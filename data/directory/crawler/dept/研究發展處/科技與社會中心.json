@@ -1,0 +1,24 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "34332",
+        "傳真電話": "03-5751917",
+        "網頁": "http://sts.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "蔡英俊",
+            "職稱/職責": "主任",
+            "分機": "42744",
+            "備註": "N/A",
+            "Email": "yctsai@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "李丁讚",
+            "職稱/職責": "N/A",
+            "分機": "42823",
+            "備註": "N/A",
+            "Email": "dtlii@mx.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "42828",
+        "直撥電話": "03-5742828",
+        "傳真電話": "03-5724598",
+        "Email": "ningzhentsai@gapp.nthu.edu.tw",
+        "網頁": "https://bnct.site.nthu.edu.tw/app/home.php"
+    },
+    "people": [
+        {
+            "姓名": "江啓勲",
+            "職稱/職責": "主任",
+            "分機": "35581",
+            "備註": "N/A",
+            "Email": "cschiang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉鴻鳴",
+            "職稱/職責": "副主任",
+            "分機": "42873",
+            "備註": "N/A",
+            "Email": "hmliu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳韋霖",
+            "職稱/職責": "助理研究員",
+            "分機": "35259",
+            "備註": "N/A",
+            "Email": "wlchen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "蔡寧真",
+            "職稱/職責": "助理",
+            "分機": "42828",
+            "備註": "N/A",
+            "Email": "ningzhentsai@gapp.nthu.edu.tw"
+        }
+    ]
+}

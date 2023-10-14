@@ -1,0 +1,38 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "33009",
+        "Email": "ipth@my.nthu.edu.tw",
+        "網頁": "http://ipth.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "吳志明",
+            "職稱/職責": "教授兼清華學院學士班主任",
+            "分機": "35329  35331",
+            "備註": "N/A",
+            "Email": "jmwuyun@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "常善媚",
+            "職稱/職責": "助理教授",
+            "分機": "35210",
+            "備註": "N/A",
+            "Email": "smchang2@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃雅怡",
+            "職稱/職責": "行政助理 / 清華學院學士班系務",
+            "分機": "33007",
+            "備註": "N/A",
+            "Email": "yihuang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張乃云",
+            "職稱/職責": "研究助理 / 實驗教育方案、客製化學習",
+            "分機": "35211",
+            "備註": "N/A",
+            "Email": "cny@mx.nthu.edu.tw "
+        }
+    ]
+}

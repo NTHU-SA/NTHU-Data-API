@@ -1,0 +1,47 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35075",
+        "直撥電話": "03-5742626",
+        "傳真電話": "03-5745473",
+        "Email": "gencom@my.nthu.edu.tw",
+        "網頁": "http://gencom.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "林文蘭",
+            "職稱/職責": "副主任委員",
+            "分機": "62224",
+            "備註": "N/A",
+            "Email": "wenlan@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張天馨",
+            "職稱/職責": "N/A",
+            "分機": "35075",
+            "備註": "N/A",
+            "Email": "gencom@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "許安邦",
+            "職稱/職責": "副管理師",
+            "分機": "42626",
+            "備註": "N/A",
+            "Email": "gencom@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃渝潔",
+            "職稱/職責": "N/A",
+            "分機": "35081",
+            "備註": "N/A",
+            "Email": "gencom@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "徐熙庭",
+            "職稱/職責": "N/A",
+            "分機": "35139",
+            "備註": "N/A",
+            "Email": "gencom@my.nthu.edu.tw"
+        }
+    ]
+}

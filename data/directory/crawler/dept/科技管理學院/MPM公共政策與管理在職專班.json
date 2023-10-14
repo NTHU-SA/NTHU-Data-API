@@ -1,0 +1,26 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "62522",
+        "直撥電話": "03-5162522",
+        "傳真電話": "03-5627046",
+        "Email": "mpm@my.nthu.edu.tw",
+        "網頁": "http://mpm.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "趙相科",
+            "職稱/職責": "主任",
+            "分機": "42722",
+            "備註": "N/A",
+            "Email": "hkchao@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃群庭",
+            "職稱/職責": "研究助理",
+            "分機": "62522",
+            "備註": "N/A",
+            "Email": "mpm@my.nthu.edu.tw"
+        }
+    ]
+}

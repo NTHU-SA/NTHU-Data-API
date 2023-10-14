@@ -1,0 +1,137 @@
+{
+    "departments": [
+        {
+            "name": "產學研合作聯盟",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5701"
+        },
+        {
+            "name": "工學院學士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5713"
+        },
+        {
+            "name": "化學工程學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5703"
+        },
+        {
+            "name": "動力機械工程學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5705"
+        },
+        {
+            "name": "材料科學工程學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5707"
+        },
+        {
+            "name": "工業工程與工程管理學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5709"
+        },
+        {
+            "name": "奈米工程與微系統研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5711"
+        },
+        {
+            "name": "生物醫學工程研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5715"
+        },
+        {
+            "name": "全球營運管理碩士雙聯學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5717"
+        },
+        {
+            "name": "前瞻功能材料產業博士學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5719"
+        }
+    ],
+    "contact": {
+        "分機": "33600",
+        "直撥電話": "03-5710521",
+        "傳真電話": "03-5712670",
+        "Email": "engineer@my.nthu.edu.tw",
+        "網頁": "https://eng.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "蔡宏營",
+            "職稱/職責": "工學院院長",
+            "分機": "42343 33600",
+            "備註": "N/A",
+            "Email": "hytsai@pme.nthu.edu.tw"
+        },
+        {
+            "姓名": "胡育誠",
+            "職稱/職責": "副院長兼國際化執行長",
+            "分機": "33642",
+            "備註": "N/A",
+            "Email": "ychu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林鶴南",
+            "職稱/職責": "副院長兼學士班主任",
+            "分機": "33811",
+            "備註": "N/A",
+            "Email": "hnlin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "侯建良",
+            "職稱/職責": "副院長兼產學聯盟執行長",
+            "分機": "42658",
+            "備註": "N/A",
+            "Email": "adamhou@ie.nthu.edu.tw"
+        },
+        {
+            "姓名": "鐘月梅",
+            "職稱/職責": "秘書",
+            "分機": "33600",
+            "備註": "N/A",
+            "Email": "engineer@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃筱平",
+            "職稱/職責": "行政助理",
+            "分機": "33601",
+            "備註": "N/A",
+            "Email": "sphuang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "蘇暐珍",
+            "職稱/職責": "行政助理",
+            "分機": "33602",
+            "備註": "N/A",
+            "Email": "ipe@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉思芸",
+            "職稱/職責": "研究助理",
+            "分機": "33701",
+            "備註": "N/A",
+            "Email": "szyun@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "洪佑儒",
+            "職稱/職責": "行政助理",
+            "分機": "33702",
+            "備註": "N/A",
+            "Email": "coeia@my.nthu.edu.tw                      "
+        },
+        {
+            "姓名": "杜涵宇",
+            "職稱/職責": "研究助理",
+            "分機": "33703",
+            "備註": "N/A",
+            "Email": "hytu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "呂季娟",
+            "職稱/職責": "研究助理",
+            "分機": "33704",
+            "備註": "N/A",
+            "Email": "cclu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "楊銘炎",
+            "職稱/職責": "管理員",
+            "分機": "33704",
+            "備註": "N/A",
+            "Email": "young57330@yahoo.com.tw"
+        }
+    ]
+}

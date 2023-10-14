@@ -1,0 +1,59 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35152",
+        "Email": "wuhj@mx.nthu.edu.tw",
+        "網頁": "http://cms.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "葉麗琴",
+            "職稱/職責": "教授兼所長",
+            "分機": "35158",
+            "備註": "N/A",
+            "Email": "lichinyeh@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳啟銘",
+            "職稱/職責": "教授",
+            "分機": "35159",
+            "備註": "N/A",
+            "Email": "chenchiming@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "李金龍",
+            "職稱/職責": "副教授",
+            "分機": "35154",
+            "備註": "N/A",
+            "Email": "chinlungli@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳人豪",
+            "職稱/職責": "副教授",
+            "分機": "35156",
+            "備註": "N/A",
+            "Email": "jh.chen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "李俊璋",
+            "職稱/職責": "副教授",
+            "分機": "35155",
+            "備註": "N/A",
+            "Email": "lee2@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉晉良",
+            "職稱/職責": "退休教授",
+            "分機": "N/A",
+            "備註": "N/A",
+            "Email": "N/A"
+        },
+        {
+            "姓名": "巫欣容",
+            "職稱/職責": "N/A",
+            "分機": "35152",
+            "備註": "N/A",
+            "Email": "wuhj@mx.nthu.edu.tw"
+        }
+    ]
+}

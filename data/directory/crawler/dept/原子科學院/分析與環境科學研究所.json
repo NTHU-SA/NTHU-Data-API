@@ -1,0 +1,66 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35522、35521",
+        "Email": "iaes@my.nthu.edu.tw",
+        "網頁": "http://iaes.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "李清福",
+            "職稱/職責": "教授",
+            "分機": "72713",
+            "備註": "N/A",
+            "Email": "leecf@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "楊樹森",
+            "職稱/職責": "教授",
+            "分機": "72712",
+            "備註": "N/A",
+            "Email": "shusen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "周秀專",
+            "職稱/職責": "教授兼所長",
+            "分機": "35486、35521",
+            "備註": "N/A",
+            "Email": "chouhc@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳劍侯",
+            "職稱/職責": "教授",
+            "分機": "35856",
+            "備註": "N/A",
+            "Email": "chwu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃郁棻",
+            "職稱/職責": "教授",
+            "分機": "34212",
+            "備註": "N/A",
+            "Email": "yufen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "董瑞安",
+            "職稱/職責": "講座教授",
+            "分機": "35569",
+            "備註": "N/A",
+            "Email": "radoong@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "周子勤",
+            "職稱/職責": "助理教授",
+            "分機": "35496",
+            "備註": "N/A",
+            "Email": "tsuchin.chou@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "楊琬琳",
+            "職稱/職責": "行政助理",
+            "分機": "35522",
+            "備註": "N/A",
+            "Email": "yangwanlin@mx.nthu.edu.tw"
+        }
+    ]
+}

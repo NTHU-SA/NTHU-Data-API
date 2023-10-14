@@ -1,0 +1,25 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "42447",
+        "直撥電話": "03-5742447",
+        "Email": "emba3@my.nthu.edu.tw",
+        "網頁": "https://embaos.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "劉玉雯",
+            "職稱/職責": "主任",
+            "分機": "42246",
+            "備註": "N/A",
+            "Email": "ywliu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "王玉梅",
+            "職稱/職責": "行政助理 / 負責深圳班、亞太地區馬來西亞業務",
+            "分機": "42447",
+            "備註": "N/A",
+            "Email": "emba3@my.nthu.edu.tw"
+        }
+    ]
+}

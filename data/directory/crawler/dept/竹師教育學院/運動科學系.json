@@ -1,0 +1,123 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "71501",
+        "傳真電話": "03-5626262",
+        "Email": "dpe@my.nthu.edu.tw",
+        "網頁": "http://dpe.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "邱文信",
+            "職稱/職責": "N/A",
+            "分機": "71512",
+            "備註": "N/A",
+            "Email": "whchiu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "高三福",
+            "職稱/職責": "N/A",
+            "分機": "71515",
+            "備註": "N/A",
+            "Email": "sanfu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張俊一",
+            "職稱/職責": "N/A",
+            "分機": "71508",
+            "備註": "N/A",
+            "Email": "chang-chunyi@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "梁龍鏡",
+            "職稱/職責": "N/A",
+            "分機": "71511",
+            "備註": "N/A",
+            "Email": "lcliang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "鄭麗媛",
+            "職稱/職責": "N/A",
+            "分機": "71513",
+            "備註": "N/A",
+            "Email": "liyuan@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉先翔",
+            "職稱/職責": "系主任",
+            "分機": "71514",
+            "備註": "N/A",
+            "Email": "liuhh@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "謝錦城",
+            "職稱/職責": "N/A",
+            "分機": "71516",
+            "備註": "N/A",
+            "Email": "chsieh@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "黎俊彥",
+            "職稱/職責": "N/A",
+            "分機": "71517",
+            "備註": "N/A",
+            "Email": "chunyenli@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "許建民",
+            "職稱/職責": "N/A",
+            "分機": "71518",
+            "備註": "N/A",
+            "Email": "shue@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "林貴福",
+            "職稱/職責": "榮譽退休教授",
+            "分機": "71519",
+            "備註": "N/A",
+            "Email": "steve@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃煜",
+            "職稱/職責": "N/A",
+            "分機": "71520",
+            "備註": "N/A",
+            "Email": "yhuang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張惟翔",
+            "職稱/職責": "N/A",
+            "分機": "75507",
+            "備註": "N/A",
+            "Email": "wei-hsiang@mail.nd.nthu.edu.tw"
+        },
+        {
+            "姓名": "曾鈺婷",
+            "職稱/職責": "N/A",
+            "分機": "71527",
+            "備註": "N/A",
+            "Email": "yutingtseng@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳麗美",
+            "職稱/職責": "組員",
+            "分機": "71500",
+            "備註": "N/A",
+            "Email": "wulimei@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "許善崴",
+            "職稱/職責": "研究助理",
+            "分機": "71502",
+            "備註": "N/A",
+            "Email": "swhsu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "鄧惠成",
+            "職稱/職責": "專案助理",
+            "分機": "71501",
+            "備註": "N/A",
+            "Email": "tenghc@mx.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "42266",
+        "直撥電話": "03-5742266",
+        "傳真電話": "03-5742295",
+        "Email": "ustcnst@my.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "齊正中",
+            "職稱/職責": "N/A",
+            "分機": "42266",
+            "備註": "N/A",
+            "Email": "cchi@phys.nthu.edu.tw"
+        },
+        {
+            "姓名": "莊婉勤",
+            "職稱/職責": "N/A",
+            "分機": "42266",
+            "備註": "N/A",
+            "Email": "ustcnst@my.nthu.edu.tw"
+        }
+    ]
+}

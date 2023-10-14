@@ -1,0 +1,29 @@
+{
+    "departments": [],
+    "contact": {
+        "Email": "concerthall@my.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "王文儀",
+            "職稱/職責": "主任",
+            "分機": "73123",
+            "備註": "N/A",
+            "Email": "vwyw.tw@gmail.com"
+        },
+        {
+            "姓名": "楊幸純",
+            "職稱/職責": "行政助理",
+            "分機": "42899",
+            "備註": "育嬰留停",
+            "Email": "hc_yang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "施淳綺",
+            "職稱/職責": "職務代理人",
+            "分機": "42899",
+            "備註": "N/A",
+            "Email": "chi0119@gapp.nthu.edu.tw"
+        }
+    ]
+}

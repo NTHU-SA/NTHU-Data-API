@@ -1,0 +1,24 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35212",
+        "Email": "garage@my.nthu.edu.tw",
+        "網頁": "https://garage.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "韓傳祥",
+            "職稱/職責": "清大創業車庫 執行長",
+            "分機": "N/A",
+            "備註": "N/A",
+            "Email": "chhan@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "邱佳雯",
+            "職稱/職責": "清大創業車庫 執行秘書",
+            "分機": "35212",
+            "備註": "N/A",
+            "Email": "garage@my.nthu.edu.tw"
+        }
+    ]
+}

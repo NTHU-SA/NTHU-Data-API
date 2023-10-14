@@ -1,0 +1,23 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "62502",
+        "網頁": "http://cap.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "信世昌",
+            "職稱/職責": "主任",
+            "分機": "62503",
+            "備註": "N/A",
+            "Email": "hsin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳雅慧",
+            "職稱/職責": "N/A",
+            "分機": "62004",
+            "備註": "N/A",
+            "Email": "chenyh2@mx.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "33197",
+        "傳真電話": "03-5717237",
+        "Email": "pmed@my.nthu.edu.tw",
+        "網頁": "https://pmed.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "周裕珽",
+            "職稱/職責": "主任",
+            "分機": "42471",
+            "備註": "N/A",
+            "Email": "ytchou@life.nthu.edu.tw"
+        },
+        {
+            "姓名": "曾大千",
+            "職稱/職責": "教授",
+            "分機": "42691",
+            "備註": "N/A",
+            "Email": "tc.tseng@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃至正",
+            "職稱/職責": "助理教授",
+            "分機": "42490",
+            "備註": "N/A",
+            "Email": "chihchenghuang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "謝蕙如",
+            "職稱/職責": "行政助理",
+            "分機": "33197",
+            "備註": "N/A",
+            "Email": "hjhsieh@life.nthu.edu.tw"
+        }
+    ]
+}

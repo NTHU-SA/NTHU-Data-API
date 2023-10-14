@@ -1,0 +1,16 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "73802",
+        "網頁": "http://hret.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "陳莉婷",
+            "職稱/職責": "行政助理",
+            "分機": "73802",
+            "備註": "N/A",
+            "Email": "liting@mx.nthu.edu.tw"
+        }
+    ]
+}

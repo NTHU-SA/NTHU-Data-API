@@ -1,0 +1,26 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "43023",
+        "直撥電話": "03-5743023",
+        "傳真電話": "03-5743024",
+        "Email": "clcul@my.nthu.edu.tw",
+        "網頁": "https://clcul.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "吳貞慧",
+            "職稱/職責": "主任",
+            "分機": "34425",
+            "備註": "N/A",
+            "Email": "chenhueiwu@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃心妍",
+            "職稱/職責": "N/A",
+            "分機": "43023",
+            "備註": "N/A",
+            "Email": "clcul@my.nthu.edu.tw"
+        }
+    ]
+}

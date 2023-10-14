@@ -1,0 +1,17 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "34538",
+        "Email": "cgss.hss@my.nthu.edu.tw",
+        "網頁": "http://cgss.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "楊佳嫻",
+            "職稱/職責": "召集人",
+            "分機": "34538",
+            "備註": "N/A",
+            "Email": "yangch@mx.nthu.edu.tw"
+        }
+    ]
+}

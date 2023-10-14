@@ -1,0 +1,73 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "78815",
+        "Email": "giat@my.nthu.edu.tw",
+        "網頁": "https://technoart.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "邱誌勇",
+            "職稱/職責": "教授兼所長",
+            "分機": "78814",
+            "備註": "N/A",
+            "Email": "aaronchiu88@gmail.com"
+        },
+        {
+            "姓名": "曾鈺涓",
+            "職稱/職責": "教授",
+            "分機": "N/A",
+            "備註": "N/A",
+            "Email": "yuchuan@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "游創文",
+            "職稱/職責": "副教授",
+            "分機": "78813",
+            "備註": "N/A",
+            "Email": "cwyou@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "曹存慧",
+            "職稱/職責": "助理教授",
+            "分機": "78809",
+            "備註": "N/A",
+            "Email": "tthtsao@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "潘正育",
+            "職稱/職責": "助理教授",
+            "分機": "N/A",
+            "備註": "N/A",
+            "Email": "noixdarec@gmail.com"
+        },
+        {
+            "姓名": "柯宜均",
+            "職稱/職責": "助理教授",
+            "分機": "N/A",
+            "備註": "N/A",
+            "Email": "ko.yichun@mx.n50thu.edu.tw"
+        },
+        {
+            "姓名": "蔡遵弘",
+            "職稱/職責": "助理教授",
+            "分機": "N/A",
+            "備註": "N/A",
+            "Email": " tsai.th@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林欣怡",
+            "職稱/職責": "合聘副教授",
+            "分機": "72929",
+            "備註": "N/A",
+            "Email": "linhsini@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "李孟懿",
+            "職稱/職責": "行政助理",
+            "分機": "78802",
+            "備註": "N/A",
+            "Email": "lee.mengi@mx.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "42761",
+        "直撥電話": "03-5742761",
+        "傳真電話": "03-5715934",
+        "Email": "lsip@life.nthu.edu.tw",
+        "網頁": "http://up.life.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "蘇士哲",
+            "職稱/職責": "教授兼主任",
+            "分機": "42025 33485",
+            "備註": "N/A",
+            "Email": "scsue@life.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉又禎",
+            "職稱/職責": "N/A",
+            "分機": "42761",
+            "備註": "N/A",
+            "Email": "yucliu@life.nthu.edu.tw"
+        }
+    ]
+}

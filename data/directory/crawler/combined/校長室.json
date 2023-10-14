@@ -1,0 +1,33 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "62001",
+        "直撥電話": "03-5162001",
+        "傳真電話": "03-5162505",
+        "Email": "presid@my.nthu.edu.tw",
+        "網頁": "http://president.site.nthu.edu.tw/?Lang=zh-tw"
+    },
+    "people": [
+        {
+            "姓名": "高為元",
+            "職稱/職責": "校長",
+            "分機": "62001",
+            "備註": "N/A",
+            "Email": "presid@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "葛雅珍",
+            "職稱/職責": "N/A",
+            "分機": "62001",
+            "備註": "N/A",
+            "Email": "ycke@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林燕君",
+            "職稱/職責": "N/A",
+            "分機": "62379",
+            "備註": "N/A",
+            "Email": "yenchun@mx.nthu.edu.tw"
+        }
+    ]
+}

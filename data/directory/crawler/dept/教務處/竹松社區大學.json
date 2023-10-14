@@ -1,0 +1,45 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "76131",
+        "Email": "greenpine@gapp.nthu.edu.tw",
+        "網頁": "http://www.greenpinecollege.tw/"
+    },
+    "people": [
+        {
+            "姓名": "徐竫",
+            "職稱/職責": "主任",
+            "分機": "76134",
+            "備註": "N/A",
+            "Email": "hsu.c@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "沈華葦",
+            "職稱/職責": "執行秘書",
+            "分機": "76138",
+            "備註": "N/A",
+            "Email": "Huawei@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "周思妤",
+            "職稱/職責": "專員 / 課務",
+            "分機": "76133",
+            "備註": "N/A",
+            "Email": "syzhou@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "陸婉瑩",
+            "職稱/職責": "行政助理 / 學務",
+            "分機": "76136",
+            "備註": "N/A",
+            "Email": "unieng.lok@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "鄒雅婷",
+            "職稱/職責": "專員 / 社區",
+            "分機": "76135",
+            "備註": "N/A",
+            "Email": "tsou@mx.nthu.edu.tw"
+        }
+    ]
+}

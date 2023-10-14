@@ -1,0 +1,25 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "34353",
+        "傳真電話": "03-5722485",
+        "Email": "gpts@my.nthu.edu.tw",
+        "網頁": "http://gpts.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "呂玫鍰",
+            "職稱/職責": "主任",
+            "分機": "42833",
+            "備註": "N/A",
+            "Email": "mhlu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "蘇淑芬",
+            "職稱/職責": "N/A",
+            "分機": "34353",
+            "備註": "N/A",
+            "Email": "gpts@my.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,87 @@
+{
+    "departments": [
+        {
+            "name": "數學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5301"
+        },
+        {
+            "name": "物理學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5303"
+        },
+        {
+            "name": "化學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5305"
+        },
+        {
+            "name": "統計學研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5307"
+        },
+        {
+            "name": "天文研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5309"
+        },
+        {
+            "name": "理學院學士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5311"
+        },
+        {
+            "name": "先進光源科技學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5313"
+        },
+        {
+            "name": "計算與建模科學研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5315"
+        }
+    ],
+    "contact": {
+        "分機": "42501",
+        "直撥電話": "886-3-5719039",
+        "傳真電話": "886-3-5723762",
+        "Email": "science@my.nthu.edu.tw",
+        "網頁": "http://science.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "牟中瑜",
+            "職稱/職責": "院長",
+            "分機": "42500",
+            "備註": "N/A",
+            "Email": "mou@phys.nthu.edu.tw"
+        },
+        {
+            "姓名": "蔡易州",
+            "職稱/職責": "副院長",
+            "分機": "33341",
+            "備註": "N/A",
+            "Email": "yictsai@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林美慧",
+            "職稱/職責": "秘書",
+            "分機": "42501",
+            "備註": "N/A",
+            "Email": "mhlin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張維娟",
+            "職稱/職責": "行政助理",
+            "分機": "33099",
+            "備註": "N/A",
+            "Email": "weichuan.chang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "朱麗安",
+            "職稱/職責": "研究助理",
+            "分機": "42425",
+            "備註": "N/A",
+            "Email": "lian@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳浩業",
+            "職稱/職責": "研究助理",
+            "分機": "33040",
+            "備註": "N/A",
+            "Email": "haoyeh@mx.nthu.edu.tw"
+        }
+    ]
+}

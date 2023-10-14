@@ -1,0 +1,25 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "34547",
+        "直撥電話": "03-5165982",
+        "Email": "cfcc@my.nthu.edu.tw",
+        "網頁": "https://cfcc.site.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "林宗弘",
+            "職稱/職責": "合聘教授/中心主任",
+            "分機": "34547",
+            "備註": "N/A",
+            "Email": "zoo42@gate.sinica.edu.tw"
+        },
+        {
+            "姓名": "蘇貞瑋",
+            "職稱/職責": "N/A",
+            "分機": "34547",
+            "備註": "N/A",
+            "Email": "cwsu@mx.nthu.edu.tw"
+        }
+    ]
+}

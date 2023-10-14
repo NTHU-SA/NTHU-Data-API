@@ -1,0 +1,63 @@
+{
+    "departments": [
+        {
+            "name": "北急區",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=9303"
+        },
+        {
+            "name": "西急區",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=9305"
+        },
+        {
+            "name": "南急區",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=9307"
+        },
+        {
+            "name": "南大區",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=9309"
+        }
+    ],
+    "contact": {
+        "分機": "43000",
+        "直撥電話": "03-5743000",
+        "傳真電話": "03-5724140",
+        "Email": "clinic@my.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "彭清誠",
+            "職稱/職責": "全區急救員 / 機動性任務",
+            "分機": "31304",
+            "備註": "駐衛警察隊",
+            "Email": "gcpeng@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "李志良",
+            "職稱/職責": "全區急救員 / 機動性任務",
+            "分機": "31305",
+            "備註": "駐衛警察隊",
+            "Email": "cllee@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "唐嬿貞",
+            "職稱/職責": "全區急救員 / 機動性任務",
+            "分機": "34762",
+            "備註": "生活輔導組",
+            "Email": "yjtarng@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "蔡宜朋",
+            "職稱/職責": "全區急救員 / 機動性任務",
+            "分機": "62089",
+            "備註": "衛生保健組",
+            "Email": "yptsai@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張淑悅",
+            "職稱/職責": "全區急救員 / 機動性任務",
+            "分機": "74401",
+            "備註": "衛生保健組",
+            "Email": "dovan@mail.nd.nthu.edu.tw"
+        }
+    ]
+}

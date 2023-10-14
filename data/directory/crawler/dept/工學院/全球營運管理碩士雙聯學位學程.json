@@ -1,0 +1,24 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35145",
+        "Email": "gom@my.nthu.edu.tw",
+        "網頁": "http://gom.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "侯建良",
+            "職稱/職責": "學程主任",
+            "分機": "42658",
+            "備註": "N/A",
+            "Email": "adamhou@ie.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉思芸",
+            "職稱/職責": "助理",
+            "分機": "33701",
+            "備註": "N/A",
+            "Email": "szyun@mx.nthu.edu.tw"
+        }
+    ]
+}

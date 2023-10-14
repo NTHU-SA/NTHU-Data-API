@@ -1,0 +1,26 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "33601",
+        "直撥電話": "03-5710521",
+        "傳真電話": "03-5712670",
+        "Email": "coeilp@my.nthu.edu.tw",
+        "網頁": "http://webserver.pme.nthu.edu.tw/~nthueng2010/coe1/index.php"
+    },
+    "people": [
+        {
+            "姓名": "侯建良",
+            "職稱/職責": "副院長兼產學聯盟執行長",
+            "分機": "42658",
+            "備註": "N/A",
+            "Email": "adamhou@ie.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉思芸",
+            "職稱/職責": "研究助理",
+            "分機": "33701",
+            "備註": "N/A",
+            "Email": "szyun@mx.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,1432 @@
+{
+    "departments": [
+        {
+            "name": "EMBA高階經營管理碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7101",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62512",
+                    "直撥電話": "03-5162512",
+                    "傳真電話": "03-5627046",
+                    "Email": "emba@my.nthu.edu.tw",
+                    "網頁": "http://emba.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "林世昌",
+                        "職稱/職責": "職專班執行長兼EMBA主任",
+                        "分機": "42729",
+                        "備註": "N/A",
+                        "Email": "slin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "王淑貞",
+                        "職稱/職責": "行政助理 / EMBA專班業務",
+                        "分機": "62512",
+                        "備註": "N/A",
+                        "Email": "emba@my.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "潘素瓊",
+                        "職稱/職責": "行政助理 / 學生社團、校友會",
+                        "分機": "42250",
+                        "備註": "N/A",
+                        "Email": "scpan@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "EMBA高階經營管理境外碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7145",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "42447",
+                    "直撥電話": "03-5742447",
+                    "Email": "emba3@my.nthu.edu.tw",
+                    "網頁": "https://embaos.site.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "劉玉雯",
+                        "職稱/職責": "主任",
+                        "分機": "42246",
+                        "備註": "N/A",
+                        "Email": "ywliu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "王玉梅",
+                        "職稱/職責": "行政助理 / 負責深圳班、亞太地區馬來西亞業務",
+                        "分機": "42447",
+                        "備註": "N/A",
+                        "Email": "emba3@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Dual EMBA高階經營管理雙聯碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7139",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62152",
+                    "直撥電話": "03-5162152",
+                    "Email": "dualemba@my.nthu.edu.tw"
+                },
+                "people": [
+                    {
+                        "姓名": "林世昌",
+                        "職稱/職責": "主任",
+                        "分機": "42729",
+                        "備註": "N/A",
+                        "Email": "slin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "嚴友淳",
+                        "職稱/職責": "專案經理",
+                        "分機": "62152",
+                        "備註": "N/A",
+                        "Email": "dualemba@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "MBA經營管理在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7102",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "42253",
+                    "直撥電話": "03-5742253",
+                    "傳真電話": "03-5627046",
+                    "Email": "mba@my.nthu.edu.tw",
+                    "網頁": "http://mba.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "張元杰",
+                        "職稱/職責": "主任",
+                        "分機": "42251",
+                        "備註": "N/A",
+                        "Email": "yucchang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "許裴舫",
+                        "職稱/職責": "主任",
+                        "分機": "42221",
+                        "備註": "N/A",
+                        "Email": "pfhsu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "程郁霖",
+                        "職稱/職責": "研究助理 / 新竹MBA班",
+                        "分機": "42253",
+                        "備註": "N/A",
+                        "Email": "mba@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "MFB財務金融在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7129",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62104",
+                    "直撥電話": "03-5162104",
+                    "傳真電話": "03-5627046",
+                    "Email": "mfb@my.nthu.edu.tw",
+                    "網頁": "http://fbm.web.nthu.edu.tw/bin/home.php"
+                },
+                "people": [
+                    {
+                        "姓名": "索樂晴",
+                        "職稱/職責": "主任",
+                        "分機": "42223",
+                        "備註": "N/A",
+                        "Email": "lcso@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "洪柔媙",
+                        "職稱/職責": "研究助理",
+                        "分機": "62104",
+                        "備註": "N/A",
+                        "Email": "mfb@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "MPM公共政策與管理在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7131",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62522",
+                    "直撥電話": "03-5162522",
+                    "傳真電話": "03-5627046",
+                    "Email": "mpm@my.nthu.edu.tw",
+                    "網頁": "http://mpm.web.nthu.edu.tw/bin/home.php"
+                },
+                "people": [
+                    {
+                        "姓名": "趙相科",
+                        "職稱/職責": "主任",
+                        "分機": "42722",
+                        "備註": "N/A",
+                        "Email": "hkchao@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃群庭",
+                        "職稱/職責": "研究助理",
+                        "分機": "62522",
+                        "備註": "N/A",
+                        "Email": "mpm@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "HBA健康政策與經營管理碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7137",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62111",
+                    "直撥電話": "03-5162111",
+                    "傳真電話": "03-5627046",
+                    "Email": "hba@my.nthu.edu.tw",
+                    "網頁": "http://hba.site.nthu.edu.tw"
+                },
+                "people": [
+                    {
+                        "姓名": "蔡昌憲",
+                        "職稱/職責": "主任",
+                        "分機": "62144",
+                        "備註": "N/A",
+                        "Email": "chstsai@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "張書綺",
+                        "職稱/職責": "研究助理",
+                        "分機": "62111",
+                        "備註": "N/A",
+                        "Email": "hba@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "IMBA國際專業管理碩士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7103",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62105",
+                    "直撥電話": "03-5162105",
+                    "傳真電話": "03-5610141",
+                    "Email": "imba@my.nthu.edu.tw",
+                    "網頁": "http://imba.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "謝英哲",
+                        "職稱/職責": "主任",
+                        "分機": "42417",
+                        "備註": "N/A",
+                        "Email": "ych@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "余其穎",
+                        "職稱/職責": "秘書",
+                        "分機": "62105",
+                        "備註": "N/A",
+                        "Email": "chiying@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "張藝",
+                        "職稱/職責": "專案經理",
+                        "分機": "62106",
+                        "備註": "N/A",
+                        "Email": "icdf.imba@my.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃于莉",
+                        "職稱/職責": "專案經理",
+                        "分機": "62106",
+                        "備註": "N/A",
+                        "Email": "icdf.imba@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "科技管理研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7105",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "42948",
+                    "直撥電話": "03-5742948",
+                    "傳真電話": "03-5623770",
+                    "Email": "tm@my.nthu.edu.tw",
+                    "網頁": "http://www.tm.nthu.edu.tw/main.php"
+                },
+                "people": [
+                    {
+                        "姓名": "史欽泰",
+                        "職稱/職責": "張忠謀講座教授",
+                        "分機": "62100  62155",
+                        "備註": "N/A",
+                        "Email": "ctshih@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黎正中",
+                        "職稱/職責": "教授",
+                        "分機": "N/A",
+                        "備註": "N/A",
+                        "Email": "ccli@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "丘宏昌",
+                        "職稱/職責": "教授",
+                        "分機": "42220",
+                        "備註": "N/A",
+                        "Email": "hcchiu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "張元杰",
+                        "職稱/職責": "教授/所長",
+                        "分機": "42251",
+                        "備註": "N/A",
+                        "Email": "yucchang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "胡美智",
+                        "職稱/職責": "教授",
+                        "分機": "62162",
+                        "備註": "N/A",
+                        "Email": "mchu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "劉玉雯",
+                        "職稱/職責": "教授",
+                        "分機": "42246",
+                        "備註": "N/A",
+                        "Email": "ywliu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "王振源",
+                        "職稱/職責": "副教授",
+                        "分機": "42442",
+                        "備註": "N/A",
+                        "Email": "wcy@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "李傳楷",
+                        "職稱/職責": "教授",
+                        "分機": "42215",
+                        "備註": "N/A",
+                        "Email": "cklee@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "謝英哲",
+                        "職稱/職責": "教授",
+                        "分機": "42417",
+                        "備註": "N/A",
+                        "Email": "ych@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "洪世章",
+                        "職稱/職責": "清華講座教授",
+                        "分機": "42448",
+                        "備註": "N/A",
+                        "Email": "schung@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "吳清炎",
+                        "職稱/職責": "副教授",
+                        "分機": "62139",
+                        "備註": "N/A",
+                        "Email": "wuchingyan@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "錢克瑄",
+                        "職稱/職責": "助理教授",
+                        "分機": "62537",
+                        "備註": "N/A",
+                        "Email": "chienkh@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "簡珮瑜",
+                        "職稱/職責": "助理教授",
+                        "分機": "62159",
+                        "備註": "N/A",
+                        "Email": "py.chien@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "廖珮汝",
+                        "職稱/職責": "行政助理",
+                        "分機": "42948  42249",
+                        "備註": "N/A",
+                        "Email": "tm@my.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "楊惠安",
+                        "職稱/職責": "研究助理",
+                        "分機": "62151",
+                        "備註": "N/A",
+                        "Email": "hayang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "許韶芸",
+                        "職稱/職責": "研究助理",
+                        "分機": "62121",
+                        "備註": "N/A",
+                        "Email": "shaoyunhsu@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "科技法律研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7107",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "42427",
+                    "直撥電話": "03-5742427",
+                    "傳真電話": "03-5629380",
+                    "Email": "lst@my.nthu.edu.tw",
+                    "網頁": "http://www.lst.nthu.edu.tw"
+                },
+                "people": [
+                    {
+                        "姓名": "陳仲嶙",
+                        "職稱/職責": "教授",
+                        "分機": "62140",
+                        "備註": "N/A",
+                        "Email": "clchen@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "范建得",
+                        "職稱/職責": "教授",
+                        "分機": "42426",
+                        "備註": "N/A",
+                        "Email": "ctfan@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "彭心儀",
+                        "職稱/職責": "特聘教授",
+                        "分機": "42428",
+                        "備註": "N/A",
+                        "Email": "sypeng@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃居正",
+                        "職稱/職責": "教授",
+                        "分機": "42433",
+                        "備註": "N/A",
+                        "Email": "itic.adhoc@gmail.com"
+                    },
+                    {
+                        "姓名": "蔡昌憲",
+                        "職稱/職責": "教授兼所長",
+                        "分機": "62144",
+                        "備註": "N/A",
+                        "Email": "chstsai@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃忠正",
+                        "職稱/職責": "副教授",
+                        "分機": "62135",
+                        "備註": "N/A",
+                        "Email": "huangcc@gmx.de"
+                    },
+                    {
+                        "姓名": "林昀嫺",
+                        "職稱/職責": "副教授",
+                        "分機": "42431",
+                        "備註": "N/A",
+                        "Email": "yunslin@hotmail.com"
+                    },
+                    {
+                        "姓名": "高銘志",
+                        "職稱/職責": "教授",
+                        "分機": "42430",
+                        "備註": "N/A",
+                        "Email": "antongao@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "陳宛妤",
+                        "職稱/職責": "副教授",
+                        "分機": "62109",
+                        "備註": "N/A",
+                        "Email": "wanyuchen@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林勤富",
+                        "職稱/職責": "教授",
+                        "分機": "62535",
+                        "備註": "N/A",
+                        "Email": "chingfulin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "連孟琦",
+                        "職稱/職責": "助理教授",
+                        "分機": "62153",
+                        "備註": "N/A",
+                        "Email": "mclien@mx.nthu.edu.tw "
+                    },
+                    {
+                        "姓名": "李怡俐",
+                        "職稱/職責": "助理教授",
+                        "分機": "62536",
+                        "備註": "N/A",
+                        "Email": "yili_lee@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "李紀寬",
+                        "職稱/職責": "助理教授",
+                        "分機": "62534",
+                        "備註": "N/A",
+                        "Email": "gkli@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "洪淳琦",
+                        "職稱/職責": "助理教授",
+                        "分機": "62533",
+                        "備註": "N/A",
+                        "Email": "chunchihung@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "廖宜寧",
+                        "職稱/職責": "助理教授",
+                        "分機": "62157",
+                        "備註": "N/A",
+                        "Email": "inliao@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林庭薇",
+                        "職稱/職責": "專案助理 / 綜理科法所行政事務",
+                        "分機": "42427",
+                        "備註": "N/A",
+                        "Email": "lst@my.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "吳立姸",
+                        "職稱/職責": "研究助理 / 綜理科法所行政事務",
+                        "分機": "31258",
+                        "備註": "N/A",
+                        "Email": "wuly@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "服務科學研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7109",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62116",
+                    "直撥電話": "03-5162116",
+                    "傳真電話": "03-5616345",
+                    "Email": "office@iss.nthu.edu.tw",
+                    "網頁": "http://www.iss.nthu.edu.tw"
+                },
+                "people": [
+                    {
+                        "姓名": "王俊程",
+                        "職稱/職責": "教授",
+                        "分機": "42247",
+                        "備註": "N/A",
+                        "Email": "jcwang@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林福仁",
+                        "職稱/職責": "教授兼創辦人",
+                        "分機": "42216",
+                        "備註": "N/A",
+                        "Email": "frlin@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "徐茉莉",
+                        "職稱/職責": "特聘教授",
+                        "分機": "62545",
+                        "備註": "N/A",
+                        "Email": "galit.shmueli@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "嚴秀茹",
+                        "職稱/職責": "教授",
+                        "分機": "62146",
+                        "備註": "N/A",
+                        "Email": "hjyen@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林聖芬",
+                        "職稱/職責": "教授級實務教師",
+                        "分機": "62531",
+                        "備註": "N/A",
+                        "Email": "sflin777@gmail.com"
+                    },
+                    {
+                        "姓名": "許裴舫",
+                        "職稱/職責": "教授",
+                        "分機": "42221",
+                        "備註": "N/A",
+                        "Email": "pfhsu@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "雷松亞",
+                        "職稱/職責": "特聘教授",
+                        "分機": "62141",
+                        "備註": "N/A",
+                        "Email": "soumya.ray@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "曾元琦",
+                        "職稱/職責": "副教授",
+                        "分機": "62547",
+                        "備註": "N/A",
+                        "Email": "yc.tseng@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "王貞雅",
+                        "職稱/職責": "副教授",
+                        "分機": "42219",
+                        "備註": "N/A",
+                        "Email": "cywang@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "歐怡君",
+                        "職稱/職責": "副教授",
+                        "分機": "62515",
+                        "備註": "N/A",
+                        "Email": "ycou@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "郭佩宜",
+                        "職稱/職責": "助理教授",
+                        "分機": "62548",
+                        "備註": "N/A",
+                        "Email": "pykuo@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "兪在元",
+                        "職稱/職責": "助理教授",
+                        "分機": "62543",
+                        "備註": "N/A",
+                        "Email": "jaewon.yoo@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "劉軒妏",
+                        "職稱/職責": "秘書",
+                        "分機": "62116",
+                        "備註": "N/A",
+                        "Email": "hwliu@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "計量財務金融學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7111",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "42422",
+                    "直撥電話": "03-5620463",
+                    "傳真電話": "03-5621823",
+                    "Email": "qf@my.nthu.edu.tw",
+                    "網頁": "http://www.qf.nthu.edu.tw/main.php"
+                },
+                "people": [
+                    {
+                        "姓名": "蔡怡純",
+                        "職稱/職責": "教授兼系主任",
+                        "分機": "62110",
+                        "備註": "N/A",
+                        "Email": "ictsai@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "曾祺峰",
+                        "職稱/職責": "副教授兼副系主任",
+                        "分機": "62133",
+                        "備註": "N/A",
+                        "Email": "cftzeng@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "鍾經樊",
+                        "職稱/職責": "教授",
+                        "分機": "42230",
+                        "備註": "N/A",
+                        "Email": "cfchung@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "余士迪",
+                        "職稱/職責": "教授",
+                        "分機": "62130",
+                        "備註": "N/A",
+                        "Email": "styu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林哲群",
+                        "職稱/職責": "教授",
+                        "分機": "42419",
+                        "備註": "N/A",
+                        "Email": "chclin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "張焯然",
+                        "職稱/職責": "教授",
+                        "分機": "42420",
+                        "備註": "N/A",
+                        "Email": "jrchang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃裕烈",
+                        "職稱/職責": "教授",
+                        "分機": "62125",
+                        "備註": "N/A",
+                        "Email": "ylihuang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "許博炫",
+                        "職稱/職責": "教授",
+                        "分機": "62156",
+                        "備註": "N/A",
+                        "Email": "pohsuanhsu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "韓傳祥",
+                        "職稱/職責": "副教授",
+                        "分機": "42224",
+                        "備註": "N/A",
+                        "Email": "chhan@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "索樂晴",
+                        "職稱/職責": "副教授",
+                        "分機": "42223",
+                        "備註": "N/A",
+                        "Email": "lcso@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "蔡子晧",
+                        "職稱/職責": "副教授",
+                        "分機": "62163",
+                        "備註": "N/A",
+                        "Email": "thtsai@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "謝佩芳",
+                        "職稱/職責": "副教授",
+                        "分機": "62132",
+                        "備註": "N/A",
+                        "Email": "pfhsieh@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "邱婉茜",
+                        "職稱/職責": "副教授",
+                        "分機": "62530",
+                        "備註": "N/A",
+                        "Email": "wan-chien.chiu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃德源",
+                        "職稱/職責": "副教授",
+                        "分機": "62136",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    },
+                    {
+                        "姓名": "潘虹華",
+                        "職稱/職責": "副教授",
+                        "分機": "62137",
+                        "備註": "N/A",
+                        "Email": "hhpan@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "謝宗翰",
+                        "職稱/職責": "助理教授",
+                        "分機": "62532",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    },
+                    {
+                        "姓名": "劉美陽",
+                        "職稱/職責": "助理管理師",
+                        "分機": "42422",
+                        "備註": "N/A",
+                        "Email": "liumy@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "經濟學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7113",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "34640",
+                    "直撥電話": "03-5628202",
+                    "傳真電話": "03-5629805",
+                    "Email": "econ@my.nthu.edu.tw",
+                    "網頁": "http://www.econ.nthu.edu.tw/bin/home.php"
+                },
+                "people": [
+                    {
+                        "姓名": "廖肇寧",
+                        "職稱/職責": "教授兼系主任",
+                        "分機": "62138",
+                        "備註": "N/A",
+                        "Email": "liaocn@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "郭俊宏",
+                        "職稱/職責": "副教授兼副系主任",
+                        "分機": "42728",
+                        "備註": "N/A",
+                        "Email": "kuoch@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "朱筱蕾",
+                        "職稱/職責": "教授",
+                        "分機": "31196",
+                        "備註": "N/A",
+                        "Email": "hlchu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "吳世英",
+                        "職稱/職責": "教授",
+                        "分機": "62031",
+                        "備註": "N/A",
+                        "Email": "wus@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "冼芻蕘",
+                        "職稱/職責": "教授",
+                        "分機": "62134",
+                        "備註": "N/A",
+                        "Email": "cysin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林世昌",
+                        "職稱/職責": "教授",
+                        "分機": "42729",
+                        "備註": "N/A",
+                        "Email": "slin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林靜儀",
+                        "職稱/職責": "教授",
+                        "分機": "62142",
+                        "備註": "N/A",
+                        "Email": "lincy@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "祁玉蘭",
+                        "職稱/職責": "教授",
+                        "分機": "42732",
+                        "備註": "N/A",
+                        "Email": "ylchyi@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "馮炳萱",
+                        "職稱/職責": "教授",
+                        "分機": "62165",
+                        "備註": "N/A",
+                        "Email": "phfung@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃朝熙",
+                        "職稱/職責": "教授",
+                        "分機": "42735",
+                        "備註": "N/A",
+                        "Email": "ghuang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "趙相科",
+                        "職稱/職責": "教授",
+                        "分機": "42722",
+                        "備註": "N/A",
+                        "Email": "hkchao@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "劉瑞華",
+                        "職稱/職責": "教授",
+                        "分機": "42731",
+                        "備註": "N/A",
+                        "Email": "rhliu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "王惠貞",
+                        "職稱/職責": "副教授",
+                        "分機": "62525",
+                        "備註": "N/A",
+                        "Email": "huichenwang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "余朝恩",
+                        "職稱/職責": "副教授",
+                        "分機": "62514",
+                        "備註": "N/A",
+                        "Email": "chaoenyu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "李宜",
+                        "職稱/職責": "副教授",
+                        "分機": "62164",
+                        "備註": "N/A",
+                        "Email": "ylee@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "李翎帆",
+                        "職稱/職責": "副教授",
+                        "分機": "42891",
+                        "備註": "N/A",
+                        "Email": "lilf@mx.nthu.edu.tw "
+                    },
+                    {
+                        "姓名": "周嗣文",
+                        "職稱/職責": "副教授",
+                        "分機": "62032",
+                        "備註": "N/A",
+                        "Email": "swchou@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "周瑞賢",
+                        "職稱/職責": "副教授",
+                        "分機": "62131",
+                        "備註": "N/A",
+                        "Email": "jhchou@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "唐震宏",
+                        "職稱/職責": "副教授",
+                        "分機": "62149",
+                        "備註": "N/A",
+                        "Email": "jhtang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃賀寶",
+                        "職稱/職責": "副教授",
+                        "分機": "42736",
+                        "備註": "N/A",
+                        "Email": "hpwong@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "盧姝璇",
+                        "職稱/職責": "副教授",
+                        "分機": "62150",
+                        "備註": "N/A",
+                        "Email": "sslu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "蔡璧涵",
+                        "職稱/職責": "副教授",
+                        "分機": "42890",
+                        "備註": "N/A",
+                        "Email": "pihantsai@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "蘇盈如",
+                        "職稱/職責": "組員",
+                        "分機": "34640",
+                        "備註": "N/A",
+                        "Email": "econ@my.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "車佩琴",
+                        "職稱/職責": "行政助理",
+                        "分機": "34640",
+                        "備註": "N/A",
+                        "Email": "econ@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "科技管理學院學士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7115",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62102",
+                    "直撥電話": "03-5162102",
+                    "傳真電話": "03-5622306",
+                    "Email": "dmm@my.nthu.edu.tw",
+                    "網頁": "http://www.dspmt.nthu.edu.tw/bin/home.php"
+                },
+                "people": [
+                    {
+                        "姓名": "林勤富",
+                        "職稱/職責": "主任",
+                        "分機": "62535",
+                        "備註": "N/A",
+                        "Email": "chingfulin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "武智雯",
+                        "職稱/職責": "行政助理",
+                        "分機": "62102",
+                        "備註": "N/A",
+                        "Email": "dmm@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "科技管理學院學士班國際學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7143",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62542",
+                    "Email": "ibba@my.nthu.edu.tw"
+                },
+                "people": [
+                    {
+                        "姓名": "王振源",
+                        "職稱/職責": "主任",
+                        "分機": "N/A",
+                        "備註": "N/A",
+                        "Email": "wcy@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "江郁瑩",
+                        "職稱/職責": "研究助理",
+                        "分機": "62542",
+                        "備註": "N/A",
+                        "Email": "ibba@my.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "服務創新與分析研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7127",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62124",
+                    "傳真電話": "03-5610957",
+                    "Email": "cstm@my.nthu.edu.tw",
+                    "網頁": "http://www.ctm.nthu.edu.tw"
+                },
+                "people": [
+                    {
+                        "姓名": "徐茉莉",
+                        "職稱/職責": "N/A",
+                        "分機": "62545",
+                        "備註": "N/A",
+                        "Email": "galit.shmueli@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "蔡敬萱",
+                        "職稱/職責": "N/A",
+                        "分機": "62124",
+                        "備註": "N/A",
+                        "Email": "tsaich@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "劉孟芸",
+                        "職稱/職責": "N/A",
+                        "分機": "42450",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    },
+                    {
+                        "姓名": "馬兆園",
+                        "職稱/職責": "研究助理",
+                        "分機": "62513",
+                        "備註": "N/A",
+                        "Email": "zhaoyen@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "教育部國教署委辦專案辦公室",
+                        "職稱/職責": "N/A",
+                        "分機": "03-5622056",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "生物倫理與法律研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7123",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62122",
+                    "直撥電話": "03-5627064",
+                    "傳真電話": "03-5629446",
+                    "Email": "blc@gapp.nthu.edu.tw",
+                    "網頁": "http://www.blc.nthu.edu.tw/main.php"
+                },
+                "people": [
+                    {
+                        "姓名": "范建得",
+                        "職稱/職責": "中心主任",
+                        "分機": "42426",
+                        "備註": "N/A",
+                        "Email": "ctfan@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "葉采蓉",
+                        "職稱/職責": "N/A",
+                        "分機": "42426",
+                        "備註": "N/A",
+                        "Email": "blc@gapp.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "楊佳文",
+                        "職稱/職責": "N/A",
+                        "分機": "62122",
+                        "備註": "N/A",
+                        "Email": "chiawen@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黎昱萱",
+                        "職稱/職責": "N/A",
+                        "分機": "62122",
+                        "備註": "N/A",
+                        "Email": "yuhsuanli@gapp.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "科技政策研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7117",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62151",
+                    "Email": "cstp@my.nthu.edu.tw",
+                    "網頁": "http://cstp.ctm.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "洪世章",
+                        "職稱/職責": "N/A",
+                        "分機": "42448",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    },
+                    {
+                        "姓名": "楊惠安",
+                        "職稱/職責": "N/A",
+                        "分機": "62151",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "技術創新與創業研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7119",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62121",
+                    "Email": "hayang@mx.nthu.edu.tw",
+                    "網頁": "http://www.ctm.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "胡美智",
+                        "職稱/職責": "主任",
+                        "分機": "62162",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    },
+                    {
+                        "姓名": "許韶芸",
+                        "職稱/職責": "N/A",
+                        "分機": "62121",
+                        "備註": "N/A",
+                        "Email": "N/A"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "財務風險控管研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7125",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "42422",
+                    "網頁": "http://www.ctm.nthu.edu.tw"
+                },
+                "people": []
+            }
+        },
+        {
+            "name": "區塊鏈法律與政策中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7133",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62527"
+                },
+                "people": [
+                    {
+                        "姓名": "范建得",
+                        "職稱/職責": "N/A",
+                        "分機": "42426",
+                        "備註": "N/A",
+                        "Email": "ctfan@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黎昱萱",
+                        "職稱/職責": "N/A",
+                        "分機": "62122",
+                        "備註": "N/A",
+                        "Email": "yuhsuanli@gapp.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "邱千芳",
+                        "職稱/職責": "N/A",
+                        "分機": "62527",
+                        "備註": "N/A",
+                        "Email": "chienfang@gapp.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "安富金融工程研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7135",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62004",
+                    "Email": "aife@gapp.nthu.edu.tw",
+                    "網頁": "http://aife.site.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "林哲群",
+                        "職稱/職責": "主任",
+                        "分機": "42419",
+                        "備註": "N/A",
+                        "Email": "chclin@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "蔡怡純",
+                        "職稱/職責": "副主任",
+                        "分機": "62110",
+                        "備註": "N/A",
+                        "Email": "ictsai@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "馬瑞辰",
+                        "職稱/職責": "執行長",
+                        "分機": "N/A",
+                        "備註": "N/A",
+                        "Email": "ma2@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "張焯然",
+                        "職稱/職責": "N/A",
+                        "分機": "42420",
+                        "備註": "N/A",
+                        "Email": "jrchang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃裕烈",
+                        "職稱/職責": "N/A",
+                        "分機": "62125",
+                        "備註": "N/A",
+                        "Email": "ylihuang@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "黃淑婷",
+                        "職稱/職責": "助理",
+                        "分機": "62004",
+                        "備註": "N/A",
+                        "Email": "shuting@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "社會企業研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7141",
+            "details": {
+                "departments": [],
+                "contact": {},
+                "people": [
+                    {
+                        "姓名": "王俊程",
+                        "職稱/職責": "主任",
+                        "分機": "42247",
+                        "備註": "N/A",
+                        "Email": "jcwang@iss.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "李佩嬫",
+                        "職稱/職責": "研究助理",
+                        "分機": "62143",
+                        "備註": "N/A",
+                        "Email": "techthy.peijung@gmail.com"
+                    },
+                    {
+                        "姓名": "鍾明君",
+                        "職稱/職責": "研究助理",
+                        "分機": "62143",
+                        "備註": "N/A",
+                        "Email": "techthy.doris@gmail.com"
+                    }
+                ]
+            }
+        }
+    ],
+    "contact": {
+        "分機": "62100",
+        "直撥電話": "03-5162100",
+        "傳真電話": "03-5622456",
+        "Email": "ctm@my.nthu.edu.tw",
+        "網頁": "http://www.ctm.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "林哲群",
+            "職稱/職責": "院長",
+            "分機": "62100",
+            "備註": "N/A",
+            "Email": "chclin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "祁玉蘭",
+            "職稱/職責": "副院長",
+            "分機": "42732",
+            "備註": "N/A",
+            "Email": "ylchyi@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張焯然",
+            "職稱/職責": "副院長",
+            "分機": "42420",
+            "備註": "N/A",
+            "Email": "jrchang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "盧妙卿",
+            "職稱/職責": "編審 / 秘書",
+            "分機": "62100",
+            "備註": "N/A",
+            "Email": "ctm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "易彤",
+            "職稱/職責": "國際認證",
+            "分機": "62101",
+            "備註": "N/A",
+            "Email": "tyih@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林絢慧",
+            "職稱/職責": "國際事務",
+            "分機": "62516",
+            "備註": "N/A",
+            "Email": "hhlin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林宜秀",
+            "職稱/職責": "職涯發展",
+            "分機": "62511",
+            "備註": "N/A",
+            "Email": "careertm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "王天生",
+            "職稱/職責": "技術助理",
+            "分機": "62118",
+            "備註": "N/A",
+            "Email": "tswang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張智彥",
+            "職稱/職責": "技術助理",
+            "分機": "62117",
+            "備註": "N/A",
+            "Email": "cy_chang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "謝金龍",
+            "職稱/職責": "管理員",
+            "分機": "42226",
+            "備註": "N/A",
+            "Email": "clhsieh@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "羅文憲",
+            "職稱/職責": "管理員",
+            "分機": "42252",
+            "備註": "N/A",
+            "Email": "wclo@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃玉婷",
+            "職稱/職責": "研究助理",
+            "分機": "42944",
+            "備註": "N/A",
+            "Email": "yt.huang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林以婷",
+            "職稱/職責": "計畫助理 / 新興科技與數位學習推動",
+            "分機": "62527",
+            "備註": "N/A",
+            "Email": "iting@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "彭美婷",
+            "職稱/職責": "研究助理 / EMI 雙語化學習計畫",
+            "分機": "62112",
+            "備註": "N/A",
+            "Email": "mtpeng@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "趙家瑜",
+            "職稱/職責": "研究助理",
+            "分機": "62113",
+            "備註": "N/A",
+            "Email": "chaocy@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "學生職涯發展辦公室",
+            "職稱/職責": "N/A",
+            "分機": "62511",
+            "備註": "N/A",
+            "Email": "careertm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "科管院國際事務辦公室",
+            "職稱/職責": "科管院國際事務、國際認證相關業務",
+            "分機": "62101",
+            "備註": "N/A",
+            "Email": "oiactm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "跨領域研究辦公室",
+            "職稱/職責": "N/A",
+            "分機": "42944",
+            "備註": "N/A",
+            "Email": "N/A"
+        }
+    ]
+}

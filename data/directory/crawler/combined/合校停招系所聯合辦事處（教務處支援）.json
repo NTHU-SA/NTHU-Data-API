@@ -1,0 +1,105 @@
+{
+    "departments": [
+        {
+            "name": "應用科學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=8701",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "72304",
+                    "Email": "pswu@mx.nthu.edu.tw",
+                    "網頁": "http://as.site.nthu.edu.tw/?Lang=zh-tw"
+                },
+                "people": [
+                    {
+                        "姓名": "吳佩珊",
+                        "職稱/職責": "研究助理",
+                        "分機": "72304",
+                        "備註": "N/A",
+                        "Email": "pswu@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "應用數學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=8703",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "網頁": "http://am.site.nthu.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "吳佩珊",
+                        "職稱/職責": "研究助理",
+                        "分機": "72304",
+                        "備註": "N/A",
+                        "Email": "pswu@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "中國語文學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=8705",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "7260172602",
+                    "網頁": "http://clls.site.nthu.edu.tw/?Lang=zh-tw"
+                },
+                "people": [
+                    {
+                        "姓名": "陳純玉",
+                        "職稱/職責": "組員",
+                        "分機": "72601",
+                        "備註": "N/A",
+                        "Email": "yuer@mail.nd.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "人力資源與數位學習科技研究所辦公室",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=8707",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "73802",
+                    "網頁": "http://hret.web.nthu.edu.tw/bin/home.php"
+                },
+                "people": [
+                    {
+                        "姓名": "陳莉婷",
+                        "職稱/職責": "行政助理",
+                        "分機": "73802",
+                        "備註": "N/A",
+                        "Email": "liting@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        }
+    ],
+    "contact": {
+        "分機": "72304",
+        "Email": "pswu@mx.nthu.edu.tw",
+        "網頁": "http://damc.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "巫勇賢",
+            "職稱/職責": "教務長",
+            "分機": "35055",
+            "備註": "N/A",
+            "Email": "yunhwu@ess.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳佩珊",
+            "職稱/職責": "研究助理",
+            "分機": "72304",
+            "備註": "N/A",
+            "Email": "pswu@mx.nthu.edu.tw"
+        }
+    ]
+}

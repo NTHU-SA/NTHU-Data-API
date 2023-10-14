@@ -1,0 +1,30 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "34553",
+        "Email": "ai.hss.nthu@gmail.com"
+    },
+    "people": [
+        {
+            "姓名": "林文源",
+            "職稱/職責": "主任",
+            "分機": "62029",
+            "備註": "N/A",
+            "Email": "wylin1@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "王道維",
+            "職稱/職責": "副主任",
+            "分機": "31272",
+            "備註": "N/A",
+            "Email": "dwwang@phys.nthu.edu.tw"
+        },
+        {
+            "姓名": "戴郁真",
+            "職稱/職責": "研究助理",
+            "分機": "34553",
+            "備註": "N/A",
+            "Email": "ai.hss.nthu@gmail.com"
+        }
+    ]
+}

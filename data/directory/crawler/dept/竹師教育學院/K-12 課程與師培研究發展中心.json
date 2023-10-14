@@ -1,0 +1,45 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "73071",
+        "Email": "k12ccte@gapp.nthu.edu.tw",
+        "網頁": "http://eric.ilst.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "呂秀蓮",
+            "職稱/職責": "主任",
+            "分機": "73070",
+            "備註": "N/A",
+            "Email": "k12ccte@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳明亞",
+            "職稱/職責": "研究助理",
+            "分機": "73071",
+            "備註": "N/A",
+            "Email": "k12ccte@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "游蕙任",
+            "職稱/職責": "研究助理",
+            "分機": "73074",
+            "備註": "N/A",
+            "Email": "k12ccte@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "邱映哲",
+            "職稱/職責": "研究助理",
+            "分機": "73070",
+            "備註": "N/A",
+            "Email": "k12ccte@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "楊又臻",
+            "職稱/職責": "研究助理",
+            "分機": "73072",
+            "備註": "N/A",
+            "Email": "k12ccte@gapp.nthu.edu.tw"
+        }
+    ]
+}

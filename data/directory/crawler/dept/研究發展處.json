@@ -1,0 +1,166 @@
+{
+    "departments": [
+        {
+            "name": "研究倫理辦公室",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2947"
+        },
+        {
+            "name": "綜合企畫組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2901"
+        },
+        {
+            "name": "計畫管理組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2903"
+        },
+        {
+            "name": "清華實驗室",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2959"
+        },
+        {
+            "name": "原子科學技術發展中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2911"
+        },
+        {
+            "name": "奈微與材料科技中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2913"
+        },
+        {
+            "name": "台聯大奈科中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2915"
+        },
+        {
+            "name": "科學儀器中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2917"
+        },
+        {
+            "name": "生物醫學科技研發中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2919"
+        },
+        {
+            "name": "電腦與通訊科技研發中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2921"
+        },
+        {
+            "name": "前沿理論及計算研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2923"
+        },
+        {
+            "name": "貴重儀器中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2925"
+        },
+        {
+            "name": "積體電路設計技術研發中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2927"
+        },
+        {
+            "name": "科技與社會中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2929"
+        },
+        {
+            "name": "光電中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2931"
+        },
+        {
+            "name": "清大/工研院聯合研發中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2933"
+        },
+        {
+            "name": "當代中國研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2935"
+        },
+        {
+            "name": "能源與環境研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2937"
+        },
+        {
+            "name": "腦科學研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2939"
+        },
+        {
+            "name": "人文社會研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2943"
+        },
+        {
+            "name": "亞洲政策中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2945"
+        },
+        {
+            "name": "物理研究推動中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2951"
+        },
+        {
+            "name": "人工智慧研發中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2953"
+        },
+        {
+            "name": "智慧製造與循環經濟研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2955"
+        },
+        {
+            "name": "運動科技中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2957"
+        },
+        {
+            "name": "硼中子捕獲治療中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2961"
+        }
+    ],
+    "contact": {
+        "分機": "35007",
+        "直撥電話": "03-5717470",
+        "傳真電話": "03-5729115",
+        "Email": "rd@my.nthu.edu.tw",
+        "網頁": "http://rd.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "邱博文",
+            "職稱/職責": "研發長",
+            "分機": "35007",
+            "備註": "N/A",
+            "Email": "pwchiu@ee.nthu.edu.tw"
+        },
+        {
+            "姓名": "胡尚秀",
+            "職稱/職責": "副研發長",
+            "分機": "31175",
+            "備註": "N/A",
+            "Email": "shhu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "邱婉君",
+            "職稱/職責": "簡任秘書兼綜企組執行組長",
+            "分機": "35127",
+            "備註": "N/A",
+            "Email": "wcchiu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "王佩倫",
+            "職稱/職責": "專員",
+            "分機": "35007",
+            "備註": "N/A",
+            "Email": "peilun@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "何亭吟",
+            "職稱/職責": "行政助理",
+            "分機": "35175",
+            "備註": "N/A",
+            "Email": "tingyinho@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "趙宛青",
+            "職稱/職責": "行政助理",
+            "分機": "35126",
+            "備註": "N/A",
+            "Email": "wanching@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "李家駿",
+            "職稱/職責": "N/A",
+            "分機": "35007",
+            "備註": "N/A",
+            "Email": "N/A"
+        }
+    ]
+}

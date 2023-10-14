@@ -1,0 +1,43 @@
+{
+    "departments": [
+        {
+            "name": "第一組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4901"
+        },
+        {
+            "name": "第二組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4903"
+        },
+        {
+            "name": "第三組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4905"
+        },
+        {
+            "name": "第四組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4907"
+        }
+    ],
+    "contact": {
+        "分機": "62048",
+        "直撥電話": "03-5721245",
+        "傳真電話": "03-5722976",
+        "Email": "account@my.nthu.edu.tw",
+        "網頁": "https://account.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "楊淑蘭",
+            "職稱/職責": "主任",
+            "分機": "62233",
+            "備註": "N/A",
+            "Email": "shulan@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林容朱",
+            "職稱/職責": "專門委員",
+            "分機": "62045",
+            "備註": "N/A",
+            "Email": "linrj@mx.nthu.edu.tw"
+        }
+    ]
+}

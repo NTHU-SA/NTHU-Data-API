@@ -1,0 +1,72 @@
+{
+    "departments": [
+        {
+            "name": "職涯發展組(行政大樓3樓)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2101"
+        },
+        {
+            "name": "生活輔導組(水木生活中心2樓)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2105"
+        },
+        {
+            "name": "課外活動組(蒙民偉樓2樓)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2107"
+        },
+        {
+            "name": "衛生保健組(醫輔大樓1樓)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2109"
+        },
+        {
+            "name": "學生住宿組(水木生活中心1樓)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2103"
+        },
+        {
+            "name": "諮商中心(醫輔大樓2樓)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=2111"
+        }
+    ],
+    "contact": {
+        "分機": "34701、34702",
+        "直撥電話": "03-5715534",
+        "傳真電話": "03-5715032",
+        "Email": "student@my.nthu.edu.tw",
+        "網頁": "http://student.site.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "詹鴻霖",
+            "職稱/職責": "學務長",
+            "分機": "34700、42476",
+            "備註": "行政大樓R303",
+            "Email": "hlchan@life.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳順吉",
+            "職稱/職責": "副學務長兼課外組組長",
+            "分機": "34304",
+            "備註": "N/A",
+            "Email": "shunchi.wu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "余憶如",
+            "職稱/職責": "簡任秘書兼住宿組執行組長",
+            "分機": "34708、34712",
+            "備註": "行政大樓R307",
+            "Email": "iryu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃怡娜",
+            "職稱/職責": "助理管理師",
+            "分機": "34701",
+            "備註": "行政大樓R303",
+            "Email": "ynhuang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "宋姿韻",
+            "職稱/職責": "行政助理",
+            "分機": "34702",
+            "備註": "行政大樓R303",
+            "Email": "tzuyun@mx.nthu.edu.tw"
+        }
+    ]
+}

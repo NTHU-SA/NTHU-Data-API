@@ -1,0 +1,140 @@
+{
+    "departments": [
+        {
+            "name": "教育與學習科技學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7301"
+        },
+        {
+            "name": "特殊教育學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7303"
+        },
+        {
+            "name": "運動科學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7305"
+        },
+        {
+            "name": "臺灣語言研究與教學研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7307"
+        },
+        {
+            "name": "環境與文化資源學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7309"
+        },
+        {
+            "name": "學習科學與科技研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7311"
+        },
+        {
+            "name": "幼兒教育學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7313"
+        },
+        {
+            "name": "教育心理與諮商學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7315"
+        },
+        {
+            "name": "數理教育研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7317"
+        },
+        {
+            "name": "英語教學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7319"
+        },
+        {
+            "name": "竹師教育學院學士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7323"
+        },
+        {
+            "name": "學前特殊教育碩士在職學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7321"
+        },
+        {
+            "name": "竹師教育學院跨領域STEAM教育碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7329"
+        },
+        {
+            "name": "華德福教育碩士在職學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7331"
+        },
+        {
+            "name": " K-12 課程與師培研究發展中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7325"
+        },
+        {
+            "name": "教育與心智科學研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7327"
+        },
+        {
+            "name": "英語教育中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7333"
+        },
+        {
+            "name": "性/別教育發展中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7335"
+        }
+    ],
+    "contact": {
+        "分機": "73009",
+        "傳真電話": "03-5619475",
+        "Email": "education@my.nthu.edu.tw",
+        "網頁": "https://ec.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "王子華",
+            "職稱/職責": "院長",
+            "分機": "73002 / 73363",
+            "備註": "N/A",
+            "Email": "tzuhuawang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "廖冠智",
+            "職稱/職責": "副院長",
+            "分機": "35166",
+            "備註": "N/A",
+            "Email": "gzliao@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "王淳民",
+            "職稱/職責": "副院長",
+            "分機": "73042",
+            "備註": "N/A",
+            "Email": "chunmin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "姚在府",
+            "職稱/職責": "助理教授",
+            "分機": "73015",
+            "備註": "N/A",
+            "Email": "zfyao@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林靜明",
+            "職稱/職責": "專員",
+            "分機": "73009",
+            "備註": "N/A",
+            "Email": "chingming@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "許禕芳",
+            "職稱/職責": "行政助理",
+            "分機": "73010",
+            "備註": "N/A",
+            "Email": "yf0604@gapp.nthu.edu.tw"
+        },
+        {
+            "姓名": "藍翊慈",
+            "職稱/職責": "行政助理",
+            "分機": "73004",
+            "備註": "N/A",
+            "Email": "lan@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "鄭尹菀",
+            "職稱/職責": "研究助理",
+            "分機": "73003",
+            "備註": "N/A",
+            "Email": "yinwan@mx.nthu.edu.tw"
+        }
+    ]
+}

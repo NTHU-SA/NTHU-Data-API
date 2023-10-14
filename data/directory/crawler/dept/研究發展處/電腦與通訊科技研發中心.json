@@ -1,0 +1,40 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "42847",
+        "直撥電話": "03-5742847",
+        "傳真電話": "03-5711037",
+        "Email": "ccrc@my.nthu.edu.tw",
+        "網頁": "http://www.ccrc.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "王俊堯",
+            "職稱/職責": "主任",
+            "分機": "42970",
+            "備註": "N/A",
+            "Email": "wcyao@cs.nthu.edu.tw"
+        },
+        {
+            "姓名": "蘇慧真",
+            "職稱/職責": "N/A",
+            "分機": "42847",
+            "備註": "N/A",
+            "Email": "hjsu@cs.nthu.edu.tw"
+        },
+        {
+            "姓名": "林玉惠",
+            "職稱/職責": "N/A",
+            "分機": "42411",
+            "備註": "N/A",
+            "Email": "yuhlin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張宜歆",
+            "職稱/職責": "N/A",
+            "分機": "42401",
+            "備註": "N/A",
+            "Email": "yihsing@mx.nthu.edu.tw"
+        }
+    ]
+}

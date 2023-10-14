@@ -1,0 +1,42 @@
+{
+    "departments": [
+        {
+            "name": "校友中心、校友總會",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=3401"
+        },
+        {
+            "name": "財務發展組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=3403"
+        }
+    ],
+    "contact": {
+        "分機": "62004",
+        "直撥電話": "03-5162004",
+        "傳真電話": "03-5162489",
+        "Email": "oasrd@my.nthu.edu.tw",
+        "網頁": "https://oasrd.site.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "李敏",
+            "職稱/職責": "校友服務及資源發展長",
+            "分機": "62500",
+            "備註": "N/A",
+            "Email": "mlee@ess.nthu.edu.tw"
+        },
+        {
+            "姓名": "林哲群",
+            "職稱/職責": "副校資長",
+            "分機": "62374",
+            "備註": "N/A",
+            "Email": "chclin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃淑婷",
+            "職稱/職責": "助理管理師",
+            "分機": "62004",
+            "備註": "N/A",
+            "Email": "shuting@mx.nthu.edu.tw"
+        }
+    ]
+}

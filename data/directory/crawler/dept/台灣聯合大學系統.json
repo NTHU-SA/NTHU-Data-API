@@ -1,0 +1,16 @@
+{
+    "departments": [
+        {
+            "name": "系統校長室(行政總部)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1001"
+        },
+        {
+            "name": "系統副校長室",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1003"
+        }
+    ],
+    "contact": {
+        "網頁": "https://www.ust.edu.tw/"
+    },
+    "people": []
+}

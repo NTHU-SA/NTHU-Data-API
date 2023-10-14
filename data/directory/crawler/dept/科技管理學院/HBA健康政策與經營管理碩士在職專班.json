@@ -1,0 +1,26 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "62111",
+        "直撥電話": "03-5162111",
+        "傳真電話": "03-5627046",
+        "Email": "hba@my.nthu.edu.tw",
+        "網頁": "http://hba.site.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "蔡昌憲",
+            "職稱/職責": "主任",
+            "分機": "62144",
+            "備註": "N/A",
+            "Email": "chstsai@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張書綺",
+            "職稱/職責": "研究助理",
+            "分機": "62111",
+            "備註": "N/A",
+            "Email": "hba@my.nthu.edu.tw"
+        }
+    ]
+}

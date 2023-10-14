@@ -1,0 +1,23 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35360",
+        "Email": "pfmi@my.nthu.edu.tw"
+    },
+    "people": [
+        {
+            "姓名": "闕郁倫",
+            "職稱/職責": "學程主任",
+            "分機": "33965",
+            "備註": "N/A",
+            "Email": "ylchueh@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "范樂平",
+            "職稱/職責": "研究助理",
+            "分機": "35363",
+            "備註": "N/A",
+            "Email": "pfmi@my.nthu.edu.tw"
+        }
+    ]
+}

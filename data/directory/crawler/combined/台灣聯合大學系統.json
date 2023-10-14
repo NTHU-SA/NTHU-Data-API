@@ -1,0 +1,66 @@
+{
+    "departments": [
+        {
+            "name": "系統校長室(行政總部)",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1001",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "43055",
+                    "直撥電話": "03-5743055",
+                    "傳真電話": "03-5743056",
+                    "網頁": "https://www.ust.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "陳力俊",
+                        "職稱/職責": "系統校長",
+                        "分機": "43055",
+                        "備註": "N/A",
+                        "Email": "ljchen@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "林靜宜",
+                        "職稱/職責": "N/A",
+                        "分機": "43055",
+                        "備註": "N/A",
+                        "Email": "jylin@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "系統副校長室",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1003",
+            "details": {
+                "departments": [],
+                "contact": {
+                    "分機": "62473",
+                    "直撥電話": "03-5162473",
+                    "傳真電話": "03-5162509",
+                    "網頁": "https://www.ust.edu.tw/"
+                },
+                "people": [
+                    {
+                        "姓名": "呂平江",
+                        "職稱/職責": "副校長",
+                        "分機": "62372",
+                        "備註": "N/A",
+                        "Email": "pclyu@mx.nthu.edu.tw"
+                    },
+                    {
+                        "姓名": "詹佳惠",
+                        "職稱/職責": "組員",
+                        "分機": "62473",
+                        "備註": "N/A",
+                        "Email": "chchan@mx.nthu.edu.tw"
+                    }
+                ]
+            }
+        }
+    ],
+    "contact": {
+        "網頁": "https://www.ust.edu.tw/"
+    },
+    "people": []
+}

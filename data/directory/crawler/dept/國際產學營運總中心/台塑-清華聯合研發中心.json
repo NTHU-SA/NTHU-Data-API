@@ -1,0 +1,38 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "34582",
+        "Email": "fpc@my.nthu.edu.tw",
+        "網頁": "https://fpc.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "邱博文",
+            "職稱/職責": "主任",
+            "分機": "35007、34270",
+            "備註": "N/A",
+            "Email": "pwchiu＠ee.nthu.edu.tw"
+        },
+        {
+            "姓名": "鄭西顯",
+            "職稱/職責": "副主任",
+            "分機": "33631",
+            "備註": "N/A",
+            "Email": "ssjang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張存續",
+            "職稱/職責": "副主任",
+            "分機": "42978",
+            "備註": "N/A",
+            "Email": "thschang@phys.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳映心",
+            "職稱/職責": "助理",
+            "分機": "34582",
+            "備註": "N/A",
+            "Email": "yingxin-chen@mx.nthu.edu.tw"
+        }
+    ]
+}

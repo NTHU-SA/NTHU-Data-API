@@ -1,0 +1,231 @@
+{
+    "departments": [
+        {
+            "name": "EMBA高階經營管理碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7101"
+        },
+        {
+            "name": "EMBA高階經營管理境外碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7145"
+        },
+        {
+            "name": "Dual EMBA高階經營管理雙聯碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7139"
+        },
+        {
+            "name": "MBA經營管理在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7102"
+        },
+        {
+            "name": "MFB財務金融在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7129"
+        },
+        {
+            "name": "MPM公共政策與管理在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7131"
+        },
+        {
+            "name": "HBA健康政策與經營管理碩士在職專班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7137"
+        },
+        {
+            "name": "IMBA國際專業管理碩士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7103"
+        },
+        {
+            "name": "科技管理研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7105"
+        },
+        {
+            "name": "科技法律研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7107"
+        },
+        {
+            "name": "服務科學研究所",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7109"
+        },
+        {
+            "name": "計量財務金融學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7111"
+        },
+        {
+            "name": "經濟學系",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7113"
+        },
+        {
+            "name": "科技管理學院學士班",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7115"
+        },
+        {
+            "name": "科技管理學院學士班國際學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7143"
+        },
+        {
+            "name": "服務創新與分析研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7127"
+        },
+        {
+            "name": "生物倫理與法律研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7123"
+        },
+        {
+            "name": "科技政策研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7117"
+        },
+        {
+            "name": "技術創新與創業研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7119"
+        },
+        {
+            "name": "財務風險控管研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7125"
+        },
+        {
+            "name": "區塊鏈法律與政策中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7133"
+        },
+        {
+            "name": "安富金融工程研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7135"
+        },
+        {
+            "name": "社會企業研究中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=7141"
+        }
+    ],
+    "contact": {
+        "分機": "62100",
+        "直撥電話": "03-5162100",
+        "傳真電話": "03-5622456",
+        "Email": "ctm@my.nthu.edu.tw",
+        "網頁": "http://www.ctm.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "林哲群",
+            "職稱/職責": "院長",
+            "分機": "62100",
+            "備註": "N/A",
+            "Email": "chclin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "祁玉蘭",
+            "職稱/職責": "副院長",
+            "分機": "42732",
+            "備註": "N/A",
+            "Email": "ylchyi@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張焯然",
+            "職稱/職責": "副院長",
+            "分機": "42420",
+            "備註": "N/A",
+            "Email": "jrchang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "盧妙卿",
+            "職稱/職責": "編審 / 秘書",
+            "分機": "62100",
+            "備註": "N/A",
+            "Email": "ctm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "易彤",
+            "職稱/職責": "國際認證",
+            "分機": "62101",
+            "備註": "N/A",
+            "Email": "tyih@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林絢慧",
+            "職稱/職責": "國際事務",
+            "分機": "62516",
+            "備註": "N/A",
+            "Email": "hhlin@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林宜秀",
+            "職稱/職責": "職涯發展",
+            "分機": "62511",
+            "備註": "N/A",
+            "Email": "careertm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "王天生",
+            "職稱/職責": "技術助理",
+            "分機": "62118",
+            "備註": "N/A",
+            "Email": "tswang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "張智彥",
+            "職稱/職責": "技術助理",
+            "分機": "62117",
+            "備註": "N/A",
+            "Email": "cy_chang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "謝金龍",
+            "職稱/職責": "管理員",
+            "分機": "42226",
+            "備註": "N/A",
+            "Email": "clhsieh@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "羅文憲",
+            "職稱/職責": "管理員",
+            "分機": "42252",
+            "備註": "N/A",
+            "Email": "wclo@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "黃玉婷",
+            "職稱/職責": "研究助理",
+            "分機": "42944",
+            "備註": "N/A",
+            "Email": "yt.huang@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "林以婷",
+            "職稱/職責": "計畫助理 / 新興科技與數位學習推動",
+            "分機": "62527",
+            "備註": "N/A",
+            "Email": "iting@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "彭美婷",
+            "職稱/職責": "研究助理 / EMI 雙語化學習計畫",
+            "分機": "62112",
+            "備註": "N/A",
+            "Email": "mtpeng@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "趙家瑜",
+            "職稱/職責": "研究助理",
+            "分機": "62113",
+            "備註": "N/A",
+            "Email": "chaocy@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "學生職涯發展辦公室",
+            "職稱/職責": "N/A",
+            "分機": "62511",
+            "備註": "N/A",
+            "Email": "careertm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "科管院國際事務辦公室",
+            "職稱/職責": "科管院國際事務、國際認證相關業務",
+            "分機": "62101",
+            "備註": "N/A",
+            "Email": "oiactm@my.nthu.edu.tw"
+        },
+        {
+            "姓名": "跨領域研究辦公室",
+            "職稱/職責": "N/A",
+            "分機": "42944",
+            "備註": "N/A",
+            "Email": "N/A"
+        }
+    ]
+}

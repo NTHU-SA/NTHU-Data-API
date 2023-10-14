@@ -1,0 +1,39 @@
+{
+    "departments": [
+        {
+            "name": "第一組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4501"
+        },
+        {
+            "name": "第二組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4503"
+        },
+        {
+            "name": "第三組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4505"
+        }
+    ],
+    "contact": {
+        "分機": "33155",
+        "直撥電話": "03-5718343",
+        "傳真電話": "03-5722201",
+        "Email": "person@my.nthu.edu.tw",
+        "網頁": "http://person.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "徐宗鴻",
+            "職稱/職責": "主任 / 綜理人事業務",
+            "分機": "31311",
+            "備註": "N/A",
+            "Email": "ch_hsu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "王秀娥",
+            "職稱/職責": "專門委員 / 襄理人事業務",
+            "分機": "31318",
+            "備註": "N/A",
+            "Email": "sewang@mx.nthu.edu.tw"
+        }
+    ]
+}

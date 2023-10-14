@@ -1,0 +1,66 @@
+{
+    "departments": [
+        {
+            "name": "綜合館務組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4101"
+        },
+        {
+            "name": "採編組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4103"
+        },
+        {
+            "name": "資訊系統組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4105"
+        },
+        {
+            "name": "典閱組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4107"
+        },
+        {
+            "name": "服務與創新組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4109"
+        },
+        {
+            "name": "特藏組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4111"
+        },
+        {
+            "name": "人社分館",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4113"
+        },
+        {
+            "name": "南大分館",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=4115"
+        }
+    ],
+    "contact": {
+        "分機": "42995",
+        "直撥電話": "03-5742995",
+        "傳真電話": "03-5162290",
+        "Email": "library@my.nthu.edu.tw",
+        "網頁": "http://www.lib.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "林登松",
+            "職稱/職責": "館長 / 綜理圖書館業務",
+            "分機": "42999",
+            "備註": "N/A",
+            "Email": "dslin@phys.nthu.edu.tw"
+        },
+        {
+            "姓名": "讀者服務專線",
+            "職稱/職責": "N/A",
+            "分機": "03-5742995",
+            "備註": "N/A",
+            "Email": "N/A"
+        },
+        {
+            "姓名": "館長室",
+            "職稱/職責": "N/A",
+            "分機": "03-5742241",
+            "備註": "N/A",
+            "Email": "N/A"
+        }
+    ]
+}

@@ -1,0 +1,127 @@
+{
+    "departments": [
+        {
+            "name": "綜合教務組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1701"
+        },
+        {
+            "name": "註冊組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1703"
+        },
+        {
+            "name": "課務組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1707"
+        },
+        {
+            "name": "招生策略中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1705"
+        },
+        {
+            "name": "推廣教育中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1709"
+        },
+        {
+            "name": "教學發展中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1711"
+        },
+        {
+            "name": "華語中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1719"
+        },
+        {
+            "name": "金門教育中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1739"
+        },
+        {
+            "name": "清華大學出版社",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1717"
+        },
+        {
+            "name": "跨院國際碩博士班學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1723"
+        },
+        {
+            "name": "智慧製造跨院高階主管碩士在職學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1743"
+        },
+        {
+            "name": "智慧生醫博士學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1747"
+        },
+        {
+            "name": "藥品與醫材法規科學碩士在職學位學程",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1749"
+        },
+        {
+            "name": "跨領域科學教育中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1725"
+        },
+        {
+            "name": "認知與心智科學中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1729"
+        },
+        {
+            "name": "印度中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1731"
+        },
+        {
+            "name": "原住民族科學發展中心",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1741"
+        },
+        {
+            "name": "竹松社區大學",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=1737"
+        }
+    ],
+    "contact": {
+        "分機": "35055、35056",
+        "直撥電話": "03-5719134",
+        "傳真電話": "03-5722713",
+        "Email": "academic@my.nthu.edu.tw",
+        "網頁": "http://academic.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "巫勇賢",
+            "職稱/職責": "教務長",
+            "分機": "35055",
+            "備註": "N/A",
+            "Email": "yunhwu@ess.nthu.edu.tw"
+        },
+        {
+            "姓名": "劉奕汶",
+            "職稱/職責": "副教務長",
+            "分機": "35077",
+            "備註": "N/A",
+            "Email": "ywliu@ee.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳明君",
+            "職稱/職責": "簡任秘書 / 綜合教務組執行組長",
+            "分機": "35062",
+            "備註": "N/A",
+            "Email": "micchen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "蘇郁欣",
+            "職稱/職責": "專員 / 教務長行程等",
+            "分機": "35055",
+            "備註": "N/A",
+            "Email": "yhsu2@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "沈瑋詩",
+            "職稱/職責": "專案助理 / 教務處下設之教學單位院級業務",
+            "分機": "35206",
+            "備註": "N/A",
+            "Email": "shenws@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "吳佩珊",
+            "職稱/職責": "研究助理 / 合校停招系所聯合辦事處業務",
+            "分機": "72304",
+            "備註": "N/A",
+            "Email": "pswu@mx.nthu.edu.tw"
+        }
+    ]
+}

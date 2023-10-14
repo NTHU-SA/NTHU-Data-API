@@ -1,0 +1,53 @@
+{
+    "departments": [
+        {
+            "name": "網路系統組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=3701"
+        },
+        {
+            "name": "校務資訊組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=3703"
+        },
+        {
+            "name": "學習科技組",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=3705"
+        }
+    ],
+    "contact": {
+        "分機": "31000",
+        "直撥電話": "03-5713786",
+        "傳真電話": "03-5710776",
+        "Email": "ccc@cc.nthu.edu.tw",
+        "網頁": "http://www.cc.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "王俊堯",
+            "職稱/職責": "中心主任",
+            "分機": "31100",
+            "備註": "N/A",
+            "Email": "wcyao@cs.nthu.edu.tw"
+        },
+        {
+            "姓名": "周志遠",
+            "職稱/職責": "中心副主任",
+            "分機": "31102",
+            "備註": "N/A",
+            "Email": "jchou@cs.nthu.edu.tw"
+        },
+        {
+            "姓名": "郭柏蘭",
+            "職稱/職責": "組員",
+            "分機": "31113",
+            "備註": "N/A",
+            "Email": "polankuo@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "鄭秀美",
+            "職稱/職責": "行政助理",
+            "分機": "31109",
+            "備註": "N/A",
+            "Email": "smcheng@cc.nthu.edu.tw"
+        }
+    ]
+}

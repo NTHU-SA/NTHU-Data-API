@@ -1,0 +1,45 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "35132",
+        "Email": "cisd@my.nthu.edu.tw",
+        "網頁": "http://cisd.site.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "傅麗玉",
+            "職稱/職責": "中心主任",
+            "分機": "42904",
+            "備註": "N/A",
+            "Email": "lyfu@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "沈昱璿",
+            "職稱/職責": "研究助理",
+            "分機": "35132",
+            "備註": "N/A",
+            "Email": "yhshen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "杜昀臻",
+            "職稱/職責": "研究助理",
+            "分機": "35094",
+            "備註": "N/A",
+            "Email": "yunjhen_du@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "陳俐妤",
+            "職稱/職責": "研究助理",
+            "分機": "35138",
+            "備註": "N/A",
+            "Email": "liyuchen@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "宋庭嘉",
+            "職稱/職責": "研究助理",
+            "分機": "35093",
+            "備註": "N/A",
+            "Email": "sungtc@mx.nthu.edu.tw"
+        }
+    ]
+}

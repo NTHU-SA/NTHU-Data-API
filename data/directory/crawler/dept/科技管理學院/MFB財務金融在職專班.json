@@ -1,0 +1,26 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "62104",
+        "直撥電話": "03-5162104",
+        "傳真電話": "03-5627046",
+        "Email": "mfb@my.nthu.edu.tw",
+        "網頁": "http://fbm.web.nthu.edu.tw/bin/home.php"
+    },
+    "people": [
+        {
+            "姓名": "索樂晴",
+            "職稱/職責": "主任",
+            "分機": "42223",
+            "備註": "N/A",
+            "Email": "lcso@mx.nthu.edu.tw"
+        },
+        {
+            "姓名": "洪柔媙",
+            "職稱/職責": "研究助理",
+            "分機": "62104",
+            "備註": "N/A",
+            "Email": "mfb@my.nthu.edu.tw"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "departments": [
+        {
+            "name": "台灣聯合大學系統 校內分機免費互撥",
+            "url": "https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=5201"
+        }
+    ],
+    "contact": {},
+    "people": [
+        {
+            "姓名": "總機",
+            "職稱/職責": "分機查詢及報修",
+            "分機": "36161",
+            "備註": "N/A",
+            "Email": "N/A"
+        }
+    ]
+}

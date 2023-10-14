@@ -1,0 +1,33 @@
+{
+    "departments": [],
+    "contact": {
+        "分機": "42463",
+        "直撥電話": "03-5742463",
+        "傳真電話": "03-5715934",
+        "Email": "bi@life.nthu.edu.tw",
+        "網頁": "http://bioindustry.life.nthu.edu.tw/"
+    },
+    "people": [
+        {
+            "姓名": "高瑞和",
+            "職稱/職責": "生科院院長兼主任",
+            "分機": "31040 42468",
+            "備註": "N/A",
+            "Email": "rhkao@life.nthu.edu.tw"
+        },
+        {
+            "姓名": "周裕珽",
+            "職稱/職責": "生技所所長兼副主任",
+            "分機": "42471 42113",
+            "備註": "N/A",
+            "Email": "ytchou@life.nthu.edu.tw"
+        },
+        {
+            "姓名": "林佳玲",
+            "職稱/職責": "行政助理",
+            "分機": "42463",
+            "備註": "N/A",
+            "Email": "cllin@life.nthu.edu.tw"
+        }
+    ]
+}
