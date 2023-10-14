@@ -38,7 +38,7 @@ spec:
             - name: LOGURU_LEVEL
               value: ERROR
             - name: PORT
-              value: 5000
+              value: "5000"
 ---
 apiVersion: v1
 kind: Service
