@@ -17,5 +17,5 @@ RUN pip3 install -r requirements.txt
 COPY . ./
 
 # Run main.py when the container launches
-EXPOSE 5050
+EXPOSE 5000
 CMD ["python", "main.py"]
