@@ -16,7 +16,7 @@ spec:
         app: nthu-data-api
     spec:
       containers:
-        - image: gcr.io/nthu-chatbot/github.com/NTHU-SA/nthu-data-api
+        - image: gcr.io/nthu-chatbot/github.com/nthu-sa/nthu-data-api
           name: nthu-data-api
           ports:
             - containerPort: 5000
