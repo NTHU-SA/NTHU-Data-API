@@ -1,0 +1,40 @@
+[
+    {
+        "id": "uuid",
+        "data": {
+            "name": "中國文學系",
+            "ext": "34340",
+            "tel": "03-5734762",
+            "fax": "03-5725973",
+            "email": "cl@my.nthu.edu.tw",
+            "parents": [
+                {
+                    "name": "人文社會學院",
+                    "id": "uuid"
+                }
+            ],
+            "childrens": [
+                {
+                    "name": "人文社會學院",
+                    "id": "uuid"
+                },
+                {
+                    "name": "人文社會學院",
+                    "id": "uuid"
+                }
+            ]
+        },
+        "create_time": "",
+        "update_time": ""
+    },
+    {
+        "id": "uuid",
+        "data": {
+            "name": "光復路校門",
+            "latitude": "24.796538",
+            "longitude": "120.997015"
+        },
+        "create_time": "",
+        "update_time": ""
+    }
+]
