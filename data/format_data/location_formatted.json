@@ -1,0 +1,2818 @@
+[
+    {
+        "id": "b876aa09-40a8-427b-8bc7-1933978690e2",
+        "data": {
+            "name": "光復路校門",
+            "name_en": "North gate",
+            "latitude": "24.796538",
+            "longitude": "120.997015"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d3bdb327-4a13-4d28-8d11-c9f4d71f31a2",
+        "data": {
+            "name": "東校門",
+            "name_en": "East gate",
+            "latitude": "24.79557",
+            "longitude": "120.99748"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3d58afa3-79e2-4193-b0c0-f0a1866e0275",
+        "data": {
+            "name": "第四綜合大樓",
+            "name_en": "Research and Development Building",
+            "latitude": "24.79570",
+            "longitude": "120.99652"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "6db26190-de4d-4d45-ae25-dccc5e47d795",
+        "data": {
+            "name": "創新育成中心(舊)",
+            "name_en": "Center of Innovative Incubator",
+            "latitude": "24.79534",
+            "longitude": "120.99649"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "27833bfe-e387-4a8a-a182-9b617780e927",
+        "data": {
+            "name": "動機化學實驗館",
+            "name_en": "Chemistry and Power Mechanical Engineering Building",
+            "latitude": "24.796533",
+            "longitude": "120.995204"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "eb51236f-ae0f-44a6-9828-e86b9fd49144",
+        "data": {
+            "name": "化學館",
+            "name_en": "Chemistry Building",
+            "latitude": "24.79620",
+            "longitude": "120.99599"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e027f167-a3e2-459c-8687-b9efb6a4dd06",
+        "data": {
+            "name": "工程一館",
+            "name_en": "Engineering Building I",
+            "latitude": "24.79519",
+            "longitude": "120.99604"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "32948935-2163-4e48-9b51-97aa244ad201",
+        "data": {
+            "name": "化工館",
+            "name_en": "Chemical Engineering Building",
+            "latitude": "24.79629",
+            "longitude": "120.99507"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d8a35523-8e6e-4f8a-8c88-0698c0801248",
+        "data": {
+            "name": "學習資源中心(旺宏館)",
+            "name_en": "Learning Resource Center(Macronix Building)",
+            "latitude": "24.79538",
+            "longitude": "120.99457"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "10d7620e-741b-4b14-8403-04d68cab4dbd",
+        "data": {
+            "name": "醫輔大樓",
+            "name_en": "Clinic and Counseling Center",
+            "latitude": "24.79625",
+            "longitude": "120.99431"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "58a2e1a8-16cc-41b3-bcb8-e3f8533402ef",
+        "data": {
+            "name": "工程三館",
+            "name_en": "Engineering Building III",
+            "latitude": "24.79634",
+            "longitude": "120.99256"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "048d4ab0-3549-4ece-bc9f-bf814727914b",
+        "data": {
+            "name": "水源街西校門",
+            "name_en": "West gate",
+            "latitude": "24.798056",
+            "longitude": "120.990027"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1a60a624-89f9-460a-83d0-6037bdf00ccf",
+        "data": {
+            "name": "材料科技館",
+            "name_en": "Materials Science and Technology Building",
+            "latitude": "24.79641",
+            "longitude": "120.99171"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7255f0d9-8eee-47b2-9165-20db7950fc0d",
+        "data": {
+            "name": "台達館",
+            "name_en": "DeltaHall",
+            "latitude": "24.79591",
+            "longitude": "120.99211"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "205532bc-feec-4f63-9bff-bba00672a018",
+        "data": {
+            "name": "教育館",
+            "name_en": "Education Building",
+            "latitude": "24.795557",
+            "longitude": "120.993703"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "426023a0-753b-4a4c-a49b-57d73f1d42ba",
+        "data": {
+            "name": "物理館",
+            "name_en": "Physics Building",
+            "latitude": "24.79434",
+            "longitude": "120.99240"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3f80f2ac-01f7-4d7e-a1e0-035db6a96675",
+        "data": {
+            "name": "資訊電機館",
+            "name_en": "Electrical Engineering and Computer Science Building",
+            "latitude": "24.79508",
+            "longitude": "120.99213"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a68f3483-23f8-47cd-b038-5823032b4c20",
+        "data": {
+            "name": "第三綜合大樓",
+            "name_en": "General Building III",
+            "latitude": "24.79507",
+            "longitude": "120.99358"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "48171d54-b65e-4c08-8a6d-a40b63088c8c",
+        "data": {
+            "name": "第一綜合大樓(行政大樓、合勤演藝廳)",
+            "name_en": "General Building I",
+            "latitude": "24.794660",
+            "longitude": "120.994548"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "22c3b868-a5ac-47e5-abf0-5d49605465e7",
+        "data": {
+            "name": "第二綜合大樓(藝術中心、計算機與通訊中心)",
+            "name_en": "General Building II",
+            "latitude": "24.79438",
+            "longitude": "120.99325"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c34536fe-c38e-474c-b842-f44af1c95ee6",
+        "data": {
+            "name": "蘇格貓底咖啡屋",
+            "name_en": "Casa de Socrates café",
+            "latitude": "24.793916",
+            "longitude": "120.993137"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "38c20b8b-a999-4170-a958-ec1165e0f33f",
+        "data": {
+            "name": "清華名人堂",
+            "name_en": "TsingHua Hall of Fame",
+            "latitude": "24.793896",
+            "longitude": "120.992822"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ddf65b59-e3ee-4747-9ad3-ef7f3f696cf2",
+        "data": {
+            "name": "小吃部",
+            "name_en": "Food Court",
+            "latitude": "24.79322",
+            "longitude": "120.99294"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a0d385a9-9055-46c5-a028-4a964828cc99",
+        "data": {
+            "name": "水木生活中心",
+            "name_en": "Shui Mu Student Center",
+            "latitude": "24.79250",
+            "longitude": "120.99394"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d8eea6d5-5674-4469-80c2-00c1c3e1e1fa",
+        "data": {
+            "name": "風雲樓",
+            "name_en": "Feng Yun Building",
+            "latitude": "24.792235",
+            "longitude": "120.994594"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8fcc212e-56f0-4899-ac36-5fcee8623287",
+        "data": {
+            "name": "大禮堂",
+            "name_en": "Auditorium",
+            "latitude": "24.79357",
+            "longitude": "120.99388"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e90e32dc-a5b8-46a3-a350-fb82fa8d5847",
+        "data": {
+            "name": "游泳池",
+            "name_en": "Swimming Pool",
+            "latitude": "24.79507",
+            "longitude": "120.99128"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8ec095e5-260d-4557-8261-96024e54c4c1",
+        "data": {
+            "name": "舊體育館(桌球館)",
+            "name_en": "Table Tennis Arena",
+            "latitude": "24.79434",
+            "longitude": "120.99131"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7baffacd-fe51-47ce-b298-8a2a7095009d",
+        "data": {
+            "name": "體育館",
+            "name_en": " Gymnasium",
+            "latitude": "24.79361",
+            "longitude": "120.99148"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "bba8070b-b7c3-450b-857e-d6c2ccb3ac65",
+        "data": {
+            "name": "蒙民偉樓(學生活動中心)",
+            "name_en": "Mong Man Wai Building (Student Union)",
+            "latitude": "24.79360",
+            "longitude": "120.99193"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "69e8dc3e-4526-4690-9564-53d2f9babab1",
+        "data": {
+            "name": "校友體育館",
+            "name_en": "Alumni Gymnasium",
+            "latitude": "24.795087",
+            "longitude": "120.989845"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f1ef072a-13d0-47de-8691-d2ed32b3d236",
+        "data": {
+            "name": "明齋",
+            "name_en": "Dormitory Ming",
+            "latitude": "24.79277",
+            "longitude": "120.99315"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5ecec53c-6786-4093-aa24-a1e33cb4c57d",
+        "data": {
+            "name": "平齋",
+            "name_en": "Dormitory Ping",
+            "latitude": "24.79260",
+            "longitude": "120.99319"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e67f9365-f344-4908-9f46-fbb1e8646f9d",
+        "data": {
+            "name": "善齋",
+            "name_en": "Dormitory Shan",
+            "latitude": "24.79220",
+            "longitude": "120.99345"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2a207a03-580b-4c5b-b4f7-4ebc6efd131d",
+        "data": {
+            "name": "華齋",
+            "name_en": "Dormitory Hua",
+            "latitude": "24.79179",
+            "longitude": "120.99402"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "85a96865-d24f-4cb9-83de-bf3884cbe80d",
+        "data": {
+            "name": "實齋",
+            "name_en": "Dormitory Shyr",
+            "latitude": "24.79161",
+            "longitude": "120.99509"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "872b5a54-4a47-45d7-b6ca-1d3d6e1ff09f",
+        "data": {
+            "name": "仁齋",
+            "name_en": "Dormitory Jen",
+            "latitude": "24.79151",
+            "longitude": "120.99570"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f790ac7c-085d-420e-b527-ad1d36d6ee94",
+        "data": {
+            "name": "碩齋",
+            "name_en": "Dormitory Shuo",
+            "latitude": "24.79136",
+            "longitude": "120.99677"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "042ca252-21e0-40d0-babc-b07ceab45b59",
+        "data": {
+            "name": "禮齋",
+            "name_en": "Dormitory Li",
+            "latitude": "24.79125",
+            "longitude": "120.99529"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d4de88dc-2881-4711-9235-148d67772803",
+        "data": {
+            "name": "信齋 A",
+            "name_en": "Dormitory Shinn A",
+            "latitude": "24.79123",
+            "longitude": "120.99571"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5978bb46-aacd-427c-a7f5-daa6883e689e",
+        "data": {
+            "name": "儒齋",
+            "name_en": "Dormitory Ru",
+            "latitude": "24.79065",
+            "longitude": "120.99447"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "51cdf193-13f2-4ae1-9f94-5bb72b46f5a5",
+        "data": {
+            "name": "誠齋",
+            "name_en": "Dormitory Cheng",
+            "latitude": "24.79147",
+            "longitude": "120.99393"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7e2745fd-7135-4346-957f-ec9c9b927760",
+        "data": {
+            "name": "義齋",
+            "name_en": "Dormitory Yi",
+            "latitude": "24.79102",
+            "longitude": "120.99391"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "66e128f8-f457-489e-bbc4-b631ddc5edef",
+        "data": {
+            "name": "鴻齋",
+            "name_en": "Dormitory Hung",
+            "latitude": "24.79055",
+            "longitude": "120.99372"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9af327a2-c87d-432e-bd09-8c1cbd6ef54f",
+        "data": {
+            "name": "學齋",
+            "name_en": "Dormitory Shiue",
+            "latitude": "24.79012",
+            "longitude": "120.99301"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "be43eee7-74db-452b-8923-bf3d6eeb3419",
+        "data": {
+            "name": "清齋",
+            "name_en": "Dormitory Tsing",
+            "latitude": "24.79127",
+            "longitude": "120.99314"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5543adb6-1f11-4882-bd29-97eef984a64c",
+        "data": {
+            "name": "新齋",
+            "name_en": "Dormitory Hsin",
+            "latitude": "24.79164",
+            "longitude": "120.99290"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c7bb68f2-05b9-4a04-bb3a-d40d76b3f06e",
+        "data": {
+            "name": "雅齋",
+            "name_en": "Dormitory Ya",
+            "latitude": "24.79287",
+            "longitude": "120.99185"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2c62ac6f-8eba-4eba-9338-ba73d1ea9c99",
+        "data": {
+            "name": "靜齋",
+            "name_en": "Dormitory Jing",
+            "latitude": "24.79258",
+            "longitude": "120.99129"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fba0e3dc-aa06-40f3-a4a4-78617a6f41ea",
+        "data": {
+            "name": "慧齋",
+            "name_en": "Dormitory Huei",
+            "latitude": "24.79217",
+            "longitude": "120.99125"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e7140e5c-ceb1-49cf-ab91-6f67d622c933",
+        "data": {
+            "name": "文齋",
+            "name_en": "Dormitory Wen",
+            "latitude": "24.79201",
+            "longitude": "120.99078"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5f492b7b-0299-4507-a7cb-b7fa842ff7e0",
+        "data": {
+            "name": "清華會館",
+            "name_en": "Guest House I",
+            "latitude": "24.797912",
+            "longitude": "120.990932"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fcac3d43-4ba5-4ac3-9a32-fd0477110f0d",
+        "data": {
+            "name": "第二招待所",
+            "name_en": "Guest House II",
+            "latitude": "24.796913",
+            "longitude": "120.991228"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0fc8f045-3797-4fad-9779-8297d964b332",
+        "data": {
+            "name": "成功湖",
+            "name_en": "Cheng Kung Lake",
+            "latitude": "24.79457",
+            "longitude": "120.99535"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "405121ca-f156-47aa-ade9-3606e427ac25",
+        "data": {
+            "name": "水圳區",
+            "name_en": "The channel",
+            "latitude": "24.79355",
+            "longitude": "120.99243"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "27e042ec-1040-42c5-ba46-c47376030567",
+        "data": {
+            "name": "雞蛋面區",
+            "name_en": "Ji Dan Mian Area",
+            "latitude": "24.78853",
+            "longitude": "120.99125"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f9e48815-17e2-4f81-a31d-1fed6559b830",
+        "data": {
+            "name": "梅谷區",
+            "name_en": "Dr. Mei Memorial Garden",
+            "latitude": "24.78938",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "bce2615b-78b6-4134-8c1a-9a2a7a59d07a",
+        "data": {
+            "name": "昆明湖",
+            "name_en": "Kum Ming Lake",
+            "latitude": "24.79418",
+            "longitude": "120.99258"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1971d5b1-754e-4685-a13e-80ccf9c58df3",
+        "data": {
+            "name": "梅亭",
+            "name_en": "Mei Pavilio",
+            "latitude": "24.79279",
+            "longitude": "120.99019"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3835436a-9319-48d0-ad9b-7f1f42267d04",
+        "data": {
+            "name": "奕亭",
+            "name_en": "Go Pavilion",
+            "latitude": "24.787981",
+            "longitude": "120.990554"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9532cd6a-c454-45bb-bf5f-4ca5e7227f74",
+        "data": {
+            "name": "駐警隊",
+            "name_en": "Campus Security Office",
+            "latitude": "24.79169",
+            "longitude": "120.99168"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ebc86b60-1581-4609-a478-1253bf197eb0",
+        "data": {
+            "name": "工科館",
+            "name_en": "Engineering and System Science Building",
+            "latitude": "24.79111",
+            "longitude": "120.99085"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "67a595e4-28e1-47d1-8aae-05248e05d075",
+        "data": {
+            "name": "李存敏館",
+            "name_en": "Green Energy Research and Education Building",
+            "latitude": "24.790759",
+            "longitude": "120.991360"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "aa3fbb4b-99da-4302-af88-9ebd597812b6",
+        "data": {
+            "name": "原科中心",
+            "name_en": "Nuclear Science and Technology Development Center",
+            "latitude": "24.79079",
+            "longitude": "120.99133"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "cb582806-5542-4555-b370-eda71bcccacb",
+        "data": {
+            "name": "人文社會學館",
+            "name_en": "Humanities and Social Sciences Building",
+            "latitude": "24.78987",
+            "longitude": "120.98970"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "23a79202-6747-4158-9c76-27f06288a41e",
+        "data": {
+            "name": "生命科學一館",
+            "name_en": "Life Science Building I",
+            "latitude": "24.78990",
+            "longitude": "120.99026"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ca6002b6-eff8-41f9-92e8-9fa80082e3ce",
+        "data": {
+            "name": "生命科學二館",
+            "name_en": "Life Science Building II",
+            "latitude": "24.78945",
+            "longitude": "120.98970"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "226a5992-b628-4984-9a5d-f3e5c35ea7f2",
+        "data": {
+            "name": "生醫工程與環境科學館",
+            "name_en": "Biomedical Engineering and Environmental Sciences Building",
+            "latitude": "24.78928",
+            "longitude": "120.99140"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "61a88a42-d1de-414e-9780-e2f608ff631c",
+        "data": {
+            "name": "原子爐",
+            "name_en": "Nuclear Reactor Building",
+            "latitude": "24.789785",
+            "longitude": "120.992187"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3ab8369d-572e-467f-bde1-4f9ca62cef70",
+        "data": {
+            "name": "同位素館",
+            "name_en": "Radioisotope Laboratory",
+            "latitude": "24.78932",
+            "longitude": "120.99216"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "37796963-9b2f-4bb7-ab7c-255043edb3c5",
+        "data": {
+            "name": "生物科技館",
+            "name_en": "Biological Science and Technology Building",
+            "latitude": "24.78985",
+            "longitude": "120.99127"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "058d06b3-c623-4029-8d3f-1a213600a4b6",
+        "data": {
+            "name": "光電研究中心-高能光電實驗室",
+            "name_en": "Photonics Research Center-HOPE Laboratory",
+            "latitude": "24.78876",
+            "longitude": "120.99168"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f8952c1a-fc20-4979-bfeb-f915c2e16415",
+        "data": {
+            "name": "加速器館",
+            "name_en": "Accelerator Building",
+            "latitude": "24.78877",
+            "longitude": "120.99207"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "82f872a8-a0f3-41df-bf6f-1df741e1cbcd",
+        "data": {
+            "name": "台積館",
+            "name_en": "TSMC Building",
+            "latitude": "24.78699",
+            "longitude": "120.98795"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "19e9c2de-3c6a-45dd-b692-48c4ef6786af",
+        "data": {
+            "name": "寶山路南校門",
+            "name_en": "South gate",
+            "latitude": "24.786774",
+            "longitude": "120.988813"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "94a42c72-8c68-4fbe-8bb2-0f96bbec9a07",
+        "data": {
+            "name": "711",
+            "name_en": "N/A",
+            "latitude": "24.793194",
+            "longitude": "120.993083"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1c1674db-6acc-4f25-ae02-a24206b739fe",
+        "data": {
+            "name": "研發大樓",
+            "name_en": "N/A",
+            "latitude": "24.795331",
+            "longitude": "120.997054"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e9901a02-8bd8-4684-aee4-cdc345eb2fac",
+        "data": {
+            "name": "創新育成中心",
+            "name_en": "N/A",
+            "latitude": "24.795236",
+            "longitude": "120.99659"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d5b5499d-67be-463a-8d9c-7bd5b385e82b",
+        "data": {
+            "name": "工一",
+            "name_en": "N/A",
+            "latitude": "24.795094",
+            "longitude": "120.996176"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3381d1c3-8ab8-4445-92de-7a94442bda55",
+        "data": {
+            "name": "科儀中心",
+            "name_en": "N/A",
+            "latitude": "24.794479",
+            "longitude": "120.996259"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1e025301-21f3-41b9-8279-aecc62d61556",
+        "data": {
+            "name": "動機化學實驗室",
+            "name_en": "N/A",
+            "latitude": "24.796772",
+            "longitude": "120.995355"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f48b4ee1-ba2e-4da4-8680-0e070d7568fd",
+        "data": {
+            "name": "學習資源中心",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fc62040d-84ae-42b0-a830-2e0eb0be8ca0",
+        "data": {
+            "name": "旺宏館",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "dd2d0f47-bfc6-46f7-8954-b6cea0692dfc",
+        "data": {
+            "name": "行政中心",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "cd63b5b8-a54a-4d88-be2c-b95da40de1dc",
+        "data": {
+            "name": "國際會議廳",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "39091be1-535e-4fd0-b866-f7b572b87f51",
+        "data": {
+            "name": "藝術創新中心",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0a3ab391-137f-4622-9842-9ac70e016f10",
+        "data": {
+            "name": "亞洲政策中心",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7618ab1d-e017-45b8-8736-0a950ad67f56",
+        "data": {
+            "name": "斯麥爾咖啡",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7f4f5a63-ee08-440d-8e97-9241ad6e899f",
+        "data": {
+            "name": "圖書館",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b8754862-d03f-48cf-9433-39bff93e2def",
+        "data": {
+            "name": "採編組",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "eb8bab4d-9194-4591-a364-ae9030d6a065",
+        "data": {
+            "name": "資訊系統組",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "167e8b6a-6725-4e8a-9270-b705b2a52ceb",
+        "data": {
+            "name": "典閱組",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "13149442-761d-4dc2-975c-63fc3ae3665d",
+        "data": {
+            "name": "服務與創新組",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c82bbe0a-a388-4f9f-8ff3-c4433803ad65",
+        "data": {
+            "name": "綜合館務組",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5d64937f-a846-44d4-ac38-b88aa7f2171e",
+        "data": {
+            "name": "特藏組",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "31e01366-0ffa-4bc8-965b-b880cc53e179",
+        "data": {
+            "name": "秘書處",
+            "name_en": "N/A",
+            "latitude": "24.795523",
+            "longitude": "120.99467"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3f164815-36b0-466e-bce6-a5b34cb4b90b",
+        "data": {
+            "name": "師資培育中心",
+            "name_en": "N/A",
+            "latitude": "24.795727",
+            "longitude": "120.993952"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "61524b03-5bf6-465c-ae42-8e3cc4cdd032",
+        "data": {
+            "name": "通識教育中心",
+            "name_en": "N/A",
+            "latitude": "24.795727",
+            "longitude": "120.993952"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fe2e622d-9ae4-4dd1-b926-3de11a161827",
+        "data": {
+            "name": "共同教育委員會",
+            "name_en": "N/A",
+            "latitude": "24.795727",
+            "longitude": "120.993952"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ea013bdc-7452-4c4e-83aa-fcd065b8098e",
+        "data": {
+            "name": "華德福教育中心",
+            "name_en": "N/A",
+            "latitude": "24.795727",
+            "longitude": "120.993952"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c410f88a-01a1-45bc-b861-4bc62c1d3f2b",
+        "data": {
+            "name": "第一綜合大樓",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e6177e65-d0b0-4a88-a00e-c9d19b73800b",
+        "data": {
+            "name": "綜一",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "323afba1-3204-47da-a213-1d7eca07b6f9",
+        "data": {
+            "name": "行政大樓",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7f3522e2-af82-4411-84b0-e7442eb15ccd",
+        "data": {
+            "name": "綜合學務組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b712af51-4585-491d-87fa-b8c96f9f660e",
+        "data": {
+            "name": "學務處",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9084c838-cda1-4597-aa0d-4eeb65b575c6",
+        "data": {
+            "name": "總務處",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "722fc264-0f5e-48ea-846c-90229f3d0e15",
+        "data": {
+            "name": "全球事務處",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1607369b-16e5-49ec-9266-416918623405",
+        "data": {
+            "name": "招生組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "90e303f8-0a8f-482a-a2b7-3ed0c7110200",
+        "data": {
+            "name": "註冊組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "82e5291c-296d-4555-8263-f7ff924fd08c",
+        "data": {
+            "name": "人事室",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4c94b84a-4042-4612-8b66-b89609c6e3eb",
+        "data": {
+            "name": "主計室",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5a210346-606e-4786-9daa-176e45a4a249",
+        "data": {
+            "name": "研究發展處",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "98e983c6-4f6a-4806-9eba-1d001c090dc0",
+        "data": {
+            "name": "校園規劃組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "190657ba-10a9-457c-b838-a0eee149f302",
+        "data": {
+            "name": "綜合企劃組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "861a06cc-edd7-434c-913f-e1f6d935573a",
+        "data": {
+            "name": "計畫管理組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "91a9588b-7fb2-4138-87a8-177c707c9a37",
+        "data": {
+            "name": "事務組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "56ae0e40-15fb-4c2b-b7e7-90ac3d5267c1",
+        "data": {
+            "name": "保管組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "68fec585-86c2-4cbd-b192-1ff5c7279b30",
+        "data": {
+            "name": "採購組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "33ba17c5-f8f4-48d9-a9f3-4cd80d0df0c7",
+        "data": {
+            "name": "文書組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "255c5079-e657-4b7e-90bc-dd09085cdbe0",
+        "data": {
+            "name": "出納組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "068818dd-cada-4a77-b933-1173c377a806",
+        "data": {
+            "name": "營繕組",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e7da221f-d4b7-439f-8d5a-062be99413b7",
+        "data": {
+            "name": "教務處",
+            "name_en": "N/A",
+            "latitude": "24.794765",
+            "longitude": "120.994444"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d73217bd-654b-442d-8e9f-44f34966c2a5",
+        "data": {
+            "name": "第二綜合大樓",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "850c7181-b761-4c24-85a4-6d6b2824e1d6",
+        "data": {
+            "name": "綜二",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "bbae8506-3c31-4321-b1c9-c3259720601d",
+        "data": {
+            "name": "藝術中心",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ac39c6d1-82f9-4e36-a6a2-65d276914e13",
+        "data": {
+            "name": "計算機與通訊中心",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c4eef7d3-9298-4afd-bbb1-6269b40d1186",
+        "data": {
+            "name": "會議廳",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e9206e3d-e1af-4aae-896f-11e0d68640ef",
+        "data": {
+            "name": "校務資訊組",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d6d82ed9-d24f-40e6-aafd-b044ddad69ab",
+        "data": {
+            "name": "網路系統組",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "95ae55ad-b1b4-4e5c-b1a8-b1e88370b0b5",
+        "data": {
+            "name": "學習科技組",
+            "name_en": "N/A",
+            "latitude": "24.794308",
+            "longitude": "120.993361"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "672ed382-7826-4dec-95f8-f996ddb668ec",
+        "data": {
+            "name": "綜三",
+            "name_en": "N/A",
+            "latitude": "24.794931",
+            "longitude": "120.993404"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8aa9fe61-1ba3-400d-b5d6-3451dd7697dc",
+        "data": {
+            "name": "工三",
+            "name_en": "N/A",
+            "latitude": "24.796418",
+            "longitude": "120.992671"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "89ec5920-de20-4787-b1af-43339b8c4ecb",
+        "data": {
+            "name": "材料實驗館",
+            "name_en": "N/A",
+            "latitude": "24.796556",
+            "longitude": "120.990883"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b4849b41-2d72-4152-8034-df1113ec32ae",
+        "data": {
+            "name": "合金實驗館",
+            "name_en": "N/A",
+            "latitude": "24.796685",
+            "longitude": "120.99018"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2e28297f-e074-4330-80a5-d918b8a0639d",
+        "data": {
+            "name": "資電館",
+            "name_en": "N/A",
+            "latitude": "24.794943",
+            "longitude": "120.992145"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4cb3a320-c9e1-4d8a-b91a-58555f408582",
+        "data": {
+            "name": "數學圖書館",
+            "name_en": "N/A",
+            "latitude": "24.794943",
+            "longitude": "120.992145"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e92b7e8d-5147-4554-b5ce-8bb56abe5ec0",
+        "data": {
+            "name": "物理圖書分館",
+            "name_en": "N/A",
+            "latitude": "24.794183",
+            "longitude": "120.99237"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0759af43-8101-4a04-bad6-73fff0aeab8d",
+        "data": {
+            "name": "綠色低碳能源教學研究大樓",
+            "name_en": "N/A",
+            "latitude": "24.790746",
+            "longitude": "120.991351"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c2f15feb-9f4a-40ed-b6ed-d451a214c432",
+        "data": {
+            "name": "綠能大樓",
+            "name_en": "N/A",
+            "latitude": "24.790746",
+            "longitude": "120.991351"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "6fd03994-e524-4ff6-aa76-45f44f0b63f2",
+        "data": {
+            "name": "綠能館",
+            "name_en": "N/A",
+            "latitude": "24.790746",
+            "longitude": "120.991351"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d3db0252-7719-4087-95b0-1db1782b66db",
+        "data": {
+            "name": "高能光電實驗室",
+            "name_en": "N/A",
+            "latitude": "24.788704",
+            "longitude": "120.991853"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0547d5de-bd6c-47a9-b647-92f5417891a4",
+        "data": {
+            "name": "人文社會學院",
+            "name_en": "N/A",
+            "latitude": "24.790031",
+            "longitude": "120.98907"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1f290037-c79f-41a8-96ce-a108286dd3f8",
+        "data": {
+            "name": "人社院",
+            "name_en": "N/A",
+            "latitude": "24.790031",
+            "longitude": "120.98907"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0f192810-743a-45be-bcce-f44dae9c5de5",
+        "data": {
+            "name": "科技管理學院",
+            "name_en": "N/A",
+            "latitude": "24.786815",
+            "longitude": "120.988265"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0846ed08-7027-4ba6-bb95-de991fd08fa2",
+        "data": {
+            "name": "創新育成大樓",
+            "name_en": "N/A",
+            "latitude": "24.786239",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "18c2487f-b2d9-4827-94a0-56d6e44e40bc",
+        "data": {
+            "name": "國際產學營運總中心",
+            "name_en": "N/A",
+            "latitude": "24.786239",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ac6242c8-9e7c-46c3-9cc2-52210e55c492",
+        "data": {
+            "name": "行政組",
+            "name_en": "N/A",
+            "latitude": "24.786239",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "444cf6f2-7a48-4598-8882-f24df18cec18",
+        "data": {
+            "name": "產學企劃組",
+            "name_en": "N/A",
+            "latitude": "24.786239",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ae8689d9-886e-4760-aa71-1fa24db34c84",
+        "data": {
+            "name": "智財技轉組",
+            "name_en": "N/A",
+            "latitude": "24.786239",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0d567d60-92f1-4ac6-9f77-32d351cc8e7b",
+        "data": {
+            "name": "技轉中心",
+            "name_en": "N/A",
+            "latitude": "24.786239",
+            "longitude": "120.98876"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "780a7127-28ee-4096-b400-01bb9f41164f",
+        "data": {
+            "name": "清華實驗室",
+            "name_en": "N/A",
+            "latitude": "24.785724",
+            "longitude": "120.989839"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9dc16277-43df-4529-8635-81e6a176df2c",
+        "data": {
+            "name": "郵局",
+            "name_en": "N/A",
+            "latitude": "24.795638",
+            "longitude": "120.997007"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ec0f8264-fa3c-4c39-bc1a-38529f1a6ae9",
+        "data": {
+            "name": "清華大草坪",
+            "name_en": "N/A",
+            "latitude": "24.793923",
+            "longitude": "120.993054"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2b7db6e8-cb58-46bc-89f6-b3c695ae6b5c",
+        "data": {
+            "name": "水漾餐廳",
+            "name_en": "N/A",
+            "latitude": "24.794095",
+            "longitude": "120.993356"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "406315dd-e3eb-4397-8fa9-8a06fd963115",
+        "data": {
+            "name": "社團辦公室",
+            "name_en": "N/A",
+            "latitude": "24.793023",
+            "longitude": "120.994142"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1a81cf4f-afda-4ce5-8f15-576742093b87",
+        "data": {
+            "name": "學生住宿組",
+            "name_en": "N/A",
+            "latitude": "24.792239",
+            "longitude": "120.994365"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "baeb266e-db55-4640-8cd5-14c050053054",
+        "data": {
+            "name": "生活輔導組",
+            "name_en": "N/A",
+            "latitude": "24.792239",
+            "longitude": "120.994365"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "333fd109-8444-447c-b5c7-b9d823c0ac34",
+        "data": {
+            "name": "水木餐廳",
+            "name_en": "N/A",
+            "latitude": "24.792271",
+            "longitude": "120.994345"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a43a7db2-3031-4c30-af88-d23ab0cd0b3a",
+        "data": {
+            "name": "水木書苑",
+            "name_en": "N/A",
+            "latitude": "24.792364",
+            "longitude": "120.994656"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d3994cb7-82d3-4f66-b274-29f16fa071fd",
+        "data": {
+            "name": "麥當勞",
+            "name_en": "N/A",
+            "latitude": "24.793194",
+            "longitude": "120.993083"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c66d1bfb-d50d-498f-be2a-4b66368c818c",
+        "data": {
+            "name": "統一超商",
+            "name_en": "N/A",
+            "latitude": "24.793194",
+            "longitude": "120.993083"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8bd51509-05db-4ec8-aa40-1c8687ab3a72",
+        "data": {
+            "name": "室內網球場",
+            "name_en": "N/A",
+            "latitude": "24.796371",
+            "longitude": "120.990364"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "6b4fabb7-0d12-4630-9858-1fc8e6a5c10c",
+        "data": {
+            "name": "舊體育館",
+            "name_en": "N/A",
+            "latitude": "24.794267",
+            "longitude": "120.991565"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e89eb3e7-4e11-4527-ab30-32c597513d4f",
+        "data": {
+            "name": "桌球館",
+            "name_en": "N/A",
+            "latitude": "24.794267",
+            "longitude": "120.991565"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f27f8dad-0b66-4607-91be-a2f94e0ed29a",
+        "data": {
+            "name": "體育室",
+            "name_en": "N/A",
+            "latitude": "24.793562",
+            "longitude": "120.991667"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "bbdb786a-44ea-40c7-b13c-0bfe557d49e0",
+        "data": {
+            "name": "蒙民偉樓",
+            "name_en": "N/A",
+            "latitude": "24.793656",
+            "longitude": "120.992071"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9c90dc90-0b2a-4aac-8b3c-62f8811366cc",
+        "data": {
+            "name": "學生活動中心",
+            "name_en": "N/A",
+            "latitude": "24.793656",
+            "longitude": "120.992071"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fdf4d9d6-718a-4df7-aebc-51a419c2e6a9",
+        "data": {
+            "name": "課外活動組",
+            "name_en": "N/A",
+            "latitude": "24.793656",
+            "longitude": "120.992071"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "712f730c-5f72-4815-b28d-9e9ec26b4c69",
+        "data": {
+            "name": "土地公廟",
+            "name_en": "N/A",
+            "latitude": "24.787417",
+            "longitude": "120.990924"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e89a41eb-e727-4cf3-9ad1-938d7ff3fc74",
+        "data": {
+            "name": "自強樓",
+            "name_en": "N/A",
+            "latitude": "24.796958",
+            "longitude": "120.991888"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "95468183-c5fc-48a5-bb9b-399d3231611b",
+        "data": {
+            "name": "西院宿舍",
+            "name_en": "N/A",
+            "latitude": "24.7975",
+            "longitude": "120.991722"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "42fb7087-6ef4-4de9-a4d3-48e5d70bc0cf",
+        "data": {
+            "name": "莊敬樓",
+            "name_en": "N/A",
+            "latitude": "24.797304",
+            "longitude": "120.990759"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f51b7f90-6cd6-4b40-abe5-aec929b44ab7",
+        "data": {
+            "name": "教職員單身宿舍",
+            "name_en": "N/A",
+            "latitude": "24.797905",
+            "longitude": "120.991342"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "412476b0-fd15-4ea1-9790-8e2fc70c1dcf",
+        "data": {
+            "name": "東院宿舍",
+            "name_en": "N/A",
+            "latitude": "24.794698",
+            "longitude": "120.997451"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fecefc78-7099-4ce4-9f62-d4728dbb45ff",
+        "data": {
+            "name": "學人宿舍",
+            "name_en": "N/A",
+            "latitude": "24.790161",
+            "longitude": "120.99831"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b802adaf-8764-4ccc-8bbb-825fe0fd0a8e",
+        "data": {
+            "name": "信齋",
+            "name_en": "N/A",
+            "latitude": "24.790876",
+            "longitude": "120.995779"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9c5f785d-3fb4-41a6-92c5-8f2fc4d28535",
+        "data": {
+            "name": "實齋交誼廳",
+            "name_en": "N/A",
+            "latitude": "24.791592",
+            "longitude": "120.994768"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d4e0ae66-4d68-4a10-805c-d9fbe5cf90cc",
+        "data": {
+            "name": "女宿",
+            "name_en": "N/A",
+            "latitude": "24.792479",
+            "longitude": "120.991892"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9fadeb35-9214-430a-a8e5-9a849c0f5821",
+        "data": {
+            "name": "立體機車停車場",
+            "name_en": "N/A",
+            "latitude": "24.79731",
+            "longitude": "120.995583"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "35427ded-871c-403e-93aa-798105e551c4",
+        "data": {
+            "name": "機車塔",
+            "name_en": "N/A",
+            "latitude": "24.79731",
+            "longitude": "120.995583"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a95d23b6-6ffa-4db5-9503-863e092581f4",
+        "data": {
+            "name": "北校區實驗室廢水處理廠",
+            "name_en": "N/A",
+            "latitude": "24.79681",
+            "longitude": "120.992503"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "738e4752-d17d-4850-8516-b369e53a9db8",
+        "data": {
+            "name": "電工房",
+            "name_en": "N/A",
+            "latitude": "24.792843",
+            "longitude": "120.992679"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5517d017-9ca7-406d-a93a-16256cfa6e25",
+        "data": {
+            "name": "清交小徑",
+            "name_en": "N/A",
+            "latitude": "24.790607",
+            "longitude": "120.995653"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "65a3902f-4b5e-4bcf-b3e4-ec54be164fc1",
+        "data": {
+            "name": "室外排球場",
+            "name_en": "N/A",
+            "latitude": "24.793916",
+            "longitude": "120.990957"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f0894fd6-d1ee-44fe-8ee5-657050e646f3",
+        "data": {
+            "name": "田徑場",
+            "name_en": "N/A",
+            "latitude": "24.794126",
+            "longitude": "120.99002"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "1c7291e4-be29-403e-a161-c82a2242b8d6",
+        "data": {
+            "name": "操場",
+            "name_en": "N/A",
+            "latitude": "24.794126",
+            "longitude": "120.99002"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d63d3571-1237-45f3-952f-3bbc26ff6b3c",
+        "data": {
+            "name": "棒球場",
+            "name_en": "N/A",
+            "latitude": "24.796049",
+            "longitude": "120.990807"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "84c43ddd-a3b1-4ff9-bc7d-df44c96f0b5c",
+        "data": {
+            "name": "網球場",
+            "name_en": "N/A",
+            "latitude": "24.79637",
+            "longitude": "120.989863"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "bfa749dc-099e-4b3e-ba68-5218f878e7ad",
+        "data": {
+            "name": "醫輔中心",
+            "name_en": "N/A",
+            "latitude": "24.79637",
+            "longitude": "120.99438"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "23a172ff-5b9e-4fff-afbb-6250735e4c0e",
+        "data": {
+            "name": "衛生保健組",
+            "name_en": "N/A",
+            "latitude": "24.79637",
+            "longitude": "120.99438"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "968b0ac2-c96a-411e-b08d-13237f081dba",
+        "data": {
+            "name": "諮詢中心",
+            "name_en": "N/A",
+            "latitude": "24.79637",
+            "longitude": "120.99438"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5e13dc42-ea16-4892-a23f-f57f6f9354e8",
+        "data": {
+            "name": "診所",
+            "name_en": "N/A",
+            "latitude": "24.79573",
+            "longitude": "120.996922"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5f6c4f41-fe88-4bb6-8171-5002dd5640a5",
+        "data": {
+            "name": "清華大學附設診所",
+            "name_en": "N/A",
+            "latitude": "24.79573",
+            "longitude": "120.996922"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "488bdd02-1554-400c-b2a3-bc60355673af",
+        "data": {
+            "name": "附設診所",
+            "name_en": "N/A",
+            "latitude": "24.79573",
+            "longitude": "120.996922"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "161c9270-c330-45d1-8ba7-cab8caf70625",
+        "data": {
+            "name": "奕園停車場",
+            "name_en": "N/A",
+            "latitude": "24.788315",
+            "longitude": "120.991918"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "3085591e-3335-4ca4-af23-ca13baa71381",
+        "data": {
+            "name": "奕園",
+            "name_en": "N/A",
+            "latitude": "24.787872",
+            "longitude": "120.990715"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "5b9d1a7b-b77a-4b9e-b038-1ce2eb41dca2",
+        "data": {
+            "name": "梅園",
+            "name_en": "N/A",
+            "latitude": "24.792371",
+            "longitude": "120.99001"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e3b48555-0491-4e71-9eae-733732bc9400",
+        "data": {
+            "name": "合勤演藝中心",
+            "name_en": "N/A",
+            "latitude": "24.794669",
+            "longitude": "120.994415"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "268292d5-7640-455d-b30a-720cf7cc8983",
+        "data": {
+            "name": "大草皮",
+            "name_en": "N/A",
+            "latitude": "24.795433",
+            "longitude": "120.995564"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ddc13667-209f-4ea2-bff7-951e89e0dcaa",
+        "data": {
+            "name": "北校門口",
+            "name_en": "N/A",
+            "latitude": "24.796607",
+            "longitude": "120.997033"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b5248586-d831-4666-b54d-88fd8bd8d87e",
+        "data": {
+            "name": "北校門",
+            "name_en": "N/A",
+            "latitude": "24.796607",
+            "longitude": "120.997033"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "03b88ee8-54c2-4945-8037-132d286399bb",
+        "data": {
+            "name": "南校門口",
+            "name_en": "N/A",
+            "latitude": "24.78608",
+            "longitude": "120.988363"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ba22d439-8185-4360-9518-7278cc819f5b",
+        "data": {
+            "name": "南校門",
+            "name_en": "N/A",
+            "latitude": "24.78608",
+            "longitude": "120.988363"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4b59d99c-235b-4dea-bbbc-0b264dba6d18",
+        "data": {
+            "name": "蝴蝶園",
+            "name_en": "N/A",
+            "latitude": "24.790629",
+            "longitude": "120.988586"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "90beaf69-307a-4224-8412-d2d0f96385df",
+        "data": {
+            "name": "全家",
+            "name_en": "N/A",
+            "latitude": "24.792249",
+            "longitude": "120.994236"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0211b8af-5a48-48b4-b7de-85e6d8396fee",
+        "data": {
+            "name": "全家便利商店",
+            "name_en": "N/A",
+            "latitude": "24.792249",
+            "longitude": "120.994236"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a55f82bf-6a02-4422-b7fd-2a687737c771",
+        "data": {
+            "name": "荷塘",
+            "name_en": "N/A",
+            "latitude": "24.790613",
+            "longitude": "120.992277"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "cefc0f12-0693-40f9-80c6-6922c1dd9c36",
+        "data": {
+            "name": "客運站",
+            "name_en": "N/A",
+            "latitude": "24.795669",
+            "longitude": "120.998127"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "cf51f8c9-5bb2-4de6-ba8f-4bbadbb409ce",
+        "data": {
+            "name": "火車站",
+            "name_en": "N/A",
+            "latitude": "24.801602",
+            "longitude": "120.971597"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c7dfbc94-9a7b-400b-80e5-45fcc4b070b5",
+        "data": {
+            "name": "新竹火車站",
+            "name_en": "N/A",
+            "latitude": "24.801602",
+            "longitude": "120.971597"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4d73d485-f009-45d9-85f0-b2314432cc61",
+        "data": {
+            "name": "馬偕醫院",
+            "name_en": "N/A",
+            "latitude": "24.800374",
+            "longitude": "120.990775"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c710a69f-6566-42e1-bc0d-c120ee5713bc",
+        "data": {
+            "name": "醫院",
+            "name_en": "N/A",
+            "latitude": "24.800374",
+            "longitude": "120.990775"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "0f6fe038-65d3-4c0a-9e21-2f40bedb6798",
+        "data": {
+            "name": "校門",
+            "name_en": "Main Entrance",
+            "latitude": "24.794656",
+            "longitude": "120.965221"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "fdc4c0b3-1a0b-4586-bd4d-45108112000c",
+        "data": {
+            "name": "側門",
+            "name_en": "Side Gate",
+            "latitude": "24.793199",
+            "longitude": "120.965696"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "260b5190-99df-46fe-acd4-2460baf1afa5",
+        "data": {
+            "name": "學生機車停車棚",
+            "name_en": "Side Gate",
+            "latitude": "24.793199",
+            "longitude": "120.965696"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a15fddc3-dcb7-4b20-b7f7-b61f52bc36aa",
+        "data": {
+            "name": "綜合教學大樓",
+            "name_en": "General Education Building",
+            "latitude": "24.793999",
+            "longitude": "120.964890"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d78e309f-adde-419a-9bc7-39d6670eaaed",
+        "data": {
+            "name": "竹師會館",
+            "name_en": "National Hsinchu University of Education History hall",
+            "latitude": "24.793846",
+            "longitude": "120.965698"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "868ae76d-7f83-485d-b745-adaae74a601a",
+        "data": {
+            "name": "教學大樓",
+            "name_en": "N/A",
+            "latitude": "24.793264",
+            "longitude": "120.965174"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "a70a98b2-0cee-4789-8a75-cfc71fa035bc",
+        "data": {
+            "name": "藝設系館",
+            "name_en": "Arts and Design Building",
+            "latitude": "24.793486",
+            "longitude": "120.964496"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "58abe9b2-0d00-4dcb-90af-1fbc74268d7c",
+        "data": {
+            "name": "中文系館",
+            "name_en": "Chinese Language and Literature Building",
+            "latitude": "24.793277",
+            "longitude": "120.965837"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4ef27172-c9e8-46b7-8eb5-21aefb0385e4",
+        "data": {
+            "name": "應科系館",
+            "name_en": "Applied Science Building",
+            "latitude": "24.793467",
+            "longitude": "120.966250"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "6f98c65f-c686-4725-b0c6-a1f0b5da2f53",
+        "data": {
+            "name": "環文系館",
+            "name_en": "Environmental and Cultural Resources Building",
+            "latitude": "24.793647",
+            "longitude": "120.965858"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "e2d1cedb-be56-47f6-b828-67b8e24c2d8c",
+        "data": {
+            "name": "推廣教育大樓",
+            "name_en": "Side Gate",
+            "latitude": "24.793199",
+            "longitude": "120.965696"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "13a2266a-a954-474e-b601-5cf883912856",
+        "data": {
+            "name": "迎曦軒",
+            "name_en": "Ying-Shi Pavilion",
+            "latitude": "24.793851",
+            "longitude": "120.964582"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "ab9939a4-a616-4947-8298-9fdbc5d807db",
+        "data": {
+            "name": "崇善樓",
+            "name_en": "Chong-Shan Building",
+            "latitude": "24.793671",
+            "longitude": "120.964577"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8edad17c-e8bc-445c-9a1e-d6c0da17de12",
+        "data": {
+            "name": "鳴鳳樓",
+            "name_en": "Ming-Feng Building",
+            "latitude": "24.793440",
+            "longitude": "120.963758"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "07820df4-d671-437d-acf2-e35253c5348a",
+        "data": {
+            "name": "綜合體育館",
+            "name_en": "Sports Complex",
+            "latitude": "24.792903",
+            "longitude": "120.963627"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c8ba5372-3c20-4869-93ef-cf252ebad8ee",
+        "data": {
+            "name": "體育健康教學大樓",
+            "name_en": "Physical and Health Education Building",
+            "latitude": "24.793169",
+            "longitude": "120.964035"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4b3a0468-40a2-4c4b-b184-45571786f634",
+        "data": {
+            "name": "學生第二活動中心",
+            "name_en": "Second Center of Student Activities",
+            "latitude": "24.792609",
+            "longitude": "120.964003"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "36af5420-4b77-4e59-a1cd-a1058bc0ff44",
+        "data": {
+            "name": "餐廳",
+            "name_en": "Second Center of Student Activities",
+            "latitude": "24.792609",
+            "longitude": "120.964003"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "c4fcccb7-4116-4135-8886-0dae2246a9ee",
+        "data": {
+            "name": "樹德樓",
+            "name_en": "Shu-De Building",
+            "latitude": "24.792346",
+            "longitude": "120.963971"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "f82e75d0-3c7a-42fd-a17a-8e80bcfa2f99",
+        "data": {
+            "name": "飲虹樓",
+            "name_en": "Yin-Hong Building",
+            "latitude": "24.792134",
+            "longitude": "120.963805"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9b34c919-a5bf-4bbe-b3a8-88da5c313c53",
+        "data": {
+            "name": "掬月齋",
+            "name_en": "Ju-Yue House",
+            "latitude": "24.792127",
+            "longitude": "120.963971"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b5aad77c-ace6-4782-b5e6-9043edb732b5",
+        "data": {
+            "name": "音樂系館",
+            "name_en": "Music Building",
+            "latitude": "24.792348",
+            "longitude": "120.964215"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "51bfe710-cc65-417c-abd0-78886bc87577",
+        "data": {
+            "name": "機車停車棚",
+            "name_en": "Motorcycle Parking Shelter",
+            "latitude": "24.793196",
+            "longitude": "120.965697"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "eada95f8-2fd6-48ca-af49-6d52b5cecc2b",
+        "data": {
+            "name": "運動場",
+            "name_en": "Sports Field",
+            "latitude": "24.792905",
+            "longitude": "120.965338"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "30565f61-4030-4704-801c-4f1c3a78d738",
+        "data": {
+            "name": "傻瓜樹",
+            "name_en": "The tree of foolishness",
+            "latitude": "24.793182",
+            "longitude": "120.964030"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2efdc896-c2ff-4b72-aa80-d08f7e790373",
+        "data": {
+            "name": "麵包樹",
+            "name_en": "The tree of bread",
+            "latitude": "24.793131",
+            "longitude": "120.965204"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b5888945-ab6e-489d-a40e-f4f186664387",
+        "data": {
+            "name": "築思橋",
+            "name_en": "The bridge of memories",
+            "latitude": "24.793213",
+            "longitude": "120.965682"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b3cf4174-05a6-43b2-ab9a-1c1839df6cb4",
+        "data": {
+            "name": "計通中心",
+            "name_en": "N/A",
+            "latitude": "24.792841",
+            "longitude": "120.96648"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2e4496df-3762-4278-a898-8947c71d346a",
+        "data": {
+            "name": "校史館",
+            "name_en": "N/A",
+            "latitude": "24.793892",
+            "longitude": "120.965863"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "2cfd8a5d-0c6d-44a6-9900-0c31c6bda937",
+        "data": {
+            "name": "圖書館南大分館",
+            "name_en": "N/A",
+            "latitude": "24.794182",
+            "longitude": "120.965478"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "598d5af2-38d2-4134-ba53-46c19a07d5f8",
+        "data": {
+            "name": "南大圖書館",
+            "name_en": "N/A",
+            "latitude": "24.794182",
+            "longitude": "120.965478"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "34d790cb-c3de-4fc8-9a8d-4a1772d5e147",
+        "data": {
+            "name": "通識中心",
+            "name_en": "N/A",
+            "latitude": "24.793782",
+            "longitude": "120.965108"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b1f9fd92-2b33-4b7f-b284-835af47bbc33",
+        "data": {
+            "name": "教與學中心",
+            "name_en": "N/A",
+            "latitude": "24.793782",
+            "longitude": "120.965108"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "918a0297-223c-44e1-b6ac-253b4bb27ef5",
+        "data": {
+            "name": "綜合教育大樓",
+            "name_en": "N/A",
+            "latitude": "24.793784",
+            "longitude": "120.965097"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "b12e7ea3-eefb-451b-8fc1-67ea70ec50ec",
+        "data": {
+            "name": "資源教室",
+            "name_en": "N/A",
+            "latitude": "24.793784",
+            "longitude": "120.965097"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "7eb41714-fde8-47e4-85bd-6c51b9a78d63",
+        "data": {
+            "name": "諮商中心",
+            "name_en": "N/A",
+            "latitude": "24.793463",
+            "longitude": "120.963753"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "9d8e35cc-76ff-45a2-8ccd-002ce198b257",
+        "data": {
+            "name": "原資中心",
+            "name_en": "N/A",
+            "latitude": "24.793463",
+            "longitude": "120.963753"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8ae05e3e-e175-4f3d-b9df-2d20d31d6fcc",
+        "data": {
+            "name": "衛保組",
+            "name_en": "N/A",
+            "latitude": "24.793463",
+            "longitude": "120.963753"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "76b20422-3315-475b-9997-aabeed9418b3",
+        "data": {
+            "name": "學務處聯合辦公室",
+            "name_en": "N/A",
+            "latitude": "24.793463",
+            "longitude": "120.963753"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "4adf16dd-1239-43b3-a735-8b84c8536119",
+        "data": {
+            "name": "音樂二館",
+            "name_en": "N/A",
+            "latitude": "24.792349",
+            "longitude": "120.964208"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "8e1b6658-f366-4c32-8b0d-d36afce1e093",
+        "data": {
+            "name": "南大校區正門",
+            "name_en": "N/A",
+            "latitude": "24.792349",
+            "longitude": "120.964208"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "69f8ed0b-7537-4c86-b04f-cda6f09aec8e",
+        "data": {
+            "name": "南大校門",
+            "name_en": "N/A",
+            "latitude": "24.792349",
+            "longitude": "120.964208"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "09f362d9-8e5d-420e-b39c-0c38d37a735f",
+        "data": {
+            "name": "南大正門",
+            "name_en": "N/A",
+            "latitude": "24.792349",
+            "longitude": "120.964208"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    },
+    {
+        "id": "d708099a-09fd-451b-892b-1ef09740fa18",
+        "data": {
+            "name": "南大校門口",
+            "name_en": "N/A",
+            "latitude": "24.792349",
+            "longitude": "120.964208"
+        },
+        "create_time": "20231014T225400+0800",
+        "update_time": "20231014T225400+0800"
+    }
+]
