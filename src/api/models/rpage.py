@@ -30,15 +30,12 @@ class Rpage:
 
         data = []
 
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
-        }
         response, code = self._get_response(url)
+        if code != 200:
+            return data, code
+
         soup = BeautifulSoup(response, "html.parser")
         recruitments = soup.select("#pageptlist .listBS")
-
-        # print(soup.prettify())
-        # print(recruitments)
 
         # 取得網址的 domain
         domain = urlparse(url).netloc
@@ -75,5 +72,5 @@ class Rpage:
                 href = None
 
             data.append({"title": title, "date": date, "url": href})
-        # print(f"{data}\n")
+
         return data, code
