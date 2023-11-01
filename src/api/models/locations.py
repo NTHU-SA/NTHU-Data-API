@@ -20,7 +20,9 @@ class Location:
         return self.data
 
     def get_by_id(self, query: str):
-        return self.get(query, key="id")
+        for i in self.data:
+            if i["id"] == query:
+                return i
 
     def get_by_data_key(self, query: str, key="name"):
         for i in self.data:
