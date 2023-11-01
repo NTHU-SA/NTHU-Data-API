@@ -4,32 +4,41 @@ from thefuzz import fuzz, process
 
 
 class Location:
-    def __init__(self, language="zh"):
-        self.location_data = self._load_data(language)
+    def __init__(self):
+        self.data = self._load_data()
 
-    def _load_data(self, language: str) -> dict:
-        with open(f"data/locations/{language}.json", "r", encoding="utf-8") as f:
-            locations_data = json.load(f)
-        return locations_data
+    def _load_data(self) -> dict:
+        with open(f"data/formatted/location.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
 
-    def get(self, query: str, field="id"):
-        locations_data = self._load_locations_data(self.language)
-        return locations_data.get(query, None)
+    def _get_all_data(self, key="name"):
+        for i in self.data:
+            yield i["data"][key]
 
-    def fuzz(self, query: str):
-        location = self.location_data.keys()
-        fuzzysearch = process.extract(query, location, scorer=fuzz.partial_ratio)
-        # print(fuzzysearch)
-        # print(process.extract(question, question_name, scorer=fuzz.token_sort_ratio))
+    def get_all(self):
+        return self.data
+
+    def get_by_id(self, query: str):
+        return self.get(query, key="id")
+
+    def get_by_data_key(self, query: str, key="name"):
+        for i in self.data:
+            if i["data"][key] == query:
+                return i
+
+    def fuzzy_search(self, query: str):
+        name = self._get_all_data("name")
+        fuzzysearch = process.extract(query, name, scorer=fuzz.partial_ratio)
         # 只取得分數大於 50 的結果
         fuzzysearch_result = [i for i in fuzzysearch if i[1] > 50]
-        # 將 fuzzysearch 的結果轉換成 dict，並且找出 question_data 對應的資料
-        result = [self.location_data[i[0]] for i in fuzzysearch_result]
+        # 將 fuzzysearch 的結果轉換成 dict，並且找出 data 對應的資料
+        result = [self.get_by_data_key(i[0]) for i in fuzzysearch_result]
         return result
 
 
 if __name__ == "__main__":
-    loc = Location(language="en")
+    location = Location()
     query = "East gate"
     print(query)
-    print(loc.fuzz(query))
+    print(location.fuzzy_search("東門"))
