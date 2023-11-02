@@ -62,14 +62,14 @@ class Dining:
         dining_data = self.get_dining_data()
         restaurant_names = []
         for building in dining_data:
-            for restaurant in building["dining"]:
+            for restaurant in building["restaurants"]:
                 restaurant_names.append(restaurant["name"])
         return restaurant_names
 
     def query_by_restaurant_name(self, query):
         dining_data = self.get_dining_data()
         for building in dining_data:
-            for restaurant in building["dining"]:
+            for restaurant in building["restaurants"]:
                 if restaurant["name"] == query:
                     return restaurant
         return None
