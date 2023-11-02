@@ -15,5 +15,5 @@ pandas==2.1.1
 lxml==4.9.3
 # Search
 jieba==0.42.1
-python-Levenshtein==0.22.0
+python-Levenshtein==0.23.0
 thefuzz==0.20.0
