@@ -13,4 +13,5 @@ class DataNode:
     def _gen_now_timestamp(self):
         return datetime.now(tz=ZoneInfo("Asia/Taipei")).strftime("%Y%m%dT%H%M%S%z")
 
+
 a = DataNode()
