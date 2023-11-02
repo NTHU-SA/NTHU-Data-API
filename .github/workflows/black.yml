@@ -1,0 +1,22 @@
+name: black
+
+on: [push]
+
+jobs:
+  linter_name:
+    name: black formatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Format code with black
+        run: |
+          pip install black
+          black .
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: ${{ github.actor }}
+          author_email: ${{ github.actor }}@users.noreply.github.com
+          message: "Format code with black"
+          add: "."
+          branch: ${{ github.ref }}
