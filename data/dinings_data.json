@@ -1,0 +1,711 @@
+[
+    {
+        "building": "小吃部",
+        "restaurants": [
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/CYp5nN",
+                "name": "7-ELEVEN",
+                "note": "",
+                "phone": "0920-229-711, 03-5166254",
+                "schedule": {
+                    "saturday": "24小時",
+                    "sunday": "24小時",
+                    "weekday": "24小時"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/KvsZAz",
+                "name": "麥當勞",
+                "note": "",
+                "phone": "03-5727801",
+                "schedule": {
+                    "saturday": "7:00-24:00",
+                    "sunday": "7:00-24:00",
+                    "weekday": "7:00-24:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/P2aHWJ",
+                "name": "瑞斯飯糰",
+                "note": "11月每週日暫停營業",
+                "phone": "03-5751757",
+                "schedule": {
+                    "saturday": "7:00-14:00",
+                    "sunday": "",
+                    "weekday": "7:00-14:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/T32cIz",
+                "name": "漢城異國美食",
+                "note": "11月每週日暫停營業",
+                "phone": "0911-684-701",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "11:00-14:00, 17:00-20:00",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/rNJlc3",
+                "name": "對味",
+                "note": "11月每週六暫停營業",
+                "phone": "0912-624-037",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "11:00-14:00, 17:00-20:00",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/YnaYzB",
+                "name": "一番快餐",
+                "note": "11月每週六暫停營業",
+                "phone": "0933-511-522",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:00-20:00",
+                    "weekday": "11:00-20:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/JbMLOG",
+                "name": "天燡廚",
+                "note": "11月每週六暫停營業，11/2暫停營業",
+                "phone": "0988-261-964",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "10:30-14:00, 17:00-20:00",
+                    "weekday": "10:30-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/uC2VPj",
+                "name": "品嘉日式料理",
+                "note": "11月每週六暫停營業",
+                "phone": "0976-618-715",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:00-20:00",
+                    "weekday": "11:00-20:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/E7u7vL",
+                "name": "鳳荷三鮮",
+                "note": "11月每週五暫停營業",
+                "phone": "0928-391-618",
+                "schedule": {
+                    "saturday": "10:30-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "10:30-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "小吃部",
+                "image": "https://img.onl/D2dhIw",
+                "name": "珈名鮮茶",
+                "note": "11月每週日暫停營業",
+                "phone": "0952-173-353, 0953-173-353",
+                "schedule": {
+                    "saturday": "10:30-20:00",
+                    "sunday": "",
+                    "weekday": "10:30-20:00"
+                }
+            }
+        ]
+    },
+    {
+        "building": "水木生活中心",
+        "restaurants": [
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/yhMEB3",
+                "name": "四海遊龍",
+                "note": "11月每週六暫停營業",
+                "phone": "0906-569-363",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:00-19:30",
+                    "weekday": "11:00-19:30"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/HO0FVN",
+                "name": "朕的嚐粉",
+                "note": "11月每週六暫停營業， 寒、暑假不營業",
+                "phone": "0920-742-168",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:15-13:30, 16:30-18:45",
+                    "weekday": "11:15-13:30, 16:30-18:45"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/mwQ6pc",
+                "name": "軒韻手作茶飲專賣店",
+                "note": "11月每週六暫停營業",
+                "phone": "0985-695-090",
+                "schedule": {
+                    "saturday": "10:30-20:00",
+                    "sunday": "",
+                    "weekday": "10:30-20:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/E4nqWP",
+                "name": "羴羊肉",
+                "note": "11月每週六暫停營業",
+                "phone": "0905-151-501",
+                "schedule": {
+                    "saturday": "11:30-20:00",
+                    "sunday": "11:30-20:00",
+                    "weekday": "11:30-20:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/z8or36",
+                "name": "郁百分水果行",
+                "note": "11月每週六暫停營業",
+                "phone": "0913-216-583",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "9:00-19:30",
+                    "weekday": "9:00-19:30"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/dfLBiQ",
+                "name": "金展自助餐",
+                "note": "11月每週六暫停營業，11/5、11/19暫停營業",
+                "phone": "0921-417-797",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "10:30-13:30, 16:30-19:15",
+                    "weekday": "10:30-13:30, 16:30-19:15"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/QSCctU",
+                "name": "A華加湯滷味",
+                "note": "11月每週六暫停營業",
+                "phone": "0917-523-901",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:00-19:00",
+                    "weekday": "11:00-19:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/f8sBq7",
+                "name": "利竫和食",
+                "note": "11月每週六暫停營業",
+                "phone": "0955-520-634",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:00-19:30",
+                    "weekday": "11:00-19:30"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/szdEq9",
+                "name": "弘謙食堂",
+                "note": "11月每週六暫停營業",
+                "phone": "0973-633-683",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "11:00-19:30",
+                    "weekday": "11:00-19:30"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/cbh066",
+                "name": "晨光早午餐",
+                "note": "11月每週六暫停營業",
+                "phone": "0989-382-100",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "6:30-14:00",
+                    "weekday": "6:30-14:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/WS4G8e",
+                "name": "小木屋鬆餅",
+                "note": "11月每週六暫停營業",
+                "phone": "03-5710188",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "10:30-20:00",
+                    "weekday": "10:30-20:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/KXPioP",
+                "name": "眼鏡部",
+                "note": "每週日暫停營業",
+                "phone": "校內分機 36701,03-5727099,0929-750-660",
+                "schedule": {
+                    "saturday": "10:00-20:00",
+                    "sunday": "10:00-20:00",
+                    "weekday": "週一~週五:10:00-20:00、週六:10:00-12:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/XUmfh",
+                "name": "洗衣部",
+                "note": "每週六、日暫停營業",
+                "phone": "0915-117-809",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "13:00-17:00"
+                }
+            },
+            {
+                "area": "水木生活中心1樓",
+                "image": "https://img.onl/FjYSxC",
+                "name": "水木百貨",
+                "note": "每週日暫停營業",
+                "phone": "03-5717838",
+                "schedule": {
+                    "saturday": "8:00-21:00",
+                    "sunday": "",
+                    "weekday": "週一~週五8:00-22:00、週六8:00-21:00"
+                }
+            },
+            {
+                "area": "水木生活中心2樓",
+                "image": "https://img.onl/UuxjY5",
+                "name": "胖達咖啡",
+                "note": "每週六暫停營業",
+                "phone": "03-5722245,0933-601-323",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "週日12:00-18:00",
+                    "weekday": "週一~週五:11:00-20:00、週日12:00-18:00"
+                }
+            },
+            {
+                "area": "水木生活中心2樓",
+                "image": "https://img.onl/tU3n1n",
+                "name": "馬六甲",
+                "note": "每週日暫停營業",
+                "phone": "0989-799-911",
+                "schedule": {
+                    "saturday": "11:00-16:00",
+                    "sunday": "",
+                    "weekday": "週一~週五:11:00-19:00、週六:11:00-16:00"
+                }
+            },
+            {
+                "area": "水木生活中心2樓",
+                "image": "https://img.onl/sT2HMU",
+                "name": "理髮部",
+                "note": "第2、4周之週四暫停營業",
+                "phone": "03-5736438",
+                "schedule": {
+                    "saturday": "8:30-19:00",
+                    "sunday": "8:30-19:00",
+                    "weekday": "週一~週五8:30-19:30、週六、週日:8:30-19:00"
+                }
+            },
+            {
+                "area": "水木生活中心2樓",
+                "image": "https://img.onl/L4wqrU",
+                "name": "利捷打字行",
+                "note": "每週六、日暫停營業",
+                "phone": "03-5726848,0910-036-249",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "7:30-20:00"
+                }
+            }
+        ]
+    },
+    {
+        "building": "風雲樓",
+        "restaurants": [
+            {
+                "area": "風雲1樓",
+                "image": "https://img.onl/U3UhvQ",
+                "name": "樂菓烘焙坊 (誠實麵包店)",
+                "note": "",
+                "phone": "0987-430-886",
+                "schedule": {
+                    "saturday": "10:00-20:00",
+                    "sunday": "10:00-20:00",
+                    "weekday": "10:00-20:00"
+                }
+            },
+            {
+                "area": "風雲1樓",
+                "image": "https://img.onl/34l5Yl",
+                "name": "水木書苑",
+                "note": "每週日暫停營業",
+                "phone": "校內分機36705,03-5716800,0958-137-850",
+                "schedule": {
+                    "saturday": "10:30-19:00",
+                    "sunday": "",
+                    "weekday": "9:30-19:00"
+                }
+            },
+            {
+                "area": "風雲1樓",
+                "image": "https://img.onl/wGZTrB",
+                "name": "Straight A",
+                "note": "每週六、日及國定假日暫停營業",
+                "phone": "03-5714647",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "11:00-19:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/1KpyD",
+                "name": "熊本鍋物",
+                "note": "每週六、日暫停營業",
+                "phone": "03-5720889,0986-004-599",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "11:00-24:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/xjN1Fh",
+                "name": "禾豐蔬食",
+                "note": "11月每週日暫停營業，11/3-11/4暫停營業",
+                "phone": "0909-787-069",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/DISSmc",
+                "name": "紅燒如意坊",
+                "note": "11月每週日暫停營業",
+                "phone": "0908-018-900",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-19:30",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-19:30"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/OoaTb",
+                "name": "茗釀茶品",
+                "note": "11月每週日暫停營業",
+                "phone": "0987-003-821",
+                "schedule": {
+                    "saturday": "10:00-20:00",
+                    "sunday": "",
+                    "weekday": "10:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/fI8Fat",
+                "name": "蘇記食堂",
+                "note": "每週六、日暫停營業及10、11月每週一~週五晚餐暫停營業",
+                "phone": "0911-333-292",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/Ma2QA",
+                "name": "友記快餐館",
+                "note": "11月每週日暫停營業",
+                "phone": "0918-609-833",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/ODfn8f",
+                "name": "蘇記牛肉麵",
+                "note": "11月每週日暫停營業",
+                "phone": "0911-333-292",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/qXGSnS",
+                "name": "帕森義大利麵",
+                "note": "11月每週日暫停營業",
+                "phone": "0963-572-818",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/6Svbif",
+                "name": "顏記文昌雞",
+                "note": "11月每週日暫停營業",
+                "phone": "0976-475-300",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/m4eJUM",
+                "name": "家味燒臘",
+                "note": "11月每週日暫停營業及每週五晚餐暫停營業",
+                "phone": "0989-208-207",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲2樓",
+                "image": "https://img.onl/Wc4mC5",
+                "name": "喜番咖哩",
+                "note": "11月每週日暫停營業，11/3晚餐暫停營業",
+                "phone": "0922-870-206",
+                "schedule": {
+                    "saturday": "11:00-14:00, 17:00-20:00",
+                    "sunday": "",
+                    "weekday": "11:00-14:00, 17:00-20:00"
+                }
+            },
+            {
+                "area": "風雲3樓",
+                "image": "https://img.onl/zQtA7A",
+                "name": "牛肉先生",
+                "note": "11月每週日暫停營業",
+                "phone": "0928-885-666",
+                "schedule": {
+                    "saturday": "11:00-19:30",
+                    "sunday": "",
+                    "weekday": "11:00-19:30"
+                }
+            },
+            {
+                "area": "風雲3樓",
+                "image": "https://img.onl/eowYc9",
+                "name": "墨尼捲餅",
+                "note": "11月每週日暫停營業",
+                "phone": "0915-934-275",
+                "schedule": {
+                    "saturday": "11:00-19:30",
+                    "sunday": "",
+                    "weekday": "11:00-19:30"
+                }
+            },
+            {
+                "area": "風雲3樓",
+                "image": "https://img.onl/DJJ9gR",
+                "name": "珍御品粥麵館",
+                "note": "11月每週日暫停營業",
+                "phone": "0937-135-706,0911-892-772",
+                "schedule": {
+                    "saturday": "10:30-20:00",
+                    "sunday": "",
+                    "weekday": "10:30-20:00"
+                }
+            },
+            {
+                "area": "風雲3樓",
+                "image": "https://img.onl/SXOj8",
+                "name": "鳴野食蘋早午餐",
+                "note": "11月每週日暫停營業",
+                "phone": "0908-669-248",
+                "schedule": {
+                    "saturday": "7:00-13:30",
+                    "sunday": "",
+                    "weekday": "7:00-13:30"
+                }
+            },
+            {
+                "area": "風雲3樓",
+                "image": "https://img.onl/rGJCrU",
+                "name": "瑪尼卡巴",
+                "note": "11月每週日暫停營業",
+                "phone": "0915-934-275",
+                "schedule": {
+                    "saturday": "11:30-14:30, 16:00-19:30",
+                    "sunday": "",
+                    "weekday": "11:30-14:30, 16:00-19:30"
+                }
+            },
+            {
+                "area": "風雲3樓",
+                "image": "https://img.onl/VdTGgb",
+                "name": "完顏南洋料理",
+                "note": "11月每週日暫停營業",
+                "phone": "0911-901-509",
+                "schedule": {
+                    "saturday": "11:00-20:00",
+                    "sunday": "11:00-21:30",
+                    "weekday": "週一~週四及週日11:00-21:30，週五、六11:00-20:00"
+                }
+            },
+            {
+                "area": "風雲4樓",
+                "image": "https://img.onl/j6WzzT",
+                "name": "Me Time",
+                "note": "每週日暫停營業",
+                "phone": "03-5733221",
+                "schedule": {
+                    "saturday": "11:15-14:00, 17:00-20:00",
+                    "sunday": "11:00-21:30",
+                    "weekday": "11:15-14:00, 17:00-20:00"
+                }
+            }
+        ]
+    },
+    {
+        "building": "綜合教學大樓(南大校區)",
+        "restaurants": [
+            {
+                "area": "綜合教學大樓",
+                "image": "https://img.onl/CYp5nN",
+                "name": "7-ELEVEN",
+                "note": "",
+                "phone": "03-5622948",
+                "schedule": {
+                    "saturday": "24小時",
+                    "sunday": "24小時",
+                    "weekday": "24小時"
+                }
+            },
+            {
+                "area": "行政大樓(旁)",
+                "image": "https://img.onl/rEEEr",
+                "name": "沐食早午餐",
+                "note": "國定假日、寒、暑假暫停營業",
+                "phone": "0925-325-006",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "9:00-18:00"
+                }
+            },
+            {
+                "area": "第二活動中心一樓",
+                "image": "https://img.onl/P2aHWJ",
+                "name": "瑞斯飯糰",
+                "note": "國定假日、寒、暑假暫停營業",
+                "phone": "0917-002-228",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "7:00-13:00"
+                }
+            }
+        ]
+    },
+    {
+        "building": "其他餐廳",
+        "restaurants": [
+            {
+                "area": "旺宏館一樓",
+                "image": "https://img.onl/3nWNgS",
+                "name": "路易莎",
+                "note": "",
+                "phone": "03-5721613",
+                "schedule": {
+                    "saturday": "8:00-21:00",
+                    "sunday": "8:00-21:00",
+                    "weekday": "7:00:21:00"
+                }
+            },
+            {
+                "area": "百齡堂",
+                "image": "https://img.onl/K4omhK",
+                "name": "清華水漾",
+                "note": "",
+                "phone": "03-5751584, 0936-394-535",
+                "schedule": {
+                    "saturday": "9:30-21:00",
+                    "sunday": "9:30-21:00",
+                    "weekday": "9:30-21:00"
+                }
+            },
+            {
+                "area": "人社院",
+                "image": "https://img.onl/aWb09f",
+                "name": "人社院餐廳",
+                "note": "每週六、日，國定假日及寒、暑假暫停營業",
+                "phone": "0932-116-552",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "11:30-13:30"
+                }
+            },
+            {
+                "area": "第二招待所一樓",
+                "image": "https://img.onl/NFxKwW",
+                "name": "第二招待所中餐廳",
+                "note": "每週六、日，國定假日及寒、暑假暫停營業",
+                "phone": "校內分機 35245, 0932-116-552",
+                "schedule": {
+                    "saturday": "",
+                    "sunday": "",
+                    "weekday": "11:30-13:30"
+                }
+            },
+            {
+                "area": "綜四館一樓",
+                "image": "https://img.onl/PWQQK2",
+                "name": "全家便利商店",
+                "note": "",
+                "phone": "0939-226-904",
+                "schedule": {
+                    "saturday": "8:00-23:00",
+                    "sunday": "8:00-23:00",
+                    "weekday": "7:00-23:00"
+                }
+            }
+        ]
+    }
+]
