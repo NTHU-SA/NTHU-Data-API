@@ -13,6 +13,9 @@ courses = Processor(json_path="data/courses/11210.json")
 
 @router.get("/")
 async def get_all_courses(limits: int = None):
+    """
+    取得所有課程。
+    """
     try:
         result = courses.course_data[:limits]
         return result
@@ -22,6 +25,9 @@ async def get_all_courses(limits: int = None):
 
 @router.get("/fields")
 async def list_fields(limits: int = None):
+    """
+    取得所有欄位的資訊。
+    """
     return {
         "id": "科號",
         "chinese_title": "課程中文名稱",
@@ -45,26 +51,37 @@ async def list_fields(limits: int = None):
     }
 
 
-@router.get("/fields/{field}")
-async def list_selected_fields(field: str, limits: int = None):
+@router.get("/fields/{field_name}")
+async def list_selected_fields(field_name: str, limits: int = None):
+    """
+    取得指定欄位的列表。
+    Args:
+        field_name: 欄位名稱
+    """
     try:
-        result = courses.list_selected_fields(field)[:limits]
+        result = courses.list_selected_fields(field_name)[:limits]
         return result
     except AttributeError as e:
         raise HTTPException(
-            status_code=500, detail=f"The field '{field}' is not exist."
+            status_code=500, detail=f"The field '{field_name}' is not exist."
         )
 
 
-@router.get("/fields/{field}/{value}")
-async def search_by_field_and_value(field: str, value: str):
+@router.get("/fields/{field_name}/{value}")
+async def search_by_field_and_value(field_name: str, value: str):
+    """
+    取得指定欄位的課程列表。
+    Args:
+        field_name: 搜尋的欄位名稱
+        value: 搜尋的值
+    """
     try:
-        condition = Conditions(field, value, True)
+        condition = Conditions(field_name, value, True)
         result = courses.query(condition)
         return result
     except KeyError as e:
         raise HTTPException(
-            status_code=500, detail=f"The field '{field}' is not exist."
+            status_code=500, detail=f"The field '{field_name}' is not exist."
         )
 
 
@@ -74,28 +91,44 @@ class Language(str, Enum):
 
 
 @router.get("/languages/{language}")
-async def search_courses_by_language(language: Language):
+async def search_courses_by_language(language: Language, limits: int = None):
+    """
+    取得指定語言的課程列表。
+    Args:
+        language: 搜尋的語言
+    """
     condition = Conditions("language", language, True)
-    result = courses.query(condition)
+    result = courses.query(condition)[:limits]
     return result
 
 
 @router.get("/credits/microcredits")
-async def search_courses_by_credits():
+async def search_courses_by_credits(limits: int = None):
+    """
+    取得微學分課程列表。
+    """
     condition = Conditions("credit", f"[0-9].[0-9]", True)
-    result = courses.query(condition)
+    result = courses.query(condition)[:limits]
     return result
 
 
 @router.get("/durations/16weeks")
-async def search_courses_by_duration():
+async def search_courses_by_duration(limits: int = None):
+    """
+    取得 16 週課程列表。
+    """
     condition = Conditions("note", "本課程為16週課程", True)
-    result = courses.query(condition)
+    result = courses.query(condition)[:limits]
     return result
 
 
 @router.get("/searches/id/{course_id}")
 async def search_courses_by_id(course_id: str):
+    """
+    根據課號取得課程。
+    Args:
+        course_id: 搜尋的課號
+    """
     if len(course_id) < 7:
         raise HTTPException(
             status_code=400, detail="Bad Request, course id is too short."
@@ -110,18 +143,28 @@ async def search_courses_by_id(course_id: str):
     return result
 
 
-@router.get("/searches/time/{time}")
-async def search_courses_by_time(time: str):
-    condition = Conditions("class_room_and_time", time, True)
+@router.get("/searches/time/{class_time}")
+async def search_courses_by_time(class_time: str):
+    """
+    根據上課時間取得課程，可以用 W1W2 表示星期一第一節到第二節。
+    Args:
+        class_time: 搜尋的上課時間
+    """
+    condition = Conditions("class_room_and_time", class_time, True)
     result = courses.query(condition)
     if result == []:
         raise HTTPException(status_code=404, detail="There is no course at this time.")
     return result
 
 
-@router.get("/searches/classroom/{classroom}")
-async def search_courses_by_classroom(classroom: str):
-    condition = Conditions("class_room_and_time", classroom, True)
+@router.get("/searches/classroom/{classroom_name}")
+async def search_courses_by_classroom(classroom_name: str):
+    """
+    根據教室取得課程，可以用中文或英文教室名稱，也可以使用系館代碼。
+    Args:
+        classroom: 搜尋的教室
+    """
+    condition = Conditions("class_room_and_time", classroom_name, True)
     result = courses.query(condition)
     if result == []:
         raise HTTPException(
@@ -130,10 +173,15 @@ async def search_courses_by_classroom(classroom: str):
     return result
 
 
-@router.get("/searches/teacher/{teacher}")
-async def search_courses_by_teacher(teacher: str):
-    condition = Conditions("teacher", teacher, True)
-    result = courses.query(condition)
+@router.get("/searches/teacher/{teacher_name}")
+async def search_courses_by_teacher(teacher_name: str, limits: int = None):
+    """
+    根據教師姓名取得課程，可以用中英文姓名，也可以只用姓氏
+    Args:
+        teacher_name: 搜尋的教師姓名
+    """
+    condition = Conditions("teacher", teacher_name, True)
+    result = courses.query(condition)[:limits]
     if result == []:
         raise HTTPException(
             status_code=404, detail="There is no course at this teacher."
@@ -141,12 +189,14 @@ async def search_courses_by_teacher(teacher: str):
     return result
 
 
-@router.get("/searches/credits/{credits}")
-async def search_courses_by_credits(credits: str):
+@router.get("/searches/credits/{credits_number}")
+async def search_courses_by_credits(credits_number: str):
     """
-    可以用 2+ 或 2- 表示 2 學分以上或以下
+    取得指定學分數的課程，可以用 2+ 或 2- 表示 2 學分以上或以下
+    Args:
+        credits_number: 搜尋的學分數
     """
-    condition = Conditions("credit", credits, True)
+    condition = Conditions("credit", f"[{credits_number}]", True)
     result = courses.query(condition)
     if result == []:
         raise HTTPException(
