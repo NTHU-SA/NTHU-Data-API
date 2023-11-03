@@ -1,3 +1,4 @@
+from enum import Enum
 from fastapi import APIRouter, HTTPException
 
 from ..models.lib import (
@@ -7,6 +8,20 @@ from ..models.lib import (
     get_rss_data,
 )
 
+
+class Lib(str, Enum):
+    mainlib = "mainlib"
+    hslib = "hslib"
+    nandalib = "nandalib"
+
+
+class Rss(str, Enum):
+    rss_news = "rss_news"
+    rss_eresources = "rss_eresources"
+    rss_exhibit = "rss_exhibit"
+    rss_branches = "rss_branches"
+
+
 router = APIRouter(
     prefix="/lib",
     tags=["lib"],
@@ -15,7 +30,7 @@ router = APIRouter(
 
 
 @router.get("/openinghours/{lib}")
-def openinghours(lib):
+def openinghours(lib: Lib):
     try:
         content, code = get_opening_hours(lib)
         if code != 200:
@@ -48,7 +63,7 @@ def spacedata():
 
 
 @router.get("/rss/{rss}")
-def rssdata(rss):
+def rssdata(rss: Rss):
     try:
         content, code = get_rss_data(rss)
         if code != 200:

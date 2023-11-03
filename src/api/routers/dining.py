@@ -1,5 +1,15 @@
+from enum import Enum
 from fastapi import APIRouter, HTTPException
 from ..models.dining import Dining
+
+
+class Building(str, Enum):
+    小吃部 = "小吃部"
+    水木生活中心 = "水木生活中心"
+    風雲樓 = "風雲樓"
+    綜合教學大樓_南大校區 = "綜合教學大樓(南大校區)"
+    其他餐廳 = "其他餐廳"
+
 
 router = APIRouter(
     prefix="/dining",
@@ -95,7 +105,7 @@ def get_all_building_names():
         },
     },
 )
-def get_dining_data(building_name: str):
+def get_dining_data(building_name: Building):
     try:
         return dining.query_by_building_name(building_name)
     except Exception as e:
@@ -144,9 +154,7 @@ def get_all_restaurant_names():
         },
     },
 )
-def get_dining_data(
-    restaurant_name: str,
-):
+def get_dining_data(restaurant_name: str):
     try:
         return dining.query_by_restaurant_name(restaurant_name)
     except Exception as e:
