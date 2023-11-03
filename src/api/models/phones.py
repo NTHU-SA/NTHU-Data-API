@@ -1,6 +1,3 @@
-import json
-
-from thefuzz import fuzz, process
 from .data import Data
 
 

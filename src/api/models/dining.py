@@ -68,11 +68,12 @@ class Dining:
 
     def query_by_restaurant_name(self, query):
         dining_data = self.get_dining_data()
+        res = []
         for building in dining_data:
             for restaurant in building["restaurants"]:
                 if restaurant["name"] == query:
-                    return restaurant
-        return None
+                    res.append(restaurant)
+        return None if len(res) == 0 else res
 
     def get_scheduled_on_saturday(self):
         dining_data = self.get_dining_data()
