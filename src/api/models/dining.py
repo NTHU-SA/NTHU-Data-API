@@ -79,7 +79,6 @@ class Dining:
         dining_data = self.get_dining_data()
         saturday_restaurants = []
         for building in dining_data:
-            print(building)
             for restaurant in building["restaurants"]:
                 if restaurant["schedule"]["saturday"] != "":
                     saturday_restaurants.append(restaurant)
@@ -89,7 +88,6 @@ class Dining:
         dining_data = self.get_dining_data()
         sunday_restaurants = []
         for building in dining_data:
-            print(building)
             for restaurant in building["restaurants"]:
                 if restaurant["schedule"]["sunday"] != "":
                     sunday_restaurants.append(restaurant)
