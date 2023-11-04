@@ -1,4 +1,5 @@
 import json
+from uuid import UUID
 
 from thefuzz import fuzz, process
 
@@ -19,9 +20,9 @@ class Data:
     def get_all(self):
         return self.data
 
-    def get_by_id(self, query: str):
+    def get_by_id(self, query: UUID):
         for i in self.data:
-            if i["id"] == query:
+            if UUID(i["id"]).int == query.int:
                 return i
 
     def get_by_data_key(self, query: str, key="name"):
