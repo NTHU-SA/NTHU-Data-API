@@ -1,18 +1,12 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, HttpUrl, Field
 
 from ..models.dining import Dining
 
 
-class Schedule(BaseModel):
-    saturday: str = Field(..., description="星期六營業時間")
-    sunday: str = Field(..., description="星期日營業時間")
-    weekday: str = Field(..., description="平日營業時間")
-
-
-class BuildingName(str, Enum):
+class DiningBuildingName(str, Enum):
     小吃部 = "小吃部"
     水木生活中心 = "水木生活中心"
     風雲樓 = "風雲樓"
@@ -20,7 +14,13 @@ class BuildingName(str, Enum):
     其他餐廳 = "其他餐廳"
 
 
-class Restaurant(BaseModel):
+class DiningSceduleName(str, Enum):
+    weekday = "weekday"
+    saturday = "saturday"
+    sunday = "sunday"
+
+
+class DiningRestaurant(BaseModel):
     area: str = Field(..., description="餐廳所在建築")
     image: Optional[HttpUrl] = Field(..., description="餐廳圖片")
     name: str = Field(..., description="餐廳名稱")
@@ -29,9 +29,9 @@ class Restaurant(BaseModel):
     schedule: dict = Field(..., description="餐廳營業時間")
 
 
-class Building(BaseModel):
+class DiningBuilding(BaseModel):
     building: str = Field(..., description="建築名稱")
-    restaurants: list[Restaurant] = Field(..., description="餐廳資料")
+    restaurants: list[DiningRestaurant] = Field(..., description="餐廳資料")
 
 
 router = APIRouter(
@@ -75,16 +75,13 @@ dining = Dining()
             },
         },
     },
-    response_model=list[Building],
+    response_model=list[DiningBuilding],
 )
-def get_dining_data():
+def get_dining_data() -> list[DiningBuilding]:
     """
     取得所有餐廳資料。
     """
-    try:
-        return dining.get_dining_data()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return dining.get_dining_data()
 
 
 @router.get(
@@ -98,16 +95,13 @@ def get_dining_data():
             },
         },
     },
-    response_model=list[BuildingName],
+    response_model=list[DiningBuildingName],
 )
-def get_all_building_names():
+def get_all_building_names() -> list[DiningBuildingName]:
     """
     取得所有建築名稱。
     """
-    try:
-        return dining.get_all_building_names()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return dining.get_all_building_names()
 
 
 @router.get(
@@ -140,16 +134,15 @@ def get_all_building_names():
             },
         },
     },
-    response_model=Building,
+    response_model=DiningBuilding,
 )
-def get_dining_data(building_name: BuildingName = Path(..., description="建築名稱")):
+def get_dining_data(
+    building_name: DiningBuildingName = Path(..., example="小吃部", description="建築名稱")
+) -> DiningBuilding:
     """
     使用建築名稱取得指定建築的餐廳資料。
     """
-    try:
-        return dining.query_by_building_name(building_name)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return dining.query_by_building_name(building_name)
 
 
 @router.get(
@@ -165,14 +158,11 @@ def get_dining_data(building_name: BuildingName = Path(..., description="建築�
     },
     response_model=list[str],
 )
-def get_all_restaurant_names():
+def get_all_restaurant_names() -> list[str]:
     """
     取得所有餐廳名稱。
     """
-    try:
-        return dining.get_all_restaurant_names()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return dining.get_all_restaurant_names()
 
 
 @router.get(
@@ -197,20 +187,19 @@ def get_all_restaurant_names():
             },
         },
     },
-    response_model=list[Restaurant],
+    response_model=list[DiningRestaurant],
 )
-def get_dining_data(restaurant_name: str = Path(..., description="餐廳名稱")):
+def get_dining_data(
+    restaurant_name: str = Path(..., example="麥當勞", description="餐廳名稱")
+):
     """
     使用餐廳名稱取得指定餐廳資料。
     """
-    try:
-        return dining.query_by_restaurant_name(restaurant_name)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return dining.query_by_restaurant_name(restaurant_name)
 
 
 @router.get(
-    "/sceduled/saturday",
+    "/scedules/{day_of_week}",
     responses={
         200: {
             "content": {
@@ -236,20 +225,22 @@ def get_dining_data(restaurant_name: str = Path(..., description="餐廳名稱")
             },
         },
     },
-    response_model=list[Restaurant],
+    response_model=list[DiningRestaurant],
 )
-def get_scheduled_on_saturday():
+def get_schedule_by_day_of_week(
+    day_of_week: DiningSceduleName = Path(..., example="saturday", description="營業日")
+) -> list[DiningRestaurant]:
     """
-    取得所有星期六有營業的餐廳資訊。
+    取得所有該營業日的餐廳資訊。
     """
     try:
-        return dining.get_scheduled_on_saturday()
+        return dining.query_by_schedule(day_of_week)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get(
-    "/sceduled/sunday",
+    "/searches/restaurants/{restaurant_name}",
     responses={
         200: {
             "content": {
@@ -275,13 +266,12 @@ def get_scheduled_on_saturday():
             },
         },
     },
-    response_model=list[Restaurant],
+    response_model=list[DiningRestaurant],
 )
-def get_scheduled_on_sunday():
+def fuzzy_search_restaurant_by_name(
+    restaurant_name: str = Path(..., example="麵", description="餐廳名稱")
+) -> List[DiningRestaurant]:
     """
-    取得所有星期日有營業的餐廳資訊。
+    使用餐廳名稱模糊搜尋餐廳資料。
     """
-    try:
-        return dining.get_scheduled_on_sunday()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return dining.fuzzy_search_restaurant_by_name(restaurant_name)

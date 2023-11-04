@@ -1,9 +1,9 @@
-import requests
 import re
 import json
-import datetime
 
+import requests
 from cachetools import cached, TTLCache
+from thefuzz import fuzz, process
 
 
 class Dining:
@@ -44,21 +44,14 @@ class Dining:
         dining_data = json.loads(dining_data)
         return dining_data
 
-    def get_all_building_names(self):
+    def get_all_building_names(self) -> list[str]:
         dining_data = self.get_dining_data()
         building_names = []
         for building in dining_data:
             building_names.append(building["building"])
         return building_names
 
-    def query_by_building_name(self, query):
-        dining_data = self.get_dining_data()
-        for restaurant in dining_data:
-            if restaurant["building"] == query:
-                return restaurant
-        return None
-
-    def get_all_restaurant_names(self):
+    def get_all_restaurant_names(self) -> list[str]:
         dining_data = self.get_dining_data()
         restaurant_names = []
         for building in dining_data:
@@ -66,32 +59,45 @@ class Dining:
                 restaurant_names.append(restaurant["name"])
         return restaurant_names
 
-    def query_by_restaurant_name(self, query):
+    def query_by_building_name(self, query_name) -> dict:
+        dining_data = self.get_dining_data()
+        for restaurant in dining_data:
+            if restaurant["building"] == query_name:
+                return restaurant
+        return None
+
+    def query_by_restaurant_name(self, query_name):
         dining_data = self.get_dining_data()
         res = []
         for building in dining_data:
             for restaurant in building["restaurants"]:
-                if restaurant["name"] == query:
+                if restaurant["name"] == query_name:
                     res.append(restaurant)
         return None if len(res) == 0 else res
 
-    def get_scheduled_on_saturday(self):
+    def query_by_schedule(self, query_day: str) -> list:
         dining_data = self.get_dining_data()
-        saturday_restaurants = []
+        scheduled_restaurants = []
         for building in dining_data:
             for restaurant in building["restaurants"]:
-                if restaurant["schedule"]["saturday"] != "":
-                    saturday_restaurants.append(restaurant)
-        return saturday_restaurants
+                if restaurant["schedule"][query_day] != "":
+                    scheduled_restaurants.append(restaurant)
+        return scheduled_restaurants
 
-    def get_scheduled_on_sunday(self):
-        dining_data = self.get_dining_data()
-        sunday_restaurants = []
-        for building in dining_data:
-            for restaurant in building["restaurants"]:
-                if restaurant["schedule"]["sunday"] != "":
-                    sunday_restaurants.append(restaurant)
-        return sunday_restaurants
+    def fuzzy_search_restaurant_by_name(self, query: str) -> list:
+        restaurant_names = self.get_all_restaurant_names()
+        fuzzysearch = process.extract(
+            query, restaurant_names, scorer=fuzz.partial_ratio
+        )
+        # 只取得分數大於 50 的結果
+        fuzzysearch_result = [i for i in fuzzysearch if i[1] > 50]
+        # 將 fuzzysearch 的結果轉換成 dict，並且找出 data 對應的資料
+        result = [
+            restaurant
+            for i in fuzzysearch_result
+            for restaurant in self.query_by_restaurant_name(i[0])
+        ]
+        return result
 
 
 if __name__ == "__main__":
