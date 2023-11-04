@@ -1,5 +1,36 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
+from pydantic import BaseModel, Field
+from uuid import UUID
+
 from ..models.phones import Phone
+
+
+class RelativeNode(BaseModel):
+    name: str = Field(..., description="父節點或子節點名稱")
+    id: UUID = Field(..., description="父節點或子節點 id")
+
+
+class Data(BaseModel):
+    name: str = Field(..., description="姓名")
+    ext: str = Field(..., description="分機")
+    tel: str = Field(..., description="電話")
+    fax: str = Field(..., description="傳真")
+    email: str = Field(..., description="電子郵件")
+    parents: list[RelativeNode] = Field(..., description="父節點")
+    children: list[RelativeNode] = Field(..., description="子節點")
+
+
+class PhoneData(BaseModel):
+    id: UUID = Field(..., description="電話資料 id")
+    data: Data = Field(..., description="電話資料")
+    create_time: str = Field(..., description="建立時間")
+    update_time: str = Field(..., description="更新時間")
+
+
+class SearchData(BaseModel):
+    name: str = Field(..., description="要查詢誰的電話")
+    max_result: int = Field(10, description="最多回傳幾筆資料")
+
 
 router = APIRouter(
     prefix="/phones",
@@ -44,8 +75,12 @@ phone = Phone()
             }
         }
     },
+    response_model=list[PhoneData],
 )
 def get_all_phone():
+    """
+    取得所有電話資料。
+    """
     try:
         result = phone.get_all()
         return result
@@ -87,10 +122,15 @@ def get_all_phone():
             }
         }
     },
+    response_model=list[PhoneData],
 )
-def search_phone(query: str, max_result: int = 10):
-    result = phone.fuzzy_search(query)
-    result = result[:max_result]
+def search_phone(search_data: SearchData):
+    """
+    根據名字模糊搜尋電話。
+    """
+    result = phone.fuzzy_search(search_data.name)
+    result = result[: search_data.max_result]
+    print(len(result))
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
     else:
@@ -98,7 +138,7 @@ def search_phone(query: str, max_result: int = 10):
 
 
 @router.get(
-    "/{query}",
+    "/{id}",
     responses={
         200: {
             "content": {
@@ -126,9 +166,13 @@ def search_phone(query: str, max_result: int = 10):
             }
         }
     },
+    response_model=PhoneData,
 )
-def get_phone(query: str):
-    result = phone.get_by_id(query)
+def get_phone(id: UUID = Path(..., description="要查詢電話的 id")):
+    """
+    使用電話 id 取得電話資料。
+    """
+    result = phone.get_by_id(id)
     if result:
         return result
     else:
@@ -136,7 +180,7 @@ def get_phone(query: str):
 
 
 @router.get(
-    "/searches/{query}",
+    "/searches/{name}",
     responses={
         200: {
             "content": {
@@ -169,9 +213,13 @@ def get_phone(query: str):
             }
         }
     },
+    response_model=list[PhoneData],
 )
-def search_phone(query: str):
-    result = phone.fuzzy_search(query)
+def search_phone(name: str = Path(..., description="要查詢誰的電話")):
+    """
+    根據名字模糊搜尋電話。
+    """
+    result = phone.fuzzy_search(name)
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
     else:

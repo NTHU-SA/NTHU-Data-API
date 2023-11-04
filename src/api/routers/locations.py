@@ -1,5 +1,28 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
+from pydantic import BaseModel, Field
+from uuid import UUID
+
 from ..models.locations import Location
+
+
+class Data(BaseModel):
+    name: str = Field(..., description="地點名稱")
+    name_en: str = Field(..., description="地點英文名稱")
+    latitude: str = Field(..., description="地點緯度")
+    longitude: str = Field(..., description="地點經度")
+
+
+class LocationData(BaseModel):
+    id: UUID = Field(..., description="地點 id")
+    data: Data = Field(..., description="地點資料")
+    create_time: str = Field(..., description="建立時間")
+    update_time: str = Field(..., description="更新時間")
+
+
+class SearchData(BaseModel):
+    name: str = Field(..., description="要查詢的地點")
+    max_result: int = Field(10, description="最多回傳幾筆資料")
+
 
 router = APIRouter(
     prefix="/locations",
@@ -36,8 +59,12 @@ location = Location()
             },
         },
     },
+    response_model=list[LocationData],
 )
 def get_all_location():
+    """
+    取得所有地點資訊。
+    """
     try:
         result = location.get_all()
         return result
@@ -82,10 +109,14 @@ def get_all_location():
             },
         },
     },
+    response_model=list[LocationData],
 )
-def search_location(query: str, max_result: int = 10):
-    result = location.fuzzy_search(query)
-    result = result[:max_result]
+def search_location(search_data: SearchData):
+    """
+    使用名稱模糊搜尋地點資訊。
+    """
+    result = location.fuzzy_search(search_data.name)
+    result = result[: search_data.max_result]
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
     else:
@@ -93,7 +124,7 @@ def search_location(query: str, max_result: int = 10):
 
 
 @router.get(
-    "/{query}",
+    "/{id}",
     responses={
         200: {
             "content": {
@@ -113,9 +144,13 @@ def search_location(query: str, max_result: int = 10):
             },
         },
     },
+    response_model=LocationData,
 )
-def get_location(query: str):
-    result = location.get_by_id(query)
+def get_location(id: UUID = Path(..., description="要查詢的地點 id")):
+    """
+    使用地點 id 取得指定地點資訊。
+    """
+    result = location.get_by_id(id)
     if result:
         return result
     else:
@@ -123,7 +158,7 @@ def get_location(query: str):
 
 
 @router.get(
-    "/searches/{query}",
+    "/searches/{name}",
     responses={
         200: {
             "content": {
@@ -159,9 +194,13 @@ def get_location(query: str):
             },
         },
     },
+    response_model=list[LocationData],
 )
-def search_location(query: str):
-    result = location.fuzzy_search(query)
+def search_location(name: str = Path(..., description="要查詢的地點")):
+    """
+    使用名稱模糊搜尋地點資訊。
+    """
+    result = location.fuzzy_search(name)
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
     else:
