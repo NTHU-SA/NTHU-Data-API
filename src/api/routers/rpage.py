@@ -1,7 +1,14 @@
 from fastapi import APIRouter, HTTPException, Path
-from pydantic import HttpUrl
+from pydantic import BaseModel, HttpUrl, Field
 
 from ..models.rpage import Rpage
+
+
+class RpageData(BaseModel):
+    title: str = Field(..., description="公告標題")
+    date: str = Field(..., description="公告日期")
+    url: HttpUrl = Field(..., description="公告網址")
+
 
 router = APIRouter(
     prefix="/rpage",
@@ -37,6 +44,7 @@ rpage = Rpage()
             },
         },
     },
+    response_model=list[RpageData],
 )
 def get_rpage_data(full_path: HttpUrl = Path(..., description="Rpage 完整公告網址")):
     """
