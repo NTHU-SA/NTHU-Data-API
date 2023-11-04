@@ -18,7 +18,7 @@ class Lib(str, Enum):
 
 
 class OpeningHours(BaseModel):
-    library: str = Field(..., description="圖書館代號")
+    library: Lib = Field(..., description="圖書館代號")
     date: str = Field(..., description="日期")
     start_time: str = Field(..., description="開館時間")
     end_time: str = Field(..., description="閉館時間")
