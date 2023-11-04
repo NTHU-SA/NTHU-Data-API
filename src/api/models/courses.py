@@ -191,6 +191,31 @@ class Processor:
         fields_list = list(set(fields_list))
         return fields_list
 
+    def list_credit(self, credit: float, op: str = None) -> list:
+        res = []
+        if op == None or op == "":
+            res = [
+                course for course in self.course_data if float(course.credit) == credit
+            ]
+        elif op == "gt":
+            res = [
+                course for course in self.course_data if float(course.credit) > credit
+            ]
+        elif op == "lt":
+            res = [
+                course for course in self.course_data if float(course.credit) < credit
+            ]
+        elif op == "gte":
+            res = [
+                course for course in self.course_data if float(course.credit) >= credit
+            ]
+        elif op == "lte":
+            res = [
+                course for course in self.course_data if float(course.credit) <= credit
+            ]
+
+        return res
+
     def query(self, conditions: Conditions) -> list[CoursesData]:
         """搜尋所有符合條件的課程。
 
