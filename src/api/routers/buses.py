@@ -1,5 +1,37 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
 from ..models.buses import Buses
+
+
+class Info(BaseModel):
+    direction: str = Field(..., description="方向")
+    duration: str = Field(..., description="時刻表有效期間")
+    route: str = Field(..., description="路線")
+    routeEN: str = Field(..., description="英文路線")
+
+
+class Schedule(BaseModel):
+    time: str = Field(..., description="發車時間")
+    description: str = Field(..., description="備註")
+
+
+class NandaData(BaseModel):
+    toward_south_campus_info: Info = Field(..., description="本部往南大區間車資訊")
+    weekday_bus_schedule_toward_south_campus: list[Schedule] = Field(
+        ..., description="本部往南大區間車時刻表（平日）"
+    )
+    weekend_bus_schedule_toward_south_campus: list[Schedule] = Field(
+        ..., description="本部往南大區間車時刻表（假日）"
+    )
+    toward_main_campus_info: Info = Field(..., description="南大往本部區間車資訊")
+    weekday_bus_schedule_toward_main_campus: list[Schedule] = Field(
+        ..., description="南大往本部區間車時刻表（平日）"
+    )
+    weekend_bus_schedule_toward_main_campus: list[Schedule] = Field(
+        ..., description="南大往本部區間車時刻表（假日）"
+    )
+
 
 router = APIRouter(
     prefix="/buses",
@@ -14,7 +46,6 @@ buses = Buses()
     "/nanda",
     responses={
         200: {
-            "description": "南大校區區間車資訊",
             "content": {
                 "application/json": {
                     "example": {
@@ -29,8 +60,12 @@ buses = Buses()
             },
         },
     },
+    response_model=NandaData,
 )
 async def get_nanda():
+    """
+    南大校區區間車資訊。
+    """
     return buses.get_nanda_data()
 
 
@@ -38,7 +73,6 @@ async def get_nanda():
     "/nanda/toward_south_campus_info",
     responses={
         200: {
-            "description": "本部往南大區間車資訊",
             "content": {
                 "application/json": {
                     "example": {
@@ -51,8 +85,12 @@ async def get_nanda():
             },
         },
     },
+    response_model=Info,
 )
 async def get_nanda_toward_south_campus_info():
+    """
+    本部往南大區間車資訊。
+    """
     return buses.get_nanda_data()["toward_south_campus_info"]
 
 
@@ -60,7 +98,6 @@ async def get_nanda_toward_south_campus_info():
     "/nanda/weekday_bus_schedule_toward_south_campus",
     responses={
         200: {
-            "description": "本部往南大區間車時刻表（平日）",
             "content": {
                 "application/json": {
                     "example": [
@@ -74,8 +111,12 @@ async def get_nanda_toward_south_campus_info():
             },
         },
     },
+    response_model=list[Schedule],
 )
 async def get_nanda_weekday_bus_schedule_toward_south_campus():
+    """
+    本部往南大區間車時刻表（平日）。
+    """
     return buses.get_nanda_data()["weekday_bus_schedule_toward_south_campus"]
 
 
@@ -83,7 +124,6 @@ async def get_nanda_weekday_bus_schedule_toward_south_campus():
     "/nanda/weekend_bus_schedule_toward_south_campus",
     responses={
         200: {
-            "description": "本部往南大區間車時刻表（假日）",
             "content": {
                 "application/json": {
                     "example": [
@@ -99,8 +139,12 @@ async def get_nanda_weekday_bus_schedule_toward_south_campus():
             },
         },
     },
+    response_model=list[Schedule],
 )
 async def get_nanda_weekend_bus_schedule_toward_south_campus():
+    """
+    本部往南大區間車時刻表（假日）。
+    """
     return buses.get_nanda_data()["weekend_bus_schedule_toward_south_campus"]
 
 
@@ -108,7 +152,6 @@ async def get_nanda_weekend_bus_schedule_toward_south_campus():
     "/nanda/toward_main_campus_info",
     responses={
         200: {
-            "description": "南大往本部區間車資訊",
             "content": {
                 "application/json": {
                     "example": {
@@ -121,8 +164,12 @@ async def get_nanda_weekend_bus_schedule_toward_south_campus():
             },
         },
     },
+    response_model=Info,
 )
 async def get_nanda_toward_main_campus_info():
+    """
+    南大往本部區間車資訊。
+    """
     return buses.get_nanda_data()["toward_main_campus_info"]
 
 
@@ -130,7 +177,6 @@ async def get_nanda_toward_main_campus_info():
     "/nanda/weekday_bus_schedule_toward_main_campus",
     responses={
         200: {
-            "description": "南大往本部區間車時刻表（平日）",
             "content": {
                 "application/json": {
                     "example": [
@@ -144,8 +190,12 @@ async def get_nanda_toward_main_campus_info():
             },
         },
     },
+    response_model=list[Schedule],
 )
 async def get_nanda_weekday_bus_schedule_toward_main_campus():
+    """
+    南大往本部區間車時刻表（平日）。
+    """
     return buses.get_nanda_data()["weekday_bus_schedule_toward_main_campus"]
 
 
@@ -153,7 +203,6 @@ async def get_nanda_weekday_bus_schedule_toward_main_campus():
     "/nanda/weekend_bus_schedule_toward_main_campus",
     responses={
         200: {
-            "description": "南大往本部區間車時刻表（假日）",
             "content": {
                 "application/json": {
                     "example": [
@@ -169,6 +218,10 @@ async def get_nanda_weekday_bus_schedule_toward_main_campus():
             },
         },
     },
+    response_model=list[Schedule],
 )
 async def get_nanda_weekend_bus_schedule_toward_main_campus():
+    """
+    南大往本部區間車時刻表（假日）。
+    """
     return buses.get_nanda_data()["weekend_bus_schedule_toward_main_campus"]

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
+from pydantic import HttpUrl
 
 from ..models.rpage import Rpage
 
@@ -15,7 +16,6 @@ rpage = Rpage()
     "/{full_path:path}",
     responses={
         200: {
-            "description": "爬取指定 Rpage 公告的內容",
             "content": {
                 "application/json": {
                     "example": [
@@ -38,7 +38,10 @@ rpage = Rpage()
         },
     },
 )
-def get_rpage_data(full_path: str):
+def get_rpage_data(full_path: HttpUrl = Path(..., description="Rpage 完整公告網址")):
+    """
+    爬取指定 Rpage 公告的內容。
+    """
     try:
         content, code = rpage.crawler(full_path)
         if content == []:
