@@ -32,12 +32,7 @@ class SearchData(BaseModel):
     max_result: int = Field(10, description="最多回傳幾筆資料")
 
 
-router = APIRouter(
-    prefix="/phones",
-    tags=["phones"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 phone = Phone()
 
 

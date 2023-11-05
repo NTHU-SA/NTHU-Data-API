@@ -117,7 +117,7 @@ def get_rss_data(url):
         "https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_exhibit.xml"  # 展覽及活動 RSS
     )
     rss_branches = "https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_branches.xml"  # 南大與人社分館 RSS
-    url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/{url}.xml"
+    url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{url}.xml"
     text, code = get_response(url)
     xml_string = text.replace("<br />", " ")
     dict = xmltodict.parse(xml_string)

@@ -1,22 +1,17 @@
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, HttpUrl, Field
+from typing import Optional
 
-from ..models.rpage import Rpage
+from src.utils.scraper import rpage_scraper
 
 
 class RpageData(BaseModel):
-    title: str = Field(..., description="公告標題")
-    date: str = Field(..., description="公告日期")
-    url: HttpUrl = Field(..., description="公告網址")
+    title: Optional[str] = Field(default=None, description="公告標題")
+    date: Optional[str] = Field(default=None, description="公告日期")
+    url: Optional[HttpUrl] = Field(default=None, description="公告網址")
 
 
-router = APIRouter(
-    prefix="/rpage",
-    tags=["rpage"],
-    responses={404: {"description": "Not found"}},
-)
-
-rpage = Rpage()
+router = APIRouter()
 
 
 @router.get(
@@ -46,16 +41,14 @@ rpage = Rpage()
     },
     response_model=list[RpageData],
 )
-def get_rpage_data(full_path: HttpUrl = Path(..., description="Rpage 完整公告網址")):
+def get_rpage_data(
+    full_path: HttpUrl = Path(
+        ...,
+        example="https://bulletin.site.nthu.edu.tw/p/403-1086-5081-1.php?Lang=zh-tw",
+        description="Rpage 完整公告網址",
+    )
+):
     """
     爬取指定 Rpage 公告的內容。
     """
-    try:
-        content, code = rpage.crawler(full_path)
-        if content == []:
-            raise HTTPException(status_code=404, detail="Not found")
-        elif code != 200:
-            raise HTTPException(status_code=code, detail="Server Error")
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    return rpage_scraper.announcement(str(full_path))

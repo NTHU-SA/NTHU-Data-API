@@ -24,12 +24,7 @@ class SearchData(BaseModel):
     max_result: int = Field(10, description="最多回傳幾筆資料")
 
 
-router = APIRouter(
-    prefix="/locations",
-    tags=["locations"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 location = Location()
 
 
