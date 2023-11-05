@@ -5,7 +5,7 @@ from uuid import UUID
 from ..models.locations import Location
 
 
-class Data(BaseModel):
+class LocationData(BaseModel):
     name: str = Field(..., description="地點名稱")
     name_en: str = Field(..., description="地點英文名稱")
     latitude: str = Field(..., description="地點緯度")
@@ -14,22 +14,17 @@ class Data(BaseModel):
 
 class LocationData(BaseModel):
     id: UUID = Field(..., description="地點 id")
-    data: Data = Field(..., description="地點資料")
+    data: LocationData = Field(..., description="地點資料")
     create_time: str = Field(..., description="建立時間")
     update_time: str = Field(..., description="更新時間")
 
 
-class SearchData(BaseModel):
+class LocationSearchData(BaseModel):
     name: str = Field(..., description="要查詢的地點")
     max_result: int = Field(10, description="最多回傳幾筆資料")
 
 
-router = APIRouter(
-    prefix="/locations",
-    tags=["locations"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 location = Location()
 
 
@@ -111,7 +106,7 @@ def get_all_location():
     },
     response_model=list[LocationData],
 )
-def search_location(search_data: SearchData):
+def search_location(search_data: LocationSearchData):
     """
     使用名稱模糊搜尋地點資訊。
     """

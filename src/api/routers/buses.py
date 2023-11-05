@@ -33,12 +33,7 @@ class BusNandaData(BaseModel):
     )
 
 
-router = APIRouter(
-    prefix="/buses",
-    tags=["buses"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 buses = Buses()
 
 

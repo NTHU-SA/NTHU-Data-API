@@ -34,12 +34,7 @@ class DiningBuilding(BaseModel):
     restaurants: list[DiningRestaurant] = Field(..., description="餐廳資料")
 
 
-router = APIRouter(
-    prefix="/dining",
-    tags=["dining"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 dining = Dining()
 
 

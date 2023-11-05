@@ -67,12 +67,7 @@ class CourseData(BaseModel):
     required_optional_note: str = Field(..., description="必選修說明：多個必選修班級用tab字元分隔")
 
 
-router = APIRouter(
-    prefix="/courses",
-    tags=["courses"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 courses = Processor(json_path="data/courses/11210.json")
 
 

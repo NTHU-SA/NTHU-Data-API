@@ -12,12 +12,7 @@ class ElectricityInfo(BaseModel):
     last_updated: str = Field(..., description="最後更新時間")
 
 
-router = APIRouter(
-    prefix="/energy",
-    tags=["energy"],
-    responses={404: {"description": "Not found"}},
-)
-
+router = APIRouter()
 energy = Energy()
 
 

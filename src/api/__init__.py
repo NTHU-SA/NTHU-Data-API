@@ -1,11 +1,23 @@
 from .. import app
-from .routers import lib, phones, rpage, locations, buses, dining, energy, courses
+from .routers import (
+    buses,
+    courses,
+    dining,
+    energy,
+    librarys,
+    locations,
+    phones,
+    resources,
+    rpage,
+)
 
-app.include_router(lib.router)
-app.include_router(rpage.router)
-app.include_router(phones.router)
-app.include_router(locations.router)
-app.include_router(buses.router)
-app.include_router(dining.router)
-app.include_router(energy.router)
-app.include_router(courses.router)
+app.include_router(buses.router, prefix="/buses", tags=["Buses"])
+app.include_router(courses.router, prefix="/courses", tags=["Courses"])
+app.include_router(dining.router, prefix="/dining", tags=["Dining"])
+app.include_router(energy.router, prefix="/energy", tags=["Energy"])
+app.include_router(librarys.router, prefix="/lib", tags=["Library"])
+app.include_router(librarys.router, prefix="/librarys", tags=["Library"])
+app.include_router(locations.router, prefix="/locations", tags=["Locations"])
+app.include_router(phones.router, prefix="/phones", tags=["Phones"])
+app.include_router(resources.router, prefix="/resources", tags=[])
+app.include_router(rpage.router, prefix="/rpage", tags=["Rpage"])

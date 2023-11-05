@@ -2,7 +2,7 @@ import requests
 import re
 import json
 
-from cachetools import cached, TTLCache
+from src.utils import cached_request
 
 
 class Buses:
@@ -10,31 +10,9 @@ class Buses:
     # https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw
     # 南大區間車
     # https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw
-    def _get_response(self, url: str):
-        headers = {
-            "accept": "*/*",
-            "accept-encoding": "gzip, deflate, br",
-            "accept-language": "zh-TW,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-CN;q=0.5",
-            "dnt": "1",
-            "referer": url,
-            "sec-ch-ua": "'Chromium';v='112', 'Microsoft Edge';v='112', 'Not:A-Brand';v='99'",
-            "sec-ch-ua-mobile": "?1",
-            "sec-ch-ua-platform": "Android",
-            "sec-fetch-dest": "script",
-            "sec-fetch-mode": "no-cors",
-            "sec-fetch-site": "same-site",
-            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.48",
-        }
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            raise Exception("Request Error")
-        response_text = response.text
-        return response_text
-
-    @cached(cache=TTLCache(maxsize=14, ttl=60 * 60))
     def get_nanda_data(self):
         url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
-        res_text = self._get_response(url)
+        res_text = cached_request.get(url)
 
         def get_campus_info(variable_string: str):
             regex_pattern = r"const " + variable_string + " = (\{.*?\})"
