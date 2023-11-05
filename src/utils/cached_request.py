@@ -39,5 +39,6 @@ def get(url: str, cache=True, update=False) -> str:
     if response.status_code != 200:
         raise Exception(f"Request error: {response.status_code}")
     response_text = response.text
-    ttl_cache[url] = response_text
+    if cache:
+        ttl_cache[url] = response_text
     return response_text

@@ -3,12 +3,13 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, HttpUrl, Field
 
-from ..models.lib import (
+from ..models.librarys import (
     get_opening_hours,
     get_number_of_goods,
     get_space_data,
-    get_rss_data,
 )
+
+from src.utils.scraper import library_rss_scraper
 
 
 class LibraryName(str, Enum):
@@ -90,13 +91,8 @@ def openinghours(
     """
     取得指定圖書館的開放時間。
     """
-    try:
-        content, code = get_opening_hours(lib)
-        if code != 200:
-            raise HTTPException(status_code=code, detail="Error")
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    data = get_opening_hours(lib)
+    return data
 
 
 @router.get("/goods", response_model=LibraryNumberOfGoods)
@@ -104,13 +100,8 @@ def numberofgoods():
     """
     取得總圖換證數量資訊。
     """
-    try:
-        content, code = get_number_of_goods()
-        if code != 200:
-            raise HTTPException(status_code=code, detail="Error")
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    goods = get_number_of_goods()
+    return goods
 
 
 @router.get("/space", response_model=LibrarySpaceData)
@@ -118,13 +109,8 @@ def spacedata():
     """
     取得空間使用資訊。
     """
-    try:
-        content, code = get_space_data()
-        if code != 200:
-            raise HTTPException(status_code=code, detail="Error")
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    content = get_space_data()
+    return content
 
 
 @router.get("/rss/{rss}", response_model=LibraryRssData)
@@ -137,10 +123,5 @@ def rssdata(
     """
     取得指定RSS資料。
     """
-    try:
-        content, code = get_rss_data(rss)
-        if code != 200:
-            raise HTTPException(status_code=code, detail="Error")
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    content = library_rss_scraper.get_rss_data(rss.value)
+    return content

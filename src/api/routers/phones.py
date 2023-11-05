@@ -5,29 +5,29 @@ from uuid import UUID
 from ..models.phones import Phone
 
 
-class RelativeNode(BaseModel):
+class ContactRelativeNode(BaseModel):
     name: str = Field(..., description="父節點或子節點名稱")
     id: UUID = Field(..., description="父節點或子節點 id")
 
 
-class Data(BaseModel):
+class ContactData(BaseModel):
     name: str = Field(..., description="姓名")
     ext: str = Field(..., description="分機")
     tel: str = Field(..., description="電話")
     fax: str = Field(..., description="傳真")
     email: str = Field(..., description="電子郵件")
-    parents: list[RelativeNode] = Field(..., description="父節點")
-    children: list[RelativeNode] = Field(..., description="子節點")
+    parents: list[ContactRelativeNode] = Field(..., description="父節點")
+    children: list[ContactRelativeNode] = Field(..., description="子節點")
 
 
-class PhoneData(BaseModel):
+class ContactsData(BaseModel):
     id: UUID = Field(..., description="電話資料 id")
-    data: Data = Field(..., description="電話資料")
+    data: ContactData = Field(..., description="電話資料")
     create_time: str = Field(..., description="建立時間")
     update_time: str = Field(..., description="更新時間")
 
 
-class SearchData(BaseModel):
+class ContactSearchData(BaseModel):
     name: str = Field(..., description="要查詢誰的電話")
     max_result: int = Field(10, description="最多回傳幾筆資料")
 
@@ -70,7 +70,7 @@ phone = Phone()
             }
         }
     },
-    response_model=list[PhoneData],
+    response_model=list[ContactsData],
 )
 def get_all_phone():
     """
@@ -117,9 +117,9 @@ def get_all_phone():
             }
         }
     },
-    response_model=list[PhoneData],
+    response_model=list[ContactsData],
 )
-def search_phone(search_data: SearchData):
+def search_phone(search_data: ContactSearchData):
     """
     根據名字模糊搜尋電話。
     """
@@ -161,7 +161,7 @@ def search_phone(search_data: SearchData):
             }
         }
     },
-    response_model=PhoneData,
+    response_model=ContactsData,
 )
 def get_phone(id: UUID = Path(..., description="要查詢電話的 id")):
     """
@@ -208,7 +208,7 @@ def get_phone(id: UUID = Path(..., description="要查詢電話的 id")):
             }
         }
     },
-    response_model=list[PhoneData],
+    response_model=list[ContactsData],
 )
 def search_phone(name: str = Path(..., description="要查詢誰的電話")):
     """
