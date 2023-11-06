@@ -1,5 +1,6 @@
 import requests
 from cachetools import TTLCache
+from fastapi import HTTPException
 
 ttl_cache = TTLCache(maxsize=1024, ttl=60 * 60)
 
@@ -42,8 +43,9 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
     if auto_headers == True:
         headers = generate_headers(url)
     response = requests.get(url, headers, **kwargs)
-    if response.status_code != 200:
-        raise Exception(f"Request error: {response.status_code}")
+    status_code = response.status_code
+    if status_code != 200:
+        raise HTTPException(status_code, f"Request error: {status_code}")
     response_text = response.text
     if cache:
         ttl_cache[url] = response_text
@@ -61,8 +63,9 @@ def post(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str
     if auto_headers == True:
         headers = generate_headers(url)
     response = requests.post(url, **kwargs)
-    if response.status_code != 200:
-        raise Exception(f"Request error: {response.status_code}")
+    status_code = response.status_code
+    if status_code != 200:
+        raise HTTPException(status_code, f"Request error: {status_code}")
     response_text = response.text
     if cache:
         ttl_cache[url] = response_text
