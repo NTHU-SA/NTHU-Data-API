@@ -1,5 +1,10 @@
 from fastapi import APIRouter
-from src.utils.scraper import rpage_scraper, library_scraper, goodjob_scraper
+from src.utils.scraper import (
+    rpage_scraper,
+    library_scraper,
+    goodjob_scraper,
+    cac_scraper,
+)
 
 router = APIRouter()
 
@@ -15,15 +20,23 @@ async def get_libarys_events():
 @router.get("/goodjob")
 async def get_goodjob_events():
     """
-    取得清華 JOB 讚的活動資料。
+    取得清華 JOB 讚的職涯活動資料。
     """
     return goodjob_scraper.get_announcements("01003")
+
+
+@router.get("/cac")
+async def get_arts_center_events():
+    """
+    取得藝術文化總中心的當期活動。
+    """
+    return cac_scraper.get_events_list()
 
 
 @router.get("/global_affairs")
 async def get_global_affairs_events():
     """
-    取得國際事務處的活動資料。
+    取得國際事務處的各類活動資料。
     """
     return rpage_scraper.announcement(
         "https://oga.site.nthu.edu.tw/p/403-1524-9308-1.php?Lang=zh-tw"
