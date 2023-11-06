@@ -1,15 +1,14 @@
 from enum import Enum
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, Path
 from pydantic import BaseModel, HttpUrl, Field
 
-from ..models.librarys import (
-    get_opening_hours,
-    get_number_of_goods,
-    get_space_data,
-)
+import re
+import json
+from bs4 import BeautifulSoup
 
-from src.utils.scraper import library_rss_scraper
+from src.utils import cached_request
+from src.utils.scraper import library_scraper
 
 
 class LibraryName(str, Enum):
@@ -82,39 +81,24 @@ class LibraryRssData(BaseModel):
 router = APIRouter()
 
 
-@router.get("/openinghours/{lib}", response_model=LibraryOpeningHour)
-def openinghours(
-    lib: LibraryName = Path(
-        ..., description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)"
-    )
-):
-    """
-    取得指定圖書館的開放時間。
-    """
-    data = get_opening_hours(lib)
-    return data
-
-
-@router.get("/goods", response_model=LibraryNumberOfGoods)
-def numberofgoods():
-    """
-    取得總圖換證數量資訊。
-    """
-    goods = get_number_of_goods()
-    return goods
-
-
 @router.get("/space", response_model=LibrarySpaceData)
-def spacedata():
+def get_library_space_data():
     """
     取得空間使用資訊。
     """
-    content = get_space_data()
-    return content
+    return library_scraper.get_space_data()
+
+
+@router.get("/lost_and_found")
+def get_library_lost_and_found():
+    """
+    取得失物招領資訊。
+    """
+    return library_scraper.get_lost_and_found()
 
 
 @router.get("/rss/{rss}", response_model=LibraryRssData)
-def rssdata(
+def get_library_rss_data(
     rss: LibraryRssType = Path(
         ...,
         description="RSS 類型：最新消息(rss_news)、電子資源(rss_eresources)、展覽及活動(rss_exhibit)、南大與人社分館(rss_branches)",
@@ -123,5 +107,24 @@ def rssdata(
     """
     取得指定RSS資料。
     """
-    content = library_rss_scraper.get_rss_data(rss.value)
-    return content
+    return library_scraper.get_rss_data(rss.value)
+
+
+@router.get("/openinghours/{libaray_name}", response_model=LibraryOpeningHour)
+def get_library_opening_hours(
+    libaray_name: LibraryName = Path(
+        ..., description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)"
+    )
+):
+    """
+    取得指定圖書館的開放時間。
+    """
+    return library_scraper.get_opening_hours(libaray_name)
+
+
+@router.get("/goods", response_model=LibraryNumberOfGoods)
+def get_library_number_of_goods() -> LibraryNumberOfGoods:
+    """
+    取得總圖換證數量資訊。
+    """
+    return library_scraper.get_number_of_goods()

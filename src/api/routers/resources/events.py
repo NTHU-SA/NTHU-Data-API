@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.utils.scraper import rpage_scraper, library_rss_scraper, goodjob_scraper
+from src.utils.scraper import rpage_scraper, library_scraper, goodjob_scraper
 
 router = APIRouter(
     prefix="/events",
@@ -13,7 +13,7 @@ async def get_libarys_events():
     """
     取得圖書館的展覽及活動資料。
     """
-    return library_rss_scraper.exhibit()
+    return library_scraper.get_rss_data("exhibit")
 
 
 @router.get("/global_affairs")
