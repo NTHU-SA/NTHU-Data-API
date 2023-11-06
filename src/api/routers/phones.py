@@ -36,134 +36,17 @@ router = APIRouter()
 phone = Phone()
 
 
-@router.get(
-    "/",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "id": "acfe50cc-3922-4acb-9fd2-4774520e82bc",
-                            "data": {
-                                "name": "台積電-國立清華大學聯合研發中心",
-                                "ext": "34071",
-                                "tel": "N/A",
-                                "fax": "N/A",
-                                "email": "N/A",
-                                "parents": [
-                                    {
-                                        "name": "國際產學營運總中心",
-                                        "id": "bc7fd10a-8d4f-42f2-8ae8-d065f94321be",
-                                    }
-                                ],
-                                "children": [],
-                            },
-                            "create_time": "20231014T225508+0800",
-                            "update_time": "20231014T225508+0800",
-                        },
-                        {
-                            "...",
-                        },
-                    ]
-                }
-            }
-        }
-    },
-    response_model=list[ContactsData],
-)
+@router.get("/", response_model=list[ContactsData])
 def get_all_phone():
     """
     取得所有電話資料。
     """
-    try:
-        result = phone.get_all()
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    result = phone.get_all()
+    return result
 
 
-@router.post(
-    "/searches",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "id": "acfe50cc-3922-4acb-9fd2-4774520e82bc",
-                            "data": {
-                                "name": "台積電-國立清華大學聯合研發中心",
-                                "ext": "34071",
-                                "tel": "N/A",
-                                "fax": "N/A",
-                                "email": "N/A",
-                                "parents": [
-                                    {
-                                        "name": "國際產學營運總中心",
-                                        "id": "bc7fd10a-8d4f-42f2-8ae8-d065f94321be",
-                                    }
-                                ],
-                                "children": [],
-                            },
-                            "create_time": "20231014T225508+0800",
-                            "update_time": "20231014T225508+0800",
-                        },
-                        {
-                            "...",
-                        },
-                    ]
-                }
-            }
-        }
-    },
-    response_model=list[ContactsData],
-)
-def search_phone(search_data: ContactSearchData):
-    """
-    根據名字模糊搜尋電話。
-    """
-    result = phone.fuzzy_search(search_data.name)
-    result = result[: search_data.max_result]
-    print(len(result))
-    if result == []:
-        raise HTTPException(status_code=404, detail="Not found")
-    else:
-        return result
-
-
-@router.get(
-    "/{id}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "id": "acfe50cc-3922-4acb-9fd2-4774520e82bc",
-                        "data": {
-                            "name": "台積電-國立清華大學聯合研發中心",
-                            "ext": "34071",
-                            "tel": "N/A",
-                            "fax": "N/A",
-                            "email": "N/A",
-                            "parents": [
-                                {
-                                    "name": "國際產學營運總中心",
-                                    "id": "bc7fd10a-8d4f-42f2-8ae8-d065f94321be",
-                                }
-                            ],
-                            "children": [],
-                        },
-                        "create_time": "20231014T225508+0800",
-                        "update_time": "20231014T225508+0800",
-                    }
-                }
-            }
-        }
-    },
-    response_model=ContactsData,
-)
-def get_phone(id: UUID = Path(..., description="要查詢電話的 id")):
+@router.get("/{id}", response_model=ContactsData)
+def get_phone(id: UUID = Path(..., description="要查詢電話的 ID")):
     """
     使用電話 id 取得電話資料。
     """
@@ -174,47 +57,25 @@ def get_phone(id: UUID = Path(..., description="要查詢電話的 id")):
         raise HTTPException(status_code=404, detail="Not found")
 
 
-@router.get(
-    "/searches/{name}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "id": "acfe50cc-3922-4acb-9fd2-4774520e82bc",
-                            "data": {
-                                "name": "台積電-國立清華大學聯合研發中心",
-                                "ext": "34071",
-                                "tel": "N/A",
-                                "fax": "N/A",
-                                "email": "N/A",
-                                "parents": [
-                                    {
-                                        "name": "國際產學營運總中心",
-                                        "id": "bc7fd10a-8d4f-42f2-8ae8-d065f94321be",
-                                    }
-                                ],
-                                "children": [],
-                            },
-                            "create_time": "20231014T225508+0800",
-                            "update_time": "20231014T225508+0800",
-                        },
-                        {
-                            "...",
-                        },
-                    ]
-                }
-            }
-        }
-    },
-    response_model=list[ContactsData],
-)
+@router.get("/searches/{name}", response_model=list[ContactsData])
 def search_phone(name: str = Path(..., description="要查詢誰的電話")):
     """
     根據名字模糊搜尋電話。
     """
     result = phone.fuzzy_search(name)
+    if result == []:
+        raise HTTPException(status_code=404, detail="Not found")
+    else:
+        return result
+
+
+@router.post("/searches", response_model=list[ContactsData])
+def search_phone(search_data: ContactSearchData):
+    """
+    根據名字模糊搜尋電話。
+    """
+    result = phone.fuzzy_search(search_data.name)
+    result = result[: search_data.max_result]
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
     else:

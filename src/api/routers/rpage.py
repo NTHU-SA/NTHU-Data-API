@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, Path
 from pydantic import BaseModel, HttpUrl, Field
 from typing import Optional
 
@@ -14,33 +14,7 @@ class RpageData(BaseModel):
 router = APIRouter()
 
 
-@router.get(
-    "/{full_path:path}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "title": "更新112/11/6(一)~113/1/14(日)南大校區區間車時刻表",
-                            "date": "2023-11-02 ",
-                            "url": "https://affairs.site.nthu.edu.tw/p/406-1165-258110,r1065.php?Lang=zh-tw",
-                        },
-                        {
-                            "title": "112/10/16(一)~113/1/13(六)校園公車時刻表",
-                            "date": "2023-10-12 ",
-                            "url": "https://affairs.site.nthu.edu.tw/p/406-1165-256804,r1065.php?Lang=zh-tw",
-                        },
-                        {
-                            "...",
-                        },
-                    ]
-                },
-            },
-        },
-    },
-    response_model=list[RpageData],
-)
+@router.get("/{full_path:path}", response_model=list[RpageData])
 def get_rpage_data(
     full_path: HttpUrl = Path(
         ...,

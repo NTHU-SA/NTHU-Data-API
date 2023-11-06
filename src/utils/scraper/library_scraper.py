@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from cachetools import cached, TTLCache
 from datetime import datetime, timedelta
+from fastapi import HTTPException
 import json
 import re
 import requests
@@ -24,13 +25,14 @@ def _get_response(url: str, **kwargs) -> str:
         "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.48",
     }
     response = requests.get(url, headers=headers, **kwargs)
-    if response.status_code != 200:
-        raise Exception(f"Request error: {response.status_code}")
-    return requests.get(url, headers=headers).text
+    status_code = response.status_code
+    if status_code != 200:
+        raise HTTPException(status_code, f"Request error: {status_code}")
+    return response.text
 
 
 @cached(cache=TTLCache(maxsize=4, ttl=60 * 60))
-def get_rss_data(rss_type: str) -> dict:
+def get_rss_data(rss_type: str) -> list:
     """
     Args:
         rss_type (str): RSS 類型，可選值: news（最新消息）、eresources（電子資源）、exhibit（展覽及活動）、branches（南大與人社分館）
@@ -43,8 +45,8 @@ def get_rss_data(rss_type: str) -> dict:
     xml_string = _get_response(url)
     xml_string = xml_string.replace("<br />", "")
     dict = xmltodict.parse(xml_string)
-    dict = dict["rss"]["channel"]
-    return dict
+    rss_data = dict["rss"]["channel"]["item"]
+    return rss_data
 
 
 def get_number_of_goods():
@@ -83,7 +85,7 @@ def get_opening_hours(libaray_name):
         data["start_time"] = match.group(2)
         data["end_time"] = match.group(3)
     else:
-        raise Exception("No match")
+        raise HTTPException(404, "Not found")
     return data
 
 
@@ -94,8 +96,11 @@ def get_space_data():
     # 來源： https://libsms.lib.nthu.edu.tw/build/
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
     response = _get_response(url)
-    response = json.loads(response)
-    return response
+    data = json.loads(response)
+    if data["resmsg"] != "成功":
+        raise HTTPException(404, "Not found")
+    else:
+        return data["rows"]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))

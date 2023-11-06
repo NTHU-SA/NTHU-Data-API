@@ -1,11 +1,7 @@
 from fastapi import APIRouter
 from src.utils.scraper import rpage_scraper, library_scraper, goodjob_scraper
 
-router = APIRouter(
-    prefix="/events",
-    tags=["events"],
-    responses={404: {"description": "Not found"}},
-)
+router = APIRouter()
 
 
 @router.get("/libarys")
@@ -14,6 +10,14 @@ async def get_libarys_events():
     取得圖書館的展覽及活動資料。
     """
     return library_scraper.get_rss_data("exhibit")
+
+
+@router.get("/goodjob")
+async def get_goodjob_events():
+    """
+    取得清華 JOB 讚的活動資料。
+    """
+    return goodjob_scraper.get_announcements("01003")
 
 
 @router.get("/global_affairs")
@@ -64,11 +68,3 @@ async def get_bulletin_student_events():
     return rpage_scraper.announcement(
         "https://bulletin.site.nthu.edu.tw/p/403-1086-5085-1.php?Lang=zh-tw"
     )
-
-
-@router.get("/goodjob")
-async def get_goodjob_events():
-    """
-    取得清華 JOB 讚的活動資料。
-    """
-    return goodjob_scraper.get("01003")

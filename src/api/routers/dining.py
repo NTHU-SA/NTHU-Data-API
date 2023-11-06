@@ -38,40 +38,7 @@ router = APIRouter()
 dining = Dining()
 
 
-@router.get(
-    "/",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "building": "小吃部",
-                            "restaurants": [
-                                {
-                                    "area": "小吃部",
-                                    "image": "https://img.onl/CYp5nN",
-                                    "name": "7-ELEVEN",
-                                    "note": "",
-                                    "phone": "0920-229-711, 03-5166254",
-                                    "schedule": {
-                                        "saturday": "24小時",
-                                        "sunday": "24小時",
-                                        "weekday": "24小時",
-                                    },
-                                },
-                                {
-                                    "...",
-                                },
-                            ],
-                        },
-                    ]
-                },
-            },
-        },
-    },
-    response_model=list[DiningBuilding],
-)
+@router.get("/", response_model=list[DiningBuilding])
 def get_dining_data() -> list[DiningBuilding]:
     """
     取得所有餐廳資料。
@@ -79,19 +46,7 @@ def get_dining_data() -> list[DiningBuilding]:
     return dining.get_dining_data()
 
 
-@router.get(
-    "/buildings",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": ["小吃部", "水木生活中心", "風雲樓", "綜合教學大樓(南大校區)", "其他餐廳"]
-                },
-            },
-        },
-    },
-    response_model=list[DiningBuildingName],
-)
+@router.get("/buildings", response_model=list[DiningBuildingName])
 def get_all_building_names() -> list[DiningBuildingName]:
     """
     取得所有建築名稱。
@@ -99,38 +54,7 @@ def get_all_building_names() -> list[DiningBuildingName]:
     return dining.get_all_building_names()
 
 
-@router.get(
-    "/buildings/{building_name}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "building": "小吃部",
-                        "restaurants": [
-                            {
-                                "area": "小吃部",
-                                "image": "https://img.onl/CYp5nN",
-                                "name": "7-ELEVEN",
-                                "note": "",
-                                "phone": "0920-229-711, 03-5166254",
-                                "schedule": {
-                                    "saturday": "24小時",
-                                    "sunday": "24小時",
-                                    "weekday": "24小時",
-                                },
-                            },
-                            {
-                                "...",
-                            },
-                        ],
-                    }
-                },
-            },
-        },
-    },
-    response_model=DiningBuilding,
-)
+@router.get("/buildings/{building_name}", response_model=DiningBuilding)
 def get_dining_data(
     building_name: DiningBuildingName = Path(..., example="小吃部", description="建築名稱")
 ) -> DiningBuilding:
@@ -140,19 +64,7 @@ def get_dining_data(
     return dining.query_by_building_name(building_name)
 
 
-@router.get(
-    "/restaurants",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": ["7-ELEVEN", "麥當勞", "瑞斯飯糰", "漢城異國美食", "對味", "..."]
-                },
-            },
-        },
-    },
-    response_model=list[str],
-)
+@router.get("/restaurants", response_model=list[str])
 def get_all_restaurant_names() -> list[str]:
     """
     取得所有餐廳名稱。
@@ -160,30 +72,7 @@ def get_all_restaurant_names() -> list[str]:
     return dining.get_all_restaurant_names()
 
 
-@router.get(
-    "/restaurants/{restaurant_name}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "area": "小吃部",
-                        "image": "https://img.onl/KvsZAz",
-                        "name": "麥當勞",
-                        "note": "",
-                        "phone": "03-5727801",
-                        "schedule": {
-                            "saturday": "7:00-24:00",
-                            "sunday": "7:00-24:00",
-                            "weekday": "7:00-24:00",
-                        },
-                    }
-                },
-            },
-        },
-    },
-    response_model=list[DiningRestaurant],
-)
+@router.get("/restaurants/{restaurant_name}", response_model=list[DiningRestaurant])
 def get_dining_data(
     restaurant_name: str = Path(..., example="麥當勞", description="餐廳名稱")
 ):
@@ -193,35 +82,7 @@ def get_dining_data(
     return dining.query_by_restaurant_name(restaurant_name)
 
 
-@router.get(
-    "/scedules/{day_of_week}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "area": "小吃部",
-                            "image": "https://img.onl/KvsZAz",
-                            "name": "麥當勞",
-                            "note": "",
-                            "phone": "03-5727801",
-                            "schedule": {
-                                "saturday": "7:00-24:00",
-                                "sunday": "7:00-24:00",
-                                "weekday": "7:00-24:00",
-                            },
-                        },
-                        {
-                            "...",
-                        },
-                    ]
-                },
-            },
-        },
-    },
-    response_model=list[DiningRestaurant],
-)
+@router.get("/scedules/{day_of_week}", response_model=list[DiningRestaurant])
 def get_schedule_by_day_of_week(
     day_of_week: DiningSceduleName = Path(..., example="saturday", description="營業日")
 ) -> list[DiningRestaurant]:
@@ -235,33 +96,7 @@ def get_schedule_by_day_of_week(
 
 
 @router.get(
-    "/searches/restaurants/{restaurant_name}",
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "area": "小吃部",
-                            "image": "https://img.onl/KvsZAz",
-                            "name": "麥當勞",
-                            "note": "",
-                            "phone": "03-5727801",
-                            "schedule": {
-                                "saturday": "7:00-24:00",
-                                "sunday": "7:00-24:00",
-                                "weekday": "7:00-24:00",
-                            },
-                        },
-                        {
-                            "...",
-                        },
-                    ]
-                },
-            },
-        },
-    },
-    response_model=list[DiningRestaurant],
+    "/searches/restaurants/{restaurant_name}", response_model=list[DiningRestaurant]
 )
 def fuzzy_search_restaurant_by_name(
     restaurant_name: str = Path(..., example="麵", description="餐廳名稱")
