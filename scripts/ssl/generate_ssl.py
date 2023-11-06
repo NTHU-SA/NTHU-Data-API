@@ -2,11 +2,11 @@ from OpenSSL import crypto, SSL
 
 
 def generate_certificate(
-    organization="huixing.tw",
-    common_name="api.huixing.tw",
+    organization="國立清華大學學生會",
+    common_name="api.nthusa.tw",
     country="TW",
     duration=(10 * 365 * 24 * 60 * 60),
-    path="src/utils/openssl/",
+    path="",
     keyfilename="key.pem",
     certfilename="cert.pem",
 ):
