@@ -8,7 +8,7 @@ from src.utils.scraper import rpage_scraper
 class RpageData(BaseModel):
     title: Optional[str] = Field(default=None, description="公告標題")
     date: Optional[str] = Field(default=None, description="公告日期")
-    url: Optional[HttpUrl] = Field(default=None, description="公告網址")
+    link: Optional[HttpUrl] = Field(default=None, description="公告網址")
 
 
 router = APIRouter()
