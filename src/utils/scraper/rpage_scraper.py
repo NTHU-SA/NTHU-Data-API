@@ -34,6 +34,12 @@ def announcement(url: str) -> list:
             title = None
             href = None
 
-        data.append({"title": title, "url": href, "date": date})
+        data.append(
+            {
+                "title": title,
+                "link": href,
+                "date": date,
+            }
+        )
 
     return data

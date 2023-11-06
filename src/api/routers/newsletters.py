@@ -1,5 +1,6 @@
 import json
 from fastapi import APIRouter, Path, HTTPException
+from pydantic import HttpUrl
 from src.utils.scraper import newsletter_scraper
 
 router = APIRouter()
@@ -15,11 +16,7 @@ def get_all_newsletters():
 
 @router.get("/{newsletter_name}")
 def get_newsletter_by_name(
-    newsletter_name: str = Path(
-        ...,
-        example="國立清華大學學生會電子報",
-        description="抓取的電子報名稱",
-    )
+    newsletter_name: str = Path(..., example="國立清華大學學生會電子報", description="抓取的電子報名稱")
 ):
     """
     透過電子報名稱取得指定的電子報列表。
@@ -27,7 +24,6 @@ def get_newsletter_by_name(
     with open("data/newsletter_list.json", "r", encoding="utf-8") as f:
         data = f.read()
     data = json.loads(data)
-    print(data)
     for newsletter in data:
         if newsletter["name"] == newsletter_name:
             newsletter_link = newsletter["link"]
@@ -39,7 +35,7 @@ def get_newsletter_by_name(
 
 @router.get("/paths/{newsletter_link:path}")
 def get_newsletter_by_link(
-    newsletter_link: str = Path(
+    newsletter_link: HttpUrl = Path(
         ...,
         example="https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/home-zh-tw/listid-44-",
         description="抓取的電子報網址",

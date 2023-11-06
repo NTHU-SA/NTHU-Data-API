@@ -1,13 +1,7 @@
 from enum import Enum
-from typing import Optional
-from fastapi import APIRouter, Path
+from typing import Optional, List
 from pydantic import BaseModel, HttpUrl, Field
-
-import re
-import json
-from bs4 import BeautifulSoup
-
-from src.utils import cached_request
+from fastapi import APIRouter, Path
 from src.utils.scraper import library_scraper
 
 
@@ -38,12 +32,6 @@ class LibrarySpace(BaseModel):
     count: int = Field(..., description="空間剩餘數量")
 
 
-class LibrarySpaceData(BaseModel):
-    rescode: int = Field(..., description="回傳代碼")
-    resmsg: str = Field(..., description="回傳訊息")
-    rows: list[LibrarySpace] = Field(..., description="各空間資料")
-
-
 class LibraryRssType(str, Enum):
     news = "news"
     eresources = "eresources"
@@ -69,19 +57,10 @@ class LibraryRssItem(BaseModel):
     image: LibraryRssImage = Field(..., description="文章圖片")
 
 
-class LibraryRssData(BaseModel):
-    title: str = Field(..., description="RSS 標題")
-    link: Optional[HttpUrl] = Field(..., description="RSS 來源連結")
-    description: str = Field(..., description="RSS 來源描述")
-    language: str = Field(..., description="RSS 語言")
-    pubDate: str = Field(..., description="RSS 發布日期")
-    item: list[LibraryRssItem] = Field(..., description="RSS 文章列表")
-
-
 router = APIRouter()
 
 
-@router.get("/space", response_model=LibrarySpaceData)
+@router.get("/space", response_model=List[LibrarySpace])
 def get_library_space_data():
     """
     取得空間使用資訊。
@@ -97,7 +76,7 @@ def get_library_lost_and_found():
     return library_scraper.get_lost_and_found()
 
 
-@router.get("/rss/{rss}", response_model=LibraryRssData)
+@router.get("/rss/{rss}", response_model=List[LibraryRssItem])
 def get_library_rss_data(
     rss: LibraryRssType = Path(
         ...,

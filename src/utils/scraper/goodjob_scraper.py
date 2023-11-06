@@ -1,8 +1,8 @@
-from src.utils import cached_request
 from bs4 import BeautifulSoup
+from src.utils import cached_request
 
 
-def get(data_type: str) -> list:
+def get_announcements(data_type: str) -> list:
     """
     從 Goodjob 取得活動資料。
     Args:
@@ -23,6 +23,7 @@ def get(data_type: str) -> list:
     for item in items:
         title = item.select_one("h3").text
         date_month = item.select_one("div.g-color-text-light-v1 span.d-block").text
+        date_month = date_month.replace("月", "")
         date_year = item.select_one(
             "div.g-color-text-light-v1 span.d-block:nth-child(2)"
         ).text
@@ -31,7 +32,7 @@ def get(data_type: str) -> list:
             {
                 "title": title,
                 "description": description,
-                "date": f"{date_year}年 {date_month}",
+                "date": f"{date_year}-{date_month}",
             }
         )
 
