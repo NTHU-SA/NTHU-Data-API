@@ -9,25 +9,25 @@ class CoursesData:
     """課程資料的資料類別。
 
     Attributes:
-        id(``str``): 科號。
-        chinese_title(``str``): 課程中文名稱。
-        english_title(``str``): 課程英文名稱。
-        credit(``str``): 學分數。
-        size_limit(``str``): 人限：若為空字串表示無人數限制。
-        freshman_reservation(``str``): 新生保留人數：若為0表示無新生保留人數。
-        object(``str``): 通識對象：[代碼說明(課務組)](https://curricul.site.nthu.edu.tw/p/404-1208-11133.php)。
-        ge_type(``str``): 通識類別。
-        language(``str``): 授課語言："中"、"英"。
-        note(``str``): 備註。
-        suspend(``str``): 停開註記："停開"或空字串。
-        class_room_and_time(``str``):教室與上課時間：一間教室對應一個上課時間，中間以tab分隔；多個上課教室以new line字元分開。
-        teacher(``str``): 授課教師：多位教師授課以new line字元分開；教師中英文姓名以tab分開。
-        prerequisite(``str``): 擋修說明：會有html entities。
-        limit_note(``str``): 課程限制說明。
-        expertise(``str``): 第一二專長對應：對應多個專長用tab字元分隔。
-        program(``str``): 學分學程對應：用半形/分隔。
-        no_extra_selection(``str``): 不可加簽說明。
-        required_optional_note(``str``): 必選修說明：多個必選修班級用tab字元分隔。
+        id (str): 科號。
+        chinese_title (str): 課程中文名稱。
+        english_title (str): 課程英文名稱。
+        credit (str): 學分數。
+        size_limit (str): 人限：若為空字串表示無人數限制。
+        freshman_reservation (str): 新生保留人數：若為0表示無新生保留人數。
+        object (str): 通識對象：[代碼說明(課務組)](https://curricul.site.nthu.edu.tw/p/404-1208-11133.php)。
+        ge_type (str): 通識類別。
+        language (str): 授課語言："中"、"英"。
+        note (str): 備註。
+        suspend (str): 停開註記："停開"或空字串。
+        class_room_and_time (str):教室與上課時間：一間教室對應一個上課時間，中間以tab分隔；多個上課教室以new line字元分開。
+        teacher (str): 授課教師：多位教師授課以new line字元分開；教師中英文姓名以tab分開。
+        prerequisite (str): 擋修說明：會有html entities。
+        limit_note (str): 課程限制說明。
+        expertise (str): 第一二專長對應：對應多個專長用tab字元分隔。
+        program (str): 學分學程對應：用半形/分隔。
+        no_extra_selection (str): 不可加簽說明。
+        required_optional_note (str): 必選修說明：多個必選修班級用tab字元分隔。
     """
 
     def __init__(self, init_data: dict) -> None:
@@ -68,9 +68,9 @@ class Condition:
     比對課程資料的欄位，確認是否滿足設定的配對（match）條件，可使用全等比對或正則表達式。
 
     Attributes:
-        row_field(``str``): 用以指定要配對的欄位。
-        matcher(``str``): 判斷式。
-        regex_match(``bool``): 當 ``True`` 時將 matcher 視為正則表達式，反之視為普通字串並使用全等比對。
+        row_field (str): 用以指定要配對的欄位。
+        matcher (str): 判斷式。
+        regex_match (bool): 當 ``True`` 時將 matcher 視為正則表達式，反之視為普通字串並使用全等比對。
     """
 
     def __init__(self, row_field: str, matcher: str, regex_match: bool) -> None:
@@ -97,14 +97,28 @@ class Conditions:
     將條件邏輯包裝進 list，模擬不同條件間 AND 、 OR 的邏輯組合。初始化參數與 Condition 相同，是傳遞參數的角色。
 
     Attributes:
-        condition_stat(``list[Condition | str | bool]``): 特定結構模擬出的表達式格式。
-        course(``Course``): 當前套用條件的課程。
+        condition_stat (list[Condition | str | bool]): 特定結構模擬出的表達式格式。
+        course (Course): 當前套用條件的課程。
     """
 
     def __init__(
-        self, row_field: str, matcher: str | re.Pattern[str], regex_match: bool = False
+        self,
+        row_field: str = None,
+        matcher: str | re.Pattern[str] = None,
+        regex_match: bool = False,
+        *,
+        list_build_target: list = None,
     ) -> None:
-        self.condition_stat = [Condition(row_field, matcher, regex_match), "and", True]
+        if list_build_target != None:
+            # 優先使用 list_build_target 建立條件式
+            self.condition_stat = list_build_target
+        else:
+            self.condition_stat = [
+                Condition(row_field, matcher, regex_match),
+                "and",
+                True,
+            ]
+
         self.course = None
 
     def __and__(self, condition2):
@@ -119,17 +133,25 @@ class Conditions:
         self.condition_stat = [self.condition_stat, "or", condition2.condition_stat]
         return self
 
-    def _solve_condition_stat(self, data: list) -> bool:
+    def _solve_condition_stat(self, data: dict) -> bool:
         """遞迴函式，拆分成 左手邊、運算子、右手邊，將左右手遞迴解成 ``bool`` 之後，再算出這一層的結果。"""
+        # 這部分遞迴實作成這樣，是因為 pydantic 幫忙確認過條件式每一層的結構，
+        # 都是合乎 [Condition, op, Condition] 的，不會有其他不合法的結構，所以可以這樣寫
 
         lhs, op, rhs = data
 
-        if type(lhs) == list:
+        if type(lhs) == dict:
+            lhs = Condition(**lhs).check(self.course)
+        elif type(lhs) == list:
+            # nested Condition，可以再遞迴拆解
             lhs = self._solve_condition_stat(lhs)
         elif type(lhs) == Condition:
             lhs = lhs.check(self.course)
 
-        if type(rhs) == list:
+        if type(rhs) == dict:
+            rhs = Condition(**rhs).check(self.course)
+        elif type(rhs) == list:
+            # nested Condition，可以再遞迴拆解
             rhs = self._solve_condition_stat(rhs)
         elif type(rhs) == Condition:
             rhs = rhs.check(self.course)
@@ -150,7 +172,7 @@ class Processor:
     """可以添加 query 條件的課程資料。
 
     Attributes:
-        course_data (``list[Course]``): 轉換為 Course 類別的課程資料。
+        course_data  (list[Course]): 轉換為 Course 類別的課程資料。
     """
 
     NTHU_COURSE_DATA_URL = (
