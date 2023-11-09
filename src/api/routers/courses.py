@@ -1,7 +1,8 @@
 from enum import Enum
+from operator import rshift
 from typing import Union
 
-from fastapi import APIRouter, Body, HTTPException, Path, Query
+from fastapi import APIRouter, Body, HTTPException, Path, Query, Response
 from pydantic import BaseModel, Field, RootModel, field_validator
 
 from ..models.courses import Conditions, Processor
@@ -115,12 +116,14 @@ courses = Processor(json_path="data/courses/11210.json")
 
 @router.get("/", response_model=list[CourseData])
 async def get_all_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
 ):
     """
     取得所有課程。
     """
     result = courses.course_data[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
@@ -182,37 +185,43 @@ async def get_selected_field_and_value_data(
 
 @router.get("/lists/16weeks", response_model=list[CourseData])
 async def get_16weeks_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
 ) -> list[CourseData]:
     """
     取得 16 週課程列表。
     """
     condition = Conditions("note", "16週課程", True)
     result = courses.query(condition)[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
 @router.get("/lists/microcredits", response_model=list[CourseData])
 async def get_microcredits_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, description="最大回傳資料筆數"),
 ) -> list[CourseData]:
     """
     取得微學分課程列表。
     """
     condition = Conditions("credit", f"[0-9].[0-9]", True)
     result = courses.query(condition)[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
 @router.get("/lists/xclass", response_model=list[CourseData])
 async def get_xclass_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, description="最大回傳資料筆數"),
 ) -> list[CourseData]:
     """
     取得 X-class 課程列表。
     """
     condition = Conditions("note", "X-Class", True)
     result = courses.query(condition)[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
