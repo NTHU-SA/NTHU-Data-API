@@ -1,8 +1,9 @@
+from doctest import Example
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, Field
 from uuid import UUID
 
-from ..models.phones import Phone
+from ..models.contacts import Contact
 
 
 class ContactRelativeNode(BaseModel):
@@ -33,50 +34,53 @@ class ContactSearchData(BaseModel):
 
 
 router = APIRouter()
-phone = Phone()
+contact = Contact()
 
 
 @router.get("/", response_model=list[ContactsData])
-def get_all_phone():
+def get_all_contact():
     """
     取得所有電話資料。
     """
-    result = phone.get_all()
+    result = contact.get_all()
     return result
 
 
 @router.get("/{id}", response_model=ContactsData)
-def get_phone(id: UUID = Path(..., description="要查詢電話的 ID")):
+def get_contact(
+    id: UUID = Path(
+        ..., example="7e00db83-b407-4320-af55-0a1b1f5734ad", description="要查詢電話的 ID"
+    )
+):
     """
     使用電話 id 取得電話資料。
     """
-    result = phone.get_by_id(id)
+    result = contact.get_by_id(id)
     if result:
         return result
-    else:
-        raise HTTPException(status_code=404, detail="Not found")
+    raise HTTPException(status_code=404, detail="Not found")
 
 
 @router.get("/searches/{name}", response_model=list[ContactsData])
-def search_phone(name: str = Path(..., description="要查詢誰的電話")):
+def search_contact_by_get_method(
+    name: str = Path(..., example="清華學院", description="要查詢誰的電話")
+):
     """
     根據名字模糊搜尋電話。
     """
-    result = phone.fuzzy_search(name)
+    result = contact.fuzzy_search(name)
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
-    else:
-        return result
+    return result
 
 
 @router.post("/searches", response_model=list[ContactsData])
-def search_phone(search_data: ContactSearchData):
+def search_contact_by_post_method(search_data: ContactSearchData):
     """
     根據名字模糊搜尋電話。
     """
-    result = phone.fuzzy_search(search_data.name)
+    result = contact.fuzzy_search(search_data.name)
     result = result[: search_data.max_result]
     if result == []:
         raise HTTPException(status_code=404, detail="Not found")
-    else:
-        return result
+    return result

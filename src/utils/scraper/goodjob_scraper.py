@@ -21,18 +21,30 @@ def get_announcements(data_type: str) -> list:
 
     data = []
     for item in items:
-        title = item.select_one("h3").text
-        date_month = item.select_one("div.g-color-text-light-v1 span.d-block").text
-        date_month = date_month.replace("月", "")
-        date_year = item.select_one(
-            "div.g-color-text-light-v1 span.d-block:nth-child(2)"
-        ).text
-        description = item.select_one("div.col-md-9 span").text
+        # 取得標題
+        title = item.select_one("h3")
+        if title is not None:
+            title = title.text
+        # 取得描述
+        description = item.select_one("div.col-md-9 span")
+        if description is not None:
+            description = description.text
+        # 取得日期
+        date = None
+        date_month = item.select_one("div.g-color-text-light-v1 span.d-block")
+        if date_month is not None:
+            date_month = date_month.text.replace("月", "")
+            date_year = item.select_one(
+                "div.g-color-text-light-v1 span.d-block:nth-child(2)"
+            )
+            if date_year is not None:
+                date_year = date_year.text.replace("年", "")
+                date = f"{date_year}-{date_month}"
         data.append(
             {
                 "title": title,
                 "description": description,
-                "date": f"{date_year}-{date_month}",
+                "date": date,
             }
         )
 

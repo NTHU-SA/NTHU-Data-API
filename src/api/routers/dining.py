@@ -39,7 +39,7 @@ dining = Dining()
 
 
 @router.get("/", response_model=list[DiningBuilding])
-def get_dining_data() -> list[DiningBuilding]:
+def get_all_dining_data() -> list[DiningBuilding]:
     """
     取得所有餐廳資料。
     """
@@ -55,7 +55,7 @@ def get_all_building_names() -> list[DiningBuildingName]:
 
 
 @router.get("/buildings/{building_name}", response_model=DiningBuilding)
-def get_dining_data(
+def get_dining_data_in_buildings(
     building_name: DiningBuildingName = Path(..., example="小吃部", description="建築名稱")
 ) -> DiningBuilding:
     """
@@ -73,7 +73,7 @@ def get_all_restaurant_names() -> list[str]:
 
 
 @router.get("/restaurants/{restaurant_name}", response_model=list[DiningRestaurant])
-def get_dining_data(
+def get_dining_data_by_name(
     restaurant_name: str = Path(..., example="麥當勞", description="餐廳名稱")
 ):
     """

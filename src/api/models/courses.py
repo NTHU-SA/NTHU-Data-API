@@ -266,10 +266,6 @@ if __name__ == "__main__":
     )
     logger.info(course_data.query(condition4)[:5])
 
-    # 課號包含"STAT"，即統計所開設之課程
-    condition_stat = Conditions("ID", "\d+STAT[3+]\d+", True)
-    logger.info(course_data.query(condition_stat)[:3])
-
     logger.info(f"總開課數: {len(course_data.course_data)}")
     # 中文授課 或 英文授課
     condition_ce = Conditions("LANGUAGE", "中") | Conditions("LANGUAGE", "英")

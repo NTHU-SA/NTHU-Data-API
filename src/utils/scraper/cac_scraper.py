@@ -19,7 +19,6 @@ def get_events_list(maxpage: int = 1):
             # 找到 a 元素，取出 href 和 title 屬性
             # 找到 img 元素，取出 src 屬性
             dimg = item.select_one("div.d-img")
-            # print(dimg)
             if dimg is not None:
                 a = dimg.find("a")
                 img = str(dimg.find("img").get("src"))

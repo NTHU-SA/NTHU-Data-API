@@ -25,7 +25,7 @@ async def get_goodjob_events():
     return goodjob_scraper.get_announcements("01003")
 
 
-@router.get("/cac")
+@router.get("/arts_center")
 async def get_arts_center_events():
     """
     取得藝術文化總中心的當期活動。

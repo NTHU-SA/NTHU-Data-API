@@ -27,19 +27,17 @@ def get_all_newsletters_list() -> list:
         h3 = li.find("h3")
         if h3 is not None:
             a = h3.find("a")
-        else:
-            a = None
-        newsletter_list.append(
-            {
-                "name": a.text.strip(),
-                "link": a["href"],
-            }
-        )
+            newsletter_list.append(
+                {
+                    "name": a.text.strip(),
+                    "link": a["href"],
+                }
+            )
     return newsletter_list
 
 
 @cached(cache=TTLCache(maxsize=32, ttl=60 * 60))
-def get_selected_newsletter_list(url: str) -> str:
+def get_selected_newsletter_list(url: str) -> list:
     """
     取得 newsletter 的內容。
     """
@@ -49,18 +47,23 @@ def get_selected_newsletter_list(url: str) -> str:
         raise HTTPException(staus_code, f"Request error: {staus_code}")
     soup = BeautifulSoup(response.text, "html.parser")
     content = soup.find("div", {"id": "acyarchivelisting"})
+    if content is None:
+        raise HTTPException(404, "Not found")
     # 取得標題
-    title_text = content.find("h1", {"class": "contentheading"}).text.strip()
+    # title_text = content.find("h1", {"class": "contentheading"}).text.strip()
     # 取得內容
     table = content.find("table", {"class": "contentpane"})
     newsletter_list = []
     for archiveRow in table.find_all("div", {"class": "archiveRow"}):
+        text = None
+        link = None
+
         a = archiveRow.find("a")
         if a is not None:
             onclick = a.get("onclick")  # 獲取連結
             match = re.search(r"openpopup\('(.*?)',", onclick)
             if match:
-                link = match.group(1)
+                link = URL_PREFIX + match.group(1)
             text = a.text  # 獲取內文
         date_string = archiveRow.find("span", {"class": "sentondate"}).text.strip()
         month_mapping = {
@@ -86,7 +89,7 @@ def get_selected_newsletter_list(url: str) -> str:
         newsletter_list.append(
             {
                 "title": text,
-                "link": URL_PREFIX + link,
+                "link": link,
                 "date": formatted_date,
             }
         )
