@@ -1,4 +1,3 @@
-import requests
 import re
 import json
 
@@ -10,13 +9,17 @@ class Buses:
     # https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw
     # 南大區間車
     # https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw
-    def get_nanda_data(self):
+    def get_nanda_data(self) -> dict:
         url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
         res_text = cached_request.get(url)
 
         def get_campus_info(variable_string: str):
             regex_pattern = r"const " + variable_string + " = (\{.*?\})"
-            data = re.search(regex_pattern, res_text, re.S).group(1)
+            data = re.search(regex_pattern, res_text, re.S)
+            if data is not None:
+                data = data.group(1)
+            else:
+                return None
             data = data.replace("'", '"')
             data = data.replace("\n", "")
             data = data.replace("direction", '"direction"')
@@ -28,7 +31,11 @@ class Buses:
 
         def get_bus_schedule(variable_string: str):
             regex_pattern = r"const " + variable_string + " = (\[.*?\])"
-            data = re.search(regex_pattern, res_text, re.S).group(1)
+            data = re.search(regex_pattern, res_text, re.S)
+            if data is not None:
+                data = data.group(1)
+            else:
+                return None
             data = data.replace("'", '"')
             data = data.replace("\n", "")
             data = data.replace("time", '"time"')

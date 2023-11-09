@@ -49,7 +49,7 @@ def get_rss_data(rss_type: str) -> list:
     return rss_data
 
 
-def get_number_of_goods():
+def get_number_of_goods() -> dict:
     """
     取得總圖換證數量資訊。
     """
@@ -69,7 +69,7 @@ def get_number_of_goods():
     return data
 
 
-def get_opening_hours(libaray_name):
+def get_opening_hours(libaray_name) -> dict:
     """
     取得指定圖書館的開放時間。
     """
@@ -89,7 +89,7 @@ def get_opening_hours(libaray_name):
     return data
 
 
-def get_space_data():
+def get_space_data() -> list:
     """
     取得空間使用資訊。
     """
@@ -104,7 +104,7 @@ def get_space_data():
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
-def get_lost_and_found():
+def get_lost_and_found() -> list:
     """
     取得失物招領資訊。
     """

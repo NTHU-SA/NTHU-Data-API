@@ -7,7 +7,7 @@ from .routers import (
     libraries,
     locations,
     newsletters,
-    phones,
+    contacts,
     resources,
     rpage,
 )
@@ -19,6 +19,7 @@ app.include_router(energy.router, prefix="/energy", tags=["Energy"])
 app.include_router(libraries.router, prefix="/libraries", tags=["Libraries"])
 app.include_router(locations.router, prefix="/locations", tags=["Locations"])
 app.include_router(newsletters.router, prefix="/newsletters", tags=["Newsletters"])
-app.include_router(phones.router, prefix="/phones", tags=["Phones"])
+app.include_router(contacts.router, prefix="/phones", tags=["Phones"])
+app.include_router(contacts.router, prefix="/contacts", tags=["Contacts"])
 app.include_router(resources.router, prefix="/resources", tags=[])
 app.include_router(rpage.router, prefix="/rpage", tags=["Rpage"])

@@ -22,7 +22,6 @@ def announcement(url: str, maxpage: int = 1) -> list:
     if maxpage > 1:
         for i in range(2, maxpage + 1):
             page_list.append(replace_numbers_in_url(url, str(i)))
-    print(page_list)
 
     data = []
 
@@ -33,8 +32,8 @@ def announcement(url: str, maxpage: int = 1) -> list:
         soup = BeautifulSoup(response, "html.parser")
         recruitments = soup.select("#pageptlist .listBS")
         for item in recruitments:
-            date = item.select_one(".mdate").text if item.select_one(".mdate") else None
-
+            mdate = item.select_one(".mdate")
+            date = str(mdate.text) if mdate is not None else None
             url_dom = item.select_one("a")
             if url_dom is not None:
                 title = str(url_dom.get("title"))

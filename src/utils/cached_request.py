@@ -42,6 +42,8 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
         return ttl_cache[url]
     if auto_headers == True:
         headers = generate_headers(url)
+    else:
+        headers = None
     response = requests.get(url, headers, **kwargs)
     status_code = response.status_code
     if status_code != 200:

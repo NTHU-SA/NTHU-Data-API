@@ -7,7 +7,7 @@ class Ckip:
     def __init__(self):
         pass
 
-    def api(self, text: str) -> str:
+    def api(self, text: str) -> list:
         # CKIP API extract from frontend
         # API DEMO: https://ckip.iis.sinica.edu.tw/demo
         # CKIP CoreNLP API extract from frontend

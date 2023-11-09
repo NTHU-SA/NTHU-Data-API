@@ -3,6 +3,7 @@ import requests
 import json
 import datetime
 from cachetools import cached, TTLCache
+from fastapi import HTTPException
 
 
 class Energy:
@@ -19,9 +20,17 @@ class Energy:
 
         for i in range(1, 4):
             res = requests.get(URL_PREFIX + str(i) + URL_POSTFIX)
+            if res.status_code != 200:
+                raise HTTPException(
+                    status_code=500, detail="Failed to get electricity usage data."
+                )
             res_text = res.text
 
-            data = re.search(r"alt=\"kW: ([\d,-]+?)\"", res_text, re.S).group(1)
+            data = re.search(r"alt=\"kW: ([\d,-]+?)\"", res_text, re.S)
+            if data is not None:
+                data = data.group(1)
+            else:
+                return None
 
             unit_data = {}
             unit_data["name"] = data_names[i - 1]
