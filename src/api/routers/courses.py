@@ -1,7 +1,8 @@
 from enum import Enum
+from operator import rshift
 from typing import Union
 
-from fastapi import APIRouter, Body, HTTPException, Path, Query
+from fastapi import APIRouter, Body, HTTPException, Path, Query, Response
 from pydantic import BaseModel, Field, RootModel, field_validator
 
 from ..models.courses import Conditions, Processor
@@ -96,7 +97,7 @@ class CourseQueryCondition(RootModel):
                 "The first element of query must be a Condition or nested Condition."
                 + POST_ERROR_INFO
             )
-        elif type(v[1]) != CourseQueryOperation:
+        elif type(v[1]) is not CourseQueryOperation:
             raise TypeError(
                 'The second element of query must be a Operation (i.e. "and" or "or").'
                 + POST_ERROR_INFO
@@ -106,49 +107,6 @@ class CourseQueryCondition(RootModel):
                 "The third element of query must be a Condition or nested Condition."
                 + POST_ERROR_INFO
             )
-
-        return v
-
-
-class CourseCondition(BaseModel):
-    row_field: CourseFieldName = Field(..., description="搜尋的欄位名稱")
-    matcher: str = Field(..., description="搜尋的值")
-    regex_match: bool = Field(False, description="是否使用正則表達式")
-
-
-class CourseQueryOperation(str, Enum):
-    and_ = "and"
-    or_ = "or"
-
-
-class CourseQueryCondition(RootModel):
-    root: list[
-        Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]
-    ]
-
-    @field_validator("root")
-    def check_query(cls, v):
-        POST_ERROR_INFO = " Also, FYI, the structure of query must be like this: [(nested) Condition, Operation, (nested) Condition]."
-        if len(v) != 3:
-            raise ValueError(
-                "Each level of query must have 3 elements." + POST_ERROR_INFO
-            )
-        elif type(v[0]) not in [CourseQueryCondition, CourseCondition]:
-            raise TypeError(
-                "The first element of query must be a Condition or nested Condition."
-                + POST_ERROR_INFO
-            )
-        elif type(v[1]) != CourseQueryOperation:
-            raise TypeError(
-                'The second element of query must be a Operation (i.e. "and" or "or").'
-                + POST_ERROR_INFO
-            )
-        elif type(v[2]) not in [CourseQueryCondition, CourseCondition]:
-            raise TypeError(
-                "The third element of query must be a Condition or nested Condition."
-                + POST_ERROR_INFO
-            )
-
         return v
 
 
@@ -158,12 +116,14 @@ courses = Processor(json_path="data/courses/11210.json")
 
 @router.get("/", response_model=list[CourseData])
 async def get_all_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
 ):
     """
     取得所有課程。
     """
     result = courses.course_data[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
@@ -225,37 +185,43 @@ async def get_selected_field_and_value_data(
 
 @router.get("/lists/16weeks", response_model=list[CourseData])
 async def get_16weeks_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
 ) -> list[CourseData]:
     """
     取得 16 週課程列表。
     """
     condition = Conditions("note", "16週課程", True)
     result = courses.query(condition)[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
 @router.get("/lists/microcredits", response_model=list[CourseData])
 async def get_microcredits_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, description="最大回傳資料筆數"),
 ) -> list[CourseData]:
     """
     取得微學分課程列表。
     """
     condition = Conditions("credit", f"[0-9].[0-9]", True)
     result = courses.query(condition)[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
 @router.get("/lists/xclass", response_model=list[CourseData])
 async def get_xclass_courses_list(
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數")
+    response: Response,
+    limits: int = Query(None, ge=1, description="最大回傳資料筆數"),
 ) -> list[CourseData]:
     """
     取得 X-class 課程列表。
     """
     condition = Conditions("note", "X-Class", True)
     result = courses.query(condition)[:limits]
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
@@ -341,13 +307,13 @@ async def get_courses_by_condition(
     """
     根據條件取得課程。
     """
-    if type(query_condition) == CourseCondition:
+    if type(query_condition) is CourseCondition:
         condition = Conditions(
             query_condition.row_field.value,
             query_condition.matcher,
             query_condition.regex_match,
         )
-    elif type(query_condition) == CourseQueryCondition:
+    elif type(query_condition) is CourseQueryCondition:
         # 設定 mode="json" 是為了讓 dump 出來的內容不包含 python 的實體 (instance)
         condition = Conditions(
             list_build_target=query_condition.model_dump(mode="json")

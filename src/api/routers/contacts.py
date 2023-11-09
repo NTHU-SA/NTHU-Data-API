@@ -1,4 +1,3 @@
-from doctest import Example
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Path

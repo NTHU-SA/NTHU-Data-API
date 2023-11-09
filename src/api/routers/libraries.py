@@ -82,7 +82,7 @@ def get_library_lost_and_found():
 def get_library_rss_data(
     rss: LibraryRssType = Path(
         ...,
-        description="RSS 類型：最新消息(rss_news)、電子資源(rss_eresources)、展覽及活動(rss_exhibit)、南大與人社分館(rss_branches)",
+        description="RSS 類型：最新消息(news)、電子資源(eresources)、展覽及活動(exhibit)、南大與人社分館(branches)",
     )
 ):
     """
