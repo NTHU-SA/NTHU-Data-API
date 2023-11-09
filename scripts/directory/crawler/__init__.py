@@ -1,9 +1,8 @@
 import os
 
-from loguru import logger
-
 from crawler import get_all_dept_details, get_dept_departments
-from sort_data import combine_file, combine_json, combine_contact
+from loguru import logger
+from sort_data import combine_contact, combine_file, combine_json
 
 
 def crawl_all():

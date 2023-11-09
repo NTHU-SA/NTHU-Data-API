@@ -1,5 +1,5 @@
-import re
 import json
+import re
 
 # https://www.nthu.edu.tw/campusmap
 # https://campusmap.cc.nthu.edu.tw/

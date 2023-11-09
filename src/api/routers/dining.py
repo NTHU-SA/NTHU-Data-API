@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
+
 from fastapi import APIRouter, HTTPException, Path
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from ..models.dining import Dining
 

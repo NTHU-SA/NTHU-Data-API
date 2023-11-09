@@ -1,6 +1,6 @@
 import json
-from phone_data_node import PhoneDataNode
 
+from phone_data_node import PhoneDataNode
 
 with open("./original_data/dept.json", "r", encoding="utf-8") as f:
     phone_data = json.load(f)

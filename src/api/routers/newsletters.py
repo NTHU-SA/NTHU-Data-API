@@ -1,6 +1,8 @@
 import json
-from fastapi import APIRouter, Path, HTTPException
+
+from fastapi import APIRouter, HTTPException, Path
 from pydantic import HttpUrl
+
 from src.utils.scraper import newsletter_scraper
 
 router = APIRouter()

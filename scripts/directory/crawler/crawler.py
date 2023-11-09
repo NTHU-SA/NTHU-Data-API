@@ -2,12 +2,12 @@
 
 base_url = "https://tel.net.nthu.edu.tw/nthusearch/"
 
-import requests
-import re
-import bs4
 import json
+import re
 
-from cachetools import cached, TTLCache
+import bs4
+import requests
+from cachetools import TTLCache, cached
 from loguru import logger
 
 

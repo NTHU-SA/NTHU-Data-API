@@ -1,4 +1,5 @@
 import json
+
 from location_data_node import LocationDataNode
 
 zh_location = dict()

@@ -1,8 +1,9 @@
 import re
+from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
-from cachetools import cached, TTLCache
+from cachetools import TTLCache, cached
 from fastapi import HTTPException
 
 URL_PREFIX = "https://newsletter.cc.nthu.edu.tw"

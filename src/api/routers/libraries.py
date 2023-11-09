@@ -1,7 +1,9 @@
 from enum import Enum
-from typing import Optional, List
-from pydantic import BaseModel, HttpUrl, Field
+from typing import List, Optional
+
 from fastapi import APIRouter, Path
+from pydantic import BaseModel, Field, HttpUrl
+
 from src.utils.scraper import library_scraper
 
 

@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, Field
-from uuid import UUID
 
 from ..models.locations import Location
 

@@ -1,9 +1,10 @@
 from fastapi import APIRouter
+
 from src.utils.scraper import (
-    rpage_scraper,
-    library_scraper,
-    goodjob_scraper,
     cac_scraper,
+    goodjob_scraper,
+    library_scraper,
+    rpage_scraper,
 )
 
 router = APIRouter()
