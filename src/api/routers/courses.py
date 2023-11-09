@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Union
-from fastapi import APIRouter, HTTPException, Path, Query, Body
-from pydantic import BaseModel, RootModel, field_validator, Field
+
+from fastapi import APIRouter, Body, HTTPException, Path, Query
+from pydantic import BaseModel, Field, RootModel, field_validator
 
 from ..models.courses import Conditions, Processor
 
