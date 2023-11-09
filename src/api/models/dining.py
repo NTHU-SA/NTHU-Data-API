@@ -1,7 +1,8 @@
-import re
 import json
+import re
 
 from thefuzz import fuzz, process
+
 from src.utils import cached_request
 
 

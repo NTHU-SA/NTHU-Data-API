@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from src.utils.scraper import rpage_scraper
 
 router = APIRouter()

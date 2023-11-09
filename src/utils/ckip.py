@@ -1,6 +1,7 @@
 # TODO: Exception handling, timeout, retry, etc.
-import requests
 import json
+
+import requests
 
 
 class Ckip:

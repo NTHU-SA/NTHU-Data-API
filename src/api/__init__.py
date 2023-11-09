@@ -1,13 +1,13 @@
 from .. import app
 from .routers import (
     buses,
+    contacts,
     courses,
     dining,
     energy,
     libraries,
     locations,
     newsletters,
-    contacts,
     resources,
     rpage,
 )

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+
 from src.utils import cached_request
 
 

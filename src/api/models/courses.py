@@ -1,8 +1,8 @@
 import json
 import re
-import requests
 
-from cachetools import cached, TTLCache
+import requests
+from cachetools import TTLCache, cached
 
 
 class CoursesData:

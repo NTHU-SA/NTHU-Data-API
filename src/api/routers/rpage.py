@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Path
-from pydantic import BaseModel, HttpUrl, Field
 from typing import Optional
+
+from fastapi import APIRouter, Path
+from pydantic import BaseModel, Field, HttpUrl
 
 from src.utils.scraper import rpage_scraper
 

@@ -1,6 +1,8 @@
 import os
+
 import uvicorn
 from dotenv import load_dotenv
+
 from scripts.ssl.generate_ssl import generate_certificate
 
 load_dotenv()

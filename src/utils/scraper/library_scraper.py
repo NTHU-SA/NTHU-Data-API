@@ -1,11 +1,12 @@
-from bs4 import BeautifulSoup
-from cachetools import cached, TTLCache
-from datetime import datetime, timedelta
-from fastapi import HTTPException
 import json
 import re
+from datetime import datetime, timedelta
+
 import requests
 import xmltodict
+from bs4 import BeautifulSoup
+from cachetools import TTLCache, cached
+from fastapi import HTTPException
 
 
 @cached(cache=TTLCache(maxsize=64, ttl=60 * 60))
