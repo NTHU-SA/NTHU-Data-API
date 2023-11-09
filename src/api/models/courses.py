@@ -1,8 +1,8 @@
 import json
+import operator
 import re
 
-import requests
-from cachetools import TTLCache, cached
+from src.utils import cached_request
 
 
 class CoursesData:
@@ -84,9 +84,9 @@ class Condition:
         course_data_dict = vars(course)
         field_data = course_data_dict[self.row_field]
 
-        if self.regex_match == True:
+        if self.regex_match is True:
             match_res = re.search(self.matcher, field_data)
-            return False if match_res == None else True
+            return False if match_res is None else True
         else:
             return field_data == self.matcher
 
@@ -109,7 +109,7 @@ class Conditions:
         *,
         list_build_target: list = None,
     ) -> None:
-        if list_build_target != None:
+        if list_build_target is not None:
             # 優先使用 list_build_target 建立條件式
             self.condition_stat = list_build_target
         else:
@@ -137,29 +137,29 @@ class Conditions:
         """遞迴函式，拆分成 左手邊、運算子、右手邊，將左右手遞迴解成 ``bool`` 之後，再算出這一層的結果。"""
         # 這部分遞迴實作成這樣，是因為 pydantic 幫忙確認過條件式每一層的結構，
         # 都是合乎 [Condition, op, Condition] 的，不會有其他不合法的結構，所以可以這樣寫
-
         lhs, op, rhs = data
 
-        if type(lhs) == dict:
-            lhs = Condition(**lhs).check(self.course)
-        elif type(lhs) == list:
-            # nested Condition，可以再遞迴拆解
-            lhs = self._solve_condition_stat(lhs)
-        elif type(lhs) == Condition:
-            lhs = lhs.check(self.course)
+        lhs = self._check_condition(lhs)
+        rhs = self._check_condition(rhs)
 
-        if type(rhs) == dict:
-            rhs = Condition(**rhs).check(self.course)
-        elif type(rhs) == list:
-            # nested Condition，可以再遞迴拆解
-            rhs = self._solve_condition_stat(rhs)
-        elif type(rhs) == Condition:
-            rhs = rhs.check(self.course)
+        match op:
+            case "and":
+                return lhs and rhs
+            case "or":
+                return lhs or rhs
+            case _:
+                raise ValueError(f"Unknown operator: {op}")
 
-        if op == "and":
-            return lhs and rhs
-        elif op == "or":
-            return lhs or rhs
+    def _check_condition(self, item):
+        if isinstance(item, dict):
+            return Condition(**item).check(self.course)
+        elif isinstance(item, list):
+            # nested Condition，可以再遞迴拆解
+            return self._solve_condition_stat(item)
+        elif isinstance(item, Condition):
+            return item.check(self.course)
+        else:
+            return item
 
     def accept(self, course: CoursesData) -> bool:
         """包裝遞迴函式供外部使用，回傳以該課程計算多個條件運算後的結果。"""
@@ -182,17 +182,16 @@ class Processor:
     def __init__(self, json_path=None) -> None:
         self.course_data = self._get_course_data(json_path)
 
-    @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
     def _get_course_data(self, json_path=None) -> list[CoursesData]:
         """TODO: error handler."""
-        if json_path != None:
+        if json_path is not None:
             # 使用 json 模組讀取檔案
             with open(json_path, "r", encoding="utf-8") as f:
                 course_data_dict_list = json.load(f)
         else:
             # 使用 requests 模組取得網頁資料
-            course_data_resp = requests.get(self.NTHU_COURSE_DATA_URL)
-            course_data_dict_list = json.loads(course_data_resp.text)
+            course_data_resp = cached_request.get(self.NTHU_COURSE_DATA_URL)
+            course_data_dict_list = json.loads(course_data_resp)
         return list(map(CoursesData, course_data_dict_list))
 
     def update(self, json_path=None):
@@ -213,28 +212,21 @@ class Processor:
         fields_list = list(set(fields_list))
         return fields_list
 
-    def list_credit(self, credit: float, op: str = None) -> list:
-        res = []
-        if op == None or op == "":
-            res = [
-                course for course in self.course_data if float(course.credit) == credit
-            ]
-        elif op == "gt":
-            res = [
-                course for course in self.course_data if float(course.credit) > credit
-            ]
-        elif op == "lt":
-            res = [
-                course for course in self.course_data if float(course.credit) < credit
-            ]
-        elif op == "gte":
-            res = [
-                course for course in self.course_data if float(course.credit) >= credit
-            ]
-        elif op == "lte":
-            res = [
-                course for course in self.course_data if float(course.credit) <= credit
-            ]
+    def list_credit(self, credit: float, op: str = "") -> list:
+        ops = {
+            "gt": operator.gt,
+            "lt": operator.lt,
+            "gte": operator.ge,
+            "lte": operator.le,
+            "eq": operator.eq,
+            "": operator.eq,
+        }
+
+        res = [
+            course
+            for course in self.course_data
+            if ops[op](float(course.credit), credit)
+        ]
 
         return res
 

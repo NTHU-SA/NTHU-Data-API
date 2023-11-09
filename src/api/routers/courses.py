@@ -96,7 +96,7 @@ class CourseQueryCondition(RootModel):
                 "The first element of query must be a Condition or nested Condition."
                 + POST_ERROR_INFO
             )
-        elif type(v[1]) != CourseQueryOperation:
+        elif type(v[1]) is not CourseQueryOperation:
             raise TypeError(
                 'The second element of query must be a Operation (i.e. "and" or "or").'
                 + POST_ERROR_INFO
@@ -106,49 +106,6 @@ class CourseQueryCondition(RootModel):
                 "The third element of query must be a Condition or nested Condition."
                 + POST_ERROR_INFO
             )
-
-        return v
-
-
-class CourseCondition(BaseModel):
-    row_field: CourseFieldName = Field(..., description="搜尋的欄位名稱")
-    matcher: str = Field(..., description="搜尋的值")
-    regex_match: bool = Field(False, description="是否使用正則表達式")
-
-
-class CourseQueryOperation(str, Enum):
-    and_ = "and"
-    or_ = "or"
-
-
-class CourseQueryCondition(RootModel):
-    root: list[
-        Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]
-    ]
-
-    @field_validator("root")
-    def check_query(cls, v):
-        POST_ERROR_INFO = " Also, FYI, the structure of query must be like this: [(nested) Condition, Operation, (nested) Condition]."
-        if len(v) != 3:
-            raise ValueError(
-                "Each level of query must have 3 elements." + POST_ERROR_INFO
-            )
-        elif type(v[0]) not in [CourseQueryCondition, CourseCondition]:
-            raise TypeError(
-                "The first element of query must be a Condition or nested Condition."
-                + POST_ERROR_INFO
-            )
-        elif type(v[1]) != CourseQueryOperation:
-            raise TypeError(
-                'The second element of query must be a Operation (i.e. "and" or "or").'
-                + POST_ERROR_INFO
-            )
-        elif type(v[2]) not in [CourseQueryCondition, CourseCondition]:
-            raise TypeError(
-                "The third element of query must be a Condition or nested Condition."
-                + POST_ERROR_INFO
-            )
-
         return v
 
 
@@ -341,13 +298,13 @@ async def get_courses_by_condition(
     """
     根據條件取得課程。
     """
-    if type(query_condition) == CourseCondition:
+    if type(query_condition) is CourseCondition:
         condition = Conditions(
             query_condition.row_field.value,
             query_condition.matcher,
             query_condition.regex_match,
         )
-    elif type(query_condition) == CourseQueryCondition:
+    elif type(query_condition) is CourseQueryCondition:
         # 設定 mode="json" 是為了讓 dump 出來的內容不包含 python 的實體 (instance)
         condition = Conditions(
             list_build_target=query_condition.model_dump(mode="json")

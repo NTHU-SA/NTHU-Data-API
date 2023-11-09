@@ -10,7 +10,7 @@ class Dining:
     # 餐廳及服務性廠商
     # https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw
 
-    def get_dining_data(self) -> dict:
+    def get_dining_data(self) -> list:
         url = "https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw"
         res_text = cached_request.get(url)
         # 將字串轉換成 json 格式
@@ -20,14 +20,14 @@ class Dining:
         if dining_data is not None:
             dining_data = dining_data.group(1)
         else:
-            return {}
+            return []
         dining_data = dining_data.replace("'", '"')
         dining_data = dining_data.replace("\n", "")
         dining_data = dining_data.replace(",  ]", "]")
         dining_data = json.loads(dining_data)
         return dining_data
 
-    def get_all_building_names(self) -> list[str]:
+    def get_all_building_names(self) -> list:
         dining_data = self.get_dining_data()
         building_names = []
         for building in dining_data:
@@ -47,7 +47,7 @@ class Dining:
         for restaurant in dining_data:
             if restaurant["building"] == query_name:
                 return restaurant
-        return None
+        return {}
 
     def query_by_restaurant_name(self, query_name):
         dining_data = self.get_dining_data()

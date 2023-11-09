@@ -1,3 +1,5 @@
+from urllib.parse import urlparse, urlunparse
+
 import requests
 from cachetools import TTLCache
 from fastapi import HTTPException
@@ -22,6 +24,27 @@ def generate_headers(referer: str) -> dict:
     }
 
 
+def validate_url(url: str) -> str:
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        raise ValueError("Invalid URL")
+    # 只允許 http 或 https 協議
+    if parsed_url.scheme not in ["http", "https"]:
+        raise ValueError("Invalid URL scheme")
+    # 重新組合 URL，排除可能的用戶名和密碼
+    safe_url = urlunparse(
+        (
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            parsed_url.params,
+            parsed_url.query,
+            parsed_url.fragment,
+        )
+    )
+    return safe_url
+
+
 def delete(url: str) -> None:
     if url in ttl_cache:
         del ttl_cache[url]
@@ -40,10 +63,11 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
         del ttl_cache[url]
     if cache and url in ttl_cache:
         return ttl_cache[url]
-    if auto_headers == True:
+    if auto_headers is True:
         headers = generate_headers(url)
     else:
         headers = None
+    url = validate_url(url)
     response = requests.get(url, headers, **kwargs)
     status_code = response.status_code
     if status_code != 200:
@@ -62,8 +86,6 @@ def post(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str
         del ttl_cache[url]
     if cache and url in ttl_cache:
         return ttl_cache[url]
-    if auto_headers == True:
-        headers = generate_headers(url)
     response = requests.post(url, **kwargs)
     status_code = response.status_code
     if status_code != 200:

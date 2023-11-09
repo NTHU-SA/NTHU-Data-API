@@ -42,7 +42,10 @@ def get_selected_newsletter_list(url: str) -> list:
     """
     取得 newsletter 的內容。
     """
-    response = requests.get(url)
+    if not url.startswith(URL_PREFIX):
+        raise HTTPException(400, "Bad request")
+    else:
+        response = requests.get(url)
     staus_code = response.status_code
     if staus_code != 200:
         raise HTTPException(staus_code, f"Request error: {staus_code}")

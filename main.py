@@ -20,7 +20,7 @@ if __name__ == "__main__":
             host="0.0.0.0",
             port=int(os.getenv("PORT") or 5000),
             log_level="debug",
-            reload=True,  #  reload the server every time code changes
+            reload=True,  # reload the server every time code changes
         )
     else:
         # Production
