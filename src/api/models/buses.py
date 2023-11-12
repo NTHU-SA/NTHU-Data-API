@@ -19,7 +19,9 @@ class Buses:
             data = data.group(1)
         else:
             return None
-        data = data.replace("'", '"')
+        data = data.replace("'", "|")
+        data = data.replace('"', '\\"')
+        data = data.replace("|", '"')
         data = data.replace("\n", "")
         data = data.replace("direction", '"direction"')
         data = data.replace("duration", '"duration"')
@@ -39,7 +41,10 @@ class Buses:
         data = data.replace("\n", "")
         data = data.replace("time", '"time"')
         data = data.replace("description", '"description"')
+        data = data.replace("depStop", '"depStop"')
+        data = data.replace("line", '"line"')
         data = data.replace(",    ]", "]")
+        data = data.replace(",  ]", "]")
         data = json.loads(data)
         return data
 
