@@ -20,4 +20,4 @@ def get_rpage_data(
     """
     爬取指定 Rpage 公告的內容。
     """
-    return rpage_scraper.announcement(str(full_path))
+    return rpage_scraper.get_announcement(str(full_path))

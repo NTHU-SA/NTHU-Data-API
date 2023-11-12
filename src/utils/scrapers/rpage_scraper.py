@@ -6,13 +6,13 @@ from bs4 import BeautifulSoup
 from src.utils import cached_request
 
 
-def replace_numbers_in_url(url: str, new_number: str) -> str:
+def replace_numbers_in_url(self, url: str, new_number: str) -> str:
     # 使用正則表達式替換 -1.php 為 -{new_number}.php
     new_url = re.sub(r"-(1)\.php", f"-{new_number}.php", url)
     return new_url
 
 
-def announcement(url: str, maxpage: int = 1) -> list:
+def get_announcement(url: str, maxpage: int = 1) -> list:
     """
     從 Rpage 公告頁面取得公告資料。
     Args:
