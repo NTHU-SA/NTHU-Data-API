@@ -1,5 +1,5 @@
 # NTHU-Data-API
-
+[![CodeFactor](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api/badge)](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api)  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ## Introduction
 This is a project for NTHU students to get data from NTHU website.
 
@@ -47,7 +47,6 @@ feat(README.md): add commit type and commit message format
 
 ## Credit
 - NTHUSA 32nd
-- Lin Chi-Wei (l7wei@github)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
