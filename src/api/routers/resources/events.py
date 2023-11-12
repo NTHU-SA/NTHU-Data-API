@@ -1,13 +1,12 @@
 from fastapi import APIRouter
 
+from src.api import schemas
 from src.utils.scraper import (
     cac_scraper,
     goodjob_scraper,
     library_scraper,
     rpage_scraper,
 )
-from src.api import schemas
-
 
 router = APIRouter()
 

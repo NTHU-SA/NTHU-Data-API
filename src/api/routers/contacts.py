@@ -2,8 +2,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Path
 
-from ..models.contacts import Contact
 from src.api import schemas
+
+from ..models.contacts import Contact
 
 router = APIRouter()
 contact = Contact()

@@ -1,13 +1,94 @@
 from fastapi import APIRouter
 
-from ..models.buses import Buses
 from src.api import schemas
 
+from ..models.buses import Buses
 
 router = APIRouter()
 buses = Buses()
 
 
+@router.get("/main", response_model=schemas.buses.BusMainData)
+async def get_main():
+    """
+    校本部公車資訊。
+    """
+    return buses.get_main_data()
+
+
+@router.get(
+    "/main/information/toward_TSMC_building_info", response_model=schemas.buses.BusInfo
+)
+async def get_main_gate_toward_TSMC_building_info() -> schemas.buses.BusInfo:
+    """
+    校門口往台積館公車資訊。
+    """
+    return buses.get_main_data()["toward_TSMC_building_info"]
+
+
+@router.get(
+    "/main/information/toward_main_gate_info", response_model=schemas.buses.BusInfo
+)
+async def get_TSMC_building_toward_main_gate_info() -> schemas.buses.BusInfo:
+    """
+    台積館往校門口公車資訊。
+    """
+    return buses.get_main_data()["toward_main_gate_info"]
+
+
+@router.get(
+    "/main/schedules/weekday/toward_TSMC_building",
+    response_model=list[schemas.buses.BusMainSchedule],
+)
+async def get_main_weekday_bus_schedule_toward_TSMC_building() -> list[
+    schemas.buses.BusMainSchedule
+]:
+    """
+    校門口往台積館公車時刻表（平日）。
+    """
+    return buses.get_main_data()["weekday_bus_schedule_toward_TSMC_building"]
+
+
+@router.get(
+    "/main/schedules/weekday/toward_main_gate",
+    response_model=list[schemas.buses.BusMainSchedule],
+)
+async def get_main_weekday_bus_schedule_toward_main_gate() -> list[
+    schemas.buses.BusMainSchedule
+]:
+    """
+    台積館往校門口公車時刻表（平日）
+    """
+    return buses.get_main_data()["weekday_bus_schedule_toward_main_gate"]
+
+
+@router.get(
+    "/main/schedules/weekend/toward_TSMC_building",
+    response_model=list[schemas.buses.BusMainSchedule],
+)
+async def get_main_weekend_bus_schedule_toward_TSMC_building() -> list[
+    schemas.buses.BusMainSchedule
+]:
+    """
+    校門口往台積館公車時刻表（假日）。
+    """
+    return buses.get_main_data()["weekend_bus_schedule_toward_TSMC_building"]
+
+
+@router.get(
+    "/main/schedules/weekend/toward_main_gate",
+    response_model=list[schemas.buses.BusMainSchedule],
+)
+async def get_main_weekend_bus_schedule_toward_main_gate() -> list[
+    schemas.buses.BusMainSchedule
+]:
+    """
+    台積館往校門口公車時刻表（假日）。
+    """
+    return buses.get_main_data()["weekend_bus_schedule_toward_main_gate"]
+
+
+####################################################################################################
 @router.get("/nanda", response_model=schemas.buses.BusNandaData)
 async def get_nanda():
     """
@@ -38,10 +119,10 @@ async def get_nanda_toward_south_campus_info() -> schemas.buses.BusInfo:
 
 @router.get(
     "/nanda/schedules/weekday/toward_main_campus",
-    response_model=list[schemas.buses.BusSchedule],
+    response_model=list[schemas.buses.BusNandaSchedule],
 )
 async def get_nanda_weekday_bus_schedule_toward_main_campus() -> list[
-    schemas.buses.BusSchedule
+    schemas.buses.BusNandaSchedule
 ]:
     """
     南大往本部區間車時刻表（平日）。
@@ -51,10 +132,10 @@ async def get_nanda_weekday_bus_schedule_toward_main_campus() -> list[
 
 @router.get(
     "/nanda/schedules/weekday/toward_south_campus",
-    response_model=list[schemas.buses.BusSchedule],
+    response_model=list[schemas.buses.BusNandaSchedule],
 )
 async def get_nanda_weekday_bus_schedule_toward_south_campus() -> list[
-    schemas.buses.BusSchedule
+    schemas.buses.BusNandaSchedule
 ]:
     """
     本部往南大區間車時刻表（平日）。
@@ -64,10 +145,10 @@ async def get_nanda_weekday_bus_schedule_toward_south_campus() -> list[
 
 @router.get(
     "/nanda/schedules/weekend/toward_main_campus",
-    response_model=list[schemas.buses.BusSchedule],
+    response_model=list[schemas.buses.BusNandaSchedule],
 )
 async def get_nanda_weekend_bus_schedule_toward_main_campus() -> list[
-    schemas.buses.BusSchedule
+    schemas.buses.BusNandaSchedule
 ]:
     """
     南大往本部區間車時刻表（假日）。
@@ -77,10 +158,10 @@ async def get_nanda_weekend_bus_schedule_toward_main_campus() -> list[
 
 @router.get(
     "/nanda/schedules/weekend/toward_south_campus",
-    response_model=list[schemas.buses.BusSchedule],
+    response_model=list[schemas.buses.BusNandaSchedule],
 )
 async def get_nanda_weekend_bus_schedule_toward_south_campus() -> list[
-    schemas.buses.BusSchedule
+    schemas.buses.BusNandaSchedule
 ]:
     """
     本部往南大區間車時刻表（假日）。

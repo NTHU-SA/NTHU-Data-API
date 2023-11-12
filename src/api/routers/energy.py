@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
-from ..models.energy import Energy
 from src.api import schemas
+
+from ..models.energy import Energy
 
 router = APIRouter()
 energy = Energy()
