@@ -17,7 +17,9 @@ def get_all_newsletters():
     return newsletter_scraper.get_all_newsletters_list()
 
 
-@router.get("/{newsletter_name}", response_model=list[schemas.resources.RssItem])
+@router.get(
+    "/{newsletter_name}", response_model=list[schemas.newsletter.NewsletterData]
+)
 def get_newsletter_by_name(
     newsletter_name: schemas.newsletter.NewsletterName = Path(
         ..., example="國立清華大學學生會電子報", description="抓取的電子報名稱"
@@ -40,7 +42,8 @@ def get_newsletter_by_name(
 
 
 @router.get(
-    "/paths/{newsletter_link:path}", response_model=list[schemas.resources.RssData]
+    "/paths/{newsletter_link:path}",
+    response_model=list[schemas.newsletter.NewsletterData],
 )
 def get_newsletter_by_link(
     newsletter_link: HttpUrl = Path(

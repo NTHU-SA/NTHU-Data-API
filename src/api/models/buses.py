@@ -53,15 +53,15 @@ class Buses:
         self.res_text = cached_request.get(url)
 
         # 往台積館資訊
-        toward_TSMC_building_info = self._parse_campus_info("towardTSMCBuildingInfo")
+        toward_tsmc_building_info = self._parse_campus_info("towardTSMCBuildingInfo")
 
         # 往台積館時刻表(平日)
-        weekday_bus_schedule_toward_TSMC_building = self._parse_bus_schedule(
+        weekday_bus_schedule_toward_tsmc_building = self._parse_bus_schedule(
             "weekdayBusScheduleTowardTSMCBuilding"
         )
 
         # 往台積館時刻表(假日)
-        weekend_bus_schedule_toward_TSMC_building = self._parse_bus_schedule(
+        weekend_bus_schedule_toward_tsmc_building = self._parse_bus_schedule(
             "weekendBusScheduleTowardTSMCBuilding"
         )
 
@@ -80,9 +80,9 @@ class Buses:
 
         # 輸出 json 檔案
         nanda_dataset = {
-            "toward_TSMC_building_info": toward_TSMC_building_info,
-            "weekday_bus_schedule_toward_TSMC_building": weekday_bus_schedule_toward_TSMC_building,
-            "weekend_bus_schedule_toward_TSMC_building": weekend_bus_schedule_toward_TSMC_building,
+            "toward_TSMC_building_info": toward_tsmc_building_info,
+            "weekday_bus_schedule_toward_TSMC_building": weekday_bus_schedule_toward_tsmc_building,
+            "weekend_bus_schedule_toward_TSMC_building": weekend_bus_schedule_toward_tsmc_building,
             "toward_main_gate_info": toward_main_gate_info,
             "weekday_bus_schedule_toward_main_gate": weekday_bus_schedule_toward_main_gate,
             "weekend_bus_schedule_toward_main_gate": weekend_bus_schedule_toward_main_gate,

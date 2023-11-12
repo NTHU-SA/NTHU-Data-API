@@ -4,7 +4,7 @@ from fastapi import APIRouter, Path
 from pydantic import BaseModel, Field, HttpUrl
 
 from src.api import schemas
-from src.utils.scraper import rpage_scraper
+from src.utils.scrapers import rpage_scraper
 
 router = APIRouter()
 

@@ -21,8 +21,8 @@ def get_rss_data(rss_type: str) -> list:
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type}.xml"
     xml_string = cached_request.get(url)
     xml_string = xml_string.replace("<br />", "")
-    dict = xmltodict.parse(xml_string)
-    rss_data = dict["rss"]["channel"]["item"]
+    rss_dict = xmltodict.parse(xml_string)
+    rss_data = rss_dict["rss"]["channel"]["item"]
     return rss_data
 
 

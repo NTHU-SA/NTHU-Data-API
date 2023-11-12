@@ -15,7 +15,7 @@ class Dining:
         res_text = cached_request.get(url)
         # 將字串轉換成 json 格式
         dining_data = re.search(
-            r"const restaurantsData = (\[.*?)  renderTabs", res_text, re.S
+            r"const restaurantsData = (\[.*?) {2}renderTabs", res_text, re.S
         )
         if dining_data is not None:
             dining_data = dining_data.group(1)

@@ -230,7 +230,7 @@ data_nanda_en = """
 """
 
 
-def mapDatatojson(data):
+def map_data_to_json(data):
     # 把 data_main 和 data_nanda 的資料變成 對應資料名稱的 json
     # 資料格式
     # {
@@ -255,8 +255,8 @@ def mapDatatojson(data):
             longitude = matches.group(2)
             key = matches.group(3)
             map_data[key] = {"latitude": latitude, "longitude": longitude}
-        except:
-            print("errordata: ", datan)
+        except Exception as e:
+            print(f"errordata: {datan}, {e}")
 
     print(map_data)
 
@@ -264,7 +264,7 @@ def mapDatatojson(data):
 
 
 if __name__ == "__main__":
-    map_data = mapDatatojson(data_main_en)
+    map_data = map_data_to_json(data_main_en)
 
     with open("map_main_official_en.json", "w", encoding="UTF-8") as f:
         json.dump(map_data, f, ensure_ascii=False, indent=4)
