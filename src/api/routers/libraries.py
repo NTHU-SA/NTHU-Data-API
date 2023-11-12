@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Path
 
 from src.api import schemas
-from src.utils.scraper import library_scraper
+from src.utils.scrapers import library_scraper
 
 router = APIRouter()
 

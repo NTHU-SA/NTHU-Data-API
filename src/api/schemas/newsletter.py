@@ -9,6 +9,12 @@ class NewsletterInfo(BaseModel):
     link: HttpUrl = Field(..., description="該電子報網址")
 
 
+class NewsletterData(BaseModel):
+    title: Optional[str] = Field(..., description="電子報標題")
+    link: Optional[HttpUrl] = Field(..., description="電子報網址")
+    date: Optional[str] = Field(..., description="發布日期")
+
+
 class NewsletterName(str, Enum):
     藝術文化總中心電子報 = "藝術文化總中心電子報"
     域報_Field_Cast = "域報 Field Cast"

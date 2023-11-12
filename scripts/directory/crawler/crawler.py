@@ -1,14 +1,17 @@
-# 爬取 https://tel.net.nthu.edu.tw/nthusearch/dept.php 的資料
-
-base_url = "https://tel.net.nthu.edu.tw/nthusearch/"
-
 import json
+import os
+import random
 import re
+import string
 
 import bs4
 import requests
 from cachetools import TTLCache, cached
 from loguru import logger
+
+# 爬取 https://tel.net.nthu.edu.tw/nthusearch/dept.php 的資料
+
+base_url = "https://tel.net.nthu.edu.tw/nthusearch/"
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=60 * 60 * 24))
@@ -67,7 +70,7 @@ def get_all_dept_url():
 # 取得系所的資料
 def get_dept_details(url):
     # https://tel.net.nthu.edu.tw/nthusearch/dept.php?departments=43
-    response_text, response_code = get_response(url)
+    response_text, _response_code = get_response(url)
     text = response_text
 
     # 使用 bs4 解析 response
@@ -220,21 +223,15 @@ def get_dept_details(url):
     return result
 
 
-import os
-import random
-import string
-
-
 def get_newname(o_filename):
     """
     filename file3.txt => file3
     extension file3.txt => .txt
     new_filename file3-[a-z]{5}.txt
     """
-    size = 5
     filename = os.path.splitext(o_filename)[0]
     extension = os.path.splitext(o_filename)[1]
-    random_string = "".join(random.choice(string.ascii_letters) for x in range(5))
+    random_string = "".join(random.choice(string.ascii_letters) for i in range(5))
     new_filename = f"{filename}-{random_string}{extension}"
     return new_filename
 

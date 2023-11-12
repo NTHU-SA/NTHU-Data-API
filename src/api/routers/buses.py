@@ -17,9 +17,9 @@ async def get_main():
 
 
 @router.get(
-    "/main/information/toward_TSMC_building_info", response_model=schemas.buses.BusInfo
+    "/main/information/toward_tsmc_building_info", response_model=schemas.buses.BusInfo
 )
-async def get_main_gate_toward_TSMC_building_info() -> schemas.buses.BusInfo:
+async def get_main_gate_toward_tsmc_building_info() -> schemas.buses.BusInfo:
     """
     校門口往台積館公車資訊。
     """
@@ -29,7 +29,7 @@ async def get_main_gate_toward_TSMC_building_info() -> schemas.buses.BusInfo:
 @router.get(
     "/main/information/toward_main_gate_info", response_model=schemas.buses.BusInfo
 )
-async def get_TSMC_building_toward_main_gate_info() -> schemas.buses.BusInfo:
+async def get_tsmc_building_toward_main_gate_info() -> schemas.buses.BusInfo:
     """
     台積館往校門口公車資訊。
     """
@@ -37,10 +37,10 @@ async def get_TSMC_building_toward_main_gate_info() -> schemas.buses.BusInfo:
 
 
 @router.get(
-    "/main/schedules/weekday/toward_TSMC_building",
+    "/main/schedules/weekday/toward_tsmc_building",
     response_model=list[schemas.buses.BusMainSchedule],
 )
-async def get_main_weekday_bus_schedule_toward_TSMC_building() -> list[
+async def get_main_weekday_bus_schedule_toward_tsmc_building() -> list[
     schemas.buses.BusMainSchedule
 ]:
     """
@@ -63,10 +63,10 @@ async def get_main_weekday_bus_schedule_toward_main_gate() -> list[
 
 
 @router.get(
-    "/main/schedules/weekend/toward_TSMC_building",
+    "/main/schedules/weekend/toward_tsmc_building",
     response_model=list[schemas.buses.BusMainSchedule],
 )
-async def get_main_weekend_bus_schedule_toward_TSMC_building() -> list[
+async def get_main_weekend_bus_schedule_toward_tsmc_building() -> list[
     schemas.buses.BusMainSchedule
 ]:
     """

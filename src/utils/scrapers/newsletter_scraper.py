@@ -42,10 +42,10 @@ def get_selected_newsletter_list(url: str) -> list:
     """
     取得 newsletter 的內容。
     """
-    if not url.startswith(URL_PREFIX):
-        raise HTTPException(400, "Bad request")
-    else:
+    if url.startswith(URL_PREFIX):
         response = requests.get(url)
+    else:
+        raise HTTPException(400, "Invalid URL")
     staus_code = response.status_code
     if staus_code != 200:
         raise HTTPException(staus_code, f"Request error: {staus_code}")
@@ -53,23 +53,20 @@ def get_selected_newsletter_list(url: str) -> list:
     content = soup.find("div", {"id": "acyarchivelisting"})
     if content is None:
         raise HTTPException(404, "Not found")
-    # 取得標題
-    # title_text = content.find("h1", {"class": "contentheading"}).text.strip()
-    # 取得內容
     table = content.find("table", {"class": "contentpane"})
     newsletter_list = []
-    for archiveRow in table.find_all("div", {"class": "archiveRow"}):
+    for archive_row in table.find_all("div", {"class": "archiveRow"}):
         text = None
         link = None
 
-        a = archiveRow.find("a")
+        a = archive_row.find("a")
         if a is not None:
             onclick = a.get("onclick")  # 獲取連結
             match = re.search(r"openpopup\('(.*?)',", onclick)
             if match:
                 link = URL_PREFIX + match.group(1)
             text = a.text  # 獲取內文
-        date_string = archiveRow.find("span", {"class": "sentondate"}).text.strip()
+        date_string = archive_row.find("span", {"class": "sentondate"}).text.strip()
         month_mapping = {
             " 一月 ": " Jan ",
             " 二月 ": " Feb ",
