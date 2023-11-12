@@ -2,37 +2,13 @@ import json
 import re
 from datetime import datetime, timedelta
 
-import requests
 import xmltodict
 from bs4 import BeautifulSoup
-from cachetools import TTLCache, cached
 from fastapi import HTTPException
 
-
-@cached(cache=TTLCache(maxsize=64, ttl=60 * 60))
-def _get_response(url: str, **kwargs) -> str:
-    headers = {
-        "accept": "*/*",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "zh-TW,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-CN;q=0.5",
-        "dnt": "1",
-        "referer": url,
-        "sec-ch-ua": "'Chromium';v='119', 'Microsoft Edge';v='119', 'Not:A-Brand';v='24'",
-        "sec-ch-ua-mobile": "?1",
-        "sec-ch-ua-platform": "Android",
-        "sec-fetch-dest": "script",
-        "sec-fetch-mode": "no-cors",
-        "sec-fetch-site": "same-site",
-        "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.48",
-    }
-    response = requests.get(url, headers=headers, **kwargs)
-    status_code = response.status_code
-    if status_code != 200:
-        raise HTTPException(status_code, f"Request error: {status_code}")
-    return response.text
+from src.utils import cached_request
 
 
-@cached(cache=TTLCache(maxsize=4, ttl=60 * 60))
 def get_rss_data(rss_type: str) -> list:
     """
     Args:
@@ -43,7 +19,7 @@ def get_rss_data(rss_type: str) -> list:
     # 展覽及活動 RSS:       https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_exhibit.xml
     # 南大與人社分館 RSS:   https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_branches.xml
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type}.xml"
-    xml_string = _get_response(url)
+    xml_string = cached_request.get(url)
     xml_string = xml_string.replace("<br />", "")
     dict = xmltodict.parse(xml_string)
     rss_data = dict["rss"]["channel"]["item"]
@@ -55,7 +31,7 @@ def get_number_of_goods() -> dict:
     取得總圖換證數量資訊。
     """
     url = "https://adage.lib.nthu.edu.tw/goods/Public/number_of_goods_mix.js"
-    text = _get_response(url)
+    text = cached_request.get(url, update=True)
     # 使用正規表達式從 text 中提取變量和值
     variables = re.findall(r'var\s+(\w+)\s*=\s*(\d+|"[^"]*");', text)
     # 將變量和值存儲在字典中
@@ -75,7 +51,7 @@ def get_opening_hours(libaray_name) -> dict:
     取得指定圖書館的開放時間。
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{libaray_name.value}.js"
-    text = _get_response(url)
+    text = cached_request.get(url)
     # 使用正規表達式從 text 中提取日期和時間
     match = re.search(
         r"(\d{4}-\d{2}-\d{2}\s+\([\w]+\))<br />(\d{2}:\d{2})-(\d{2}:\d{2})", text
@@ -96,7 +72,7 @@ def get_space_data() -> list:
     """
     # 來源： https://libsms.lib.nthu.edu.tw/build/
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
-    response = _get_response(url)
+    response = cached_request.get(url)
     data = json.loads(response)
     if data["resmsg"] != "成功":
         raise HTTPException(404, "Not found")
@@ -104,7 +80,6 @@ def get_space_data() -> list:
         return data["rows"]
 
 
-@cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
 def get_lost_and_found() -> list:
     """
     取得失物招領資訊。
@@ -116,7 +91,7 @@ def get_lost_and_found() -> list:
     date_end = date_end.strftime("%Y-%m-%d")
     date_start = date_start.strftime("%Y-%m-%d")
     # 發送 POST 請求
-    response = requests.post(
+    response = cached_request.post(
         "https://adage.lib.nthu.edu.tw/find/search_it.php",
         data={
             "place": "0",
@@ -127,11 +102,8 @@ def get_lost_and_found() -> list:
             "SUMIT": "送出",
         },
     )
-    if response.status_code != 200:
-        raise Exception(f"Request error: {response.status_code}")
-    html = response.text
     # 找到表格
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(response, "html.parser")
     table = soup.find("table")
     # 初始化一個列表來存儲所有行的數據
     rows_data = []

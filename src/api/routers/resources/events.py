@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.api import schemas
-from src.utils.scraper import (
+from src.utils.scrapers import (
     cac_scraper,
     goodjob_scraper,
     library_scraper,
@@ -40,7 +40,7 @@ async def get_global_affairs_events():
     """
     取得國際事務處的各類活動資料。
     """
-    return rpage_scraper.announcement(
+    return rpage_scraper.get_announcement(
         "https://oga.site.nthu.edu.tw/p/403-1524-9308-1.php?Lang=zh-tw"
     )
 
@@ -50,7 +50,7 @@ async def get_health_center_events():
     """
     取得衛生保健組的活動資料。
     """
-    return rpage_scraper.announcement(
+    return rpage_scraper.get_announcement(
         "https://health.site.nthu.edu.tw/p/403-1001-7467-1.php?Lang=zh-tw"
     )
 
@@ -60,7 +60,7 @@ async def get_bulletin_art_and_cultural_events():
     """
     取得清華公佈欄的藝文活動。
     """
-    return rpage_scraper.announcement(
+    return rpage_scraper.get_announcement(
         "https://bulletin.site.nthu.edu.tw/p/403-1086-5083-1.php?Lang=zh-tw"
     )
 
@@ -70,7 +70,7 @@ async def get_bulletin_academic_events():
     """
     取得清華公佈欄的學術活動。
     """
-    return rpage_scraper.announcement(
+    return rpage_scraper.get_announcement(
         "https://bulletin.site.nthu.edu.tw/p/403-1086-5084-1.php?Lang=zh-tw"
     )
 
@@ -80,6 +80,6 @@ async def get_bulletin_student_events():
     """
     取得清華公佈欄的學生活動。
     """
-    return rpage_scraper.announcement(
+    return rpage_scraper.get_announcement(
         "https://bulletin.site.nthu.edu.tw/p/403-1086-5085-1.php?Lang=zh-tw"
     )

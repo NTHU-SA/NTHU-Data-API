@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Path
 from pydantic import HttpUrl
 
 from src.api import schemas
-from src.utils.scraper import newsletter_scraper
+from src.utils.scrapers import newsletter_scraper
 
 router = APIRouter()
 
