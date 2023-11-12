@@ -3,12 +3,13 @@ import json
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import HttpUrl
 
-from src.utils.scraper import newsletter_scraper
+from src.api import schemas
+from src.utils.scrapers import newsletter_scraper
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", response_model=list[schemas.newsletter.NewsletterInfo])
 def get_all_newsletters():
     """
     取得所有的電子報。
@@ -16,9 +17,11 @@ def get_all_newsletters():
     return newsletter_scraper.get_all_newsletters_list()
 
 
-@router.get("/{newsletter_name}")
+@router.get("/{newsletter_name}", response_model=list[schemas.resources.RssItem])
 def get_newsletter_by_name(
-    newsletter_name: str = Path(..., example="國立清華大學學生會電子報", description="抓取的電子報名稱")
+    newsletter_name: schemas.newsletter.NewsletterName = Path(
+        ..., example="國立清華大學學生會電子報", description="抓取的電子報名稱"
+    )
 ):
     """
     透過電子報名稱取得指定的電子報列表。
@@ -36,7 +39,9 @@ def get_newsletter_by_name(
     return newsletter_scraper.get_selected_newsletter_list(newsletter_link)
 
 
-@router.get("/paths/{newsletter_link:path}")
+@router.get(
+    "/paths/{newsletter_link:path}", response_model=list[schemas.resources.RssData]
+)
 def get_newsletter_by_link(
     newsletter_link: HttpUrl = Path(
         ...,
