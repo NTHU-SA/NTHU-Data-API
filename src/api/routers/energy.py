@@ -1,22 +1,13 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 
 from ..models.energy import Energy
-
-
-class ElectricityInfo(BaseModel):
-    name: str = Field(..., description="電力名稱")
-    data: int = Field(..., description="電力使用量")
-    capacity: int = Field(..., description="電力容量")
-    unit: str = Field(..., description="單位")
-    last_updated: str = Field(..., description="最後更新時間")
-
+from src.api import schemas
 
 router = APIRouter()
 energy = Energy()
 
 
-@router.get("/electricity_usage", response_model=list[ElectricityInfo])
+@router.get("/electricity_usage", response_model=list[schemas.energy.ElectricityInfo])
 async def get_realtime_electricity_usage():
     """
     取得校園電力即時使用量。

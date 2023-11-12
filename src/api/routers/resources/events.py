@@ -6,11 +6,13 @@ from src.utils.scraper import (
     library_scraper,
     rpage_scraper,
 )
+from src.api import schemas
+
 
 router = APIRouter()
 
 
-@router.get("/libarys")
+@router.get("/libarys", response_model=list[schemas.resources.RssItem])
 async def get_libarys_events():
     """
     取得圖書館的展覽及活動資料。
