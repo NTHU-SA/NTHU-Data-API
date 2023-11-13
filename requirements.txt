@@ -11,7 +11,7 @@ pyopenssl==23.3.0
 requests==2.31.0
 beautifulsoup4==4.12.2
 xmltodict==0.13.0
-pandas==2.1.2
+pandas==2.1.3
 lxml==4.9.3
 # Search
 jieba==0.42.1
