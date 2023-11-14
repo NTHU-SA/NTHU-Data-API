@@ -12,7 +12,7 @@ from .api.routers import (
     locations,
     newsletters,
     resources,
-    rpage,
+    scrapers,
 )
 
 app = FastAPI()
@@ -37,7 +37,7 @@ app.include_router(newsletters.router, prefix="/newsletters", tags=["Newsletters
 app.include_router(contacts.router, prefix="/phones", tags=["Phones"])
 app.include_router(contacts.router, prefix="/contacts", tags=["Contacts"])
 app.include_router(resources.router, prefix="/resources", tags=[])
-app.include_router(rpage.router, prefix="/rpage", tags=["Rpage"])
+app.include_router(scrapers.router, prefix="/scrapers", tags=["Scrapers"])
 
 
 @app.get(
