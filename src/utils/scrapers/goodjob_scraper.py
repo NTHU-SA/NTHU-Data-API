@@ -15,8 +15,8 @@ def get_announcements(data_type: str) -> list:
     # 活動:          https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01003
     # 課程/證照/考試: https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01004
     # 宣導資料:       https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01005
-    url_prefix = "https://goodjob-nthu.conf.asia/sys_news.aspx?nt="
-    response = cached_request.get(url_prefix + data_type)
+    URL_PREFIX = "https://goodjob-nthu.conf.asia/sys_news.aspx?nt="
+    response = cached_request.get(URL_PREFIX + data_type)
     soup = BeautifulSoup(response, "html.parser")
     items = soup.select("div.col-md-12 ul.list-unstyled li.u-block-hover")
 

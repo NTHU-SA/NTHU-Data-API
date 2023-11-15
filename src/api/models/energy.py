@@ -45,11 +45,3 @@ class Energy:
             electricity_usage_data.append(unit_data)
 
         return electricity_usage_data
-
-
-if __name__ == "__main__":
-    energy = Energy()
-    json_data = energy.get_realtime_electricity_usage()
-
-    with open("data/energy_sys.json", "w", encoding="utf-8") as f:
-        json.dump(json_data, f, ensure_ascii=False, indent=4)

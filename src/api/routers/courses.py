@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Body, HTTPException, Path, Query, Response
 
 from src.api import schemas
-
-from ..models.courses import Conditions, Processor
+from src.api.models.courses import Conditions, Processor
 
 router = APIRouter()
 courses = Processor(json_path="data/courses/11210.json")

@@ -131,10 +131,3 @@ class Buses:
         }
 
         return nanda_dataset
-
-
-if __name__ == "__main__":
-    buses = Buses()
-    json_data = buses.get_nanda_data()
-    with open("data/buses_nanda.json", "w", encoding="utf-8") as f:
-        json.dump(json_data, f, ensure_ascii=False, indent=4)
