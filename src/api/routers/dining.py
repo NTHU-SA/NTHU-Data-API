@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, Path
 
 from src.api import schemas
-
-from ..models.dining import Dining
+from src.api.models.dining import Dining
 
 router = APIRouter()
 dining = Dining()

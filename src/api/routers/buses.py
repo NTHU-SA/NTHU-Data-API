@@ -1,8 +1,7 @@
 from fastapi import APIRouter
 
 from src.api import schemas
-
-from ..models.buses import Buses
+from src.api.models.buses import Buses
 
 router = APIRouter()
 buses = Buses()

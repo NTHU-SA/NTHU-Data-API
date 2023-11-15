@@ -2,7 +2,7 @@ import time
 
 from fastapi import FastAPI, Request
 
-from .api.routers import (
+from src.api.routers import (
     buses,
     contacts,
     courses,

@@ -3,8 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Path
 
 from src.api import schemas
-
-from ..models.locations import Location
+from src.api.models.locations import Location
 
 router = APIRouter()
 location = Location()

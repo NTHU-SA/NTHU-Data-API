@@ -81,10 +81,3 @@ class Dining:
             for restaurant in self.query_by_restaurant_name(i[0])
         ]
         return result
-
-
-if __name__ == "__main__":
-    dining = Dining()
-    json_data = dining.get_dining_data()
-    with open("data/dining_data.json", "w", encoding="utf-8") as f:
-        json.dump(json_data, f, ensure_ascii=False, indent=4)
