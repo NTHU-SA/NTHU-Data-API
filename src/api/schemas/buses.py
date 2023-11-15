@@ -22,17 +22,17 @@ class BusMainSchedule(BaseModel):
 
 class BusMainData(BaseModel):
     toward_TSMC_building_info: BusInfo = Field(..., description="校門口往台積館公車資訊")
-    weekday_bus_schedule_toward_TSMC_building: list[BusNandaSchedule] = Field(
+    weekday_bus_schedule_toward_TSMC_building: list[BusMainSchedule] = Field(
         ..., description="校門口往台積館公車時刻表（平日）"
     )
-    weekend_bus_schedule_toward_TSMC_building: list[BusNandaSchedule] = Field(
+    weekend_bus_schedule_toward_TSMC_building: list[BusMainSchedule] = Field(
         ..., description="校門口往台積館公車時刻表（假日）"
     )
     toward_main_gate_info: BusInfo = Field(..., description="台積館往校門口公車資訊")
-    weekday_bus_schedule_toward_main_gate: list[BusNandaSchedule] = Field(
+    weekday_bus_schedule_toward_main_gate: list[BusMainSchedule] = Field(
         ..., description="台積館往校門口公車時刻表（平日）"
     )
-    weekend_bus_schedule_toward_main_gate: list[BusNandaSchedule] = Field(
+    weekend_bus_schedule_toward_main_gate: list[BusMainSchedule] = Field(
         ..., description="台積館往校門口公車時刻表（假日）"
     )
 

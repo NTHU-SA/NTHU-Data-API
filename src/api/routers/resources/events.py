@@ -19,7 +19,7 @@ async def get_libarys_events():
     return library_scraper.get_rss_data("exhibit")
 
 
-@router.get("/goodjob")
+@router.get("/goodjob", response_model=list[schemas.events.GoodjobData])
 async def get_goodjob_events():
     """
     取得清華 JOB 讚的職涯活動資料。
@@ -27,7 +27,7 @@ async def get_goodjob_events():
     return goodjob_scraper.get_announcements("01003")
 
 
-@router.get("/arts_center")
+@router.get("/arts_center", response_model=list[schemas.events.ArtsCenterData])
 async def get_arts_center_events():
     """
     取得藝術文化總中心的當期活動。
@@ -35,7 +35,7 @@ async def get_arts_center_events():
     return cac_scraper.get_events_list()
 
 
-@router.get("/global_affairs")
+@router.get("/global_affairs", response_model=list[schemas.resources.RssData])
 async def get_global_affairs_events():
     """
     取得國際事務處的各類活動資料。
@@ -45,7 +45,7 @@ async def get_global_affairs_events():
     )
 
 
-@router.get("/health_center")
+@router.get("/health_center", response_model=list[schemas.resources.RssData])
 async def get_health_center_events():
     """
     取得衛生保健組的活動資料。
@@ -55,7 +55,9 @@ async def get_health_center_events():
     )
 
 
-@router.get("/bulletin/art_and_cultural")
+@router.get(
+    "/bulletin/art_and_cultural", response_model=list[schemas.resources.RssData]
+)
 async def get_bulletin_art_and_cultural_events():
     """
     取得清華公佈欄的藝文活動。
@@ -65,7 +67,7 @@ async def get_bulletin_art_and_cultural_events():
     )
 
 
-@router.get("/bulletin/academic")
+@router.get("/bulletin/academic", response_model=list[schemas.resources.RssData])
 async def get_bulletin_academic_events():
     """
     取得清華公佈欄的學術活動。
@@ -75,7 +77,7 @@ async def get_bulletin_academic_events():
     )
 
 
-@router.get("/bulletin/student")
+@router.get("/bulletin/student", response_model=list[schemas.resources.RssData])
 async def get_bulletin_student_events():
     """
     取得清華公佈欄的學生活動。
