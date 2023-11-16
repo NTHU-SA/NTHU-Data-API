@@ -13,7 +13,7 @@ ENV LOGURU_LEVEL=ERROR
 
 # Install python 
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt --no-cache-dir
 COPY . ./
 
 # Run main.py when the container launches

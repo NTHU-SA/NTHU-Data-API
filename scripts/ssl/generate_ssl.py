@@ -1,4 +1,4 @@
-from OpenSSL import SSL, crypto
+from OpenSSL import crypto
 
 
 def generate_certificate(
