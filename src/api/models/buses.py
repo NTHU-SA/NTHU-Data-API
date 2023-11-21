@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+from functools import reduce
 from typing import Literal
 
 from cachetools import TTLCache, cached
@@ -11,21 +12,16 @@ from src.utils import cached_request
 def after_specific_time(
     target_list,
     time,
-    time_route: list = None,
+    time_path: list = None,
 ) -> list:
-    hour, minute = time.split(":")
+    hour, minute = map(int, time.split(":"))
 
     res = []
 
     for bus in target_list:
-        if len(time_route) == 1:
-            bus_hour, bus_minute = bus[time_route[0]].split(":")
-        elif len(time_route) == 2:
-            bus_hour, bus_minute = bus[time_route[0]][time_route[1]].split(":")
+        bus_hour, bus_minute = map(int, reduce(dict.get, time_path, bus).split(":"))
 
-        if int(bus_hour) > int(hour):
-            res.append(bus)
-        elif int(bus_hour) == int(hour) and int(bus_minute) >= int(minute):
+        if bus_hour > hour or (bus_hour == hour and bus_minute >= minute):
             res.append(bus)
 
     return res
@@ -56,24 +52,28 @@ def gen_all_field(target_list) -> None:
         )
 
 
+def bus_data_dict_init():
+    return {
+        "main": {
+            "up": {"weekday": [], "weekend": [], "all": []},
+            "down": {"weekday": [], "weekend": [], "all": []},
+        },
+        "nanda": {
+            "up": {"weekday": [], "weekend": [], "all": []},
+            "down": {"weekday": [], "weekend": [], "all": []},
+        },
+        "all": {
+            "up": {"weekday": [], "weekend": [], "all": []},
+            "down": {"weekday": [], "weekend": [], "all": []},
+        },
+    }
+
+
 class Stop:
     def __init__(self, name, name_en) -> None:
         self.name = name
         self.name_en = name_en
-        self.stoped_bus = {
-            "main": {
-                "up": {"weekday": [], "weekend": [], "all": []},
-                "down": {"weekday": [], "weekend": [], "all": []},
-            },
-            "nanda": {
-                "up": {"weekday": [], "weekend": [], "all": []},
-                "down": {"weekday": [], "weekend": [], "all": []},
-            },
-            "all": {
-                "up": {"weekday": [], "weekend": [], "all": []},
-                "down": {"weekday": [], "weekend": [], "all": []},
-            },
-        }
+        self.stoped_bus = bus_data_dict_init()
 
     def gen_whole_bus_list(self) -> None:
         gen_all_field(self.stoped_bus)
@@ -191,16 +191,12 @@ class Buses:
         data = data.replace(",  ]", "]")
         data = json.loads(data)
 
-        try:
-            data[0]["line"]
-            for i in data:
-                i["route"] = "校園公車"
-        except KeyError:
-            for i in data:
-                i["route"] = "南大區間車"
+        for i in data:
+            i["route"] = "校園公車" if "line" in data[0] else "南大區間車"
 
         return data
 
+    # TODO: 現在很多部分都具有相似架構，之後應該要整個敲掉從源頭就把資料 format 好
     def get_main_data(self) -> dict:
         url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
         self._res_text = cached_request.get(url)
@@ -355,14 +351,12 @@ class Buses:
 
                 # 判斷是否上山時從綜二館出發，將影響下山的終點站
                 # 有 0 的情況是因為資料中有些時間是 8:00 這種格式
-                if (
-                    self._start_from_gen_2_bus_info.count(bus["time"] + line) > 0
-                    or self._start_from_gen_2_bus_info.count("0" + bus["time"] + line)
-                    > 0
-                ):
-                    this_route = self._route_selector(dep_stop, line, True)
-                else:
-                    this_route = self._route_selector(dep_stop, line)
+                dep_from_gen_2 = (
+                    bus["time"] + line in self._start_from_gen_2_bus_info
+                    or "0" + bus["time"] + line in self._start_from_gen_2_bus_info
+                )
+
+                this_route = self._route_selector(dep_stop, line, dep_from_gen_2)
 
                 # 如果從綜二出發，紀錄該班資訊
                 if dep_stop.count("綜二") > 0:
@@ -408,20 +402,7 @@ class Buses:
 
     @cached(TTLCache(maxsize=1024, ttl=60 * 60))
     def get_bus_detailed_schedule_and_update_stops_data(self) -> dict:
-        self.detailed_data = {
-            "main": {
-                "up": {"weekday": [], "weekend": [], "all": []},
-                "down": {"weekday": [], "weekend": [], "all": []},
-            },
-            "nanda": {
-                "up": {"weekday": [], "weekend": [], "all": []},
-                "down": {"weekday": [], "weekend": [], "all": []},
-            },
-            "all": {
-                "up": {"weekday": [], "weekend": [], "all": []},
-                "down": {"weekday": [], "weekend": [], "all": []},
-            },
-        }
+        self.detailed_data = bus_data_dict_init()
 
         #########################################
         # 校門口往返台積館公車時刻表（平日）
