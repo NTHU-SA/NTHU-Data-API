@@ -306,26 +306,26 @@ class Buses:
     ) -> Route:
         # 這裡不用 match 的原因是因為資料中有些會多空格
         # 下山
-        if dep_stop.count("台積") > 0:
-            if line.count("red") > 0 and from_gen_2:
+        if "台積" in dep_stop:
+            if "red" in line and from_gen_2:
                 return red_M5_M2
-            elif line.count("red") > 0 and not from_gen_2:
+            elif "red" in line and not from_gen_2:
                 return red_M5_M1
-            elif line.count("green") > 0 and from_gen_2:
+            elif "green" in line and from_gen_2:
                 return green_M5_M2
-            elif line.count("green") > 0 and not from_gen_2:
+            elif "green" in line and not from_gen_2:
                 return green_M5_M1
             else:
                 print(dep_stop, line)
         # 上山
         else:
-            if dep_stop.count("校門") > 0 and line.count("red") > 0:
+            if "校門" in dep_stop and "red" in line:
                 return red_M1_M5
-            elif dep_stop.count("綜二") > 0 and line.count("red") > 0:
+            elif "綜二" in dep_stop and "red" in line:
                 return red_M2_M5
-            elif dep_stop.count("校門") > 0 and line.count("green") > 0:
+            elif "校門" in dep_stop and "green" in line:
                 return green_M1_M5
-            elif dep_stop.count("綜二") > 0 and line.count("green") > 0:
+            elif "綜二" in dep_stop and "green" in line:
                 return green_M2_M5
             else:
                 print(dep_stop, line)
