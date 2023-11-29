@@ -69,6 +69,18 @@ def bus_data_dict_init():
     }
 
 
+def sort_by_time(target_dict: dict, time_path: list = None) -> None:
+    for scope in ["main", "nanda", "all"]:
+        for direction in ["up", "down"]:
+            for day in ["weekday", "weekend", "all"]:
+                target_list = target_dict[scope][direction][day]
+                target_list.sort(
+                    key=lambda x: datetime.datetime.strptime(
+                        reduce(dict.get, time_path, x), "%H:%M"
+                    )
+                )
+
+
 class Stop:
     def __init__(self, name, name_en) -> None:
         self.name = name
@@ -77,17 +89,7 @@ class Stop:
 
     def gen_whole_bus_list(self) -> None:
         gen_all_field(self.stoped_bus)
-        self._sort_bus()
-
-    def _sort_bus(self) -> None:
-        for scope in ["main", "nanda", "all"]:
-            for direction in ["up", "down"]:
-                for day in ["weekday", "weekend", "all"]:
-                    self.stoped_bus[scope][direction][day].sort(
-                        key=lambda x: datetime.datetime.strptime(
-                            x["arrive_time"], "%H:%M"
-                        )
-                    )
+        sort_by_time(self.stoped_bus, ["arrive_time"])
 
 
 M1 = Stop("北校門口", "North Main Gate")
@@ -123,7 +125,7 @@ class Route:
             S1: {M5: 15},
         }
 
-    def gen_accu_time(self) -> list:
+    def gen_accumulated_time(self) -> list:
         res = [0]
         for i in range(0, len(self.route) - 1):
             res.append(
@@ -374,7 +376,7 @@ class Buses:
             for index, stop in enumerate(this_route.route):
                 arrive_time = self._add_on_time(
                     bus["time"],
-                    this_route.gen_accu_time()[index],
+                    this_route.gen_accumulated_time()[index],
                 )
 
                 # 處理各站牌資訊
@@ -389,16 +391,6 @@ class Buses:
             res.append(temp_bus)
 
         return res
-
-    def _sort_bus(self) -> None:
-        for scope in ["main", "nanda", "all"]:
-            for direction in ["up", "down"]:
-                for day in ["weekday", "weekend", "all"]:
-                    self.detailed_data[scope][direction][day].sort(
-                        key=lambda x: datetime.datetime.strptime(
-                            x["dep_info"]["time"], "%H:%M"
-                        )
-                    )
 
     @cached(TTLCache(maxsize=1024, ttl=60 * 60))
     def get_bus_detailed_schedule_and_update_stops_data(self) -> dict:
@@ -484,6 +476,6 @@ class Buses:
             stop.gen_whole_bus_list()
 
         gen_all_field(self.detailed_data)
-        self._sort_bus()
+        sort_by_time(self.detailed_data, ["dep_info", "time"])
 
         return self.detailed_data
