@@ -367,9 +367,9 @@ class Buses:
             elif scope == "nanda":
                 # 判斷路線
                 if direction == "up":
-                    this_route = nanda_S1_M1
-                elif direction == "down":
                     this_route = nanda_M1_S1
+                elif direction == "down":
+                    this_route = nanda_S1_M1
 
             for index, stop in enumerate(this_route.route):
                 arrive_time = self._add_on_time(
