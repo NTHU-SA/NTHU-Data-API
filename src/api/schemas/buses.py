@@ -90,7 +90,7 @@ class BusMainSchedule(BaseModel):
 
 
 class BusStopsQueryResult(BaseModel):
-    bus_info: BusNandaSchedule | BusMainSchedule = Field(..., description="公車資訊")
+    bus_info: BusMainSchedule | BusNandaSchedule = Field(..., description="公車資訊")
     arrive_time: str = Field(..., description="預計到達時間")
 
 
