@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
@@ -90,13 +90,22 @@ class BusMainSchedule(BaseModel):
 
 
 class BusStopsQueryResult(BaseModel):
-    bus_info: BusNandaSchedule | BusMainSchedule = Field(..., description="公車資訊")
+    bus_info: BusMainSchedule | BusNandaSchedule = Field(..., description="公車資訊")
     arrive_time: str = Field(..., description="預計到達時間")
 
 
 class BusArriveTime(BaseModel):
     # {"stop_name": stop.name, "time": arrive_time}
-    stop_name: StopsName = Field(..., description="公車站牌名稱")
+    stop_name: Literal[
+        StopsName.M1,
+        StopsName.M2,
+        StopsName.M3,
+        "人社院/生科館",
+        StopsName.M5,
+        StopsName.M6,
+        StopsName.M7,
+        StopsName.S1,
+    ] = Field(..., description="公車站牌名稱")
     time: str = Field(..., description="預計到達時間")
 
 
