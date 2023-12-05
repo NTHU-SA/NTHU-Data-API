@@ -320,7 +320,7 @@ class Buses:
         }
 
         key = (dep_stop, line) if "台積" not in dep_stop else (dep_stop, line, from_gen_2)
-        return stops_lines_map.get(key, print(dep_stop, line))
+        return stops_lines_map.get(key, None)
 
     def _gen_detailed_bus_schedule(
         self,
