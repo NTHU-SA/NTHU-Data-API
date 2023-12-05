@@ -3,7 +3,7 @@
 import json
 
 
-def mapJson():
+def map_json():
     # "化工館": [24.796396, 120.995007],
     # 變成
     # "化工館": {latitude: 120.995007, longitude: 24.796396},

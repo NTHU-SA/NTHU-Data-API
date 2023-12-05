@@ -78,7 +78,7 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
     return response_text
 
 
-def post(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
+def post(url: str, cache=True, update=False, **kwargs) -> str:
     """
     從網址取得回應內容。
     """

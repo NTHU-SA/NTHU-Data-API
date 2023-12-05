@@ -2,7 +2,7 @@ import datetime
 import json
 import re
 from functools import reduce
-from typing import Literal
+from typing import Literal, Optional
 
 from cachetools import TTLCache, cached
 
@@ -113,7 +113,7 @@ stops = {"M1": M1, "M2": M2, "M3": M3, "M4": M4, "M5": M5, "M6": M6, "M7": M7, "
 
 class Route:
     def __init__(self, *arg) -> None:
-        self.route: list[Stop] = list(arg)
+        self.stops: list[Stop] = list(arg)
         self._delta_time_table = {
             M1: {M2: 1},
             M2: {M1: 1, M3: 1, M4: 3},
@@ -127,9 +127,9 @@ class Route:
 
     def gen_accumulated_time(self) -> list:
         res = [0]
-        for i in range(0, len(self.route) - 1):
+        for i in range(0, len(self.stops) - 1):
             res.append(
-                res[i] + self._delta_time_table[self.route[i]][self.route[i + 1]]
+                res[i] + self._delta_time_table[self.stops[i]][self.stops[i + 1]]
             )
         return res
 
@@ -297,7 +297,7 @@ class Buses:
         return str(st.strftime("%H:%M"))
 
     # 用字串尋找對應的 Stop 物件
-    def _find_stop_from_str(self, stop_str: str) -> Stop:
+    def _find_stop_from_str(self, stop_str: str) -> Optional[Stop]:
         for stop in stops.values():
             if stop.name == stop_str:
                 return stop
@@ -308,29 +308,19 @@ class Buses:
     ) -> Route:
         # 這裡不用 match 的原因是因為資料中有些會多空格
         # 下山
-        if "台積" in dep_stop:
-            if "red" in line and from_gen_2:
-                return red_M5_M2
-            elif "red" in line and not from_gen_2:
-                return red_M5_M1
-            elif "green" in line and from_gen_2:
-                return green_M5_M2
-            elif "green" in line and not from_gen_2:
-                return green_M5_M1
-            else:
-                print(dep_stop, line)
-        # 上山
-        else:
-            if "校門" in dep_stop and "red" in line:
-                return red_M1_M5
-            elif "綜二" in dep_stop and "red" in line:
-                return red_M2_M5
-            elif "校門" in dep_stop and "green" in line:
-                return green_M1_M5
-            elif "綜二" in dep_stop and "green" in line:
-                return green_M2_M5
-            else:
-                print(dep_stop, line)
+        stops_lines_map = {
+            ("台積", "red", True): red_M5_M2,
+            ("台積", "red", False): red_M5_M1,
+            ("台積", "green", True): green_M5_M2,
+            ("台積", "green", False): green_M5_M1,
+            ("校門", "red"): red_M1_M5,
+            ("綜二", "red"): red_M2_M5,
+            ("校門", "green"): green_M1_M5,
+            ("綜二", "green"): green_M2_M5,
+        }
+
+        key = (dep_stop, line) if "台積" not in dep_stop else (dep_stop, line, from_gen_2)
+        return stops_lines_map.get(key, print(dep_stop, line))
 
     def _gen_detailed_bus_schedule(
         self,
@@ -373,7 +363,7 @@ class Buses:
                 elif direction == "down":
                     this_route = nanda_S1_M1
 
-            for index, stop in enumerate(this_route.route):
+            for index, stop in enumerate(this_route.stops):
                 arrive_time = self._add_on_time(
                     bus["time"],
                     this_route.gen_accumulated_time()[index],

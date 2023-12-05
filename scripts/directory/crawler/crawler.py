@@ -70,7 +70,7 @@ def get_all_dept_url():
 # 取得系所的資料
 def get_dept_details(url):
     # https://tel.net.nthu.edu.tw/nthusearch/dept.php?departments=43
-    response_text, _response_code = get_response(url)
+    response_text, _ = get_response(url)
     text = response_text
 
     # 使用 bs4 解析 response
@@ -125,15 +125,13 @@ def get_dept_details(url):
             # 取得第一個 table 的子項目的子項目的名稱和資料
             name = story_max1_1[0].text.strip()
             data = story_max1_1[1].text.strip().replace(" ", "")
-            if data == "":
-                link = story_max1_1[1].select_one("a")
-                if link is not None:
-                    data = link.get("href").replace("mailto:", "")
-                else:
-                    data = "N/A"
-            if name == "" or data == "":
-                continue
-            contact[name] = data
+            if link := story_max1_1[1].select_one("a"):
+                data = (
+                    "N/A" if link is None else link.get("href").replace("mailto:", "")
+                )
+
+            if name and data:
+                contact[name] = data
 
         return contact
 
@@ -200,12 +198,13 @@ def get_dept_details(url):
             for j in story_max2_1:
                 data = j.text.strip()
                 # 取得第二個 table 的子項目的子項目的名稱和資料
-                if data == "":
-                    link = j.select_one("a")
-                    if link is not None:
-                        data = link.get("href").replace("mailto:", "")
-                    else:
-                        data = "N/A"
+                if link := j.select_one("a"):
+                    data = (
+                        "N/A"
+                        if link is None
+                        else link.get("href").replace("mailto:", "")
+                    )
+
                 people_temp[people_col[col]] = data
                 col += 1
             people.append(people_temp)
@@ -231,7 +230,7 @@ def get_newname(o_filename):
     """
     filename = os.path.splitext(o_filename)[0]
     extension = os.path.splitext(o_filename)[1]
-    random_string = "".join(random.choice(string.ascii_letters) for i in range(5))
+    random_string = "".join(random.choice(string.ascii_letters) for _ in range(5))
     new_filename = f"{filename}-{random_string}{extension}"
     return new_filename
 

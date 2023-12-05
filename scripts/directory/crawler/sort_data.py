@@ -20,11 +20,14 @@
 import json
 import os
 
+JSON_EXTENSION = ".json"
+DEPT_FILE_NAME = "dept.json"
+
 
 def combine_file():
     files = os.listdir("dept")
     # 移除不為 json 結尾的檔案
-    files = [i for i in files if i.endswith(".json")]
+    files = [i for i in files if i.endswith(JSON_EXTENSION)]
     # 開啟 json 檔案
     for i in files:
         with open(f"dept/{i}", "r", encoding="utf-8") as f:
@@ -36,7 +39,7 @@ def combine_file():
         # 取得子系所的資料夾中的所有檔案
         dept_files = os.listdir(dept_path)
         # 移除不為 json 結尾的檔案
-        dept_files = [i for i in dept_files if i.endswith(".json")]
+        dept_files = [i for i in dept_files if i.endswith(JSON_EXTENSION)]
         # 開啟子系所的 json 檔案
         for j in dept_files:
             with open(f"{dept_path}/{j}", "r", encoding="utf-8") as f:
@@ -54,7 +57,7 @@ def combine_file():
 def combine_json():
     files = os.listdir("combined")
     # 搜尋是否有 JSON 結尾對應的資料夾
-    files = [i for i in files if i.endswith(".json")]
+    files = [i for i in files if i.endswith(JSON_EXTENSION)]
     final_data = []
     # 開啟 json 檔案
     for i in files:
@@ -66,7 +69,7 @@ def combine_json():
         final_data.append(temp_data)
 
     # 將 final_data 存入 json 檔案
-    with open("dept.json", "w", encoding="utf-8") as f:
+    with open(DEPT_FILE_NAME, "w", encoding="utf-8") as f:
         json.dump(final_data, f, ensure_ascii=False, indent=4)
 
 
@@ -74,14 +77,14 @@ def combine_json():
 def combine_contact():
     with open("departments.json", "r", encoding="utf-8") as f:
         contact_data = json.load(f)
-    with open("dept.json", "r", encoding="utf-8") as f:
+    with open(DEPT_FILE_NAME, "r", encoding="utf-8") as f:
         dept_data = json.load(f)
     for i in contact_data:
         for j in dept_data:
             if i["name"] == j["name"]:
                 j["url"] = i["url"]
 
-    with open("dept.json", "w", encoding="utf-8") as f:
+    with open(DEPT_FILE_NAME, "w", encoding="utf-8") as f:
         json.dump(dept_data, f, ensure_ascii=False, indent=4)
 
 
