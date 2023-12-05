@@ -7,6 +7,7 @@ from src.api.models.contacts import Contact
 
 router = APIRouter()
 contact = Contact()
+NOT_FOUND_EXCEPTION = HTTPException(status_code=404, detail="Not found")
 
 
 @router.get("/", response_model=list[schemas.contacts.ContactsData])
@@ -30,7 +31,7 @@ def get_contact(
     result = contact.get_by_id(id)
     if result:
         return result
-    raise HTTPException(status_code=404, detail="Not found")
+    raise NOT_FOUND_EXCEPTION
 
 
 @router.get("/searches/{name}", response_model=list[schemas.contacts.ContactsData])
@@ -41,9 +42,9 @@ def search_contact_by_get_method(
     根據名字模糊搜尋電話。
     """
     result = contact.fuzzy_search(name)
-    if result == []:
-        raise HTTPException(status_code=404, detail="Not found")
-    return result
+    if result:
+        return result
+    raise NOT_FOUND_EXCEPTION
 
 
 @router.post("/searches", response_model=list[schemas.contacts.ContactsData])
@@ -53,6 +54,6 @@ def search_contact_by_post_method(search_data: schemas.contacts.ContactSearchDat
     """
     result = contact.fuzzy_search(search_data.name)
     result = result[: search_data.max_result]
-    if result == []:
-        raise HTTPException(status_code=404, detail="Not found")
-    return result
+    if result:
+        return result
+    raise NOT_FOUND_EXCEPTION
