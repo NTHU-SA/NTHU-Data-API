@@ -6,7 +6,7 @@ from thefuzz import fuzz, process
 
 class Data:
     def __init__(self, path: str):
-        self.data = self._load_data(path)
+        self.value = self._load_data(path)
 
     def _load_data(self, path: str) -> dict:
         with open(path, "r", encoding="utf-8") as f:
@@ -14,19 +14,19 @@ class Data:
         return data
 
     def _get_all_data(self, key="name"):
-        for i in self.data:
+        for i in self.value:
             yield i["data"][key]
 
     def get_all(self):
-        return self.data
+        return self.value
 
     def get_by_id(self, query: UUID):
-        for i in self.data:
+        for i in self.value:
             if UUID(i["id"]).int == query.int:
                 return i
 
     def get_by_data_key(self, query: str, key="name"):
-        for i in self.data:
+        for i in self.value:
             if i["data"][key] == query:
                 return i
 
