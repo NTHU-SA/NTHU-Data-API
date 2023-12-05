@@ -5,12 +5,13 @@ from src.api.models.courses import Conditions, Processor
 
 router = APIRouter()
 courses = Processor(json_path="data/courses/11210.json")
+DESCRIPTION_OF_LIMITS = "最大回傳資料筆數"
 
 
 @router.get("/", response_model=list[schemas.courses.CourseData])
 async def get_all_courses_list(
     response: Response,
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得所有課程。
@@ -53,7 +54,7 @@ async def get_selected_fields_list(
     field_name: schemas.courses.CourseFieldName = Path(
         ..., example="id", description="欄位名稱"
     ),
-    limits: int = Query(None, ge=1, example=20, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=20, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得指定欄位的列表。
@@ -70,7 +71,7 @@ async def get_selected_field_and_value_data(
         ..., example="chinese_title", description="搜尋的欄位名稱"
     ),
     value: str = Path(..., example="產業創新與生涯探索", description="搜尋的值"),
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
@@ -83,7 +84,7 @@ async def get_selected_field_and_value_data(
 @router.get("/lists/16weeks", response_model=list[schemas.courses.CourseData])
 async def get_16weeks_courses_list(
     response: Response,
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
     取得 16 週課程列表。
@@ -97,12 +98,12 @@ async def get_16weeks_courses_list(
 @router.get("/lists/microcredits", response_model=list[schemas.courses.CourseData])
 async def get_microcredits_courses_list(
     response: Response,
-    limits: int = Query(None, ge=1, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
     取得微學分課程列表。
     """
-    condition = Conditions("credit", f"[0-9].[0-9]", True)
+    condition = Conditions("credit", "[0-9].[0-9]", True)
     result = courses.query(condition)[:limits]
     response.headers["X-Total-Count"] = str(len(result))
     return result
@@ -111,7 +112,7 @@ async def get_microcredits_courses_list(
 @router.get("/lists/xclass", response_model=list[schemas.courses.CourseData])
 async def get_xclass_courses_list(
     response: Response,
-    limits: int = Query(None, ge=1, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
     取得 X-class 課程列表。
@@ -130,7 +131,7 @@ async def search_by_field_and_value(
         description="搜尋的欄位名稱",
     ),
     value: str = Query(..., example="產業.+生涯", description="搜尋的值（可以使用 Regex，正則表達式）"),
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
@@ -203,7 +204,7 @@ async def get_courses_by_condition(
             },
         }
     ),
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     根據條件取得課程。
@@ -251,7 +252,7 @@ async def search_courses_by_credits(
     op: schemas.courses.CourseCreditOperation = Query(
         None, example="gt", description="比較運算子，可以是 >(gt)、<(lt)、>=(gte)、<=(lte)"
     ),
-    limits: int = Query(None, description="最大回傳資料筆數"),
+    limits: int = Query(None, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
     取得指定學分數的課程。
@@ -270,7 +271,7 @@ async def search_courses_by_credits(
 )
 async def search_courses_by_classroom(
     classroom_name: str = Path(..., description="搜尋的教室"),
-    limits: int = Query(None, description="最大回傳資料筆數"),
+    limits: int = Query(None, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     根據教室取得課程，可以用中文或英文教室名稱，也可以使用系館代碼。
@@ -289,7 +290,7 @@ async def search_courses_by_classroom(
 )
 async def search_courses_by_time(
     class_time: str = Path(..., example="M1M2", description="搜尋的上課時間"),
-    limits: int = Query(None, ge=1, example=5, description="最大回傳資料筆數"),
+    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     根據上課時間取得課程，使用 M1M2 表示星期一第一節到第二節。
@@ -306,7 +307,7 @@ async def search_courses_by_time(
 )
 async def search_courses_by_teacher(
     teacher_name: str = Path(..., example="顏東勇", description="搜尋的教師姓名"),
-    limits: int = Query(None, description="最大回傳資料筆數"),
+    limits: int = Query(None, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
     根據教師姓名取得課程，可以用中英文姓名，也可以只用姓氏。
