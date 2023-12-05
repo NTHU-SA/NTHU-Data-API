@@ -7,6 +7,7 @@ from src.api.models.locations import Location
 
 router = APIRouter()
 location = Location()
+NOT_FOUND_EXCEPTION = HTTPException(status_code=404, detail="Not found")
 
 
 @router.get("/", response_model=list[schemas.locations.LocationData])
@@ -30,7 +31,7 @@ def get_location_by_id(
     result = location.get_by_id(id)
     if result:
         return result
-    raise HTTPException(status_code=404, detail="Not found")
+    raise NOT_FOUND_EXCEPTION
 
 
 @router.get("/searches/{name}", response_model=list[schemas.locations.LocationData])
@@ -41,9 +42,9 @@ def search_location_by_get_method(
     使用名稱模糊搜尋地點資訊。
     """
     result = location.fuzzy_search(name)
-    if result == []:
-        raise HTTPException(status_code=404, detail="Not found")
-    return result
+    if result:
+        return result
+    raise NOT_FOUND_EXCEPTION
 
 
 @router.post("/searches", response_model=list[schemas.locations.LocationData])
@@ -53,6 +54,6 @@ def search_location_by_post_method(search_data: schemas.locations.LocationSearch
     """
     result = location.fuzzy_search(search_data.name)
     result = result[: search_data.max_result]
-    if result == []:
-        raise HTTPException(status_code=404, detail="Not found")
-    return result
+    if result:
+        return result
+    raise NOT_FOUND_EXCEPTION
