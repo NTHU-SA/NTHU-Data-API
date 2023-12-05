@@ -38,9 +38,7 @@ def get_number_of_goods() -> dict:
     data = {}
     for variable in variables:
         key, value = variable
-        if value.isdigit():
-            value = value
-        else:
+        if not value.isdigit():
             value = value.strip('"')
         data[key] = value
     return data
