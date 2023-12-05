@@ -41,9 +41,7 @@ def get_response(url):
 
 # 取得所有系所的網址
 def get_all_dept_url():
-    response_text, response_code = get_response(
-        "https://tel.net.nthu.edu.tw/nthusearch/index.php"
-    )
+    response_text, _ = get_response("https://tel.net.nthu.edu.tw/nthusearch/index.php")
     text = response_text
     text = text.split("\n")
 
