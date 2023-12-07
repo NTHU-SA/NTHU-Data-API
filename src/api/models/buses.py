@@ -306,13 +306,14 @@ class Buses:
     def _route_selector(
         self, dep_stop: str, line: str, from_gen_2: bool = False
     ) -> Route:
-        # 這裡不用 match 的原因是因為資料中有些會多空格
+        # 清理資料，爬蟲抓下來的資料有些會多空格
+        (dep_stop, line) = map(str.strip, [dep_stop, line])
         # 下山
         stops_lines_map = {
-            ("台積", "red", True): red_M5_M2,
-            ("台積", "red", False): red_M5_M1,
-            ("台積", "green", True): green_M5_M2,
-            ("台積", "green", False): green_M5_M1,
+            ("台積館", "red", True): red_M5_M2,
+            ("台積館", "red", False): red_M5_M1,
+            ("台積館", "green", True): green_M5_M2,
+            ("台積館", "green", False): green_M5_M1,
             ("校門", "red"): red_M1_M5,
             ("綜二", "red"): red_M2_M5,
             ("校門", "green"): green_M1_M5,
