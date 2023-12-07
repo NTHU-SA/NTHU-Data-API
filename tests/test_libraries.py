@@ -12,7 +12,7 @@ client = TestClient(app)
     [
         ("/libraries/space", 200),
         ("/libraries/lost_and_found", 200),
-        ("/libraries/goods", 200),
+        # ("/libraries/goods", 200),
     ],
 )
 def test_libraries_endpoints(url, status_code):

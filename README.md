@@ -1,5 +1,5 @@
 # NTHU-Data-API
-[![CodeFactor](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api/badge)](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api)  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![CodeFactor](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api/badge)](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api)  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)  [![Smokeshow coverage](https://coverage-badge.samuelcolvin.workers.dev/NTHU-SA/NTHU-Data-API.svg)](https://coverage-badge.samuelcolvin.workers.dev/redirect/NTHU-SA/NTHU-Data-API)
 ## Introduction
 This is a project for NTHU students to get data from NTHU website.
 
