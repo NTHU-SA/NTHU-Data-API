@@ -38,17 +38,17 @@ def get_library_rss_data(
 
 
 @router.get(
-    "/openinghours/{libaray_name}", response_model=schemas.resources.LibraryOpeningHour
+    "/openinghours/{library_name}", response_model=schemas.resources.LibraryOpeningHour
 )
 def get_library_opening_hours(
-    libaray_name: schemas.resources.LibraryName = Path(
+    library_name: schemas.resources.LibraryName = Path(
         ..., description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)"
     )
 ):
     """
     取得指定圖書館的開放時間。
     """
-    return library_scraper.get_opening_hours(libaray_name)
+    return library_scraper.get_opening_hours(library_name)
 
 
 @router.get("/goods", response_model=schemas.resources.LibraryNumberOfGoods)
