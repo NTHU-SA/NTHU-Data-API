@@ -38,10 +38,9 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-tests.txt
       - name: Test
-        run: python -m pytest -n auto tests --cov=. --cov-report=html:coverage --cov-fail-under=80
-      - run: smokeshow upload coverage
-        env:
-          SMOKESHOW_GITHUB_STATUS_DESCRIPTION: coverage {coverage-percentage}
-          SMOKESHOW_GITHUB_COVERAGE_THRESHOLD: 50
-          SMOKESHOW_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SMOKESHOW_GITHUB_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python -m pytest -n auto tests --cov=. --cov-report=html:coverage --cov-fail-under=85
+      - name: Store coverage files
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage
