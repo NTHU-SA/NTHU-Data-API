@@ -1,0 +1,47 @@
+name: Generate Coverage
+
+on:
+  workflow_run:
+    workflows: [Test]
+    types: [completed]
+
+permissions:
+  statuses: write
+
+jobs:
+  Context:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+  Smokeshow:
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: pip install smokeshow
+
+      - uses: dawidd6/action-download-artifact@v2.28.0
+        with:
+          workflow: tests.yml
+          commit: ${{ github.event.workflow_run.head_sha }}
+
+      - run: smokeshow upload coverage
+        env:
+          SMOKESHOW_GITHUB_STATUS_DESCRIPTION: Coverage {coverage-percentage}
+          SMOKESHOW_GITHUB_COVERAGE_THRESHOLD: 85
+          SMOKESHOW_GITHUB_CONTEXT: Coverage
+          SMOKESHOW_GITHUB_PR_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          SMOKESHOW_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,46 @@
+# test workflow from https://github.com/tiangolo/fastapi/blob/master/.github/workflows/test.yml
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+      fail-fast: true
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('requirements-tests.txt') }}-test-v06
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-tests.txt
+      - name: Test
+        run: python -m pytest -n auto tests --cov=. --cov-report=html:coverage --cov-fail-under=85
+      - name: Store coverage files
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage

@@ -68,7 +68,7 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
     else:
         headers = None
     url = validate_url(url)
-    response = requests.get(url, headers, **kwargs)
+    response = requests.get(url, headers, timeout=10, **kwargs)
     status_code = response.status_code
     if status_code != 200:
         raise HTTPException(status_code, f"Request error: {status_code}")
@@ -86,7 +86,7 @@ def post(url: str, cache=True, update=False, **kwargs) -> str:
         del ttl_cache[url]
     if cache and url in ttl_cache:
         return ttl_cache[url]
-    response = requests.post(url, **kwargs)
+    response = requests.post(url, timeout=10, **kwargs)
     status_code = response.status_code
     if status_code != 200:
         raise HTTPException(status_code, f"Request error: {status_code}")
