@@ -16,9 +16,8 @@ jobs:
         with:
           workflow: tests.yml
           commit: ${{ github.event.workflow_run.head_sha }}
-      - name: fix code coverage paths
-        run: |
-          sed -i 's/\/home\/runner\/work\/<your-repo>\/<your-repo>\//\/github\/workspace\//g' coverage-xml/coverage.xml
+      - name: Override Coverage Source Path for Sonar
+        run: sed -i 's/\/home\/runner\/work\/NTHU-Data-API\/NTHU-Data-API\//\/github\/workspace\//g' coverage-xml/coverage.xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
