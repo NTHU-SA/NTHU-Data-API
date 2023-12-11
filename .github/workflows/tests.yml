@@ -9,9 +9,10 @@ on:
     types:
       - opened
       - synchronize
+      - reopened
 
 jobs:
-  Test:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -44,3 +45,8 @@ jobs:
         with:
           name: coverage
           path: coverage
+      - name: Store coverage xml
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-xml
+          path: coverage.xml
