@@ -6,11 +6,19 @@ jobs:
   linter_name:
     name: Code formatter
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+      fail-fast: true
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install black isort
       - name: Format code with black and isort
         run: |
-          pip install black isort
           isort .
           black .
       - name: Commit changes
