@@ -31,6 +31,9 @@ def validate_url(url: str) -> str:
     # 只允許 http 或 https 協議
     if parsed_url.scheme not in ["http", "https"]:
         raise ValueError("Invalid URL scheme")
+    # 只允許 nthu.edu.tw 結尾的網域
+    if not parsed_url.netloc.endswith("nthu.edu.tw"):
+        raise ValueError("Invalid URL domain")
     # 重新組合 URL，排除可能的用戶名和密碼
     safe_url = urlunparse(
         (
@@ -59,6 +62,13 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
         update (bool): 是否更新快取。
         **kwargs: 額外傳遞給的參數，會傳遞給 requests.get。
     """
+
+    # 驗證網址
+    try:
+        url = validate_url(url)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
     if update and url in ttl_cache:
         del ttl_cache[url]
     if cache and url in ttl_cache:
@@ -67,7 +77,6 @@ def get(url: str, cache=True, update=False, auto_headers=True, **kwargs) -> str:
         headers = generate_headers(url)
     else:
         headers = None
-    url = validate_url(url)
     response = requests.get(url, headers, timeout=10, **kwargs)
     status_code = response.status_code
     if status_code != 200:

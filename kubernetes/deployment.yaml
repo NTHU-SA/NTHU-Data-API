@@ -27,9 +27,9 @@ spec:
               ephemeral-storage: 1Gi
               memory: "512Mi"
             limits:
-              cpu: "250m"
+              cpu: "500m"
               ephemeral-storage: 1Gi
-              memory: "512Mi"
+              memory: "1024Mi"
           env:
             - name: TZ
               value: Asia/Taipei

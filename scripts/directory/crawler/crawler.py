@@ -10,8 +10,7 @@ from cachetools import TTLCache, cached
 from loguru import logger
 
 # 爬取 https://tel.net.nthu.edu.tw/nthusearch/dept.php 的資料
-
-base_url = "https://tel.net.nthu.edu.tw/nthusearch/"
+BASE_URL = "https://tel.net.nthu.edu.tw/nthusearch/"
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=60 * 60 * 24))
@@ -39,8 +38,10 @@ def get_response(url):
     return response_text, response_code
 
 
-# 取得所有系所的網址
 def get_all_dept_url():
+    """
+    取得所有系所的網址
+    """
     response_text, _ = get_response("https://tel.net.nthu.edu.tw/nthusearch/index.php")
     text = response_text
     text = text.split("\n")
@@ -54,15 +55,120 @@ def get_all_dept_url():
         if match:
             url = match.group(1)
             name = match.group(2)
-
-            # 將網址加入 base_url
-            url = base_url + url
+            url = BASE_URL + url
             print(url, name)
             departments.append({"name": name, "url": url})
 
     with open("departments.json", "w", encoding="UTF-8") as f:
         json.dump(departments, f, ensure_ascii=False, indent=4)
+
     return departments
+
+
+def get_dept_departments(soup):
+    """
+    取得系所的子系所的名稱和網址
+    """
+    departments = []
+    # 取得 div story_left 的內容
+    story_left = soup.select_one("div.story_left")
+    # 取得 story_left 的子項目
+    # <a href="dept.php?departments=7505">音樂學系</a>
+    story_left = story_left.select("a")
+    # 取得系所的子項目的網址和名稱
+    for i in story_left:
+        url = i.get("href")
+        name = i.text
+        url = BASE_URL + url
+        departments.append({"name": name, "url": url})
+    return departments
+
+
+def get_dept_contact(first_story_max):
+    """
+    取得系所的聯絡資訊
+    """
+
+    """
+    <table width="100%"  border="0" cellspacing="0" cellpadepartmentsing="0">
+    <tr><td>分機</td><td>62222、62223</td></tr>
+    <tr><td>直撥電話</td><td>03- 5162222</td></tr>
+    <tr><td>傳真電話</td><td>03- 5726819 </td></tr>
+    <tr><td>Email</td><td><a href=mailto:cac@my.nthu.edu.tw><img src="./image/mail.jpg" border=0 alt='寄信'></a></td></tr>
+    <tr><td>網頁</td><td><a href=https://cac.site.nthu.edu.tw/app/index.php><img src="./image/home.png" border=0 alt='網頁'></a></td></tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>    </table>
+    """
+    contact = {}
+    # 取得第一個 table 的子項目
+    for i in first_story_max:
+        # 取得第一個 table 的子項目的子項目
+        # <td>分機</td><td>62222、62223</td>
+        first_story_max_td = i.select("td")
+        # 取得第一個 table 的子項目的子項目的名稱和資料
+        name = first_story_max_td[0].text.strip()
+        data = first_story_max_td[1].text.strip().replace(" ", "")
+        if link := first_story_max_td[1].select_one("a"):
+            if link is None:
+                data = "N/A"
+            else:
+                data = link.get("href").replace("mailto:", "")
+        if name and data:
+            contact[name] = data
+
+    return contact
+
+
+def get_dept_people(second_story_max):
+    """
+    取得系所的人員資訊
+    """
+
+    """
+    <table width="100%"  border="0" cellspacing="2" cellpadepartmentsing="2">
+    <tr>
+    <td width="18%"><b>姓　名</b></td>
+    <td width="37%"><b>職稱/職責</b></td>
+    <td width="23%"><b>分機</b></td>
+    <td width="18%"><b>備註</b></td>
+    <td width="4%"><b>Email</b></td>
+    </tr>
+    <tr>
+    <td>簡禎富</td>
+    <td>副校長兼總中心主任</td><td>62503</td><td align=center></td>
+    <td align=center><a href="mailto:cfchien@mx.nthu.edu.tw"><img src="./image/mail.jpg" border=0 alt='寄信'></a></td>
+    </tr>
+    </table>
+    """
+
+    if len(second_story_max) == 0:
+        return None
+
+    # 透過第二個 table 的第一個子項目的子項目建立欄位名稱
+    second_story_max_1_td = second_story_max[0].select("td")
+    people_col = []
+    for i in second_story_max_1_td:
+        people_col.append(i.text.strip().replace("\u3000", ""))
+
+    people = []
+    for i in second_story_max:
+        # 取得第二個 table 的子項目的子項目
+        # <td>簡禎富</td>
+        second_story_max_td = i.select("td")
+        people_temp = {}
+        col = 0
+        for j in second_story_max_td:
+            data = j.text.strip()
+            # 取得第二個 table 的子項目的子項目的名稱和資料
+            if link := j.select_one("a"):
+                data = (
+                    "N/A" if link is None else link.get("href").replace("mailto:", "")
+                )
+
+            people_temp[people_col[col]] = data
+            col += 1
+        people.append(people_temp)
+
+    return people
 
 
 # 取得系所的資料
@@ -70,153 +176,26 @@ def get_dept_details(url):
     # https://tel.net.nthu.edu.tw/nthusearch/dept.php?departments=43
     response_text, _ = get_response(url)
     text = response_text
-
     # 使用 bs4 解析 response
     soup = bs4.BeautifulSoup(text, "html.parser")
-
-    def get_dept_departments():
-        departments = []
-        # 取得 div story_left 的內容
-        story_left = soup.select_one("div.story_left")
-        # 取得 story_left 的子項目
-        # <a href="dept.php?departments=7505">音樂學系</a>
-        story_left = story_left.select("a")
-        # 取得系所的子項目的網址和名稱
-        for i in story_left:
-            url = i.get("href")
-            name = i.text
-            # 將網址加入 base_url
-            url = base_url + url
-            departments.append({"name": name, "url": url})
-        return departments
-
+    # 取得系所的子系所的名稱和網址
     try:
-        departments = get_dept_departments()
+        departments = get_dept_departments(soup)
     except Exception as e:
         logger.error(f"{url} 的 departments 失效了，錯誤為 {e}")
         departments = []
-
-    def get_dept_contact():
-        # 取得 div story_max 的內容
-        story_max = soup.select_one("div.story_max")
-        # 分開取得 story_max 的兩個 table
-        story_max = story_max.select("table")
-
-        # 處理第一個 table
-        """
-        <table width="100%"  border="0" cellspacing="0" cellpadepartmentsing="0">
-        <tr><td>分機</td><td>62222、62223</td></tr>
-        <tr><td>直撥電話</td><td>03- 5162222</td></tr>
-        <tr><td>傳真電話</td><td>03- 5726819 </td></tr>
-        <tr><td>Email</td><td><a href=mailto:cac@my.nthu.edu.tw><img src="./image/mail.jpg" border=0 alt='寄信'></a></td></tr>
-        <tr><td>網頁</td><td><a href=https://cac.site.nthu.edu.tw/app/index.php><img src="./image/home.png" border=0 alt='網頁'></a></td></tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>    </table>
-        """
-
-        contact = {}
-        # 取得第一個 table 的子項目
-        story_max1 = story_max[0].select("tr")
-        for i in story_max1:
-            # 取得第一個 table 的子項目的子項目
-            # <td>分機</td><td>62222、62223</td>
-            story_max1_1 = i.select("td")
-            # 取得第一個 table 的子項目的子項目的名稱和資料
-            name = story_max1_1[0].text.strip()
-            data = story_max1_1[1].text.strip().replace(" ", "")
-            if link := story_max1_1[1].select_one("a"):
-                data = (
-                    "N/A" if link is None else link.get("href").replace("mailto:", "")
-                )
-
-            if name and data:
-                contact[name] = data
-
-        return contact
-
-    try:
-        contact = get_dept_contact()
-    except Exception as e:
-        logger.error(f"{url} 的 contact 失效了，錯誤為 {e}")
-        contact = {}
-
-    def get_dept_people():
-        # 取得 div story_max 的內容
-        story_max = soup.select_one("div.story_max")
-        # 分開取得 story_max 的兩個 table
-        story_max = story_max.select("table")
-
-        # 處理第二個 table
-        """
-        <table width="100%"  border="0" cellspacing="2" cellpadepartmentsing="2">
-        <tr>
-        <td width="18%"><b>姓　名</b></td>
-        <td width="37%"><b>職稱/職責</b></td>
-        <td width="23%"><b>分機</b></td>
-        <td width="18%"><b>備註</b></td>
-        <td width="4%"><b>Email</b></td>
-        </tr>
-        <tr>
-        <td>簡禎富</td>
-        <td>副校長兼總中心主任</td><td>62503</td><td align=center></td>
-        <td align=center><a href="mailto:cfchien@mx.nthu.edu.tw"><img src="./image/mail.jpg" border=0 alt='寄信'></a></td>
-        </tr>
-        <tr bgcolor="#EEEEEE"><td width="18%">吳尚衡</td>
-        <td>專案助理</td><td>62222</td><td align=center></td>
-        <td align=center><a href="mailto:shanghengwu@mx.nthu.edu.tw"><img src="./image/mail.jpg" border=0 alt='寄信'></a></td>
-        </tr>
-        <tr>
-        <td width="18%">林怡君</td>
-        <td>音樂藝術企劃</td><td>62377</td><td align=center></td>
-        <td align=center><a href="mailto:ichunlin@mx.nthu.edu.tw"><img src="./image/mail.jpg" border=0 alt='寄信'></a></td>
-        </tr>
-        <tr bgcolor="#EEEEEE"><td width="18%">林甫珊</td>
-        <td>視覺藝術企劃</td><td>62497</td><td align=center></td>
-        <td align=center><a href="mailto:fslin@mx.nthu.edu.tw"><img src="./image/mail.jpg" border=0 alt='寄信'></a></td>
-        </tr>
-        </table>
-        """
-
-        # 取得第二個 table 的子項目
-        story_max2 = story_max[1].select("tr")
-        story_max2_1 = story_max2[0].select("td")
-        people_col = []
-        # 透過第二個 table 的第一個子項目的子項目建立欄位名稱
-        for i in story_max2_1:
-            people_col.append(i.text.strip().replace("\u3000", ""))
-
-        story_max2 = story_max2[1:]
-        people = []
-
-        for i in story_max2:
-            # 取得第二個 table 的子項目的子項目
-            # <td>簡禎富</td>
-            story_max2_1 = i.select("td")
-            people_temp = {}
-            col = 0
-            for j in story_max2_1:
-                data = j.text.strip()
-                # 取得第二個 table 的子項目的子項目的名稱和資料
-                if link := j.select_one("a"):
-                    data = (
-                        "N/A"
-                        if link is None
-                        else link.get("href").replace("mailto:", "")
-                    )
-
-                people_temp[people_col[col]] = data
-                col += 1
-            people.append(people_temp)
-
-        return people
-
-    try:
-        people = get_dept_people()
-    except Exception as e:
-        logger.error(f"{url} 的 people 失效了，錯誤為 {e}")
-        people = []
-
+    # 處理頁面的兩個 table
+    # 取得 div story_max 的內容
+    story_max = soup.select_one("div.story_max")
+    if story_max is None:
+        return {"departments": departments, "contact": {}, "people": []}
+    # 分開取得 story_max 的兩個 table
+    story_max = story_max.select("table")
+    # 取得系所的聯絡資訊
+    contact = get_dept_contact(story_max[0].select("tr")) or {}
+    # 取得系所的人員資訊
+    people = get_dept_people(story_max[1].select("tr")) or []
     result = {"departments": departments, "contact": contact, "people": people}
-
     return result
 
 
@@ -256,7 +235,7 @@ def get_all_dept_details_from_file():
 
 
 # 從系所的資料中取得子系所的名稱和網址，並爬取並存至系所資料夾中
-def get_dept_departments():
+def get_dept_departments_to_dir():
     files = os.listdir("dept")
     files = [i for i in files if i.endswith(".json")]
     for i in files:
@@ -277,13 +256,6 @@ def get_dept_departments():
                 filename = get_newname(filename)
             with open(f"dept/{dept_name}/{filename}", "w", encoding="UTF-8") as f:
                 json.dump(result, f, ensure_ascii=False, indent=4)
-
-
-def get_dept_departments_dir():
-    files = os.listdir("dept")
-    print(files)
-    start_index = files.index("研究發展處")
-    print(start_index)
 
 
 # 撈取指定系所的資料
@@ -319,7 +291,5 @@ def get_nodata_dept_departments():
 
 
 if __name__ == "__main__":
-    data = get_dept_details(
-        "https://tel.net.nthu.edu.tw/nthusearch/dept.php?departments=43"
-    )
+    data = get_dept_details("https://tel.net.nthu.edu.tw/nthusearch/dept.php?dd=86")
     print(data)
