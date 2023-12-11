@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   Context:
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +20,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
 
   Smokeshow:
-    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success' }}
+    needs: Context
     runs-on: ubuntu-latest
 
     steps:
