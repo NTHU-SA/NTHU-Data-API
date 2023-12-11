@@ -3,7 +3,7 @@ name: Code formatter
 on: [push]
 
 jobs:
-  linter_name:
+  foratter:
     name: Code formatter
     runs-on: ubuntu-latest
     strategy:
