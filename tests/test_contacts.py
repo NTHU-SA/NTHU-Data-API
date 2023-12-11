@@ -14,7 +14,7 @@ name_list = ["清華學院", "理學院", "主計"]
 
 
 def test_contacts():
-    response = client.get(url=f"/contacts")
+    response = client.get(url="/contacts")
     assert response.status_code == 200
 
 
