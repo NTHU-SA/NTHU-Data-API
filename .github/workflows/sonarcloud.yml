@@ -17,6 +17,8 @@ jobs:
           workflow: tests.yml
           commit: ${{ github.event.workflow_run.head_sha }}
       - run: ls -la
+      - run: ls coverage-xml
+      - run: cat coverage-xml/coverage.xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
