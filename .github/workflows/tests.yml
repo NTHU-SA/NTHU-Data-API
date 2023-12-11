@@ -14,10 +14,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11"]
-      fail-fast: true
     steps:
       - name: Dump GitHub context
         env:
@@ -27,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "*"
       - uses: actions/cache@v3
         id: cache
         with:
