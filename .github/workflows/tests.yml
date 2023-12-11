@@ -38,7 +38,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-tests.txt
       - name: Test
-        run: python -m pytest -n auto tests --cov=src --cov=tests --cov-report=html:coverage --cov-fail-under=85
+        run: python -m pytest -n auto tests --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
       - name: Store coverage files
         uses: actions/upload-artifact@v3
         with:
