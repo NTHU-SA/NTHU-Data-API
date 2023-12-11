@@ -22,7 +22,10 @@ jobs:
   Smokeshow:
     needs: Context
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+      fail-fast: true
     steps:
       - name: Dump GitHub context
         env:
@@ -30,15 +33,12 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
+          python-version: ${{ matrix.python-version }}
       - run: pip install smokeshow
-
       - uses: dawidd6/action-download-artifact@v2.28.0
         with:
           workflow: tests.yml
           commit: ${{ github.event.workflow_run.head_sha }}
-
       - run: smokeshow upload coverage
         env:
           SMOKESHOW_GITHUB_STATUS_DESCRIPTION: Coverage {coverage-percentage}

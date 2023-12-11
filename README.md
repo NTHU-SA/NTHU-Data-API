@@ -1,52 +1,77 @@
 # NTHU-Data-API
-[![CodeFactor](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api/badge)](https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api)  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)  [![Smokeshow coverage](https://coverage-badge.samuelcolvin.workers.dev/NTHU-SA/NTHU-Data-API.svg)](https://coverage-badge.samuelcolvin.workers.dev/redirect/NTHU-SA/NTHU-Data-API)
-## Introduction
-This is a project for NTHU students to get data from NTHU website.
+<p align="center">
+    <em>NTHU-Data-API is a project designed for NTHU developers.</em>
+    <br>
+    <em>It provides an easy way to fetch data from the NTHU website.</em>
+</p>
+<p align="center">
+<a href="https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api" target="_blank">
+    <img src="https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api/badge" alt="Codefactor Score">
+</a>
+<a href="https://github.com/psf/black" target="_blank">
+    <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black">
+</a>
+<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/NTHU-SA/NTHU-Data-API" target="_blank">
+    <img src="https://coverage-badge.samuelcolvin.workers.dev/NTHU-SA/NTHU-Data-API.svg" alt="Test Coverage">
+</a>
+<br>
+<a href="https://sonarcloud.io/summary/new_code?id=NTHU-SA_NTHU-Data-API" target="_blank">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=NTHU-SA_NTHU-Data-API&metric=ncloc" alt="Lines of Code">
+</a>
+<a href="https://sonarcloud.io/summary/new_code?id=NTHU-SA_NTHU-Data-API" target="_blank">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=NTHU-SA_NTHU-Data-API&metric=sqale_index" alt="Technical Debt">
+</a>
+</p>
 
-## Usage
-### Install
+## Introduction
+NTHU-Data-API is a project designed for NTHU developers. It provides an easy way to fetch data from the NTHU website.
+
+## Getting Started
+### Prerequisites
+Ensure you have Python 3 installed on your machine. You can verify this by running `python3 --version` in your terminal. If you don't have Python 3 installed, you can download it [here](https://www.python.org/downloads/).
+### Installation
+1. Clone the repository:
+```sh
+git clone https://github.com/NTHU-SA/NTHU-Data-API.git
+```
+2. Navigate to the project directory:
+```sh
+cd NTHU-Data-API
+```
+3. Install the required dependencies:
 ```sh
 pip3 install -r requirements.txt
 ```
-### Config
+### Configuration
+Copy the environment template file and fill in your details:
 ```sh
 cp .env.template .env
 ```
-### Run
+### Running the Application
 ```sh
 python3 main.py
 ```
 
-## Notes
-### Commit:
-#### Type:
-- feat: 新增/修改功能 (feature)。
-- fix: 修補 bug (bug fix)。
-- docs: 文件 (documentation)。
-- style: 格式 (不影響程式碼運行的變動 white-space, formatting, missing semi colons, etc)。
-- refactor: 重構 (既不是新增功能，也不是修補 bug 的程式碼變動)。
-- perf: 改善效能 (A code change that improves performance)。
-- test: 增加測試 (when adding missing tests)。
-- chore: 建構程序或輔助工具的變動 (maintain)。
-- revert: 撤銷回覆先前的 commit 例如：revert: type(scope): subject (回覆版本：xxxx)。
-#### Message Format:
-```sh
-<type>(<scope>): <subject>
-<BLANK LINE>
-<body>
-<BLANK LINE>
-<footer>
-```
-#### Message Example:
-```sh
-feat(README.md): add commit type and commit message format
-```
-#### Reference
-- [Git Commit Message Convention](https://gist.github.com/stephenparish/9941e89d80e2bc58a153)
-- [Git Commit Message 這樣寫會更好，替專案引入規範與範例](https://wadehuanglearning.blogspot.com/2019/05/commit-commit-commit-why-what-commit.html)
+## Contributing
+We follow certain guidelines for contributing. Here are the types of commits we accept:
+
+- feat: Add or modify features.
+- fix: Bug fixes.
+- docs: Documentation changes.
+- style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi colons, etc).
+- refactor: Code changes that neither fixes a bug nor adds a feature.
+- perf: Code changes that improve performance.
+- test: Adding missing tests.
+- chore: Changes to the build process or auxiliary tools and libraries.
+- revert: Reverts a previous commit.
 
 ## Credit
-- NTHUSA 32nd
+This project is maintained by NTHUSA 32nd.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+This project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
+
+## Acknowledgements
+Thanks to SonarCloud for providing code quality metrics:
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=NTHU-SA_NTHU-Data-API)
