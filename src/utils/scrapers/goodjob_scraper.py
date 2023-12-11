@@ -1,8 +1,9 @@
+import requests
 from bs4 import BeautifulSoup
+from cachetools import TTLCache, cached
 
-from src.utils import cached_request
 
-
+@cached(cache=TTLCache(maxsize=2, ttl=60 * 60 * 4))
 def get_announcements(data_type: str) -> list:
     """
     從 Goodjob 取得活動資料。
@@ -16,7 +17,7 @@ def get_announcements(data_type: str) -> list:
     # 課程/證照/考試: https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01004
     # 宣導資料:       https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01005
     URL_PREFIX = "https://goodjob-nthu.conf.asia/sys_news.aspx?nt="
-    response = cached_request.get(URL_PREFIX + data_type)
+    response = requests.get(URL_PREFIX + data_type).text
     soup = BeautifulSoup(response, "html.parser")
     items = soup.select("div.col-md-12 ul.list-unstyled li.u-block-hover")
 
