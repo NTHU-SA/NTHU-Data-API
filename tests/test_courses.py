@@ -5,6 +5,37 @@ from src import app
 from src.api import schemas
 
 client = TestClient(app)
+one_condition = {"row_field": "chinese_title", "matcher": "數統導論", "regex_match": True}
+two_conditions = [
+    {"row_field": "teacher", "matcher": "黃", "regex_match": True},
+    "or",
+    {"row_field": "teacher", "matcher": "孫", "regex_match": True},
+]
+multiple_conditions = [
+    {"row_field": "credit", "matcher": "3", "regex_match": True},
+    "and",
+    [
+        [
+            {"row_field": "id", "matcher": "STAT", "regex_match": True},
+            "or",
+            {"row_field": "id", "matcher": "MATH", "regex_match": True},
+        ],
+        "and",
+        [
+            {
+                "row_field": "class_room_and_time",
+                "matcher": "T3T4",
+                "regex_match": True,
+            },
+            "or",
+            {
+                "row_field": "class_room_and_time",
+                "matcher": "R3R4",
+                "regex_match": True,
+            },
+        ],
+    ],
+]
 
 
 @pytest.mark.parametrize(
@@ -34,7 +65,7 @@ def test_courses_fields(field_name):
     "field_name", [_.value for _ in schemas.courses.CourseFieldName]
 )
 @pytest.mark.parametrize("value", ["testing"])
-def test_courses_fields(field_name, value):
+def test_courses_fields_with_values(field_name, value):
     response = client.get(url=f"/courses/fields/{field_name}/{value}")
     assert response.status_code == 200
 
@@ -45,6 +76,12 @@ def test_courses_fields(field_name, value):
 @pytest.mark.parametrize("value", ["testing"])
 def test_courses_search(field_name, value):
     response = client.get(url=f"/courses/searches?field={field_name}&value={value}")
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("body", [one_condition, two_conditions, multiple_conditions])
+def test_courses_search_post(body):
+    response = client.post(url="/courses/searches", json=body)
     assert response.status_code == 200
 
 
