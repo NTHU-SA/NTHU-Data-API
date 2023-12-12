@@ -159,7 +159,7 @@ class Buses:
         self.detailed_data = {}
 
     def _parse_campus_info(self, variable_string: str):
-        regex_pattern = r"const " + variable_string + " = (\{.*?\})"
+        regex_pattern = r"const " + variable_string + r" = (\{.*?\})"
         data = re.search(regex_pattern, self._res_text, re.S)
         if data is not None:
             data = data.group(1)
@@ -177,7 +177,7 @@ class Buses:
         return data
 
     def _parse_bus_schedule(self, variable_string: str):
-        regex_pattern = r"const " + variable_string + " = (\[.*?\])"
+        regex_pattern = r"const " + variable_string + r" = (\[.*?\])"
         data = re.search(regex_pattern, self._res_text, re.S)
         if data is not None:
             data = data.group(1)
