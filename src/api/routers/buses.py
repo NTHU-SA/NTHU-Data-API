@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Path
 
 from src.api import schemas
@@ -5,6 +8,13 @@ from src.api.models.buses import Buses, after_specific_time, stops
 
 router = APIRouter()
 buses = Buses()
+
+
+def get_current_time_state():
+    current = datetime.now()
+    current_time = current.time().strftime("%H:%M")
+    current_day = "weekday" if current.now().weekday() < 5 else "weekend"
+    return current_time, current_day
 
 
 @router.get("/main", response_model=schemas.buses.BusMainData)
@@ -71,7 +81,7 @@ def get_bus_schedule(
     "/stops/{stop_name}/{bus_type}/{day}/{direction}",
     response_model=list[schemas.buses.BusStopsQueryResult],
 )
-def get_stop_up(
+def get_stop_bus(
     stop_name: schemas.buses.StopsName = Path(
         ..., example="北校門口", description="公車站牌名稱"
     ),
@@ -101,7 +111,7 @@ def get_stop_up(
         schemas.buses.BusMainDetailedSchedule | schemas.buses.BusNandaDetailedSchedule
     ],
 )
-def get_bus_info(
+def get_bus_detailed_schedule(
     bus_type: schemas.buses.BusType = Path(
         ..., example="main", description="車種選擇 校本部公車 或 南大區間車"
     ),
@@ -121,3 +131,96 @@ def get_bus_info(
         query.time,
         ["dep_info", "time"],
     )[: query.limits]
+
+
+@router.get(
+    "/current/schedules/{bus_type}/{direction}",
+    response_model=Optional[
+        schemas.buses.BusNandaSchedule | schemas.buses.BusMainSchedule
+    ],
+)
+def get_current_schedule_bus(
+    bus_type: schemas.buses.BusType = Path(
+        ..., example="main", description="車種選擇 校本部公車 或 南大區間車"
+    ),
+    direction: schemas.buses.BusDirection = Path(
+        ..., example="up", description="上山或下山"
+    ),
+):
+    """
+    取得目前時刻下一班公車時刻。
+    """
+    buses.get_all_data()
+
+    current_time, current_day = get_current_time_state()
+
+    res = after_specific_time(
+        buses.raw_schedule_data.loc[(bus_type, current_day, direction), "data"],
+        current_time,
+        ["time"],
+    )
+
+    return res[0] if res else None
+
+
+@router.get(
+    "/current/stops/{stop_name}/{bus_type}/{direction}",
+    response_model=Optional[schemas.buses.BusStopsQueryResult],
+)
+def get_current_stop_bus(
+    stop_name: schemas.buses.StopsName = Path(
+        ..., example="北校門口", description="公車站牌名稱"
+    ),
+    bus_type: schemas.buses.BusType = Path(
+        ..., example="main", description="車種選擇 校本部公車 或 南大區間車"
+    ),
+    direction: schemas.buses.BusDirection = Path(
+        ..., example="up", description="上山或下山"
+    ),
+):
+    """
+    取得目前時刻下一班公車時刻。
+    """
+    buses.get_all_data()
+
+    current_time, current_day = get_current_time_state()
+
+    res = after_specific_time(
+        stops[stop_name.name].stoped_bus.loc[
+            (bus_type, current_day, direction), "data"
+        ],
+        current_time,
+        ["arrive_time"],
+    )
+
+    return res[0] if res else None
+
+
+@router.get(
+    "/current/detailed/{bus_type}/{direction}",
+    response_model=Optional[
+        schemas.buses.BusMainDetailedSchedule | schemas.buses.BusNandaDetailedSchedule
+    ],
+)
+def get_current_bus_detailed_schedule(
+    bus_type: schemas.buses.BusType = Path(
+        ..., example="main", description="車種選擇 校本部公車 或 南大區間車"
+    ),
+    direction: schemas.buses.BusDirection = Path(
+        ..., example="up", description="上山或下山"
+    ),
+):
+    """
+    取得詳細公車資訊，包含抵達各站時間。
+    """
+    buses.gen_bus_detailed_schedule_and_update_stops_data()
+
+    current_time, current_day = get_current_time_state()
+
+    res = after_specific_time(
+        buses.detailed_schedule_data.loc[(bus_type, current_day, direction), "data"],
+        current_time,
+        ["dep_info", "time"],
+    )
+
+    return res[0] if res else None
