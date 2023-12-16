@@ -8,7 +8,7 @@ buses = Buses()
 
 
 @router.get("/main", response_model=schemas.buses.BusMainData)
-async def get_main():
+def get_main():
     """
     校本部公車資訊。
     """
@@ -17,7 +17,7 @@ async def get_main():
 
 
 @router.get("/nanda", response_model=schemas.buses.BusNandaData)
-async def get_nanda():
+def get_nanda():
     """
     南大校區區間車資訊。
     """
@@ -71,7 +71,7 @@ def get_bus_schedule(
     "/stops/{stop_name}/{bus_type}/{day}/{direction}",
     response_model=list[schemas.buses.BusStopsQueryResult],
 )
-async def get_stop_up(
+def get_stop_up(
     stop_name: schemas.buses.StopsName = Path(
         ..., example="北校門口", description="公車站牌名稱"
     ),
@@ -101,7 +101,7 @@ async def get_stop_up(
         schemas.buses.BusMainDetailedSchedule | schemas.buses.BusNandaDetailedSchedule
     ],
 )
-async def get_bus_info(
+def get_bus_info(
     bus_type: schemas.buses.BusType = Path(
         ..., example="main", description="車種選擇 校本部公車 或 南大區間車"
     ),
