@@ -49,3 +49,27 @@ def test_buses_stops(stop_name, bus_type, day, direction):
 def test_buses_detailed(bus_type, day, direction):
     response = client.get(url=f"/buses/detailed/{bus_type}/{day}/{direction}")
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize("bus_type", [_.value for _ in schemas.buses.BusType])
+@pytest.mark.parametrize("direction", [_.value for _ in schemas.buses.BusDirection])
+def test_current_schedules(bus_type, direction):
+    response = client.get(url=f"/buses/current/schedules/{bus_type}/{direction}")
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("stop_name", [_.value for _ in schemas.buses.StopsName])
+@pytest.mark.parametrize("bus_type", [_.value for _ in schemas.buses.BusType])
+@pytest.mark.parametrize("direction", [_.value for _ in schemas.buses.BusDirection])
+def test_current_buses_stops(stop_name, bus_type, direction):
+    response = client.get(
+        url=f"/buses/current/stops/{stop_name}/{bus_type}/{direction}"
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("bus_type", [_.value for _ in schemas.buses.BusType])
+@pytest.mark.parametrize("direction", [_.value for _ in schemas.buses.BusDirection])
+def test_buses_detailed(bus_type, direction):
+    response = client.get(url=f"/buses/current/detailed/{bus_type}/{direction}")
+    assert response.status_code == 200
