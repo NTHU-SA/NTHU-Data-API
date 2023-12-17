@@ -2,15 +2,21 @@ import datetime
 import json
 import re
 from functools import reduce
+from itertools import product
 from typing import Literal
 
 import pandas as pd
 import requests
 from cachetools import TTLCache, cached
 
-schedule_index = pd.MultiIndex.from_product(
-    [["all", "main", "nanda"], ["all", "weekday", "weekend"], ["up", "down"]]
-)
+from src.api import schemas
+
+BUS_TYPE = list(schemas.buses.BusType)
+BUS_TYPE_WITHOUT_ALL = list(schemas.buses.BusType)[1:]  # 預設第一個為 all，並將其移除
+BUS_DAY = list(schemas.buses.BusDay)
+BUS_DIRECTION = list(schemas.buses.BusDirection)
+
+schedule_index = pd.MultiIndex.from_product([BUS_TYPE, BUS_DAY, BUS_DIRECTION])
 
 
 def after_specific_time(
@@ -40,27 +46,24 @@ def sort_by_time(target, time_path: list = None) -> None:
 
 
 def gen_all_field(target_dataframe: pd.DataFrame, time_path: list) -> None:
-    for scope in ["main", "nanda"]:
-        for direction in ["up", "down"]:
-            target_dataframe.loc[(scope, "all", direction), "data"] = (
-                target_dataframe.loc[(scope, "weekday", direction), "data"]
-                + target_dataframe.loc[(scope, "weekend", direction), "data"]
-            )
+    for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
+        target_dataframe.loc[(scope, "all", direction), "data"] = (
+            target_dataframe.loc[(scope, "weekday", direction), "data"]
+            + target_dataframe.loc[(scope, "weekend", direction), "data"]
+        )
 
-    for day in ["all", "weekday", "weekend"]:
-        for direction in ["up", "down"]:
-            target_dataframe.loc[("all", day, direction), "data"] = (
-                target_dataframe.loc[("main", day, direction), "data"]
-                + target_dataframe.loc[("nanda", day, direction), "data"]
-            )
+    for day, direction in product(BUS_DAY, BUS_DIRECTION):
+        target_dataframe.loc[("all", day, direction), "data"] = (
+            target_dataframe.loc[("main", day, direction), "data"]
+            + target_dataframe.loc[("nanda", day, direction), "data"]
+        )
 
-    for scope in ["all", "main", "nanda"]:
-        for day in ["all", "weekday", "weekend"]:
-            for direction in ["up", "down"]:
-                sort_by_time(
-                    target_dataframe.loc[(scope, day, direction), "data"],
-                    time_path,
-                )
+    for scope, day in product(BUS_TYPE, BUS_DAY):
+        for direction in ["up", "down"]:
+            sort_by_time(
+                target_dataframe.loc[(scope, day, direction), "data"],
+                time_path,
+            )
 
 
 class Stop:
@@ -136,7 +139,7 @@ class Buses:
         self._start_from_gen_2_bus_info = []
 
         self._info_index = pd.MultiIndex.from_product(
-            [["main", "nanda"], ["up", "down"]]
+            [BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION]
         )
         self.raw_schedule_data = pd.DataFrame(index=schedule_index, columns=["data"])
         self.detailed_schedule_data = pd.DataFrame(
@@ -206,23 +209,20 @@ class Buses:
         self._res_text = requests.get(main_url).text + requests.get(nanda_url).text
 
         # schedule data
-        for scope in ["main", "nanda"]:
-            for direction in ["up", "down"]:
-                for day in ["weekday", "weekend"]:
-                    self.raw_schedule_data.loc[
-                        (scope, day, direction), "data"
-                    ] = self._parse_bus_schedule(
-                        f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
-                    )
+        for scope, day, direction in product(
+            BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
+        ):
+            self.raw_schedule_data.loc[
+                (scope, day, direction), "data"
+            ] = self._parse_bus_schedule(
+                f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
+            )
 
         # info data
-        for scope in ["main", "nanda"]:
-            for direction in ["up", "down"]:
-                self.info_data.loc[
-                    (scope, direction), "data"
-                ] = self._parse_campus_info(
-                    f"toward{self.transform_toward_name(scope, direction)}Info"
-                )
+        for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
+            self.info_data.loc[(scope, direction), "data"] = self._parse_campus_info(
+                f"toward{self.transform_toward_name(scope, direction)}Info"
+            )
 
         gen_all_field(self.raw_schedule_data, ["time"])
 
@@ -366,18 +366,18 @@ class Buses:
 
     @cached(TTLCache(maxsize=1024, ttl=60 * 60))
     def gen_bus_detailed_schedule_and_update_stops_data(self):
-        for scope in ["main", "nanda"]:
-            for direction in ["up", "down"]:
-                for day in ["weekday", "weekend"]:
-                    self._update_data()
-                    self.detailed_schedule_data.loc[
-                        (scope, day, direction), "data"
-                    ] = self._gen_detailed_bus_schedule(
-                        self.raw_schedule_data.loc[(scope, day, direction), "data"],
-                        scope=scope,
-                        direction=direction,
-                        day=day,
-                    )
+        for scope, day, direction in product(
+            BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
+        ):
+            self._update_data()
+            self.detailed_schedule_data.loc[
+                (scope, day, direction), "data"
+            ] = self._gen_detailed_bus_schedule(
+                self.raw_schedule_data.loc[(scope, day, direction), "data"],
+                scope=scope,
+                direction=direction,
+                day=day,
+            )
 
         gen_all_field(self.detailed_schedule_data, ["dep_info", "time"])
         for stop in stops.values():
