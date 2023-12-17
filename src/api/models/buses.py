@@ -11,10 +11,13 @@ from cachetools import TTLCache, cached
 
 from src.api import schemas
 
-BUS_TYPE = list(schemas.buses.BusType)
-BUS_TYPE_WITHOUT_ALL = list(schemas.buses.BusType)[1:]  # 預設第一個為 all，並將其移除
-BUS_DAY = list(schemas.buses.BusDay)
-BUS_DIRECTION = list(schemas.buses.BusDirection)
+# 務必保持之後的程式碼中，BUS_TYPE、BUS_DAY、BUS_DIRECTION 的順序一致，因為 BusType、BusDay 具有 all 這個選項
+# 之後合併要先處理完 BusDirection 的部份才會合併到 all
+BUS_TYPE = [_.value for _ in schemas.buses.BusType]
+BUS_TYPE_WITHOUT_ALL = [_.value for _ in schemas.buses.BusType][1:]  # 預設第一個為 all，並將其移除
+BUS_DAY = [_.value for _ in schemas.buses.BusDay]
+BUS_DAY_WITHOUT_ALL = [_.value for _ in schemas.buses.BusDay][1:]  # 預設第一個為 all，並將其移除
+BUS_DIRECTION = [_.value for _ in schemas.buses.BusDirection]
 
 schedule_index = pd.MultiIndex.from_product([BUS_TYPE, BUS_DAY, BUS_DIRECTION])
 
@@ -58,19 +61,19 @@ def gen_all_field(target_dataframe: pd.DataFrame, time_path: list) -> None:
             + target_dataframe.loc[("nanda", day, direction), "data"]
         )
 
-    for scope, day in product(BUS_TYPE, BUS_DAY):
-        for direction in ["up", "down"]:
-            sort_by_time(
-                target_dataframe.loc[(scope, day, direction), "data"],
-                time_path,
-            )
+    for scope, day, direction in product(BUS_TYPE, BUS_DAY, BUS_DIRECTION):
+        sort_by_time(
+            target_dataframe.loc[(scope, day, direction), "data"],
+            time_path,
+        )
 
 
 class Stop:
     def __init__(self, name, name_en) -> None:
         self.name = name
         self.name_en = name_en
-        self.stoped_bus = pd.DataFrame(data={"data": [[] * 18]}, index=schedule_index)
+        # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
+        self.stopped_bus = pd.DataFrame(data={"data": [[] * 18]}, index=schedule_index)
 
 
 M1 = Stop("北校門口", "North Main Gate")
@@ -148,7 +151,6 @@ class Buses:
         self.info_data = pd.DataFrame(index=self._info_index, columns=["data"])
 
     def _parse_campus_info(self, variable_string: str):
-        print(variable_string)
         regex_pattern = r"const " + variable_string + r" = (\{.*?\})"
         data = re.search(regex_pattern, self._res_text, re.S)
         if data is not None:
@@ -168,7 +170,6 @@ class Buses:
         return [data]  # turn to list to store in DataFrame
 
     def _parse_bus_schedule(self, variable_string: str):
-        print(variable_string)
         regex_pattern = r"const " + variable_string + r" = (\[.*?\])"
         data = re.search(regex_pattern, self._res_text, re.S)
         if data is not None:
@@ -309,8 +310,8 @@ class Buses:
         bus_schedule: list,
         *,
         scope: Literal["main", "nanda"] = "main",
-        direction: Literal["up", "down"] = "up",
         day: Literal["weekday", "weekend"] = "weekday",
+        direction: Literal["up", "down"] = "up",
     ) -> list:
         res = []
         for bus in bus_schedule:
@@ -352,7 +353,7 @@ class Buses:
                 )
 
                 # 處理各站牌資訊
-                self._find_stop_from_str(stop.name).stoped_bus.loc[
+                self._find_stop_from_str(stop.name).stopped_bus.loc[
                     (scope, day, direction), "data"
                 ].append({"bus_info": bus, "arrive_time": arrive_time})
 
@@ -366,8 +367,11 @@ class Buses:
 
     @cached(TTLCache(maxsize=1024, ttl=60 * 60))
     def gen_bus_detailed_schedule_and_update_stops_data(self):
+        """
+        若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
+        """
         for scope, day, direction in product(
-            BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
+            BUS_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
         ):
             self._update_data()
             self.detailed_schedule_data.loc[
@@ -375,10 +379,10 @@ class Buses:
             ] = self._gen_detailed_bus_schedule(
                 self.raw_schedule_data.loc[(scope, day, direction), "data"],
                 scope=scope,
-                direction=direction,
                 day=day,
+                direction=direction,
             )
 
         gen_all_field(self.detailed_schedule_data, ["dep_info", "time"])
         for stop in stops.values():
-            gen_all_field(stop.stoped_bus, ["arrive_time"])
+            gen_all_field(stop.stopped_bus, ["arrive_time"])
