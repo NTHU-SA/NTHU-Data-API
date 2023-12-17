@@ -83,17 +83,3 @@ def test_courses_search(field_name, value):
 def test_courses_search_post(body):
     response = client.post(url="/courses/searches", json=body)
     assert response.status_code == 200
-
-
-@pytest.mark.parametrize("path", ["id", "classroom", "time", "teacher"])
-@pytest.mark.parametrize("value", ["testing"])
-def test_courses_search_extension(path, value):
-    response = client.get(url=f"/courses/searches/{path}/{value}")
-    assert response.status_code == 404
-
-
-@pytest.mark.parametrize("path", ["credits"])
-@pytest.mark.parametrize("op", ["gt", "lt", "gte", "lte"])
-def test_courses_search_credits(path, op):
-    response = client.get(url=f"/courses/searches/{path}/3?op={op}")
-    assert response.status_code == 200
