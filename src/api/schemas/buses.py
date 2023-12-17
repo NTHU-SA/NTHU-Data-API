@@ -29,17 +29,28 @@ class BusDirection(str, Enum):
 
 
 class BusDay(str, Enum):
+    # 記得改這個的時候要一起改 BusDayWithCurrent
     all = "all"
     weekday = "weekday"
     weekend = "weekend"
 
 
+class BusDayWithCurrent(str, Enum):
+    # 目前原生的 enum 不能 extend enum，所以只能多寫一個，改 BusDay 的時候也要改這裡
+    all = "all"
+    weekday = "weekday"
+    weekend = "weekend"
+    current = "current"
+
+
 class BusQuery(BaseModel):
     time: Optional[str] = Field(
-        Query("0:00", example="8:10", description="時間"), description="時間"
+        Query("0:00", example="8:10", description="時間。若搜尋 day 選擇 current 時失效。"),
+        description="時間",
     )
     limits: Optional[int] = Field(
-        Query(None, ge=1, description="最大回傳資料筆數"), description="最大回傳資料筆數"
+        Query(None, ge=1, description="最大回傳資料筆數。若搜尋 day 選擇 current 時失效。"),
+        description="最大回傳資料筆數",
     )
 
     @field_validator("time")

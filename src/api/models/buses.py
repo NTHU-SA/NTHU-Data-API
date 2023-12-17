@@ -2,11 +2,24 @@ import datetime
 import json
 import re
 from functools import reduce
-from typing import Literal, Optional
+from itertools import product
+from typing import Literal
 
+import pandas as pd
+import requests
 from cachetools import TTLCache, cached
 
-from src.utils import cached_request
+from src.api import schemas
+
+# 務必保持之後的程式碼中，BUS_TYPE、BUS_DAY、BUS_DIRECTION 的順序一致，因為 BusType、BusDay 具有 all 這個選項
+# 之後合併要先處理完 BusDirection 的部份才會合併到 all
+BUS_TYPE = [_.value for _ in schemas.buses.BusType]
+BUS_TYPE_WITHOUT_ALL = [_.value for _ in schemas.buses.BusType][1:]  # 預設第一個為 all，並將其移除
+BUS_DAY = [_.value for _ in schemas.buses.BusDay]
+BUS_DAY_WITHOUT_ALL = [_.value for _ in schemas.buses.BusDay][1:]  # 預設第一個為 all，並將其移除
+BUS_DIRECTION = [_.value for _ in schemas.buses.BusDirection]
+
+schedule_index = pd.MultiIndex.from_product([BUS_TYPE, BUS_DAY, BUS_DIRECTION])
 
 
 def after_specific_time(
@@ -27,69 +40,40 @@ def after_specific_time(
     return res
 
 
-def gen_all_field(target_list) -> None:
-    # 生成 main 和 nanda all 欄位
-    for scope in ["main", "nanda"]:
-        for direction in ["up", "down"]:
-            target_list[scope][direction]["all"] = (
-                target_list[scope][direction]["weekday"]
-                + target_list[scope][direction]["weekend"]
-            )
+def sort_by_time(target, time_path: list = None) -> None:
+    target.sort(
+        key=lambda x: datetime.datetime.strptime(
+            reduce(dict.get, time_path, x), "%H:%M"
+        )
+    )
 
-    # 生成 all 的 weekday 和 weekend 欄位
-    for direction in ["up", "down"]:
-        for day in ["weekday", "weekend"]:
-            target_list["all"][direction][day] = (
-                target_list["main"][direction][day]
-                + target_list["nanda"][direction][day]
-            )
 
-    # 生成 all 的 all 欄位
-    for direction in ["up", "down"]:
-        target_list["all"][direction]["all"] = (
-            target_list["all"][direction]["weekday"]
-            + target_list["all"][direction]["weekend"]
+def gen_all_field(target_dataframe: pd.DataFrame, time_path: list) -> None:
+    for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
+        target_dataframe.loc[(scope, "all", direction), "data"] = (
+            target_dataframe.loc[(scope, "weekday", direction), "data"]
+            + target_dataframe.loc[(scope, "weekend", direction), "data"]
         )
 
+    for day, direction in product(BUS_DAY, BUS_DIRECTION):
+        target_dataframe.loc[("all", day, direction), "data"] = (
+            target_dataframe.loc[("main", day, direction), "data"]
+            + target_dataframe.loc[("nanda", day, direction), "data"]
+        )
 
-def bus_data_dict_init():
-    return {
-        "main": {
-            "up": {"weekday": [], "weekend": [], "all": []},
-            "down": {"weekday": [], "weekend": [], "all": []},
-        },
-        "nanda": {
-            "up": {"weekday": [], "weekend": [], "all": []},
-            "down": {"weekday": [], "weekend": [], "all": []},
-        },
-        "all": {
-            "up": {"weekday": [], "weekend": [], "all": []},
-            "down": {"weekday": [], "weekend": [], "all": []},
-        },
-    }
-
-
-def sort_by_time(target_dict: dict, time_path: list = None) -> None:
-    for scope in ["main", "nanda", "all"]:
-        for direction in ["up", "down"]:
-            for day in ["weekday", "weekend", "all"]:
-                target_list = target_dict[scope][direction][day]
-                target_list.sort(
-                    key=lambda x: datetime.datetime.strptime(
-                        reduce(dict.get, time_path, x), "%H:%M"
-                    )
-                )
+    for scope, day, direction in product(BUS_TYPE, BUS_DAY, BUS_DIRECTION):
+        sort_by_time(
+            target_dataframe.loc[(scope, day, direction), "data"],
+            time_path,
+        )
 
 
 class Stop:
     def __init__(self, name, name_en) -> None:
         self.name = name
         self.name_en = name_en
-        self.stoped_bus = bus_data_dict_init()
-
-    def gen_whole_bus_list(self) -> None:
-        gen_all_field(self.stoped_bus)
-        sort_by_time(self.stoped_bus, ["arrive_time"])
+        # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
+        self.stopped_bus = pd.DataFrame(data={"data": [[] * 18]}, index=schedule_index)
 
 
 M1 = Stop("北校門口", "North Main Gate")
@@ -156,7 +140,15 @@ class Buses:
     def __init__(self) -> None:
         self._res_text = ""
         self._start_from_gen_2_bus_info = []
-        self.detailed_data = {}
+
+        self._info_index = pd.MultiIndex.from_product(
+            [BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION]
+        )
+        self.raw_schedule_data = pd.DataFrame(index=schedule_index, columns=["data"])
+        self.detailed_schedule_data = pd.DataFrame(
+            index=schedule_index, columns=["data"]
+        )
+        self.info_data = pd.DataFrame(index=self._info_index, columns=["data"])
 
     def _parse_campus_info(self, variable_string: str):
         regex_pattern = r"const " + variable_string + r" = (\{.*?\})"
@@ -174,7 +166,8 @@ class Buses:
         data = data.replace("route", '"route"', 1)
         data = data.replace("routeEN", '"routeEN"')
         data = json.loads(data)
-        return data
+
+        return [data]  # turn to list to store in DataFrame
 
     def _parse_bus_schedule(self, variable_string: str):
         regex_pattern = r"const " + variable_string + r" = (\[.*?\])"
@@ -198,97 +191,87 @@ class Buses:
 
         return data
 
-    # TODO: 現在很多部分都具有相似架構，之後應該要整個敲掉從源頭就把資料 format 好
+    def transform_toward_name(
+        self, route: Literal["main", "nanda"], direction: Literal["up", "down"]
+    ) -> str:
+        trans_list = {
+            ("main", "up"): "TSMCBuilding",
+            ("main", "down"): "MainGate",
+            ("nanda", "up"): "SouthCampus",
+            ("nanda", "down"): "MainCampus",
+        }
+
+        return trans_list[(route, direction)]
+
+    @cached(TTLCache(maxsize=1024, ttl=60 * 60))
+    def get_all_data(self):
+        main_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
+        nanda_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
+        self._res_text = requests.get(main_url).text + requests.get(nanda_url).text
+
+        # schedule data
+        for scope, day, direction in product(
+            BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
+        ):
+            self.raw_schedule_data.loc[
+                (scope, day, direction), "data"
+            ] = self._parse_bus_schedule(
+                f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
+            )
+
+        # info data
+        for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
+            self.info_data.loc[(scope, direction), "data"] = self._parse_campus_info(
+                f"toward{self.transform_toward_name(scope, direction)}Info"
+            )
+
+        gen_all_field(self.raw_schedule_data, ["time"])
+
     def get_main_data(self) -> dict:
-        url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
-        self._res_text = cached_request.get(url)
-
-        # 往台積館資訊
-        self.toward_tsmc_building_info = self._parse_campus_info(
-            "towardTSMCBuildingInfo"
-        )
-
-        # 往台積館時刻表(平日)
-        self.weekday_bus_schedule_toward_tsmc_building = self._parse_bus_schedule(
-            "weekdayBusScheduleTowardTSMCBuilding"
-        )
-
-        # 往台積館時刻表(假日)
-        self.weekend_bus_schedule_toward_tsmc_building = self._parse_bus_schedule(
-            "weekendBusScheduleTowardTSMCBuilding"
-        )
-
-        # 往校門口資訊
-        self.toward_main_gate_info = self._parse_campus_info("towardMainGateInfo")
-
-        # 往校門口時刻表(平日)
-        self.weekday_bus_schedule_toward_main_gate = self._parse_bus_schedule(
-            "weekdayBusScheduleTowardMainGate"
-        )
-
-        # 往校門口時刻表(假日)
-        self.weekend_bus_schedule_toward_main_gate = self._parse_bus_schedule(
-            "weekendBusScheduleTowardMainGate"
-        )
-
         # 輸出 json 檔案
         main_dataset = {
-            "toward_TSMC_building_info": self.toward_tsmc_building_info,
-            "weekday_bus_schedule_toward_TSMC_building": self.weekday_bus_schedule_toward_tsmc_building,
-            "weekend_bus_schedule_toward_TSMC_building": self.weekend_bus_schedule_toward_tsmc_building,
-            "toward_main_gate_info": self.toward_main_gate_info,
-            "weekday_bus_schedule_toward_main_gate": self.weekday_bus_schedule_toward_main_gate,
-            "weekend_bus_schedule_toward_main_gate": self.weekend_bus_schedule_toward_main_gate,
+            "toward_TSMC_building_info": self.info_data.loc[("main", "up"), "data"][0],
+            "weekday_bus_schedule_toward_TSMC_building": self.raw_schedule_data.loc[
+                (("main", "weekday", "up")), "data"
+            ],
+            "weekend_bus_schedule_toward_TSMC_building": self.raw_schedule_data.loc[
+                (("main", "weekend", "up")), "data"
+            ],
+            "toward_main_gate_info": self.info_data.loc[("main", "down"), "data"][0],
+            "weekday_bus_schedule_toward_main_gate": self.raw_schedule_data.loc[
+                (("main", "weekday", "down")), "data"
+            ],
+            "weekend_bus_schedule_toward_main_gate": self.raw_schedule_data.loc[
+                (("main", "weekend", "down")), "data"
+            ],
         }
 
         return main_dataset
 
     def get_nanda_data(self) -> dict:
-        url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
-        self._res_text = cached_request.get(url)
-
-        # 往南大校區資訊
-        self.toward_south_campus_info = self._parse_campus_info("towardSouthCampusInfo")
-
-        # 往南大校區時刻表(平日)
-        self.weekday_bus_schedule_toward_south_campus = self._parse_bus_schedule(
-            "weekdayBusScheduleTowardSouthCampus"
-        )
-
-        # 往南大校區時刻表(假日)
-        self.weekend_bus_schedule_toward_south_campus = self._parse_bus_schedule(
-            "weekendBusScheduleTowardSouthCampus"
-        )
-
-        # 往校本部資訊
-        self.toward_main_campus_info = self._parse_campus_info("towardMainCampusInfo")
-
-        # 往校本部時刻表(平日)
-        self.weekday_bus_schedule_toward_main_campus = self._parse_bus_schedule(
-            "weekdayBusScheduleTowardMainCampus"
-        )
-
-        # 往校本部時刻表(假日)
-        self.weekend_bus_schedule_toward_main_campus = self._parse_bus_schedule(
-            "weekendBusScheduleTowardMainCampus"
-        )
-
         # 輸出 json 檔案
         nanda_dataset = {
-            "toward_south_campus_info": self.toward_south_campus_info,
-            "weekday_bus_schedule_toward_south_campus": self.weekday_bus_schedule_toward_south_campus,
-            "weekend_bus_schedule_toward_south_campus": self.weekend_bus_schedule_toward_south_campus,
-            "toward_main_campus_info": self.toward_main_campus_info,
-            "weekday_bus_schedule_toward_main_campus": self.weekday_bus_schedule_toward_main_campus,
-            "weekend_bus_schedule_toward_main_campus": self.weekend_bus_schedule_toward_main_campus,
+            "toward_south_campus_info": self.info_data.loc[("nanda", "up"), "data"][0],
+            "weekday_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
+                (("nanda", "weekday", "up")), "data"
+            ],
+            "weekend_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
+                (("nanda", "weekend", "up")), "data"
+            ],
+            "toward_main_campus_info": self.info_data.loc[("nanda", "down"), "data"][0],
+            "weekday_bus_schedule_toward_main_campus": self.raw_schedule_data.loc[
+                (("nanda", "weekday", "down")), "data"
+            ],
+            "weekend_bus_schedule_toward_main_campus": self.raw_schedule_data.loc[
+                (("nanda", "weekend", "down")), "data"
+            ],
         }
 
         return nanda_dataset
 
     # 更新資料，並清除 _start_from_gen_2_bus_info
     def _update_data(self):
-        self.get_main_data()
-        self.get_nanda_data()
+        self.get_all_data()
         self._start_from_gen_2_bus_info = []
 
     def _add_on_time(self, start_time: str, time_delta: int) -> str:
@@ -297,18 +280,17 @@ class Buses:
         return str(st.strftime("%H:%M"))
 
     # 用字串尋找對應的 Stop 物件
-    def _find_stop_from_str(self, stop_str: str) -> Optional[Stop]:
+    def _find_stop_from_str(self, stop_str: str) -> Stop:
         for stop in stops.values():
             if stop.name == stop_str:
                 return stop
-        return None
 
     def _route_selector(
         self, dep_stop: str, line: str, from_gen_2: bool = False
     ) -> Route:
         # 清理資料，爬蟲抓下來的資料有些會多空格
         (dep_stop, line) = map(str.strip, [dep_stop, line])
-        # 下山
+
         stops_lines_map = {
             ("台積館", "red", True): red_M5_M2,
             ("台積館", "red", False): red_M5_M1,
@@ -328,8 +310,8 @@ class Buses:
         bus_schedule: list,
         *,
         scope: Literal["main", "nanda"] = "main",
-        direction: Literal["up", "down"] = "up",
         day: Literal["weekday", "weekend"] = "weekday",
+        direction: Literal["up", "down"] = "up",
     ) -> list:
         res = []
         for bus in bus_schedule:
@@ -371,8 +353,8 @@ class Buses:
                 )
 
                 # 處理各站牌資訊
-                self._find_stop_from_str(stop.name).stoped_bus[scope][direction][
-                    day
+                self._find_stop_from_str(stop.name).stopped_bus.loc[
+                    (scope, day, direction), "data"
                 ].append({"bus_info": bus, "arrive_time": arrive_time})
 
                 temp_bus["stops_time"].append(
@@ -384,89 +366,23 @@ class Buses:
         return res
 
     @cached(TTLCache(maxsize=1024, ttl=60 * 60))
-    def get_bus_detailed_schedule_and_update_stops_data(self) -> dict:
-        self.detailed_data = bus_data_dict_init()
+    def gen_bus_detailed_schedule_and_update_stops_data(self):
+        """
+        若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
+        """
+        for scope, day, direction in product(
+            BUS_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
+        ):
+            self._update_data()
+            self.detailed_schedule_data.loc[
+                (scope, day, direction), "data"
+            ] = self._gen_detailed_bus_schedule(
+                self.raw_schedule_data.loc[(scope, day, direction), "data"],
+                scope=scope,
+                day=day,
+                direction=direction,
+            )
 
-        #########################################
-        # 校門口往返台積館公車時刻表（平日）
-        #########################################
-        self._update_data()
-        self.detailed_data["main"]["up"]["weekday"] = self._gen_detailed_bus_schedule(
-            self.weekday_bus_schedule_toward_tsmc_building,
-            scope="main",
-            direction="up",
-            day="weekday",
-        )
-        self.detailed_data["main"]["down"]["weekday"] = self._gen_detailed_bus_schedule(
-            self.weekday_bus_schedule_toward_main_gate,
-            scope="main",
-            direction="down",
-            day="weekday",
-        )
-        #########################################
-
-        #########################################
-        # 校門口往返台積館公車時刻表（假日）
-        #########################################
-        self._update_data()
-        self.detailed_data["main"]["up"]["weekend"] = self._gen_detailed_bus_schedule(
-            self.weekend_bus_schedule_toward_tsmc_building,
-            scope="main",
-            direction="up",
-            day="weekend",
-        )
-        self.detailed_data["main"]["down"]["weekend"] = self._gen_detailed_bus_schedule(
-            self.weekend_bus_schedule_toward_main_gate,
-            scope="main",
-            direction="down",
-            day="weekend",
-        )
-        #########################################
-
-        #########################################
-        # 校門口往返南大校區區間車時刻表（平日）
-        #########################################
-        # 區間車不用 update 是因為不會有從綜二出發的情況
-        self.detailed_data["nanda"]["up"]["weekday"] = self._gen_detailed_bus_schedule(
-            self.weekday_bus_schedule_toward_south_campus,
-            scope="nanda",
-            direction="up",
-            day="weekday",
-        )
-        self.detailed_data["nanda"]["down"][
-            "weekday"
-        ] = self._gen_detailed_bus_schedule(
-            self.weekday_bus_schedule_toward_main_campus,
-            scope="nanda",
-            direction="down",
-            day="weekday",
-        )
-        #########################################
-
-        #########################################
-        # 校門口往返南大校區區間車時刻表（假日）
-        #########################################
-        # 區間車不用 update 是因為不會有從綜二出發的情況
-        self.detailed_data["nanda"]["up"]["weekend"] = self._gen_detailed_bus_schedule(
-            self.weekend_bus_schedule_toward_south_campus,
-            scope="nanda",
-            direction="up",
-            day="weekend",
-        )
-        self.detailed_data["nanda"]["down"][
-            "weekend"
-        ] = self._gen_detailed_bus_schedule(
-            self.weekend_bus_schedule_toward_main_campus,
-            scope="nanda",
-            direction="down",
-            day="weekend",
-        )
-        #########################################
-
+        gen_all_field(self.detailed_schedule_data, ["dep_info", "time"])
         for stop in stops.values():
-            stop.gen_whole_bus_list()
-
-        gen_all_field(self.detailed_data)
-        sort_by_time(self.detailed_data, ["dep_info", "time"])
-
-        return self.detailed_data
+            gen_all_field(stop.stopped_bus, ["arrive_time"])
