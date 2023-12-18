@@ -81,43 +81,23 @@ async def get_selected_field_and_value_data(
     return result
 
 
-@router.get("/lists/16weeks", response_model=list[schemas.courses.CourseData])
-async def get_16weeks_courses_list(
+@router.get("/lists/{list_name}", response_model=list[schemas.courses.CourseData])
+async def get_courses_list(
+    list_name: schemas.courses.CourseListName,
     response: Response,
     limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
-    取得 16 週課程列表。
+    取得指定類型的課程列表。
     """
-    condition = Conditions("note", "16週課程", True)
-    result = courses.query(condition)[:limits]
-    response.headers["X-Total-Count"] = str(len(result))
-    return result
-
-
-@router.get("/lists/microcredits", response_model=list[schemas.courses.CourseData])
-async def get_microcredits_courses_list(
-    response: Response,
-    limits: int = Query(None, ge=1, description=DESCRIPTION_OF_LIMITS),
-) -> list[schemas.courses.CourseData]:
-    """
-    取得微學分課程列表。
-    """
-    condition = Conditions("credit", "[0-9].[0-9]", True)
-    result = courses.query(condition)[:limits]
-    response.headers["X-Total-Count"] = str(len(result))
-    return result
-
-
-@router.get("/lists/xclass", response_model=list[schemas.courses.CourseData])
-async def get_xclass_courses_list(
-    response: Response,
-    limits: int = Query(None, ge=1, description=DESCRIPTION_OF_LIMITS),
-) -> list[schemas.courses.CourseData]:
-    """
-    取得 X-class 課程列表。
-    """
-    condition = Conditions("note", "X-Class", True)
+    if list_name == "16weeks":
+        condition = Conditions("note", "16週課程", True)
+    elif list_name == "microcredits":
+        condition = Conditions("credit", "[0-9].[0-9]", True)
+    elif list_name == "xclass":
+        condition = Conditions("note", "X-Class", True)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid list name")
     result = courses.query(condition)[:limits]
     response.headers["X-Total-Count"] = str(len(result))
     return result
@@ -221,101 +201,4 @@ async def get_courses_by_condition(
             list_build_target=query_condition.model_dump(mode="json")
         )
     result = courses.query(condition)[:limits]
-    return result
-
-
-@router.get("/searches/id/{course_id}", response_model=list[schemas.courses.CourseData])
-async def search_courses_by_id(course_id: str = Path(..., description="搜尋的課號")):
-    """
-    根據課號取得課程。
-    """
-    if len(course_id) < 7:
-        raise HTTPException(
-            status_code=400, detail="Bad Request, course id is too short."
-        )
-    # 課號是 11210AES 520100，但是有些人會用 11210AES520100
-    if course_id[-7] != " ":
-        course_id = course_id[:-6] + " " + course_id[-6:]
-    condition = Conditions("id", course_id, True)
-    result = courses.query(condition)
-    if result == []:
-        raise HTTPException(status_code=404, detail="There is no course id match.")
-    return result
-
-
-@router.get(
-    "/searches/credits/{credits_number}",
-    response_model=list[schemas.courses.CourseData],
-)
-async def search_courses_by_credits(
-    credits_number: float = Path(..., example=3, description="搜尋的學分數"),
-    op: schemas.courses.CourseCreditOperation = Query(
-        None, example="gt", description="比較運算子，可以是 >(gt)、<(lt)、>=(gte)、<=(lte)"
-    ),
-    limits: int = Query(None, description=DESCRIPTION_OF_LIMITS),
-) -> list[schemas.courses.CourseData]:
-    """
-    取得指定學分數的課程。
-    """
-    result = courses.list_credit(credits_number, op)[:limits]
-    if result == []:
-        raise HTTPException(
-            status_code=404, detail="There is no course at this credits."
-        )
-    return result
-
-
-@router.get(
-    "/searches/classroom/{classroom_name}",
-    response_model=list[schemas.courses.CourseData],
-)
-async def search_courses_by_classroom(
-    classroom_name: str = Path(..., description="搜尋的教室"),
-    limits: int = Query(None, description=DESCRIPTION_OF_LIMITS),
-):
-    """
-    根據教室取得課程，可以用中文或英文教室名稱，也可以使用系館代碼。
-    """
-    condition = Conditions("class_room_and_time", classroom_name, True)
-    result = courses.query(condition)[:limits]
-    if result == []:
-        raise HTTPException(
-            status_code=404, detail="There is no course at this classroom."
-        )
-    return result
-
-
-@router.get(
-    "/searches/time/{class_time}", response_model=list[schemas.courses.CourseData]
-)
-async def search_courses_by_time(
-    class_time: str = Path(..., example="M1M2", description="搜尋的上課時間"),
-    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
-):
-    """
-    根據上課時間取得課程，使用 M1M2 表示星期一第一節到第二節。
-    """
-    condition = Conditions("class_room_and_time", class_time, True)
-    result = courses.query(condition)[:limits]
-    if result == []:
-        raise HTTPException(status_code=404, detail="There is no course at this time.")
-    return result
-
-
-@router.get(
-    "/searches/teacher/{teacher_name}", response_model=list[schemas.courses.CourseData]
-)
-async def search_courses_by_teacher(
-    teacher_name: str = Path(..., example="顏東勇", description="搜尋的教師姓名"),
-    limits: int = Query(None, description=DESCRIPTION_OF_LIMITS),
-) -> list[schemas.courses.CourseData]:
-    """
-    根據教師姓名取得課程，可以用中英文姓名，也可以只用姓氏。
-    """
-    condition = Conditions("teacher", teacher_name, True)
-    result = courses.query(condition)[:limits]
-    if result == []:
-        raise HTTPException(
-            status_code=404, detail="There is no course at this teacher."
-        )
     return result

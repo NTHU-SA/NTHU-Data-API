@@ -104,3 +104,9 @@ class CourseQueryCondition(RootModel):
                 + POST_ERROR_INFO
             )
         return v
+
+
+class CourseListName(str, Enum):
+    weeks16 = "16weeks"
+    microcredits = "microcredits"
+    xclass = "xclass"
