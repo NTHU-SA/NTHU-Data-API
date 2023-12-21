@@ -184,7 +184,7 @@ class Buses:
         data = data.replace("\n", "")
         data = data.replace("time", '"time"')
         data = data.replace("description", '"description"')
-        data = data.replace("depStop", '"depStop"')
+        data = data.replace("depStop", '"dep_stop"')
         data = data.replace("line", '"line"')
         data = data.replace(",    ]", "]")
         data = data.replace(",  ]", "]")
