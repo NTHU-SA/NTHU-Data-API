@@ -122,7 +122,7 @@ def get_stop_bus(
     return_limit = (
         query.limits
         if day != "current"
-        else min(query.limits, DEFAULT_LIMIT_DAY_CURRENT)
+        else min(filter(None, (query.limits, DEFAULT_LIMIT_DAY_CURRENT)))
     )
     find_day, after_time = (
         (day, query.time) if day != "current" else get_current_time_state()
@@ -165,7 +165,7 @@ def get_bus_detailed_schedule(
     return_limit = (
         query.limits
         if day != "current"
-        else min(query.limits, DEFAULT_LIMIT_DAY_CURRENT)
+        else min(filter(None, (query.limits, DEFAULT_LIMIT_DAY_CURRENT)))
     )
     find_day, after_time = (
         (day, query.time) if day != "current" else get_current_time_state()
