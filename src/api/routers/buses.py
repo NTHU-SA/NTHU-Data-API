@@ -68,7 +68,7 @@ def get_bus_schedule(
     day: schemas.buses.BusDayWithCurrent = Query(
         ...,
         example="weekday",
-        description=f"平日、假日或目前時刻。選擇 current 預設為 {DEFAULT_LIMIT_DAY_CURRENT} 筆資料。",
+        description=f"平日、假日或目前時刻。選擇 current 預設回傳 {DEFAULT_LIMIT_DAY_CURRENT} 筆資料。",
     ),
     direction: schemas.buses.BusDirection = Query(
         ..., example="up", description="上山或下山"
@@ -107,7 +107,7 @@ def get_stop_bus(
     day: schemas.buses.BusDayWithCurrent = Query(
         ...,
         example="weekday",
-        description=f"平日、假日或目前時刻。選擇 current 預設為 {DEFAULT_LIMIT_DAY_CURRENT} 筆資料。",
+        description=f"平日、假日或目前時刻。選擇 current 預設回傳 {DEFAULT_LIMIT_DAY_CURRENT} 筆資料。",
     ),
     direction: schemas.buses.BusDirection = Query(
         ..., example="up", description="上山或下山"
@@ -150,7 +150,7 @@ def get_bus_detailed_schedule(
     day: schemas.buses.BusDayWithCurrent = Query(
         ...,
         example="weekday",
-        description=f"平日、假日或目前時刻。選擇 current 預設為 {DEFAULT_LIMIT_DAY_CURRENT} 筆資料。",
+        description=f"平日、假日或目前時刻。選擇 current 預設回傳 {DEFAULT_LIMIT_DAY_CURRENT} 筆資料。",
     ),
     direction: schemas.buses.BusDirection = Query(
         ..., example="up", description="上山或下山"
