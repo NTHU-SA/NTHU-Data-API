@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from functools import reduce
 from itertools import product
 from typing import Literal
@@ -211,7 +212,12 @@ class Buses:
     def get_all_data(self):
         main_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
         nanda_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
-        self._res_text = requests.get(main_url).text + requests.get(nanda_url).text
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            main_text, nanda_text = executor.map(
+                lambda url: requests.get(url).text, [main_url, nanda_url]
+            )
+        self._res_text = main_text + nanda_text
 
         # schedule data
         for scope, day, direction in product(
