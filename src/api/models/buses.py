@@ -73,7 +73,11 @@ class Stop:
         self.name = name
         self.name_en = name_en
         # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
-        self.stopped_bus = pd.DataFrame(data={"data": [[] * 18]}, index=schedule_index)
+        # data init 不能用 [[]] * 18，因為這樣會讓所有 entries 共用同一個 list（shallow copy）
+        self.stopped_bus = pd.DataFrame(
+            data={"data": [[] for _ in range(len(schedule_index))]},
+            index=schedule_index,
+        )
 
 
 M1 = Stop("北校門口", "North Main Gate")
