@@ -207,7 +207,7 @@ class Buses:
 
         return trans_list[(route, direction)]
 
-    @cached(TTLCache(maxsize=1024, ttl=60 * 60))
+    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 24))
     def get_all_data(self):
         main_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
         nanda_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
@@ -369,7 +369,7 @@ class Buses:
 
         return res
 
-    @cached(TTLCache(maxsize=1024, ttl=60 * 60))
+    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 24))
     def gen_bus_detailed_schedule_and_update_stops_data(self):
         """
         若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
