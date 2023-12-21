@@ -49,7 +49,7 @@ class BusQuery(BaseModel):
         description="時間",
     )
     limits: Optional[int] = Field(
-        Query(None, ge=1, description="最大回傳資料筆數。若搜尋 day 選擇 current 時失效。"),
+        Query(None, ge=1, description="最大回傳資料筆數。若搜尋 day 選擇 current 且大於 5 時失效。"),
         description="最大回傳資料筆數",
     )
 
@@ -96,7 +96,7 @@ class BusMainSchedule(BaseModel):
     time: str = Field(..., description="發車時間")
     description: str = Field(..., description="備註")
     route: str = Field("校園公車", description="路線")
-    depStop: str = Field(..., description="發車地點")
+    dep_stop: str = Field(..., description="發車地點")
     line: str = Field(..., description="路線")
 
 

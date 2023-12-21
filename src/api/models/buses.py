@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from functools import reduce
 from itertools import product
 from typing import Literal
@@ -73,7 +74,11 @@ class Stop:
         self.name = name
         self.name_en = name_en
         # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
-        self.stopped_bus = pd.DataFrame(data={"data": [[] * 18]}, index=schedule_index)
+        # data init 不能用 [[]] * 18，因為這樣會讓所有 entries 共用同一個 list（shallow copy）
+        self.stopped_bus = pd.DataFrame(
+            data={"data": [[] for _ in range(len(schedule_index))]},
+            index=schedule_index,
+        )
 
 
 M1 = Stop("北校門口", "North Main Gate")
@@ -180,7 +185,7 @@ class Buses:
         data = data.replace("\n", "")
         data = data.replace("time", '"time"')
         data = data.replace("description", '"description"')
-        data = data.replace("depStop", '"depStop"')
+        data = data.replace("depStop", '"dep_stop"')
         data = data.replace("line", '"line"')
         data = data.replace(",    ]", "]")
         data = data.replace(",  ]", "]")
@@ -203,11 +208,16 @@ class Buses:
 
         return trans_list[(route, direction)]
 
-    @cached(TTLCache(maxsize=1024, ttl=60 * 60))
+    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 24))
     def get_all_data(self):
         main_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
         nanda_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
-        self._res_text = requests.get(main_url).text + requests.get(nanda_url).text
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            main_text, nanda_text = executor.map(
+                lambda url: requests.get(url).text, [main_url, nanda_url]
+            )
+        self._res_text = main_text + nanda_text
 
         # schedule data
         for scope, day, direction in product(
@@ -321,7 +331,7 @@ class Buses:
             # 校本部公車
             if scope == "main":
                 # 判斷路線
-                dep_stop = bus["depStop"]
+                dep_stop = bus["dep_stop"]
                 line = bus["line"]
 
                 # 判斷是否上山時從綜二館出發，將影響下山的終點站
@@ -365,7 +375,7 @@ class Buses:
 
         return res
 
-    @cached(TTLCache(maxsize=1024, ttl=60 * 60))
+    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 24))
     def gen_bus_detailed_schedule_and_update_stops_data(self):
         """
         若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
