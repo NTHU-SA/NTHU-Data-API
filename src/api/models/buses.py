@@ -325,7 +325,7 @@ class Buses:
             # 校本部公車
             if scope == "main":
                 # 判斷路線
-                dep_stop = bus["depStop"]
+                dep_stop = bus["dep_stop"]
                 line = bus["line"]
 
                 # 判斷是否上山時從綜二館出發，將影響下山的終點站
