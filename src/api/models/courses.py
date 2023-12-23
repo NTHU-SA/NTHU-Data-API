@@ -2,6 +2,7 @@ import json
 import operator
 import re
 
+from src.api import constant, schemas
 from src.utils import cached_request
 
 
@@ -179,8 +180,12 @@ class Processor:
         "https://www.ccxp.nthu.edu.tw/ccxp/INQUIRE/JH/OPENDATA/open_course_data.json"
     )
 
-    def __init__(self, json_path=None) -> None:
-        self.course_data = self._get_course_data(json_path)
+    def __init__(
+        self,
+        semester: schemas.courses.CourseSemester = constant.courses.DEFAULT_SEMESTER,
+    ) -> None:
+        self.semester = semester.value
+        self.course_data = self._get_course_data(f"data/courses/{self.semester}.json")
 
     def _get_course_data(self, json_path=None) -> list[CoursesData]:
         """TODO: error handler."""
@@ -194,8 +199,20 @@ class Processor:
             course_data_dict_list = json.loads(course_data_resp)
         return list(map(CoursesData, course_data_dict_list))
 
-    def update(self, json_path=None):
-        self.course_data = self._get_course_data(json_path)
+    def set_semester(
+        self,
+        semester: schemas.courses.CourseSemester = constant.courses.DEFAULT_SEMESTER,
+    ):
+        if semester.value == self.semester:
+            return
+
+        self.semester = semester.value
+        if self.semester == "latest":
+            self.course_data = self._get_course_data()
+        else:
+            self.course_data = self._get_course_data(
+                f"data/courses/{self.semester}.json"
+            )
 
     def list_selected_fields(self, field) -> list:
         """列出所有課程的某個欄位。

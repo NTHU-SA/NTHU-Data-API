@@ -1,21 +1,25 @@
 from fastapi import APIRouter, Body, HTTPException, Path, Query, Response
 
-from src.api import schemas
+from src.api import constant, schemas
 from src.api.models.courses import Conditions, Processor
 
 router = APIRouter()
-courses = Processor(json_path="data/courses/11210.json")
 DESCRIPTION_OF_LIMITS = "最大回傳資料筆數"
+courses = Processor(semester=constant.courses.DEFAULT_SEMESTER)
 
 
 @router.get("/", response_model=list[schemas.courses.CourseData])
 async def get_all_courses_list(
     response: Response,
+    semester: schemas.courses.CourseSemester = Query(
+        constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
+    ),
     limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得所有課程。
     """
+    courses.set_semester(semester)
     result = courses.course_data[:limits]
     response.headers["X-Total-Count"] = str(len(result))
     return result
@@ -54,11 +58,15 @@ async def get_selected_fields_list(
     field_name: schemas.courses.CourseFieldName = Path(
         ..., example="id", description="欄位名稱"
     ),
+    semester: schemas.courses.CourseSemester = Query(
+        constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
+    ),
     limits: int = Query(None, ge=1, example=20, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得指定欄位的列表。
     """
+    courses.set_semester(semester)
     result = courses.list_selected_fields(field_name)[:limits]
     return result
 
@@ -71,11 +79,15 @@ async def get_selected_field_and_value_data(
         ..., example="chinese_title", description="搜尋的欄位名稱"
     ),
     value: str = Path(..., example="產業創新與生涯探索", description="搜尋的值"),
+    semester: schemas.courses.CourseSemester = Query(
+        constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
+    ),
     limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
     """
+    courses.set_semester(semester)
     condition = Conditions(field_name, value, False)
     result = courses.query(condition)[:limits]
     return result
@@ -85,11 +97,15 @@ async def get_selected_field_and_value_data(
 async def get_courses_list(
     list_name: schemas.courses.CourseListName,
     response: Response,
+    semester: schemas.courses.CourseSemester = Query(
+        constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
+    ),
     limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ) -> list[schemas.courses.CourseData]:
     """
     取得指定類型的課程列表。
     """
+    courses.set_semester(semester)
     if list_name == "16weeks":
         condition = Conditions("note", "16週課程", True)
     elif list_name == "microcredits":
@@ -111,11 +127,15 @@ async def search_by_field_and_value(
         description="搜尋的欄位名稱",
     ),
     value: str = Query(..., example="產業.+生涯", description="搜尋的值（可以使用 Regex，正則表達式）"),
+    semester: schemas.courses.CourseSemester = Query(
+        constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
+    ),
     limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
     """
+    courses.set_semester(semester)
     condition = Conditions(field, value, True)
     result = courses.query(condition)[:limits]
     return result
@@ -184,11 +204,15 @@ async def get_courses_by_condition(
             },
         }
     ),
+    semester: schemas.courses.CourseSemester = Query(
+        constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
+    ),
     limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
 ):
     """
     根據條件取得課程。
     """
+    courses.set_semester(semester)
     if type(query_condition) is schemas.courses.CourseCondition:
         condition = Conditions(
             query_condition.row_field.value,
