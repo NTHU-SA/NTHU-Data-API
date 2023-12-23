@@ -41,45 +41,64 @@ multiple_conditions = [
 @pytest.mark.parametrize(
     "url, status_code",
     [
-        ("/courses/", 200),
         ("/courses/fields/info", 200),
+    ],
+)
+def test_courses_info_endpoints(url, status_code):
+    response = client.get(url=url)
+    assert response.status_code == status_code
+
+
+@pytest.mark.parametrize("semester", [_.value for _ in schemas.courses.CourseSemester])
+@pytest.mark.parametrize(
+    "url, status_code",
+    [
+        ("/courses/", 200),
         ("/courses/lists/16weeks", 200),
         ("/courses/lists/microcredits", 200),
         ("/courses/lists/xclass", 200),
     ],
 )
-def test_courses_endpoints(url, status_code):
-    response = client.get(url=url)
+def test_courses_endpoints(semester, url, status_code):
+    response = client.get(url=url + f"?semester={semester}")
     assert response.status_code == status_code
 
 
+@pytest.mark.parametrize("semester", [_.value for _ in schemas.courses.CourseSemester])
 @pytest.mark.parametrize(
     "field_name", [_.value for _ in schemas.courses.CourseFieldName]
 )
-def test_courses_fields(field_name):
-    response = client.get(url=f"/courses/fields/{field_name}")
+def test_courses_fields(semester, field_name):
+    response = client.get(url=f"/courses/fields/{field_name}/?semester={semester}")
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize(
-    "field_name", [_.value for _ in schemas.courses.CourseFieldName]
-)
-@pytest.mark.parametrize("value", ["testing"])
-def test_courses_fields_with_values(field_name, value):
-    response = client.get(url=f"/courses/fields/{field_name}/{value}")
-    assert response.status_code == 200
-
-
+@pytest.mark.parametrize("semester", [_.value for _ in schemas.courses.CourseSemester])
 @pytest.mark.parametrize(
     "field_name", [_.value for _ in schemas.courses.CourseFieldName]
 )
 @pytest.mark.parametrize("value", ["testing"])
-def test_courses_search(field_name, value):
-    response = client.get(url=f"/courses/searches?field={field_name}&value={value}")
+def test_courses_fields_with_values(semester, field_name, value):
+    response = client.get(
+        url=f"/courses/fields/{field_name}/{value}/?semester={semester}"
+    )
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize("semester", [_.value for _ in schemas.courses.CourseSemester])
+@pytest.mark.parametrize(
+    "field_name", [_.value for _ in schemas.courses.CourseFieldName]
+)
+@pytest.mark.parametrize("value", ["testing"])
+def test_courses_search(semester, field_name, value):
+    response = client.get(
+        url=f"/courses/searches?field={field_name}&value={value}&semester={semester}"
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("semester", [_.value for _ in schemas.courses.CourseSemester])
 @pytest.mark.parametrize("body", [one_condition, two_conditions, multiple_conditions])
-def test_courses_search_post(body):
-    response = client.post(url="/courses/searches", json=body)
+def test_courses_search_post(semester, body):
+    response = client.post(url=f"/courses/searches?semester={semester}", json=body)
     assert response.status_code == 200
