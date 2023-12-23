@@ -10,7 +10,6 @@ client = TestClient(app)
     "url, status_code",
     [
         ("/", 200),
-        ("/ping", 200),
     ],
 )
 def test_default_endpoints(url, status_code):

@@ -6,7 +6,7 @@ on:
 
 jobs:
   sonarcloud:
-    if: github.repository == 'NTHU-SA/NTHU-Data-API'
+    if: github.repository == 'NTHU-SA/NTHU-Data-API' && github.event.workflow_run.conclusion == 'success'
     name: SonarCloud
     runs-on: ubuntu-latest
     steps:

@@ -9,11 +9,8 @@ client = TestClient(app)
 @pytest.mark.parametrize(
     "url, status_code",
     [
-        ("/events/libarys", 200),
-        ("/events/goodjob", 200),
-        ("/events/arts_center", 200),
-        ("/events/global_affairs", 200),
-        ("/events/health_center", 200),
+        ("/bulletins/zh/行政公告", 200),
+        ("/bulletins/zh/校內徵才", 200),
     ],
 )
 def test_events_endpoints(url, status_code):
