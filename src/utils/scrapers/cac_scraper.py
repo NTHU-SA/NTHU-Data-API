@@ -48,5 +48,7 @@ def get_events_list(maxpage: int = 1):
             a = dimg.find("a") if dimg is not None else None
             img = process_img(dimg, parsed_url)
             href, title = process_link(a, parsed_url)
-            data.append({"title": title, "link": href, "image": img})
+            data.append(
+                {"title": title, "link": href, "image": img, "unix_timestamp": None}
+            )
     return data

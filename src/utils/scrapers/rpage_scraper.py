@@ -2,6 +2,7 @@ import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
+from dateutil.parser import parse
 
 from src.utils import cached_request
 
@@ -13,7 +14,22 @@ def replace_numbers_in_url(url: str, new_number: str) -> str:
 
 
 def process_date(mdate):
-    return str(mdate.text) if mdate is not None else None
+    if mdate is None:
+        return None
+    mdate = mdate.text.strip()
+    return mdate
+
+
+def process_timestamp(date):
+    if date is None:
+        return None
+    try:
+        date = parse(date)
+        timestamp = int(date.timestamp())
+    except ValueError:
+        # 如果日期不能被解析，返回 None
+        timestamp = None
+    return timestamp
 
 
 def process_link(url_dom, parsed_url):
@@ -46,7 +62,15 @@ def get_announcement(url: str, maxpage: int = 1) -> list:
         for item in recruitments:
             mdate = item.select_one(".mdate")
             date = process_date(mdate)
+            timestamp = process_timestamp(date)
             url_dom = item.select_one("a")
             title, href = process_link(url_dom, parsed_url)
-            data.append({"title": title, "link": href, "date": date})
+            data.append(
+                {
+                    "title": title,
+                    "link": href,
+                    "date": date,
+                    "unix_timestamp": timestamp,
+                }
+            )
     return data
