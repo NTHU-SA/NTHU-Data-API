@@ -57,7 +57,7 @@ def get_dining_data_by_name(
 
 
 @router.get(
-    "/scedules/{day_of_week}", response_model=list[schemas.dining.DiningRestaurant]
+    "/schedules/{day_of_week}", response_model=list[schemas.dining.DiningRestaurant]
 )
 def get_schedule_by_day_of_week(
     day_of_week: schemas.dining.DiningSceduleName = Path(
