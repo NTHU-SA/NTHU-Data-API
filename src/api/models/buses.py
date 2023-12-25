@@ -242,17 +242,17 @@ class Buses:
         main_dataset = {
             "toward_TSMC_building_info": self.info_data.loc[("main", "up"), "data"][0],
             "weekday_bus_schedule_toward_TSMC_building": self.raw_schedule_data.loc[
-                (("main", "weekday", "up")), "data"
+                ("main", "weekday", "up"), "data"
             ],
             "weekend_bus_schedule_toward_TSMC_building": self.raw_schedule_data.loc[
-                (("main", "weekend", "up")), "data"
+                ("main", "weekend", "up"), "data"
             ],
             "toward_main_gate_info": self.info_data.loc[("main", "down"), "data"][0],
             "weekday_bus_schedule_toward_main_gate": self.raw_schedule_data.loc[
-                (("main", "weekday", "down")), "data"
+                ("main", "weekday", "down"), "data"
             ],
             "weekend_bus_schedule_toward_main_gate": self.raw_schedule_data.loc[
-                (("main", "weekend", "down")), "data"
+                ("main", "weekend", "down"), "data"
             ],
         }
 
@@ -263,17 +263,17 @@ class Buses:
         nanda_dataset = {
             "toward_south_campus_info": self.info_data.loc[("nanda", "up"), "data"][0],
             "weekday_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
-                (("nanda", "weekday", "up")), "data"
+                ("nanda", "weekday", "up"), "data"
             ],
             "weekend_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
-                (("nanda", "weekend", "up")), "data"
+                ("nanda", "weekend", "up"), "data"
             ],
             "toward_main_campus_info": self.info_data.loc[("nanda", "down"), "data"][0],
             "weekday_bus_schedule_toward_main_campus": self.raw_schedule_data.loc[
-                (("nanda", "weekday", "down")), "data"
+                ("nanda", "weekday", "down"), "data"
             ],
             "weekend_bus_schedule_toward_main_campus": self.raw_schedule_data.loc[
-                (("nanda", "weekend", "down")), "data"
+                ("nanda", "weekend", "down"), "data"
             ],
         }
 

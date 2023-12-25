@@ -4,7 +4,6 @@ from src.api import constant, schemas
 from src.api.models.courses import Conditions, Processor
 
 router = APIRouter()
-DESCRIPTION_OF_LIMITS = "最大回傳資料筆數"
 courses = Processor(semester=constant.courses.DEFAULT_SEMESTER)
 
 
@@ -14,7 +13,7 @@ async def get_all_courses_list(
     semester: schemas.courses.CourseSemester = Query(
         constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
     ),
-    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
+    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     取得所有課程。
@@ -61,7 +60,7 @@ async def get_selected_fields_list(
     semester: schemas.courses.CourseSemester = Query(
         constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
     ),
-    limits: int = Query(None, ge=1, example=20, description=DESCRIPTION_OF_LIMITS),
+    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     取得指定欄位的列表。
@@ -82,7 +81,7 @@ async def get_selected_field_and_value_data(
     semester: schemas.courses.CourseSemester = Query(
         constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
     ),
-    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
+    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
@@ -100,7 +99,7 @@ async def get_courses_list(
     semester: schemas.courses.CourseSemester = Query(
         constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
     ),
-    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
+    limits: int = constant.general.LIMITS_QUERY,
 ) -> list[schemas.courses.CourseData]:
     """
     取得指定類型的課程列表。
@@ -130,7 +129,7 @@ async def search_by_field_and_value(
     semester: schemas.courses.CourseSemester = Query(
         constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
     ),
-    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
+    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
@@ -207,7 +206,7 @@ async def get_courses_by_condition(
     semester: schemas.courses.CourseSemester = Query(
         constant.courses.DEFAULT_SEMESTER, example="11210", description="學期代碼"
     ),
-    limits: int = Query(None, ge=1, example=5, description=DESCRIPTION_OF_LIMITS),
+    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     根據條件取得課程。
