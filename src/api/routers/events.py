@@ -11,7 +11,7 @@ from src.utils.scrapers import (
 router = APIRouter()
 
 
-@router.get("/libarys", response_model=list[schemas.events.EventData])
+@router.get("/libaries", response_model=list[schemas.events.EventData])
 async def get_libarys_events():
     """
     取得圖書館的展覽及活動資料。

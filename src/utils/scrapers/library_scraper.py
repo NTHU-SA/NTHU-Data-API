@@ -11,12 +11,10 @@ from src.utils import cached_request
 
 
 def process_timestamp(date):
-    if date is None:
-        return None
     try:
         date = parse(date)
         timestamp = int(date.timestamp())
-    except ValueError:
+    except (ValueError, TypeError):
         # 如果日期不能被解析，返回 None
         timestamp = None
     return timestamp

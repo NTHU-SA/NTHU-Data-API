@@ -9,3 +9,4 @@ class EventData(BaseModel):
     link: Optional[HttpUrl] = Field(None, description="活動網址")
     image: Optional[HttpUrl] = Field(None, description="活動圖片")
     unix_timestamp: Optional[int] = Field(None, description="活動發布日期")
+    author: Optional[str] = Field(None, description="活動發布者")
