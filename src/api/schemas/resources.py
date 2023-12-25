@@ -67,3 +67,14 @@ class LibraryLostAndFound(BaseModel):
     拾獲時間: str = Field(..., description="拾獲日期")
     拾獲地點: str = Field(..., description="拾獲地點")
     描述: str = Field(..., description="物品描述")
+
+
+class BulletinResourceTypeZH(str, Enum):
+    行政公告 = "行政公告"
+    校內徵才 = "校內徵才"
+    校外徵才 = "校外徵才"
+    招生公告 = "招生公告"
+    藝文活動 = "藝文活動"
+    學術活動 = "學術活動"
+    學生活動 = "學生活動"
+    其他公告 = "其他公告"
