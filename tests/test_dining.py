@@ -53,7 +53,7 @@ def test_dining_restaurants(restaurant_name):
     "day_of_week", [_.value for _ in schemas.dining.DiningSceduleName]
 )
 def test_dining_schedules(day_of_week):
-    response = client.get(url=f"/dining/scedules/{day_of_week}")
+    response = client.get(url=f"/dining/schedules/{day_of_week}")
     assert response.status_code == 200
 
 
