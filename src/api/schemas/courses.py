@@ -110,3 +110,10 @@ class CourseListName(str, Enum):
     weeks16 = "16weeks"
     microcredits = "microcredits"
     xclass = "xclass"
+
+
+class CourseSemester(str, Enum):
+    latest = "latest"
+    _11120 = "11120"
+    _11210 = "11210"
+    _11220 = "11220"
