@@ -12,7 +12,7 @@ requests==2.31.0
 beautifulsoup4==4.12.2
 xmltodict==0.13.0
 pandas==2.1.4
-lxml==4.9.4
+lxml==5.1.0
 # Search
 jieba==0.42.1
 python-Levenshtein==0.23.0
