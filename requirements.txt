@@ -9,7 +9,7 @@ cachetools==5.3.2
 pyopenssl==23.3.0
 # Crawlers
 requests==2.31.0
-beautifulsoup4==4.12.2
+beautifulsoup4==4.12.3
 xmltodict==0.13.0
 pandas==2.1.4
 lxml==5.1.0
