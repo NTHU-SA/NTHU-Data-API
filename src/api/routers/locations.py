@@ -22,7 +22,9 @@ def get_all_location():
 @router.get("/{id}", response_model=schemas.locations.LocationData)
 def get_location_by_id(
     id: UUID = Path(
-        ..., example="b876aa09-40a8-427b-8bc7-1933978690e2", description="要查詢的地點 id"
+        ...,
+        example="b876aa09-40a8-427b-8bc7-1933978690e2",
+        description="要查詢的地點 id",
     )
 ):
     """

@@ -22,7 +22,9 @@ def get_all_contact():
 @router.get("/{id}", response_model=schemas.contacts.ContactsData)
 def get_contact(
     id: UUID = Path(
-        ..., example="7e00db83-b407-4320-af55-0a1b1f5734ad", description="要查詢電話的 ID"
+        ...,
+        example="7e00db83-b407-4320-af55-0a1b1f5734ad",
+        description="要查詢電話的 ID",
     )
 ):
     """
