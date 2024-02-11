@@ -109,7 +109,9 @@ async def search_by_field_and_value(
         example=schemas.courses.CourseFieldName.chinese_title,
         description="搜尋的欄位名稱",
     ),
-    value: str = Query(..., example="產業.+生涯", description="搜尋的值（可以使用 Regex，正則表達式）"),
+    value: str = Query(
+        ..., example="產業.+生涯", description="搜尋的值（可以使用 Regex，正則表達式）"
+    ),
     limits: int = constant.general.LIMITS_QUERY,
 ):
     """

@@ -7,7 +7,8 @@ with open("./original_data/dept.json", "r", encoding="utf-8") as f:
 
 for first_class in phone_data:
     print(
-        first_class["name"], f" 共計有 {len(first_class['details']['departments'])} 個下轄機關"
+        first_class["name"],
+        f" 共計有 {len(first_class['details']['departments'])} 個下轄機關",
     )
 
 res = []

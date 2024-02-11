@@ -45,11 +45,17 @@ class BusDayWithCurrent(str, Enum):
 
 class BusQuery(BaseModel):
     time: Optional[str] = Field(
-        Query("0:00", example="8:10", description="時間。若搜尋 day 選擇 current 時失效。"),
+        Query(
+            "0:00", example="8:10", description="時間。若搜尋 day 選擇 current 時失效。"
+        ),
         description="時間",
     )
     limits: Optional[int] = Field(
-        Query(None, ge=1, description="最大回傳資料筆數。若搜尋 day 選擇 current 且大於 5 時失效。"),
+        Query(
+            None,
+            ge=1,
+            description="最大回傳資料筆數。若搜尋 day 選擇 current 且大於 5 時失效。",
+        ),
         description="最大回傳資料筆數",
     )
 
@@ -131,7 +137,9 @@ class BusMainDetailedSchedule(BaseModel):
 
 
 class BusMainData(BaseModel):
-    toward_TSMC_building_info: BusInfo = Field(..., description="校門口往台積館公車資訊")
+    toward_TSMC_building_info: BusInfo = Field(
+        ..., description="校門口往台積館公車資訊"
+    )
     weekday_bus_schedule_toward_TSMC_building: list[BusMainSchedule] = Field(
         ..., description="校門口往台積館公車時刻表（平日）"
     )
