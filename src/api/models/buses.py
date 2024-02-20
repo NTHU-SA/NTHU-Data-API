@@ -290,6 +290,13 @@ class Buses:
 
         return nanda_dataset
 
+    def _reset_stop_data(self):
+        for stop in stops.values():
+            stop.stopped_bus = pd.DataFrame(
+                data={"data": [[] for _ in range(len(schedule_index))]},
+                index=schedule_index,
+            )
+
     # 更新資料，並清除 _start_from_gen_2_bus_info
     def _update_data(self):
         self.get_all_data()
@@ -393,6 +400,8 @@ class Buses:
         """
         若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
         """
+        self._reset_stop_data()
+
         for scope, day, direction in product(
             BUS_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
         ):
