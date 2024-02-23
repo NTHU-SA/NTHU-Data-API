@@ -42,7 +42,8 @@ def get_library_rss_data(
 )
 def get_library_opening_hours(
     library_name: schemas.resources.LibraryName = Path(
-        ..., description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)"
+        ...,
+        description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)",
     )
 ):
     """

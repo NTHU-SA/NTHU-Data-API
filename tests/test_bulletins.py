@@ -9,9 +9,10 @@ client = TestClient(app)
 @pytest.mark.parametrize(
     "url, status_code",
     [
-        ("/", 200),
+        ("/bulletins/zh/行政公告", 200),
+        ("/bulletins/zh/校內徵才", 200),
     ],
 )
-def test_default_endpoints(url, status_code):
+def test_events_endpoints(url, status_code):
     response = client.get(url=url)
     assert response.status_code == status_code

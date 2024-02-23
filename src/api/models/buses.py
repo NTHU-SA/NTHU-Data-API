@@ -15,9 +15,13 @@ from src.api import schemas
 # 務必保持之後的程式碼中，BUS_TYPE、BUS_DAY、BUS_DIRECTION 的順序一致，因為 BusType、BusDay 具有 all 這個選項
 # 之後合併要先處理完 BusDirection 的部份才會合併到 all
 BUS_TYPE = [_.value for _ in schemas.buses.BusType]
-BUS_TYPE_WITHOUT_ALL = [_.value for _ in schemas.buses.BusType][1:]  # 預設第一個為 all，並將其移除
+BUS_TYPE_WITHOUT_ALL = [_.value for _ in schemas.buses.BusType][
+    1:
+]  # 預設第一個為 all，並將其移除
 BUS_DAY = [_.value for _ in schemas.buses.BusDay]
-BUS_DAY_WITHOUT_ALL = [_.value for _ in schemas.buses.BusDay][1:]  # 預設第一個為 all，並將其移除
+BUS_DAY_WITHOUT_ALL = [_.value for _ in schemas.buses.BusDay][
+    1:
+]  # 預設第一個為 all，並將其移除
 BUS_DIRECTION = [_.value for _ in schemas.buses.BusDirection]
 
 schedule_index = pd.MultiIndex.from_product([BUS_TYPE, BUS_DAY, BUS_DIRECTION])
@@ -88,7 +92,10 @@ M4 = Stop("人社院/生科館", "CHSS/CLS Building")
 M5 = Stop("台積館", "TSMC Building")
 M6 = Stop("奕園停車場", "Yi Pavilion Parking Lot")
 M7 = Stop("南門停車場", "South Gate Parking Lot")
-S1 = Stop("南大校區校門口右側(食品路校牆邊)", "The right side of NandaCampus front gate(Shipin Road)")
+S1 = Stop(
+    "南大校區校門口右側(食品路校牆邊)",
+    "The right side of NandaCampus front gate(Shipin Road)",
+)
 stops = {"M1": M1, "M2": M2, "M3": M3, "M4": M4, "M5": M5, "M6": M6, "M7": M7, "S1": S1}
 
 # 清大路網圖 (單位：分鐘)
@@ -133,8 +140,12 @@ green_M5_M1 = Route(M5, M4, M3, M2, M1)  # 綠線 台積館 往 北校門
 green_M2_M5 = Route(M2, M3, M6, M7, M5)  # 綠線 綜二館 往 台積館
 green_M5_M2 = Route(M5, M4, M3, M2)  # 綠線 台積館 往 綜二館
 
-nanda_M1_S1 = Route(M1, M2, M4, M5, S1)  # 校區區間車 南大校區校門口右側(食品路校牆邊) 往 北校門
-nanda_S1_M1 = Route(S1, M5, M4, M2, M1)  # 校區區間車 北校門 往 南大校區校門口右側(食品路校牆邊)
+nanda_M1_S1 = Route(
+    M1, M2, M4, M5, S1
+)  # 校區區間車 南大校區校門口右側(食品路校牆邊) 往 北校門
+nanda_S1_M1 = Route(
+    S1, M5, M4, M2, M1
+)  # 校區區間車 北校門 往 南大校區校門口右側(食品路校牆邊)
 
 
 class Buses:
@@ -187,10 +198,10 @@ class Buses:
         data = data.replace("description", '"description"')
         data = data.replace("depStop", '"dep_stop"')
         data = data.replace("line", '"line"')
-        data = data.replace(",    ]", "]")
-        data = data.replace(",  ]", "]")
+        data = re.sub(r",[ ]+?\]", "]", data)  # remove trailing comma
         data = json.loads(data)
 
+        data = [i for i in data if i["time"] != ""]  # remove empty time
         for i in data:
             i["route"] = "校園公車" if "line" in data[0] else "南大區間車"
 
@@ -223,10 +234,10 @@ class Buses:
         for scope, day, direction in product(
             BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
         ):
-            self.raw_schedule_data.loc[
-                (scope, day, direction), "data"
-            ] = self._parse_bus_schedule(
-                f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
+            self.raw_schedule_data.loc[(scope, day, direction), "data"] = (
+                self._parse_bus_schedule(
+                    f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
+                )
             )
 
         # info data
@@ -279,6 +290,13 @@ class Buses:
 
         return nanda_dataset
 
+    def _reset_stop_data(self):
+        for stop in stops.values():
+            stop.stopped_bus = pd.DataFrame(
+                data={"data": [[] for _ in range(len(schedule_index))]},
+                index=schedule_index,
+            )
+
     # 更新資料，並清除 _start_from_gen_2_bus_info
     def _update_data(self):
         self.get_all_data()
@@ -312,7 +330,9 @@ class Buses:
             ("綜二", "green"): green_M2_M5,
         }
 
-        key = (dep_stop, line) if "台積" not in dep_stop else (dep_stop, line, from_gen_2)
+        key = (
+            (dep_stop, line) if "台積" not in dep_stop else (dep_stop, line, from_gen_2)
+        )
         return stops_lines_map.get(key, None)
 
     def _gen_detailed_bus_schedule(
@@ -380,17 +400,19 @@ class Buses:
         """
         若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
         """
+        self._reset_stop_data()
+
         for scope, day, direction in product(
             BUS_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
         ):
             self._update_data()
-            self.detailed_schedule_data.loc[
-                (scope, day, direction), "data"
-            ] = self._gen_detailed_bus_schedule(
-                self.raw_schedule_data.loc[(scope, day, direction), "data"],
-                scope=scope,
-                day=day,
-                direction=direction,
+            self.detailed_schedule_data.loc[(scope, day, direction), "data"] = (
+                self._gen_detailed_bus_schedule(
+                    self.raw_schedule_data.loc[(scope, day, direction), "data"],
+                    scope=scope,
+                    day=day,
+                    direction=direction,
+                )
             )
 
         gen_all_field(self.detailed_schedule_data, ["dep_info", "time"])

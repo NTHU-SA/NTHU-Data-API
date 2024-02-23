@@ -5,7 +5,11 @@ from src import app
 from src.api import schemas
 
 client = TestClient(app)
-one_condition = {"row_field": "chinese_title", "matcher": "數統導論", "regex_match": True}
+one_condition = {
+    "row_field": "chinese_title",
+    "matcher": "數統導論",
+    "regex_match": True,
+}
 two_conditions = [
     {"row_field": "teacher", "matcher": "黃", "regex_match": True},
     "or",

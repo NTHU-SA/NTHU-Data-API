@@ -300,7 +300,9 @@ if __name__ == "__main__":
     logger.info(f"總開課數: {len(course_data.course_data)}")
     # 中文授課 或 英文授課
     condition_ce = Conditions("LANGUAGE", "中") | Conditions("LANGUAGE", "英")
-    logger.info(f"中文授課 或 英文授課 開課數量: {len(course_data.query(condition_ce))}")
+    logger.info(
+        f"中文授課 或 英文授課 開課數量: {len(course_data.query(condition_ce))}"
+    )
     # 中文授課
     condition_c = Conditions("LANGUAGE", "中")
     logger.info(f"中文授課 開課數量: {len(course_data.query(condition_c))}")

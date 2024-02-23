@@ -4,9 +4,20 @@ from datetime import datetime, timedelta
 
 import xmltodict
 from bs4 import BeautifulSoup
+from dateutil.parser import parse
 from fastapi import HTTPException
 
 from src.utils import cached_request
+
+
+def process_timestamp(date):
+    try:
+        date = parse(date)
+        timestamp = int(date.timestamp())
+    except (ValueError, TypeError):
+        # 如果日期不能被解析，返回 None
+        timestamp = None
+    return timestamp
 
 
 def get_rss_data(rss_type: str) -> list:
@@ -24,6 +35,34 @@ def get_rss_data(rss_type: str) -> list:
     rss_dict = xmltodict.parse(xml_string)
     rss_data = rss_dict["rss"]["channel"]["item"]
     return rss_data
+
+
+def get_parsed_rss_data(rss_type: str) -> list:
+    rss_data = get_rss_data(rss_type)
+    data = []
+    for item in rss_data:
+        title = item["title"]
+        link = item["link"]
+        pubDate = item["pubDate"]
+        description = item["description"]
+        author = item["author"]
+        image = item["image"]["url"]
+        if image.startswith("//"):
+            image = f"https:{image}"
+        date = pubDate
+        unix_timestamp = process_timestamp(date)
+        data.append(
+            {
+                "title": title,
+                "link": link,
+                "date": pubDate,
+                "description": description,
+                "author": author,
+                "image": image,
+                "unix_timestamp": unix_timestamp,
+            }
+        )
+    return data
 
 
 def get_number_of_goods() -> dict:
