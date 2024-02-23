@@ -1,7 +1,7 @@
 # Logging
 loguru==0.7.2
 # Server
-fastapi==0.105.0
+fastapi==0.109.2
 uvicorn==0.25.0
 # Environment
 python-dotenv==1.0.0
