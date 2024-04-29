@@ -23,7 +23,7 @@ class Dining:
             return []
         dining_data = dining_data.replace("'", '"')
         dining_data = dining_data.replace("\n", "")
-        dining_data = dining_data.replace(",  ]", "]")
+        dining_data = re.sub(r",[ ]+?\]", "]", dining_data)  # remove trailing comma
         dining_data = json.loads(dining_data)
         return dining_data
 
