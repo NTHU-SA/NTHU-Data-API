@@ -65,6 +65,7 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 - chore: Changes to the build process or auxiliary tools and libraries.
 - revert: Reverts a previous commit.
 
+### pre-commit
 1. Before committing, use `pre-commit` to ensure the format.
 ```sh
 pip3 install -r requirements-dev.txt
