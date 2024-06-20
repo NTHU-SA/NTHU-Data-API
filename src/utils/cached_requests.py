@@ -113,7 +113,7 @@ def get(
     try:
         headers = generate_headers(url) if auto_headers else None
 
-        response = requests.get(url, headers, timeout=10, **kwargs)
+        response = requests.get(url, headers, timeout=10, verify=False, **kwargs)
 
         status_code = response.status_code
         # 如果回應狀態碼不是 200，則拋出例外；但有可能是 2xx 範圍的狀態碼
