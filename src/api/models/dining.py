@@ -1,18 +1,20 @@
 import json
 import re
 
+from cachetools import TTLCache, cached
 from thefuzz import fuzz, process
 
-from src.utils import cached_request
+from src.utils import cached_requests
 
 
 class Dining:
     # 餐廳及服務性廠商
     # https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw
 
+    @cached(TTLCache(maxsize=3, ttl=60 * 60 * 3))
     def get_dining_data(self) -> list:
         url = "https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw"
-        res_text = cached_request.get(url)
+        res_text, using_cache = cached_requests.get(url, update=True, auto_headers=True)
         # 將字串轉換成 json 格式
         dining_data = re.search(
             r"const restaurantsData = (\[.*?) {2}renderTabs", res_text, re.S

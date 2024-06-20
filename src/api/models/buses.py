@@ -7,10 +7,10 @@ from itertools import product
 from typing import Literal
 
 import pandas as pd
-import requests
 from cachetools import TTLCache, cached
 
 from src.api import schemas
+from src.utils import cached_requests
 
 # 務必保持之後的程式碼中，BUS_TYPE、BUS_DAY、BUS_DIRECTION 的順序一致，因為 BusType、BusDay 具有 all 這個選項
 # 之後合併要先處理完 BusDirection 的部份才會合併到 all
@@ -226,7 +226,8 @@ class Buses:
 
         with ThreadPoolExecutor(max_workers=2) as executor:
             main_text, nanda_text = executor.map(
-                lambda url: requests.get(url).text, [main_url, nanda_url]
+                lambda url: cached_requests.get(url, update=True, auto_headers=True)[0],
+                [main_url, nanda_url],
             )
         self._res_text = main_text + nanda_text
 
