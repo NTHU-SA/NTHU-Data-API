@@ -1,9 +1,10 @@
 from enum import Enum
 
-import requests
 from bs4 import BeautifulSoup
 from cachetools import TTLCache, cached
 from dateutil.parser import parse
+
+from src.utils import cached_requests
 
 
 class DataType(Enum):
@@ -43,7 +44,9 @@ def get_announcements(data_type: DataType = DataType.ALL) -> list:
     # 課程/證照/考試: https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01004
     # 宣導資料:       https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01005
     URL_PREFIX = "https://goodjob-nthu.conf.asia/sys_news.aspx?nt="
-    response = requests.get(URL_PREFIX + data_type.value).text
+    response, using_cache = cached_requests.get(
+        URL_PREFIX + data_type.value, update=True, auto_headers=True
+    )
     soup = BeautifulSoup(response, "html.parser")
     items = soup.select("div.col-md-12 ul.list-unstyled li.u-block-hover")
     data = []
