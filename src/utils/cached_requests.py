@@ -46,8 +46,11 @@ def validate_url(url: str) -> str:
     if parsed_url.scheme not in ["http", "https"]:
         raise ValueError("Invalid URL scheme")
 
-    # 只允許 nthu.edu.tw 結尾的網域
-    if not parsed_url.netloc.endswith("nthu.edu.tw"):
+    # 只允許 nthu.edu.tw 結尾 或 清華JOB讚 的網域
+    if not (
+        parsed_url.netloc.endswith("nthu.edu.tw")
+        or parsed_url.netloc.endswith("goodjob-nthu.conf.asia")
+    ):
         raise ValueError("Invalid URL domain")
 
     # 重新組合 URL，排除可能的用戶名和密碼
