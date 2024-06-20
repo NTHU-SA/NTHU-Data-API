@@ -1,10 +1,10 @@
 import datetime
-import json
 import re
 
-import requests
 from cachetools import TTLCache, cached
 from fastapi import HTTPException
+
+from src.utils import cached_requests
 
 
 class Energy:
@@ -20,7 +20,9 @@ class Energy:
         electricity_usage_data = []
 
         for i in range(1, 4):
-            res = requests.get(URL_PREFIX + str(i) + URL_POSTFIX)
+            res, using_cache = cached_requests.get(
+                URL_PREFIX + str(i) + URL_POSTFIX, update=True, auto_headers=True
+            )
             if res.status_code != 200:
                 raise HTTPException(
                     status_code=500, detail="Failed to get electricity usage data."

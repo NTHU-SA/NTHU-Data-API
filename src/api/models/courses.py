@@ -2,7 +2,9 @@ import json
 import operator
 import re
 
-from src.utils import cached_request
+from cachetools import TTLCache, cached
+
+from src.utils import cached_requests
 
 
 class CoursesData:
@@ -182,6 +184,7 @@ class Processor:
     def __init__(self, json_path=None) -> None:
         self.course_data = self._get_course_data(json_path)
 
+    @cached(TTLCache(maxsize=1, ttl=60 * 60 * 24 * 7))
     def _get_course_data(self, json_path=None) -> list[CoursesData]:
         """TODO: error handler."""
         if json_path is not None:
@@ -190,7 +193,9 @@ class Processor:
                 course_data_dict_list = json.load(f)
         else:
             # 使用 requests 模組取得網頁資料
-            course_data_resp = cached_request.get(self.NTHU_COURSE_DATA_URL)
+            course_data_resp, using_cache = cached_requests.get(
+                self.NTHU_COURSE_DATA_URL, update=True, auto_headers=True
+            )
             course_data_dict_list = json.loads(course_data_resp)
         return list(map(CoursesData, course_data_dict_list))
 

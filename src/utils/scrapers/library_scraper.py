@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from dateutil.parser import parse
 from fastapi import HTTPException
 
-from src.utils import cached_request
+from src.utils import cached_requests
 
 
 def process_timestamp(date):
@@ -30,7 +30,7 @@ def get_rss_data(rss_type: str) -> list:
     # 展覽及活動 RSS:       https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_exhibit.xml
     # 南大與人社分館 RSS:   https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_branches.xml
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type}.xml"
-    xml_string = cached_request.get(url)
+    xml_string, using_cache = cached_requests.get(url, update=True, auto_headers=True)
     xml_string = xml_string.replace("<br />", "")
     rss_dict = xmltodict.parse(xml_string)
     rss_data = rss_dict["rss"]["channel"]["item"]
@@ -70,7 +70,7 @@ def get_number_of_goods() -> dict:
     取得總圖換證數量資訊。
     """
     url = "https://adage.lib.nthu.edu.tw/goods/Public/number_of_goods_mix.js"
-    text = cached_request.get(url, update=True)
+    text, using_cache = cached_requests.get(url, update=True, auto_headers=True)
     # 使用正規表達式從 text 中提取變量和值
     variables = re.findall(r'var\s+(\w+)\s*=\s*(\d+|"[^"]*");', text)
     # 將變量和值存儲在字典中
@@ -88,7 +88,7 @@ def get_opening_hours(libaray_name) -> dict:
     取得指定圖書館的開放時間。
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{libaray_name.value}.js"
-    text = cached_request.get(url)
+    text, using_cache = cached_requests.get(url, update=True, auto_headers=True)
     # 使用正規表達式從 text 中提取日期和時間
     match = re.search(
         r"(\d{4}-\d{2}-\d{2}\s+\([\w]+\))<br />(\d{2}:\d{2})-(\d{2}:\d{2})", text
@@ -109,7 +109,7 @@ def get_space_data() -> list:
     """
     # 來源： https://libsms.lib.nthu.edu.tw/build/
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
-    response = cached_request.get(url)
+    response, using_cache = cached_requests.get(url, update=True, auto_headers=True)
     data = json.loads(response)
     if data["resmsg"] != "成功":
         raise HTTPException(404, "Not found")
@@ -128,7 +128,7 @@ def get_lost_and_found() -> list:
     date_end = date_end.strftime("%Y-%m-%d")
     date_start = date_start.strftime("%Y-%m-%d")
     # 發送 POST 請求
-    response = cached_request.post(
+    response = cached_requests.post(
         "https://adage.lib.nthu.edu.tw/find/search_it.php",
         data={
             "place": "0",

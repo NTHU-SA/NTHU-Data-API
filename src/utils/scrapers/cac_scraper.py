@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
-from src.utils import cached_request
+from src.utils import cached_requests
 
 
 def process_img(dimg, parsed_url):
@@ -39,7 +39,7 @@ def get_events_list(maxpage: int = 1):
     ]
     data = []
     for url in url_list:
-        response = cached_request.get(url)
+        response, using_cache = cached_requests.get(url, update=True, auto_headers=True)
         soup = BeautifulSoup(response, "html.parser")
         cac_activity = soup.select("#pageptlist .d-item")
         parsed_url = urlparse(url)

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
 
-from src.utils import cached_request
+from src.utils import cached_requests
 
 
 def replace_numbers_in_url(url: str, new_number: str) -> str:
@@ -53,7 +53,7 @@ def get_announcement(url: str, maxpage: int = 1) -> list:
     )
     data = []
     for url in page_list:
-        response = cached_request.get(url)
+        response, using_cache = cached_requests.get(url, update=True, auto_headers=True)
         parsed_url = urlparse(url)
         soup = BeautifulSoup(response, "html.parser")
         recruitments = soup.select("#pageptlist .listBS")
