@@ -4,7 +4,7 @@ loguru==0.7.2
 fastapi==0.109.2
 uvicorn==0.29.0
 # Environment
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 cachetools==5.3.2
 pyopenssl==24.0.0
 # Crawlers
