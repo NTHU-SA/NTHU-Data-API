@@ -70,7 +70,15 @@ def get_number_of_goods() -> dict:
     取得總圖換證數量資訊。
     """
     url = "https://adage.lib.nthu.edu.tw/goods/Public/number_of_goods_mix.js"
-    text, using_cache = cached_requests.get(url, update=True, auto_headers=True)
+    # 使用自定義 headers (adage.lib.nthu.edu.tw 只接受指定 Referer)
+    headers = {
+        "Referer": "https://www.lib.nthu.edu.tw/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    }
+    text, using_cache = cached_requests.get(
+        url, update=True, auto_headers=False, headers=headers
+    )
+
     # 使用正規表達式從 text 中提取變量和值
     variables = re.findall(r'var\s+(\w+)\s*=\s*(\d+|"[^"]*");', text)
     # 將變量和值存儲在字典中
@@ -83,21 +91,32 @@ def get_number_of_goods() -> dict:
     return data
 
 
-def get_opening_hours(libaray_name) -> dict:
+def get_opening_hours(library_name) -> dict:
     """
     取得指定圖書館的開放時間。
     """
-    url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{libaray_name.value}.js"
+    url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{library_name.value}.js"
     text, using_cache = cached_requests.get(url, update=True, auto_headers=True)
     # 使用正規表達式從 text 中提取日期和時間
     match = re.search(
-        r"(\d{4}-\d{2}-\d{2}\s+\([\w]+\))<br />(\d{2}:\d{2})-(\d{2}:\d{2})", text
+        r"var openhour ='(\d{4}-\d{2}-\d{2}\s+\([\w]+\))<br />(.*?)'", text
     )
-    data = {"library": libaray_name.value}
+    data = {"library": library_name.value}
     if match:
         data["date"] = match.group(1)
-        data["start_time"] = match.group(2)
-        data["end_time"] = match.group(3)
+        opening_info = match.group(2)
+        if opening_info == "不提供服務":
+            data["start_time"] = ""
+            data["end_time"] = ""
+            data["message"] = "不提供服務"
+        else:
+            time_match = re.search(r"(\d{2}:\d{2})-(\d{2}:\d{2})", opening_info)
+            if time_match:
+                data["start_time"] = time_match.group(1)
+                data["end_time"] = time_match.group(2)
+                data["message"] = "提供服務"
+            else:
+                raise HTTPException(500, "Invalid time format")
     else:
         raise HTTPException(404, "Not found")
     return data

@@ -5,20 +5,7 @@ from src import app
 from src.api import schemas
 
 client = TestClient(app)
-restaurant_name_list = [
-    "麥當勞",
-    "紅燒如意坊",
-    "茗釀茶品",
-    "友記快餐館",
-    "蘇記牛肉麵",
-    "帕森義大利麵",
-    "碳烤小姐(原顏記文昌雞)",
-    "家味燒臘",
-    "喜番咖哩",
-    "牛肉先生",
-    "墨尼捲餅",
-    "珍御品粥麵館",
-]
+restaurant_name_list = ["麥當勞", "7-ELEVEN", "全家便利商店", "路易莎", "清華水漾"]
 
 
 @pytest.mark.parametrize(

@@ -39,6 +39,7 @@ class LibraryOpeningHour(BaseModel):
     date: str = Field(..., description="日期")
     start_time: str = Field(..., description="開館時間")
     end_time: str = Field(..., description="閉館時間")
+    message: str = Field(..., description="訊息")
 
 
 class LibraryNumberOfGoods(BaseModel):
