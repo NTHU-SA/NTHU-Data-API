@@ -74,9 +74,11 @@ def gen_all_field(target_dataframe: pd.DataFrame, time_path: list) -> None:
 
 
 class Stop:
-    def __init__(self, name, name_en) -> None:
+    def __init__(self, name: str, name_en: str, latitude: str, longitude: str) -> None:
         self.name = name
         self.name_en = name_en
+        self.latitude = latitude
+        self.longitude = longitude
         # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
         # data init 不能用 [[]] * 18，因為這樣會讓所有 entries 共用同一個 list（shallow copy）
         self.stopped_bus = pd.DataFrame(
@@ -85,16 +87,20 @@ class Stop:
         )
 
 
-M1 = Stop("北校門口", "North Main Gate")
-M2 = Stop("綜二館", "General Building II")
-M3 = Stop("楓林小徑", "Maple Path")
-M4 = Stop("人社院/生科館", "CHSS/CLS Building")
-M5 = Stop("台積館", "TSMC Building")
-M6 = Stop("奕園停車場", "Yi Pavilion Parking Lot")
-M7 = Stop("南門停車場", "South Gate Parking Lot")
+M1 = Stop("北校門口", "North Main Gate", "24.79589", "120.99633")
+M2 = Stop("綜二館", "General Building II", "24.794176", "120.99376")
+M3 = Stop("楓林小徑", "Maple Path", "24.791388889", "120.991388889")
+M4 = Stop("人社院/生科館", "CHSS/CLS Building", "24.79", "120.990277778")
+M5 = Stop("台積館", "TSMC Building", "24.78695", "120.9884")
+M6 = Stop(
+    "奕園停車場", "Yi Pavilion Parking Lot", "24.788284441920126", "120.99246131713849"
+)
+M7 = Stop("南門停車場", "South Gate Parking Lot", "24.7859395", "120.9901396")
 S1 = Stop(
     "南大校區校門口右側(食品路校牆邊)",
     "The right side of NandaCampus front gate(Shipin Road)",
+    "24.79438267696105",
+    "120.965382976675",
 )
 stops = {"M1": M1, "M2": M2, "M3": M3, "M4": M4, "M5": M5, "M6": M6, "M7": M7, "S1": S1}
 
@@ -419,3 +425,17 @@ class Buses:
         gen_all_field(self.detailed_schedule_data, ["dep_info", "time"])
         for stop in stops.values():
             gen_all_field(stop.stopped_bus, ["arrive_time"])
+
+    def gen_bus_stops_info(self) -> list:
+        res = []
+        for stop in stops.values():
+            res.append(
+                {
+                    "stop_name": stop.name,
+                    "stop_name_en": stop.name_en,
+                    "latitude": stop.latitude,
+                    "longitude": stop.longitude,
+                }
+            )
+
+        return res
