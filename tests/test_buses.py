@@ -26,6 +26,11 @@ def test_buses_info(bus_type, direction):
     assert response.status_code == 200
 
 
+def test_buses_stops_info():
+    response = client.get(url=f"/buses/info/stops")
+    assert response.status_code == 200
+
+
 @pytest.mark.parametrize("bus_type", [_.value for _ in schemas.buses.BusType])
 @pytest.mark.parametrize("day", [_.value for _ in schemas.buses.BusDayWithCurrent])
 @pytest.mark.parametrize("direction", [_.value for _ in schemas.buses.BusDirection])
