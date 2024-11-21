@@ -44,10 +44,18 @@ def get_bus_info(
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_PATH,
 ):
     """
-    取得公車時刻表。
+    取得公車路線資訊。
     """
     buses.get_all_data()
     return buses.info_data.loc[(bus_type, direction), "data"]
+
+
+@router.get("/info/stops", response_model=list[schemas.buses.BusStopsInfo])
+def get_bus_stops_info():
+    """
+    取得停靠站資訊
+    """
+    return buses.gen_bus_stops_info()
 
 
 @router.get(

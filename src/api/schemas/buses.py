@@ -92,6 +92,13 @@ class BusInfo(BaseModel):
     routeEN: str = Field(..., description="英文路線")
 
 
+class BusStopsInfo(BaseModel):
+    stop_name: str = Field(..., description="站牌中文名稱")
+    stop_name_en: str = Field(..., description="站牌英文名稱")
+    latitude: str = Field(..., description="站牌所在地緯度")
+    longitude: str = Field(..., description="站牌所在地經度")
+
+
 class BusNandaSchedule(BaseModel):
     time: str = Field(..., description="發車時間")
     description: str = Field(..., description="備註")
@@ -113,11 +120,12 @@ class BusStopsQueryResult(BaseModel):
 
 class BusArriveTime(BaseModel):
     # {"stop_name": stop.name, "time": arrive_time}
+    # TODO: refacter stop_name Literal check
     stop_name: Literal[
         StopsName.M1,
         StopsName.M2,
         StopsName.M3,
-        "人社院/生科館",
+        "人社院/生科館",  # 此處功能同 StopsName.M4，但 / 會影響 url query，故手動更改
         StopsName.M5,
         StopsName.M6,
         StopsName.M7,
