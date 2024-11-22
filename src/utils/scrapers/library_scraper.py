@@ -30,7 +30,7 @@ def get_rss_data(rss_type: str) -> list:
     # 展覽及活動 RSS:       https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_exhibit.xml
     # 南大與人社分館 RSS:   https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_branches.xml
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type}.xml"
-    xml_string, using_cache = cached_requests.get(url, update=True, auto_headers=True)
+    xml_string, _using_cache = cached_requests.get(url, update=True, auto_headers=True)
     xml_string = xml_string.replace("<br />", "")
     rss_dict = xmltodict.parse(xml_string)
     rss_data = rss_dict["rss"]["channel"]["item"]
@@ -75,7 +75,7 @@ def get_number_of_goods() -> dict:
         "Referer": "https://www.lib.nthu.edu.tw/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
     }
-    text, using_cache = cached_requests.get(
+    text, _using_cache = cached_requests.get(
         url, update=True, auto_headers=False, headers=headers
     )
 
@@ -96,7 +96,7 @@ def get_opening_hours(library_name) -> dict:
     取得指定圖書館的開放時間。
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{library_name.value}.js"
-    text, using_cache = cached_requests.get(url, update=True, auto_headers=True)
+    text, _using_cache = cached_requests.get(url, update=True, auto_headers=True)
     # 使用正規表達式從 text 中提取日期和時間
     match = re.search(
         r"var openhour ='(\d{4}-\d{2}-\d{2}\s+\([\w]+\))<br />(.*?)'", text
@@ -128,7 +128,7 @@ def get_space_data() -> list:
     """
     # 來源： https://libsms.lib.nthu.edu.tw/build/
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
-    response, using_cache = cached_requests.get(url, update=True, auto_headers=True)
+    response, _using_cache = cached_requests.get(url, update=True, auto_headers=True)
     data = json.loads(response)
     if data["resmsg"] != "成功":
         raise HTTPException(404, "Not found")

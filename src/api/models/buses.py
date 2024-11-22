@@ -1,12 +1,13 @@
-import datetime
 import json
 import re
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
 from functools import reduce
 from itertools import product
 from typing import Literal
 
 import pandas as pd
+from bs4 import BeautifulSoup
 from cachetools import TTLCache, cached
 
 from src.api import schemas
@@ -47,9 +48,7 @@ def after_specific_time(
 
 def sort_by_time(target, time_path: list = None) -> None:
     target.sort(
-        key=lambda x: datetime.datetime.strptime(
-            reduce(dict.get, time_path, x), "%H:%M"
-        )
+        key=lambda x: datetime.strptime(reduce(dict.get, time_path, x), "%H:%M")
     )
 
 
@@ -81,10 +80,12 @@ class Stop:
         self.longitude = longitude
         # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
         # data init 不能用 [[]] * 18，因為這樣會讓所有 entries 共用同一個 list（shallow copy）
-        self.stopped_bus = pd.DataFrame(
-            data={"data": [[] for _ in range(len(schedule_index))]},
-            index=schedule_index,
-        )
+        self.stopped_bus = {
+            (bus_type, bus_day, bus_direction): []
+            for bus_type in BUS_TYPE
+            for bus_day in BUS_DAY
+            for bus_direction in BUS_DIRECTION
+        }
 
 
 M1 = Stop("北校門口", "North Main Gate", "24.79589", "120.99633")
@@ -103,6 +104,7 @@ S1 = Stop(
     "120.965382976675",
 )
 stops = {"M1": M1, "M2": M2, "M3": M3, "M4": M4, "M5": M5, "M6": M6, "M7": M7, "S1": S1}
+stop_name_mapping = {stop.name: stop for stop in stops.values()}
 
 # 清大路網圖 (單位：分鐘)
 #                        M4
@@ -188,6 +190,13 @@ class Buses:
         data = data.replace("route", '"route"', 1)
         data = data.replace("routeEN", '"routeEN"')
         data = json.loads(data)
+
+        # 使用 BeautifulSoup 移除 route 和 routeEN 中的 span
+        # 原始: <span style=\"color: #F44336;\">(紅線)</span> 台積館 → <span style=\"color: #F44336;\">南門停車場</span>...
+        for key in ["route", "routeEN"]:
+            if key in data and ("<span" in data[key] or "</span>" in data[key]):
+                soup = BeautifulSoup(data[key], "html.parser")
+                data[key] = soup.get_text(separator=" ")
 
         return [data]  # turn to list to store in DataFrame
 
@@ -310,15 +319,12 @@ class Buses:
         self._start_from_gen_2_bus_info = []
 
     def _add_on_time(self, start_time: str, time_delta: int) -> str:
-        st = datetime.datetime.strptime(start_time, "%H:%M")
-        st = st + datetime.timedelta(minutes=time_delta)
-        return str(st.strftime("%H:%M"))
+        st = datetime.strptime(start_time, "%H:%M") + timedelta(minutes=time_delta)
+        return st.strftime("%H:%M")
 
     # 用字串尋找對應的 Stop 物件
     def _find_stop_from_str(self, stop_str: str) -> Stop:
-        for stop in stops.values():
-            if stop.name == stop_str:
-                return stop
+        return stop_name_mapping.get(stop_str)
 
     def _route_selector(
         self, dep_stop: str, line: str, from_gen_2: bool = False
@@ -402,17 +408,17 @@ class Buses:
 
         return res
 
-    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 24))
+    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 12))
     def gen_bus_detailed_schedule_and_update_stops_data(self):
         """
         若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
         """
         self._reset_stop_data()
+        self._update_data()
 
         for scope, day, direction in product(
             BUS_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
         ):
-            self._update_data()
             self.detailed_schedule_data.loc[(scope, day, direction), "data"] = (
                 self._gen_detailed_bus_schedule(
                     self.raw_schedule_data.loc[(scope, day, direction), "data"],
