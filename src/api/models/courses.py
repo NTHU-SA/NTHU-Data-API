@@ -193,7 +193,7 @@ class Processor:
                 course_data_dict_list = json.load(f)
         else:
             # 使用 requests 模組取得網頁資料
-            course_data_resp, using_cache = cached_requests.get(
+            course_data_resp, _using_cache = cached_requests.get(
                 self.NTHU_COURSE_DATA_URL, update=True, auto_headers=True
             )
             course_data_dict_list = json.loads(course_data_resp)
