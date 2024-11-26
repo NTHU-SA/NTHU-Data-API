@@ -44,7 +44,7 @@ def get_announcements(data_type: DataType = DataType.ALL) -> list:
     # 課程/證照/考試: https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01004
     # 宣導資料:       https://goodjob-nthu.conf.asia/sys_news.aspx?nt=01005
     URL_PREFIX = "https://goodjob-nthu.conf.asia/sys_news.aspx?nt="
-    response, using_cache = cached_requests.get(
+    response, _using_cache = cached_requests.get(
         URL_PREFIX + data_type.value, update=True, auto_headers=True
     )
     soup = BeautifulSoup(response, "html.parser")
