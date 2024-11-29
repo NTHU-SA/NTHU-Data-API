@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: "*"
       - run: pip install smokeshow
-      - uses: dawidd6/action-download-artifact@v6
+      - uses: dawidd6/action-download-artifact@v7
         with:
           workflow: tests.yml
           commit: ${{ github.event.workflow_run.head_sha }}
