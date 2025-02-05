@@ -53,7 +53,9 @@ def get_announcement(url: str, maxpage: int = 1) -> list:
     )
     data = []
     for url in page_list:
-        response, _using_cache = cached_requests.get(url, update=True, auto_headers=True)
+        response, _using_cache = cached_requests.get(
+            url, update=True, auto_headers=True
+        )
         parsed_url = urlparse(url)
         soup = BeautifulSoup(response, "html.parser")
         recruitments = soup.select("#pageptlist .listBS")
