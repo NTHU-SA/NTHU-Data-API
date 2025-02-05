@@ -2,7 +2,7 @@ import json
 import operator
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from cachetools import TTLCache, cached
 
@@ -35,7 +35,7 @@ class CoursesData:
     required_optional_note: str
 
     @classmethod
-    def from_dict(cls, init_data: dict) -> CoursesData:
+    def from_dict(cls, init_data: dict) -> "CoursesData":
         # 為避免依賴 dict 的順序，直接以 key 取值
         return cls(
             id=init_data.get("id", ""),
@@ -167,6 +167,12 @@ class Conditions:
 # Processor - 課程資料處理器
 # =============================================================================
 class Processor:
+    """
+    課程資料處理
+    https://www.ccxp.nthu.edu.tw/ccxp/INQUIRE/JH/OPENDATA/open_course_data.json
+    資料來源：https://api-json.nthusa.tw/courses/lastest.json
+    """
+
     NTHU_COURSE_DATA_URL = "https://api-json.nthusa.tw/courses/lastest.json"
 
     def __init__(self, json_path: Optional[str] = None) -> None:
