@@ -1,223 +1,206 @@
 import json
 import operator
 import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Union
 
 from cachetools import TTLCache, cached
 
 from src.utils import cached_requests
 
 
+# =============================================================================
+# 課程資料類別
+# =============================================================================
+@dataclass
 class CoursesData:
-    """課程資料的資料類別。
+    id: str
+    chinese_title: str
+    english_title: str
+    credit: str
+    size_limit: str
+    freshman_reservation: str
+    object: str
+    ge_type: str
+    language: str
+    note: str
+    suspend: str
+    class_room_and_time: str
+    teacher: str
+    prerequisite: str
+    limit_note: str
+    expertise: str
+    program: str
+    no_extra_selection: str
+    required_optional_note: str
 
-    Attributes:
-        id (str): 科號。
-        chinese_title (str): 課程中文名稱。
-        english_title (str): 課程英文名稱。
-        credit (str): 學分數。
-        size_limit (str): 人限：若為空字串表示無人數限制。
-        freshman_reservation (str): 新生保留人數：若為0表示無新生保留人數。
-        object (str): 通識對象：[代碼說明(課務組)](https://curricul.site.nthu.edu.tw/p/404-1208-11133.php)。
-        ge_type (str): 通識類別。
-        language (str): 授課語言："中"、"英"。
-        note (str): 備註。
-        suspend (str): 停開註記："停開"或空字串。
-        class_room_and_time (str):教室與上課時間：一間教室對應一個上課時間，中間以tab分隔；多個上課教室以new line字元分開。
-        teacher (str): 授課教師：多位教師授課以new line字元分開；教師中英文姓名以tab分開。
-        prerequisite (str): 擋修說明：會有html entities。
-        limit_note (str): 課程限制說明。
-        expertise (str): 第一二專長對應：對應多個專長用tab字元分隔。
-        program (str): 學分學程對應：用半形/分隔。
-        no_extra_selection (str): 不可加簽說明。
-        required_optional_note (str): 必選修說明：多個必選修班級用tab字元分隔。
-    """
-
-    def __init__(self, init_data: dict) -> None:
-        keys = [
-            "id",
-            "chinese_title",
-            "english_title",
-            "credit",
-            "size_limit",
-            "freshman_reservation",
-            "object",
-            "ge_type",
-            "language",
-            "note",
-            "suspend",
-            "class_room_and_time",
-            "teacher",
-            "prerequisite",
-            "limit_note",
-            "expertise",
-            "program",
-            "no_extra_selection",
-            "required_optional_note",
-        ]
-
-        init_data_values = list(init_data.values())
-
-        for i, key in enumerate(keys):
-            setattr(self, key, init_data_values[i])
+    @classmethod
+    def from_dict(cls, init_data: dict) -> CoursesData:
+        # 為避免依賴 dict 的順序，直接以 key 取值
+        return cls(
+            id=init_data.get("id", ""),
+            chinese_title=init_data.get("chinese_title", ""),
+            english_title=init_data.get("english_title", ""),
+            credit=init_data.get("credit", ""),
+            size_limit=init_data.get("size_limit", ""),
+            freshman_reservation=init_data.get("freshman_reservation", ""),
+            object=init_data.get("object", ""),
+            ge_type=init_data.get("ge_type", ""),
+            language=init_data.get("language", ""),
+            note=init_data.get("note", ""),
+            suspend=init_data.get("suspend", ""),
+            class_room_and_time=init_data.get("class_room_and_time", ""),
+            teacher=init_data.get("teacher", ""),
+            prerequisite=init_data.get("prerequisite", ""),
+            limit_note=init_data.get("limit_note", ""),
+            expertise=init_data.get("expertise", ""),
+            program=init_data.get("program", ""),
+            no_extra_selection=init_data.get("no_extra_selection", ""),
+            required_optional_note=init_data.get("required_optional_note", ""),
+        )
 
     def __repr__(self) -> str:
-        return str(vars(self))
+        return str(self.__dict__)
 
 
+# =============================================================================
+# 條件判斷
+# =============================================================================
+@dataclass
 class Condition:
-    """利用資訊確認 query 是否成功的最小單位。
+    row_field: str
+    matcher: Union[str, re.Pattern]
+    regex_match: bool = False
 
-    比對課程資料的欄位，確認是否滿足設定的配對（match）條件，可使用全等比對或正則表達式。
-
-    Attributes:
-        row_field (str): 用以指定要配對的欄位。
-        matcher (str): 判斷式。
-        regex_match (bool): 當 ``True`` 時將 matcher 視為正則表達式，反之視為普通字串並使用全等比對。
-    """
-
-    def __init__(self, row_field: str, matcher: str, regex_match: bool) -> None:
-        self.row_field = row_field.lower()
-        self.matcher = matcher
-        self.regex_match = regex_match
+    def __post_init__(self):
+        # 統一使用小寫的欄位名稱以方便比對
+        self.row_field = self.row_field.lower()
 
     def check(self, course: CoursesData) -> bool:
-        """確認是否滿足判斷式。"""
-
-        course_data_dict = vars(course)
-        field_data = course_data_dict[self.row_field]
-
-        if self.regex_match is True:
-            match_res = re.search(self.matcher, field_data)
-            return False if match_res is None else True
+        field_data = getattr(course, self.row_field, "")
+        if self.regex_match:
+            return re.search(self.matcher, field_data) is not None
         else:
             return field_data == self.matcher
 
 
+# 複合條件的類型（支援 Condition、布林值或巢狀結構）
+ConditionType = Union[Condition, bool, dict, list]
+
+
+@dataclass
 class Conditions:
-    """包裝 Condition 類別，組合成特別的結構以處理條件之 AND 、 OR 邏輯。
-
-    將條件邏輯包裝進 list，模擬不同條件間 AND 、 OR 的邏輯組合。初始化參數與 Condition 相同，是傳遞參數的角色。
-
-    Attributes:
-        condition_stat (list[Condition | str | bool]): 特定結構模擬出的表達式格式。
-        course (Course): 當前套用條件的課程。
-    """
+    # condition_stat 儲存條件樹，預設為單一條件結構，
+    # 若傳入 list_build_target 則直接作為複合條件樹使用
+    condition_stat: Any = field(default=None)
+    course: Optional[CoursesData] = field(default=None, init=False)
 
     def __init__(
         self,
-        row_field: str = None,
-        matcher: str | re.Pattern[str] = None,
+        row_field: Optional[str] = None,
+        matcher: Optional[Union[str, re.Pattern]] = None,
         regex_match: bool = False,
         *,
-        list_build_target: list = None,
-    ) -> None:
+        list_build_target: Optional[List[Any]] = None,
+    ):
         if list_build_target is not None:
-            # 優先使用 list_build_target 建立條件式
             self.condition_stat = list_build_target
-        else:
+        elif row_field is not None and matcher is not None:
+            # 預設結構為單一條件，後面再與其他條件結合
             self.condition_stat = [
                 Condition(row_field, matcher, regex_match),
                 "and",
                 True,
             ]
-
+        else:
+            raise ValueError("必須傳入 row_field 與 matcher，或 list_build_target")
         self.course = None
 
-    def __and__(self, condition2):
-        """Override bitwise ``and`` operator 當成 logical ``and``。"""
+    def __and__(self, other: "Conditions") -> "Conditions":
+        return Conditions(
+            list_build_target=[self.condition_stat, "and", other.condition_stat]
+        )
 
-        self.condition_stat = [self.condition_stat, "and", condition2.condition_stat]
-        return self
+    def __or__(self, other: "Conditions") -> "Conditions":
+        return Conditions(
+            list_build_target=[self.condition_stat, "or", other.condition_stat]
+        )
 
-    def __or__(self, condition2):
-        """Override bitwise ``or`` operator 當成 logical ``or``。"""
-
-        self.condition_stat = [self.condition_stat, "or", condition2.condition_stat]
-        return self
-
-    def _solve_condition_stat(self, data: dict) -> bool:
-        """遞迴函式，拆分成 左手邊、運算子、右手邊，將左右手遞迴解成 ``bool`` 之後，再算出這一層的結果。"""
-        # 這部分遞迴實作成這樣，是因為 pydantic 幫忙確認過條件式每一層的結構，
-        # 都是合乎 [Condition, op, Condition] 的，不會有其他不合法的結構，所以可以這樣寫
+    def _solve_condition_stat(self, data: Any) -> bool:
+        """
+        遞迴拆解條件樹，結構固定為 [lhs, op, rhs]，其中 lhs 與 rhs 可能為 Condition、布林值或巢狀結構。
+        """
+        if not isinstance(data, list):
+            # 若 data 不是 list 則直接檢查條件
+            return self._check_condition(data)
         lhs, op, rhs = data
-
-        lhs = self._check_condition(lhs)
-        rhs = self._check_condition(rhs)
-
+        lhs_value = self._check_condition(lhs)
+        rhs_value = self._check_condition(rhs)
         match op:
             case "and":
-                return lhs and rhs
+                return lhs_value and rhs_value
             case "or":
-                return lhs or rhs
+                return lhs_value or rhs_value
             case _:
                 raise ValueError(f"Unknown operator: {op}")
 
-    def _check_condition(self, item):
+    def _check_condition(self, item: ConditionType) -> bool:
         if isinstance(item, dict):
+            # 若為 dict，視為傳入 Condition 的關鍵字參數
             return Condition(**item).check(self.course)
         elif isinstance(item, list):
-            # nested Condition，可以再遞迴拆解
             return self._solve_condition_stat(item)
         elif isinstance(item, Condition):
             return item.check(self.course)
-        else:
+        elif isinstance(item, bool):
             return item
+        else:
+            raise TypeError(f"無法處理的條件項目：{item}")
 
     def accept(self, course: CoursesData) -> bool:
-        """包裝遞迴函式供外部使用，回傳以該課程計算多個條件運算後的結果。"""
-
+        """根據 condition_stat 判斷該課程是否滿足所有條件"""
         self.course = course
         return self._solve_condition_stat(self.condition_stat)
 
 
+# =============================================================================
+# Processor - 課程資料處理器
+# =============================================================================
 class Processor:
-    """可以添加 query 條件的課程資料。
+    NTHU_COURSE_DATA_URL = "https://api-json.nthusa.tw/courses/lastest.json"
 
-    Attributes:
-        course_data  (list[Course]): 轉換為 Course 類別的課程資料。
-    """
+    def __init__(self, json_path: Optional[str] = None) -> None:
+        self.course_data: List[CoursesData] = self._get_course_data(json_path)
 
-    NTHU_COURSE_DATA_URL = (
-        "https://www.ccxp.nthu.edu.tw/ccxp/INQUIRE/JH/OPENDATA/open_course_data.json"
-    )
-
-    def __init__(self, json_path=None) -> None:
-        self.course_data = self._get_course_data(json_path)
-
-    @cached(TTLCache(maxsize=1, ttl=60 * 60 * 24 * 7))
-    def _get_course_data(self, json_path=None) -> list[CoursesData]:
-        """TODO: error handler."""
-        if json_path is not None:
-            # 使用 json 模組讀取檔案
+    @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
+    def _get_course_data(self, json_path: Optional[str] = None) -> List[CoursesData]:
+        """
+        取得課程資料，若提供 json_path 則由檔案讀取，
+        否則利用 cached_requests 從網路上取得資料。
+        """
+        if json_path:
             with open(json_path, "r", encoding="utf-8") as f:
                 course_data_dict_list = json.load(f)
         else:
-            # 使用 requests 模組取得網頁資料
-            course_data_resp, _using_cache = cached_requests.get(
+            course_data_resp, _ = cached_requests.get(
                 self.NTHU_COURSE_DATA_URL, update=True, auto_headers=True
             )
             course_data_dict_list = json.loads(course_data_resp)
-        return list(map(CoursesData, course_data_dict_list))
+        return [CoursesData.from_dict(data) for data in course_data_dict_list]
 
-    def update(self, json_path=None):
+    def update(self, json_path: Optional[str] = None) -> None:
         self.course_data = self._get_course_data(json_path)
 
-    def list_selected_fields(self, field) -> list:
-        """列出所有課程的某個欄位。
-        Args:
-            field (str): 欲列出的欄位。
-        Returns:
-            list: 所有課程的某個欄位。
-        """
-        fields_list = [
+    def list_selected_fields(self, field: str) -> List[str]:
+        """回傳所有課程中指定欄位的非空字串集合"""
+        fields_set = {
             getattr(course, field).strip()
             for course in self.course_data
             if getattr(course, field).strip()
-        ]
-        fields_list = list(set(fields_list))
-        return fields_list
+        }
+        return list(fields_set)
 
-    def list_credit(self, credit: float, op: str = "") -> list:
+    def list_credit(self, credit: float, op: str = "") -> List[CoursesData]:
         ops = {
             "gt": operator.gt,
             "lt": operator.lt,
@@ -226,74 +209,68 @@ class Processor:
             "eq": operator.eq,
             "": operator.eq,
         }
-
-        res = [
+        cmp_op = ops.get(op, operator.eq)
+        return [
             course
             for course in self.course_data
-            if ops[op](float(course.credit), credit)
+            if cmp_op(float(course.credit), credit)
         ]
 
-        return res
-
-    def query(self, conditions: Conditions) -> list[CoursesData]:
-        """搜尋所有符合條件的課程。
-
-        Args:
-            conditions (Conditions): 欲套用的條件式。
-
-        Returns:
-            list[Course]: 所有符合條件的課程。
-        """
-
-        res = []
-
-        for course in self.course_data:
-            if conditions.accept(course):
-                res.append(course)
-
-        return res
+    def query(self, conditions: Conditions) -> List[CoursesData]:
+        """搜尋所有符合條件的課程，傳入的 conditions 為複合條件樹"""
+        return [course for course in self.course_data if conditions.accept(course)]
 
 
+# =============================================================================
+# 主程式測試區
+# =============================================================================
 if __name__ == "__main__":
     from loguru import logger
 
-    course_data = Processor(json_path="data/courses/11210.json")
+    processor = Processor()
 
-    # 中文課名為"文化人類學專題" 且 課號為"11210ANTH651000"
+    # 條件範例 1：中文課名為 "文化人類學專題" 且課號為 "11210ANTH651000"
     condition1 = Conditions("CHINESE_TITLE", "文化人類學專題") & Conditions(
         "ID", "11210ANTH651000"
     )
-    logger.info("中文課名 與 ID (有一堂課): ", len(course_data.query(condition1)))
-    logger.info(course_data.query(condition1))
+    result1 = processor.query(condition1)
+    logger.info("中文課名 與 ID (有一堂課): {}", len(result1))
+    logger.info(result1)
 
-    # 中文課名為"化人類學專題" 或 課號為"11210ANTH651000"
+    # 條件範例 2：中文課名為 "化人類學專題" 或課號為 "11210ANTH651000"
     condition2 = Conditions("CHINESE_TITLE", "化人類學專題") | Conditions(
         "ID", "11210ANTH651000"
     )
-    logger.info("中文課名 或 ID (有一堂課): ", len(course_data.query(condition2)))
-    logger.info(course_data.query(condition2))
+    result2 = processor.query(condition2)
+    logger.info("中文課名 或 ID (有一堂課): {}", len(result2))
+    logger.info(result2)
 
-    # 中文課名包含"產業"
-    condition3 = Conditions("CHINESE_TITLE", "產業", True)
-    logger.info(course_data.query(condition3)[:5])
+    # 條件範例 3：中文課名包含 "產業"
+    condition3 = Conditions("CHINESE_TITLE", "產業", regex_match=True)
+    result3 = processor.query(condition3)
+    logger.info("中文課名包含 '產業' 的課程 (取前5筆): {}", result3[:5])
 
-    # 中文課名包含"產業" 且 課號包含 "GE"，即通識課程
+    # 條件範例 4：中文課名包含 "產業" 且 CREDIT 為 "2" 且課號包含 "GE"（通識課程）
     condition4 = (
-        Conditions("CHINESE_TITLE", "產業", True)
+        Conditions("CHINESE_TITLE", "產業", regex_match=True)
         & Conditions("CREDIT", "2")
-        & Conditions("ID", "GE", True)
+        & Conditions("ID", "GE", regex_match=True)
     )
-    logger.info(course_data.query(condition4)[:5])
+    result4 = processor.query(condition4)
+    logger.info("符合複合條件的課程 (取前5筆): {}", result4[:5])
 
-    logger.info(f"總開課數: {len(course_data.course_data)}")
-    # 中文授課 或 英文授課
+    logger.info("總開課數: {}", len(processor.course_data))
+    # 條件範例 5：中文授課 或 英文授課
     condition_ce = Conditions("LANGUAGE", "中") | Conditions("LANGUAGE", "英")
-    logger.info(
-        f"中文授課 或 英文授課 開課數量: {len(course_data.query(condition_ce))}"
-    )
-    # 中文授課
+    result_ce = processor.query(condition_ce)
+    logger.info("中文授課 或 英文授課 開課數量: {}", len(result_ce))
+
+    # 條件範例 6：中文授課
     condition_c = Conditions("LANGUAGE", "中")
-    logger.info(f"中文授課 開課數量: {len(course_data.query(condition_c))}")
-    # 英文授課
+    result_c = processor.query(condition_c)
+    logger.info("中文授課 開課數量: {}", len(result_c))
+
+    # 條件範例 7：英文授課
     condition_e = Conditions("LANGUAGE", "英")
-    logger.info(f"英文授課 開課數量: {len(course_data.query(condition_e))}")
+    result_e = processor.query(condition_e)
+    logger.info("英文授課 開課數量: {}", len(result_e))
