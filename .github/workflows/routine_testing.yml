@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "*"
+      - name: Set pythonLocation environment variable
+        run: echo "pythonLocation=$(python -c 'import sys; print(sys.prefix)')" >> $GITHUB_ENV
       - uses: actions/cache@v4
         id: cache
         with:
