@@ -34,6 +34,8 @@ def get_rss_data(rss_type: str) -> list:
     xml_string = xml_string.replace("<br />", "")
     rss_dict = xmltodict.parse(xml_string)
     rss_data = rss_dict["rss"]["channel"]["item"]
+    if not isinstance(rss_data, list):
+        rss_data = [rss_data]
     return rss_data
 
 
