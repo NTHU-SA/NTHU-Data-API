@@ -1,11 +1,10 @@
 import re
 from datetime import datetime
 
+import requests
 from bs4 import BeautifulSoup
 from cachetools import TTLCache, cached
 from fastapi import HTTPException
-
-from src.utils import cached_requests
 
 URL_PREFIX = "https://newsletter.cc.nthu.edu.tw"
 
@@ -17,7 +16,7 @@ def get_all_newsletters_list() -> list:
     """
     # 來源：　https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/home-zh-tw/lis
     url = URL_PREFIX + "/nthu-list/search.html"
-    response, _using_cache = cached_requests.get(url, update=True, auto_headers=True)
+    response = requests.get(url)
     staus_code = response.status_code
     if staus_code != 200:
         raise HTTPException(staus_code, f"Request error: {staus_code}")
@@ -44,9 +43,7 @@ def get_selected_newsletter_list(url: str) -> list:
     取得 newsletter 的內容。
     """
     if url.startswith(URL_PREFIX):
-        response, _using_cache = cached_requests.get(
-            url, update=True, auto_headers=True
-        )
+        response = requests.get(url)
     else:
         raise HTTPException(400, "Invalid URL")
     staus_code = response.status_code
