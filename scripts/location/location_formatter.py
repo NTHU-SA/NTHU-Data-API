@@ -18,9 +18,9 @@ def en_name(latitude, longitude):
     return "N/A"
 
 
-with open("./original_data/zh.json", "r", encoding="utf-8") as f:
+with open("./data/zh.json", "r", encoding="utf-8") as f:
     zh_location = json.load(f)
-with open("./original_data/en.json", "r", encoding="utf-8") as f:
+with open("./data/en.json", "r", encoding="utf-8") as f:
     en_location = json.load(f)
 
 res = []
