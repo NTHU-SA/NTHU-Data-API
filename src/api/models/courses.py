@@ -4,9 +4,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
+import requests
 from cachetools import TTLCache, cached
-
-from src.utils import cached_requests
 
 
 # =============================================================================
@@ -34,30 +33,64 @@ class CoursesData:
     no_extra_selection: str
     required_optional_note: str
 
+    # 定義各個欄位可能出現的關鍵字（同義字）
+    FIELD_MAPPING = {
+        "id": ["科號", "ID", "id"],
+        "chinese_title": ["課程中文名稱", "CHINESE_TITLE", "chinese_title"],
+        "english_title": ["課程英文名稱", "ENGLISH_TITLE", "english_title"],
+        "credit": ["學分數", "CREDIT", "credit"],
+        "size_limit": ["人限", "SIZE_LIMIT", "size_limit"],
+        "freshman_reservation": [
+            "新生保留人數",
+            "FRESHMAN_RESERVATION",
+            "freshman_reservation",
+        ],
+        "object": ["通識對象", "OBJECT", "object"],
+        "ge_type": ["通識類別", "GE_TYPE", "ge_type"],
+        "language": ["授課語言", "LANGUAGE", "language"],
+        "note": ["備註", "NOTE", "note"],
+        "suspend": ["停開註記", "SUSPEND", "suspend"],
+        "class_room_and_time": [
+            "教室與上課時間",
+            "CLASS_ROOM_AND_TIME",
+            "class_room_and_time",
+        ],
+        "teacher": ["授課教師", "TEACHER", "teacher"],
+        "prerequisite": ["擋修說明", "PREREQUISITE", "prerequisite"],
+        "limit_note": ["課程限制說明", "LIMIT_NOTE", "limit_note"],
+        "expertise": ["第一二專長對應", "EXPERTISE", "expertise"],
+        "program": ["學分學程對應", "PROGRAM", "program"],
+        "no_extra_selection": [
+            "不可加簽說明",
+            "NO_EXTRA_SELECTION",
+            "no_extra_selection",
+        ],
+        "required_optional_note": [
+            "必選修說明",
+            "REQUIRED_OPTIONAL_NOTE",
+            "required_optional_note",
+        ],
+    }
+
     @classmethod
     def from_dict(cls, init_data: dict) -> "CoursesData":
-        # 為避免依賴 dict 的順序，直接以 key 取值
-        return cls(
-            id=init_data.get("id", ""),
-            chinese_title=init_data.get("chinese_title", ""),
-            english_title=init_data.get("english_title", ""),
-            credit=init_data.get("credit", ""),
-            size_limit=init_data.get("size_limit", ""),
-            freshman_reservation=init_data.get("freshman_reservation", ""),
-            object=init_data.get("object", ""),
-            ge_type=init_data.get("ge_type", ""),
-            language=init_data.get("language", ""),
-            note=init_data.get("note", ""),
-            suspend=init_data.get("suspend", ""),
-            class_room_and_time=init_data.get("class_room_and_time", ""),
-            teacher=init_data.get("teacher", ""),
-            prerequisite=init_data.get("prerequisite", ""),
-            limit_note=init_data.get("limit_note", ""),
-            expertise=init_data.get("expertise", ""),
-            program=init_data.get("program", ""),
-            no_extra_selection=init_data.get("no_extra_selection", ""),
-            required_optional_note=init_data.get("required_optional_note", ""),
-        )
+        """
+        根據 FIELD_MAPPING 從原始資料中找出對應的欄位資料，
+        若找不到則給空字串。
+        """
+        # 準備一個新的 dict，存放轉換後的資料
+        data = {}
+        for canonical_field, keywords in cls.FIELD_MAPPING.items():
+            # 尋找 init_data 中符合任一關鍵字的欄位
+            found = False
+            for key in keywords:
+                if key in init_data:
+                    data[canonical_field] = init_data[key]
+                    found = True
+                    break
+            if not found:
+                data[canonical_field] = ""
+        return cls(**data)
 
     def __repr__(self) -> str:
         return str(self.__dict__)
@@ -106,7 +139,7 @@ class Conditions:
         if list_build_target is not None:
             self.condition_stat = list_build_target
         elif row_field is not None and matcher is not None:
-            # 預設結構為單一條件，後面再與其他條件結合
+            # 使用小寫的 canonical 欄位名稱
             self.condition_stat = [
                 Condition(row_field, matcher, regex_match),
                 "and",
@@ -128,7 +161,8 @@ class Conditions:
 
     def _solve_condition_stat(self, data: Any) -> bool:
         """
-        遞迴拆解條件樹，結構固定為 [lhs, op, rhs]，其中 lhs 與 rhs 可能為 Condition、布林值或巢狀結構。
+        遞迴拆解條件樹，結構固定為 [lhs, op, rhs]，
+        其中 lhs 與 rhs 可能為 Condition、布林值或巢狀結構。
         """
         if not isinstance(data, list):
             # 若 data 不是 list 則直接檢查條件
@@ -136,13 +170,12 @@ class Conditions:
         lhs, op, rhs = data
         lhs_value = self._check_condition(lhs)
         rhs_value = self._check_condition(rhs)
-        match op:
-            case "and":
-                return lhs_value and rhs_value
-            case "or":
-                return lhs_value or rhs_value
-            case _:
-                raise ValueError(f"Unknown operator: {op}")
+        if op == "and":
+            return lhs_value and rhs_value
+        elif op == "or":
+            return lhs_value or rhs_value
+        else:
+            raise ValueError(f"Unknown operator: {op}")
 
     def _check_condition(self, item: ConditionType) -> bool:
         if isinstance(item, dict):
@@ -169,29 +202,25 @@ class Conditions:
 class Processor:
     """
     課程資料處理
-    https://www.ccxp.nthu.edu.tw/ccxp/INQUIRE/JH/OPENDATA/open_course_data.json
     資料來源：https://api-json.nthusa.tw/courses/lastest.json
     """
 
-    NTHU_COURSE_DATA_URL = "https://api-json.nthusa.tw/courses/lastest.json"
-
     def __init__(self, json_path: Optional[str] = None) -> None:
+        self.NTHU_COURSE_DATA_URL = "https://api-json.nthusa.tw/courses/lastest.json"
         self.course_data: List[CoursesData] = self._get_course_data(json_path)
 
     @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
     def _get_course_data(self, json_path: Optional[str] = None) -> List[CoursesData]:
         """
         取得課程資料，若提供 json_path 則由檔案讀取，
-        否則利用 cached_requests 從網路上取得資料。
+        否則從遠端 URL 取得資料。
         """
         if json_path:
             with open(json_path, "r", encoding="utf-8") as f:
                 course_data_dict_list = json.load(f)
         else:
-            course_data_resp, _ = cached_requests.get(
-                self.NTHU_COURSE_DATA_URL, update=True, auto_headers=True
-            )
-            course_data_dict_list = json.loads(course_data_resp)
+            course_data_resp = requests.get(self.NTHU_COURSE_DATA_URL)
+            course_data_dict_list = course_data_resp.json()
         return [CoursesData.from_dict(data) for data in course_data_dict_list]
 
     def update(self, json_path: Optional[str] = None) -> None:
@@ -235,48 +264,75 @@ if __name__ == "__main__":
 
     processor = Processor()
 
-    # 條件範例 1：中文課名為 "文化人類學專題" 且課號為 "11210ANTH651000"
-    condition1 = Conditions("CHINESE_TITLE", "文化人類學專題") & Conditions(
-        "ID", "11210ANTH651000"
+    # 範例資料（原始資料中使用中文欄位名稱）
+    sample_data = {
+        "科號": "11320AES 370100",
+        "課程中文名稱": "環境科學與工程",
+        "課程英文名稱": "Environmental Science and Engineering",
+        "學分數": "3",
+        "人限": "",
+        "新生保留人數": "0",
+        "通識對象": " ",
+        "通識類別": "",
+        "授課語言": "中",
+        "備註": " ",
+        "停開註記": "",
+        "教室與上課時間": "BMES醫環501\tR7R8R9\n",
+        "授課教師": "吳劍侯\tWU, CHIEN-HOU\n",
+        "擋修說明": "",
+        "課程限制說明": "",
+        "第一二專長對應": "環境科技學程(第二專長)",
+        "學分學程對應": "(跨領域)永續發展與環境管理學分學程",
+        "不可加簽說明": "",
+        "必選修說明": "分環所113M  選修\t原科院學士班111B  選修\t",
+    }
+    # 可用 sample_data 測試 from_dict：
+    course_sample = CoursesData.from_dict(sample_data)
+    logger.info("轉換後的課程資料: {}", course_sample)
+
+    # 以下為原有的查詢條件範例
+    # 範例 1：中文課名為 "文化人類學專題" 且課號為 "11210ANTH651000"
+    condition1 = Conditions("chinese_title", "文化人類學專題") & Conditions(
+        "id", "11210ANTH651000"
     )
     result1 = processor.query(condition1)
     logger.info("中文課名 與 ID (有一堂課): {}", len(result1))
     logger.info(result1)
 
-    # 條件範例 2：中文課名為 "化人類學專題" 或課號為 "11210ANTH651000"
-    condition2 = Conditions("CHINESE_TITLE", "化人類學專題") | Conditions(
-        "ID", "11210ANTH651000"
+    # 範例 2：中文課名為 "化人類學專題" 或課號為 "11210ANTH651000"
+    condition2 = Conditions("chinese_title", "化人類學專題") | Conditions(
+        "id", "11210ANTH651000"
     )
     result2 = processor.query(condition2)
     logger.info("中文課名 或 ID (有一堂課): {}", len(result2))
     logger.info(result2)
 
-    # 條件範例 3：中文課名包含 "產業"
-    condition3 = Conditions("CHINESE_TITLE", "產業", regex_match=True)
+    # 範例 3：中文課名包含 "產業"
+    condition3 = Conditions("chinese_title", "產業", regex_match=True)
     result3 = processor.query(condition3)
     logger.info("中文課名包含 '產業' 的課程 (取前5筆): {}", result3[:5])
 
-    # 條件範例 4：中文課名包含 "產業" 且 CREDIT 為 "2" 且課號包含 "GE"（通識課程）
+    # 範例 4：中文課名包含 "產業" 且 credit 為 "2" 且課號包含 "GE"（通識課程）
     condition4 = (
-        Conditions("CHINESE_TITLE", "產業", regex_match=True)
-        & Conditions("CREDIT", "2")
-        & Conditions("ID", "GE", regex_match=True)
+        Conditions("chinese_title", "產業", regex_match=True)
+        & Conditions("credit", "2")
+        & Conditions("id", "GE", regex_match=True)
     )
     result4 = processor.query(condition4)
     logger.info("符合複合條件的課程 (取前5筆): {}", result4[:5])
 
     logger.info("總開課數: {}", len(processor.course_data))
-    # 條件範例 5：中文授課 或 英文授課
-    condition_ce = Conditions("LANGUAGE", "中") | Conditions("LANGUAGE", "英")
+    # 範例 5：中文授課 或 英文授課
+    condition_ce = Conditions("language", "中") | Conditions("language", "英")
     result_ce = processor.query(condition_ce)
     logger.info("中文授課 或 英文授課 開課數量: {}", len(result_ce))
 
-    # 條件範例 6：中文授課
-    condition_c = Conditions("LANGUAGE", "中")
+    # 範例 6：中文授課
+    condition_c = Conditions("language", "中")
     result_c = processor.query(condition_c)
     logger.info("中文授課 開課數量: {}", len(result_c))
 
-    # 條件範例 7：英文授課
-    condition_e = Conditions("LANGUAGE", "英")
+    # 範例 7：英文授課
+    condition_e = Conditions("language", "英")
     result_e = processor.query(condition_e)
     logger.info("英文授課 開課數量: {}", len(result_e))

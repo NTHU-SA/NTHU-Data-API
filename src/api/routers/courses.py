@@ -4,7 +4,7 @@ from src.api import constant, schemas
 from src.api.models.courses import Conditions, Processor
 
 router = APIRouter()
-courses = Processor(json_path="data/courses/11210.json")
+courses = Processor()
 
 
 @router.get("/", response_model=list[schemas.courses.CourseData])
