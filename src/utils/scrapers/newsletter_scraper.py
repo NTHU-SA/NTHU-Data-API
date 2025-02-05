@@ -44,7 +44,9 @@ def get_selected_newsletter_list(url: str) -> list:
     取得 newsletter 的內容。
     """
     if url.startswith(URL_PREFIX):
-        response, _using_cache = cached_requests.get(url, update=True, auto_headers=True)
+        response, _using_cache = cached_requests.get(
+            url, update=True, auto_headers=True
+        )
     else:
         raise HTTPException(400, "Invalid URL")
     staus_code = response.status_code
