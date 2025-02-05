@@ -1,17 +1,12 @@
-import json
-import re
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from functools import reduce
 from itertools import product
 from typing import Literal
 
 import pandas as pd
-from bs4 import BeautifulSoup
-from cachetools import TTLCache, cached
+import requests
 
 from src.api import schemas
-from src.utils import cached_requests
 
 # 務必保持之後的程式碼中，BUS_TYPE、BUS_DAY、BUS_DIRECTION 的順序一致，因為 BusType、BusDay 具有 all 這個選項
 # 之後合併要先處理完 BusDirection 的部份才會合併到 all
@@ -78,14 +73,10 @@ class Stop:
         self.name_en = name_en
         self.latitude = latitude
         self.longitude = longitude
-        # self.stopped_bus 共有 18 個 entries 需要被初始賦值為空 list，避免後續對 nan 做 append() 導致錯誤
-        # data init 不能用 [[]] * 18，因為這樣會讓所有 entries 共用同一個 list（shallow copy）
-        self.stopped_bus = {
-            (bus_type, bus_day, bus_direction): []
-            for bus_type in BUS_TYPE
-            for bus_day in BUS_DAY
-            for bus_direction in BUS_DIRECTION
-        }
+        self.stopped_bus = pd.DataFrame(index=schedule_index, columns=["data"])
+        # Initialize 'data' column with empty lists
+        for idx in self.stopped_bus.index:
+            self.stopped_bus.loc[idx, "data"] = []
 
 
 M1 = Stop("北校門口", "North Main Gate", "24.79589", "120.99633")
@@ -158,11 +149,11 @@ nanda_S1_M1 = Route(
 
 class Buses:
     # 校本部公車
-    # https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw
+    # https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw (不再使用)
     # 南大區間車
-    # https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw
+    # https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw (不再使用)
     def __init__(self) -> None:
-        self._res_text = ""
+        self._res_json = {}  # 儲存從 JSON 獲取的資料
         self._start_from_gen_2_bus_info = []
 
         self._info_index = pd.MultiIndex.from_product(
@@ -173,54 +164,6 @@ class Buses:
             index=schedule_index, columns=["data"]
         )
         self.info_data = pd.DataFrame(index=self._info_index, columns=["data"])
-
-    def _parse_campus_info(self, variable_string: str):
-        regex_pattern = r"const " + variable_string + r" = (\{.*?\})"
-        data = re.search(regex_pattern, self._res_text, re.S)
-        if data is not None:
-            data = data.group(1)
-        else:
-            return None
-        data = data.replace("'", "|")
-        data = data.replace('"', '\\"')
-        data = data.replace("|", '"')
-        data = data.replace("\n", "")
-        data = data.replace("direction", '"direction"')
-        data = data.replace("duration", '"duration"')
-        data = data.replace("route", '"route"', 1)
-        data = data.replace("routeEN", '"routeEN"')
-        data = json.loads(data)
-
-        # 使用 BeautifulSoup 移除 route 和 routeEN 中的 span
-        # 原始: <span style=\"color: #F44336;\">(紅線)</span> 台積館 → <span style=\"color: #F44336;\">南門停車場</span>...
-        for key in ["route", "routeEN"]:
-            if key in data and ("<span" in data[key] or "</span>" in data[key]):
-                soup = BeautifulSoup(data[key], "html.parser")
-                data[key] = soup.get_text(separator=" ")
-
-        return [data]  # turn to list to store in DataFrame
-
-    def _parse_bus_schedule(self, variable_string: str):
-        regex_pattern = r"const " + variable_string + r" = (\[.*?\])"
-        data = re.search(regex_pattern, self._res_text, re.S)
-        if data is not None:
-            data = data.group(1)
-        else:
-            return None
-        data = data.replace("'", '"')
-        data = data.replace("\n", "")
-        data = data.replace("time", '"time"')
-        data = data.replace("description", '"description"')
-        data = data.replace("depStop", '"dep_stop"')
-        data = data.replace("line", '"line"')
-        data = re.sub(r",[ ]+?\]", "]", data)  # remove trailing comma
-        data = json.loads(data)
-
-        data = [i for i in data if i["time"] != ""]  # remove empty time
-        for i in data:
-            i["route"] = "校園公車" if "line" in data[0] else "南大區間車"
-
-        return data
 
     def transform_toward_name(
         self, route: Literal["main", "nanda"], direction: Literal["up", "down"]
@@ -234,33 +177,29 @@ class Buses:
 
         return trans_list[(route, direction)]
 
-    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 24))
     def get_all_data(self):
-        main_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw"
-        nanda_url = "https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw"
-
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            main_text, nanda_text = executor.map(
-                lambda url: cached_requests.get(url, update=True, auto_headers=True)[0],
-                [main_url, nanda_url],
-            )
-        self._res_text = main_text + nanda_text
+        json_url = "https://nthu-data-json.pages.dev/buses.json"
+        try:
+            response = requests.get(json_url)
+            response.raise_for_status()  # 檢查 HTTP 請求是否成功
+            self._res_json = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data from {json_url}: {e}")
+            return
 
         # schedule data
         for scope, day, direction in product(
             BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
         ):
-            self.raw_schedule_data.loc[(scope, day, direction), "data"] = (
-                self._parse_bus_schedule(
-                    f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
-                )
-            )
+            schedule_key = f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
+            schedule_data = self._res_json.get(schedule_key, [])  # 使用 get 方法並提供預設空列表，避免 KeyError
+            self.raw_schedule_data.loc[(scope, day, direction), "data"] = schedule_data
 
         # info data
         for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
-            self.info_data.loc[(scope, direction), "data"] = self._parse_campus_info(
-                f"toward{self.transform_toward_name(scope, direction)}Info"
-            )
+            info_key = f"toward{self.transform_toward_name(scope, direction)}Info"
+            info_data = self._res_json.get(info_key, {})  # 使用 get 方法並提供預設空字典，避免 KeyError
+            self.info_data.loc[(scope, direction), "data"] = [info_data]  # 保持 list 形式
 
         gen_all_field(self.raw_schedule_data, ["time"])
 
@@ -286,7 +225,7 @@ class Buses:
         return main_dataset
 
     def get_nanda_data(self) -> dict:
-        # 輸出 json 檔案
+        # 輸出 json 檔案 
         nanda_dataset = {
             "toward_south_campus_info": self.info_data.loc[("nanda", "up"), "data"][0],
             "weekday_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
@@ -308,10 +247,9 @@ class Buses:
 
     def _reset_stop_data(self):
         for stop in stops.values():
-            stop.stopped_bus = pd.DataFrame(
-                data={"data": [[] for _ in range(len(schedule_index))]},
-                index=schedule_index,
-            )
+            stop.stopped_bus = pd.DataFrame(index=schedule_index, columns=["data"])
+            for idx in stop.stopped_bus.index:
+                stop.stopped_bus.loc[idx, "data"] = []
 
     # 更新資料，並清除 _start_from_gen_2_bus_info
     def _update_data(self):
@@ -364,8 +302,8 @@ class Buses:
             # 校本部公車
             if scope == "main":
                 # 判斷路線
-                dep_stop = bus["dep_stop"]
-                line = bus["line"]
+                dep_stop = bus.get("dep_stop", "")  # 使用 get 方法避免 KeyError
+                line = bus.get("line", "")  # 使用 get 方法避免 KeyError
 
                 # 判斷是否上山時從綜二館出發，將影響下山的終點站
                 # 有 0 的情況是因為資料中有些時間是 8:00 這種格式
@@ -389,26 +327,28 @@ class Buses:
                 elif direction == "down":
                     this_route = nanda_S1_M1
 
-            for index, stop in enumerate(this_route.stops):
-                arrive_time = self._add_on_time(
-                    bus["time"],
-                    this_route.gen_accumulated_time()[index],
-                )
+            if this_route:  # 確保 this_route 不是 None 才繼續
+                for index, stop in enumerate(this_route.stops):
+                    arrive_time = self._add_on_time(
+                        bus["time"],
+                        this_route.gen_accumulated_time()[index],
+                    )
 
-                # 處理各站牌資訊
-                self._find_stop_from_str(stop.name).stopped_bus.loc[
-                    (scope, day, direction), "data"
-                ].append({"bus_info": bus, "arrive_time": arrive_time})
+                    # 處理各站牌資訊
+                    stop_obj = self._find_stop_from_str(stop.name)
+                    if stop_obj:  # 確保 stop_obj 不是 None 才繼續
+                        stop_obj.stopped_bus.loc[
+                            (scope, day, direction), "data"
+                        ].append({"bus_info": bus, "arrive_time": arrive_time})
 
-                temp_bus["stops_time"].append(
-                    {"stop_name": stop.name, "time": arrive_time}
-                )
+                    temp_bus["stops_time"].append(
+                        {"stop_name": stop.name, "time": arrive_time}
+                    )
 
             res.append(temp_bus)
 
         return res
 
-    @cached(TTLCache(maxsize=8, ttl=60 * 60 * 12))
     def gen_bus_detailed_schedule_and_update_stops_data(self):
         """
         若使用這個 function，同時也會呼叫 get_all_data()，因此不需要再另外呼叫 get_all_data()。
@@ -443,5 +383,4 @@ class Buses:
                     "longitude": stop.longitude,
                 }
             )
-
         return res
