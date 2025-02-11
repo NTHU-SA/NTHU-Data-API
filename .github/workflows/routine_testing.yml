@@ -7,43 +7,33 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Set pythonLocation environment variable
-        run: echo "pythonLocation=$(python -c 'import sys; print(sys.prefix)')" >> $GITHUB_ENV
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('requirements-tests.txt') }}-test-v06
-
-      - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          pip install -r requirements.txt
-          pip install -r requirements-tests.txt
-
-      - name: Test
-        run: python -m pytest -n auto tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
-
-      - name: Store coverage files
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: |
-            coverage
-            coverage.xml
+      runs-on: ubuntu-latest
+      steps:
+          - name: Dump GitHub context
+            env:
+                GITHUB_CONTEXT: ${{ toJson(github) }}
+            run: echo "$GITHUB_CONTEXT"
+          - uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+                python-version: "3.11"
+          - uses: actions/cache@v4
+            id: cache
+            with:
+              path: ~/.cache/pip
+              key: ${{ runner.os }}-python-${{ hashFiles('requirements-tests.txt') }}-test-v06
+          - name: Install Dependencies
+            if: steps.cache.outputs.cache-hit != 'true'
+            run: |
+                pip install -r requirements.txt
+                pip install -r requirements-tests.txt
+          - name: Test
+            run: python -m pytest -n auto tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
+          - name: Store coverage files
+            uses: actions/upload-artifact@v4
+            with:
+                name: coverage
+                path: |
+                    coverage
+                    coverage.xml
