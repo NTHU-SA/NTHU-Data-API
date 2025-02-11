@@ -3,6 +3,7 @@ name: Routine Testing
 on:
   schedule:
     - cron: '0 12 * * 1,3,5'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -12,25 +13,33 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "*"
+          python-version: '3.11'
+
       - name: Set pythonLocation environment variable
         run: echo "pythonLocation=$(python -c 'import sys; print(sys.prefix)')" >> $GITHUB_ENV
-      - uses: actions/cache@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
         id: cache
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('requirements-tests.txt') }}-test-v06
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements-tests.txt') }}-test-v06
+
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           pip install -r requirements.txt
           pip install -r requirements-tests.txt
+
       - name: Test
         run: python -m pytest -n auto tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
+
       - name: Store coverage files
         uses: actions/upload-artifact@v4
         with:
