@@ -12,7 +12,7 @@ def get_all_dining_data() -> list[schemas.dining.DiningBuilding]:
     """
     取得所有餐廳資料。
     """
-    return dining.get_dining_data()
+    return dining.dining_data
 
 
 @router.get("/buildings", response_model=list[schemas.dining.DiningBuildingName])
@@ -20,7 +20,7 @@ def get_all_building_names() -> list[schemas.dining.DiningBuildingName]:
     """
     取得所有建築名稱。
     """
-    return dining.get_all_building_names()
+    return dining.all_building_names
 
 
 @router.get("/buildings/{building_name}", response_model=schemas.dining.DiningBuilding)
@@ -40,7 +40,7 @@ def get_all_restaurant_names() -> list[str]:
     """
     取得所有餐廳名稱。
     """
-    return dining.get_all_restaurant_names()
+    return dining.all_restaurant_names
 
 
 @router.get(
@@ -68,7 +68,18 @@ def get_schedule_by_day_of_week(
     取得所有該營業日的餐廳資訊。
     """
     try:
-        return dining.query_by_schedule(day_of_week)
+        return dining.get_open_restaurants_by_day_of_week(day_of_week)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/schedules/today", response_model=list[schemas.dining.DiningRestaurant])
+def get_schedule_today() -> list[schemas.dining.DiningRestaurant]:
+    """
+    取得今天有開的餐廳資訊。
+    """
+    try:
+        return dining.get_open_restaurants_today()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
