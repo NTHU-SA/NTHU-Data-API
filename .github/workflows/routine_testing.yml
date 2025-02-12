@@ -23,7 +23,6 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-python-${{ hashFiles('requirements-tests.txt') }}-test-v06
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           pip install -r requirements.txt
           pip install -r requirements-tests.txt
