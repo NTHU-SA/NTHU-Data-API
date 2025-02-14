@@ -236,10 +236,3 @@ class Dining:
             if score >= FUZZY_MATCH_THRESHOLD:
                 results.extend(self.query_by_restaurant_name(name))
         return results
-        return results
-        return results
-        return results
-        return results
-        return results
-        return results
-        return results
