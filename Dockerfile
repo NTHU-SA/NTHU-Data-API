@@ -1,5 +1,5 @@
 # Purpose: Dockerfile for building the image of the web server
-FROM python:3.11-buster
+FROM python:3.13-slim
 
 # Set the working directory to /app
 WORKDIR /usr/src/app
@@ -10,6 +10,7 @@ RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezo
 
 # Set logging level
 ENV LOGURU_LEVEL=ERROR
+ENV NTHU_DATA_URL=https://data.nthusa.tw/
 
 # Install python
 COPY requirements.txt .
