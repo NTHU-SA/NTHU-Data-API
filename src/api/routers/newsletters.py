@@ -55,4 +55,10 @@ def get_newsletter_by_link(
     """
     透過電子報網址取得指定的電子報列表。
     """
-    return newsletter_scraper.get_selected_newsletter_list(str(newsletter_link))
+    if "nthu.edu.tw" in newsletter_link.host:
+        return newsletter_scraper.get_selected_newsletter_list(str(newsletter_link))
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid URL. Please provide a valid NTHU newsletter URL.",
+        )
