@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
@@ -7,7 +8,7 @@ from thefuzz import fuzz, process
 
 from src.api.schemas.dining import DiningRestaurant, DiningSceduleKeyword
 
-JSON_URL = "https://nthu-data-json.pages.dev/dining.json"
+JSON_URL = os.getenv("NTHU_DATA_URL", "https://data.nthusa.tw") + "/dining.json"
 FUZZY_MATCH_THRESHOLD = 50
 DATA_TTL_HOURS = 4  # 資料存活時間 (小時)
 
@@ -16,7 +17,6 @@ class Dining:
     """
     餐廳及服務性廠商資料
     https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw
-    資料來源：https://nthu-data-json.pages.dev/dining.json
     """
 
     def __init__(self) -> None:
@@ -142,7 +142,7 @@ class Dining:
 
         Returns:
             Optional[List[DiningRestaurant]]: 若找到符合的餐廳，則返回包含餐廳資料的列表，
-                                             若餐廳名稱不在快取中或找不到餐廳，則返回空列表。
+                                            若餐廳名稱不在快取中或找不到餐廳，則返回空列表。
         """
         if query_name not in self._restaurant_names:
             return []
@@ -235,4 +235,11 @@ class Dining:
         for name, score in fuzzy_results:
             if score >= FUZZY_MATCH_THRESHOLD:
                 results.extend(self.query_by_restaurant_name(name))
+        return results
+        return results
+        return results
+        return results
+        return results
+        return results
+        return results
         return results
