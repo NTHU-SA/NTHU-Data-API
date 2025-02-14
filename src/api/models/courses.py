@@ -264,8 +264,6 @@ class Processor:
 # 主程式測試區
 # =============================================================================
 if __name__ == "__main__":
-    from loguru import logger
-
     processor = Processor()
 
     # 範例資料（原始資料中使用中文欄位名稱）

@@ -8,13 +8,8 @@ from scripts.ssl.generate_ssl import generate_certificate
 load_dotenv()
 
 if __name__ == "__main__":
-    ssl_path = "scripts/ssl/"
-    generate_certificate(path=ssl_path)
-    ssl_keyfile = ssl_path + "key.pem"
-    ssl_certfile = ssl_path + "cert.pem"
-    if os.getenv("ENV") == "development":
+    if os.getenv("DEV_MODE") == "True":
         # Development
-        # Run the server
         uvicorn.run(
             app="src:app",
             host="0.0.0.0",
@@ -24,7 +19,10 @@ if __name__ == "__main__":
         )
     else:
         # Production
-        # Run the server
+        ssl_path = "scripts/ssl/"
+        generate_certificate(path=ssl_path)
+        ssl_keyfile = ssl_path + "key.pem"
+        ssl_certfile = ssl_path + "cert.pem"
         uvicorn.run(
             app="src:app",
             host="0.0.0.0",
