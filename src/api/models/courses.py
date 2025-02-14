@@ -1,5 +1,6 @@
 import json
 import operator
+import os
 import re
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
@@ -206,7 +207,10 @@ class Processor:
     """
 
     def __init__(self, json_path: Optional[str] = None) -> None:
-        self.NTHU_COURSE_DATA_URL = "https://api-json.nthusa.tw/courses/lastest.json"
+        self.NTHU_COURSE_DATA_URL = (
+            os.getenv("NTHU_DATA_URL", "https://data.nthusa.tw")
+            + "/courses/latest.json"
+        )
         self.course_data: List[CoursesData] = self._get_course_data(json_path)
 
     @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
