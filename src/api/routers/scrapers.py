@@ -23,11 +23,12 @@ def get_rpage_data(
     """
     爬取指定 Rpage 公告的內容。
     """
-    if "nthu.edu.tw" not in full_path.host:
+    if "nthu.edu.tw" in full_path.host:
+        return rpage_scraper.get_announcement(
+            url=str(full_path), start_page=start_page, max_page=max_page
+        )
+    else:
         raise HTTPException(
             status_code=400,
             detail="Invalid URL. Please provide a valid NTHU Rpage announcement URL.",
         )
-    return rpage_scraper.get_announcement(
-        url=str(full_path), start_page=start_page, max_page=max_page
-    )
