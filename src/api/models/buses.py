@@ -22,13 +22,13 @@ JSON_URL = (
 )  # 公車時刻表 JSON API 端點
 
 # 保持後續程式中 BUS_TYPE, BUS_DAY, BUS_DIRECTION 的順序一致，因 BusType、BusDay 具有 all 選項
-BUS_TYPE: List[str] = [bus_type.value for bus_type in schemas.buses.BusType]
-BUS_TYPE_WITHOUT_ALL: List[str] = BUS_TYPE[1:]  # 第一個為 all，故移除
+BUS_ROUTE_TYPE: List[str] = [bus_type.value for bus_type in schemas.buses.BusRouteType]
+BUS_ROUTE_TYPE_WITHOUT_ALL: List[str] = BUS_ROUTE_TYPE[1:]  # 第一個為 all，故移除
 BUS_DAY: List[str] = [bus_day.value for bus_day in schemas.buses.BusDay]
 BUS_DAY_WITHOUT_ALL: List[str] = BUS_DAY[1:]
 BUS_DIRECTION: List[str] = [bus_dir.value for bus_dir in schemas.buses.BusDirection]
 
-schedule_index = pd.MultiIndex.from_product([BUS_TYPE, BUS_DAY, BUS_DIRECTION])
+schedule_index = pd.MultiIndex.from_product([BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECTION])
 
 
 # ---------------------------------------------------------------------------
@@ -92,7 +92,7 @@ def sort_by_time(target: List[dict], time_path: Optional[List[str]] = None) -> N
     )
 
 
-def gen_all_field(target_dataframe: pd.DataFrame, time_path: List[str]) -> None:
+def gen_the_all_field(target_dataframe: pd.DataFrame, time_path: List[str]) -> None:
     """
     針對 DataFrame 產品組合欄位，將資料合併至 'all' 欄位，並依照時間排序。
 
@@ -104,10 +104,10 @@ def gen_all_field(target_dataframe: pd.DataFrame, time_path: List[str]) -> None:
         time_path (List[str]): 指定在資料中取得時間字串的鍵路徑，用於排序。
     """
     # 針對 BUS_TYPE_WITHOUT_ALL 合併 weekday 與 weekend
-    for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
-        weekday_data = target_dataframe.loc[(scope, "weekday", direction), "data"]
-        weekend_data = target_dataframe.loc[(scope, "weekend", direction), "data"]
-        target_dataframe.loc[(scope, "all", direction), "data"] = (
+    for route_type, direction in product(BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DIRECTION):
+        weekday_data = target_dataframe.loc[(route_type, "weekday", direction), "data"]
+        weekend_data = target_dataframe.loc[(route_type, "weekend", direction), "data"]
+        target_dataframe.loc[(route_type, "all", direction), "data"] = (
             weekday_data + weekend_data
         )
 
@@ -118,8 +118,10 @@ def gen_all_field(target_dataframe: pd.DataFrame, time_path: List[str]) -> None:
         target_dataframe.loc[("all", day, direction), "data"] = main_data + nanda_data
 
     # 最後對所有資料依時間排序
-    for scope, day, direction in product(BUS_TYPE, BUS_DAY, BUS_DIRECTION):
-        sort_by_time(target_dataframe.loc[(scope, day, direction), "data"], time_path)
+    for route_type, day, direction in product(BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECTION):
+        sort_by_time(
+            target_dataframe.loc[(route_type, day, direction), "data"], time_path
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -280,10 +282,13 @@ class Buses:
         self.info_data = pd.DataFrame(
             {
                 "data": [
-                    [] for _ in range(len(BUS_TYPE_WITHOUT_ALL) * len(BUS_DIRECTION))
+                    []
+                    for _ in range(len(BUS_ROUTE_TYPE_WITHOUT_ALL) * len(BUS_DIRECTION))
                 ]
             },
-            index=pd.MultiIndex.from_product([BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION]),
+            index=pd.MultiIndex.from_product(
+                [BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DIRECTION]
+            ),
         )
         self._res_json: dict = {}  # 儲存原始 JSON 回應資料
         self._start_from_gen_2_bus_info: List[str] = []  # 記錄從綜二館發車的班次資訊
@@ -342,29 +347,13 @@ class Buses:
         """
         處理從 JSON API 獲取的公車時刻表資料。
 
-        此方法負責解析 JSON 資料，並將資料填入 `raw_schedule_data`、`info_data` 和 `detailed_schedule_data` 等 DataFrame 中。
+        此方法負責解析 JSON 資料，並將資料填入 `info_data`、`raw_schedule_data` 和 `detailed_schedule_data` 等 DataFrame 中。
         同時會呼叫 `gen_bus_detailed_schedule_and_update_stops_data` 方法產生詳細時刻表並更新站點資訊。
         """
-        self._populate_raw_schedule_data()
         self._populate_info_data()
+        self._populate_raw_schedule_data()
+        self._add_fields_to_raw_schedule_data()
         self.gen_bus_detailed_schedule_and_update_stops_data()
-
-    def _populate_raw_schedule_data(self) -> None:
-        """
-        將原始 JSON 資料填入 raw_schedule_data DataFrame。
-
-        遍歷 BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION 的所有組合，從 JSON 資料中提取對應的時刻表資料，
-        並存儲到 raw_schedule_data DataFrame 中。
-        """
-        for scope, day, direction in product(
-            BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
-        ):
-            schedule_key = (
-                f"{day}BusScheduleToward{self.transform_toward_name(scope, direction)}"
-            )
-            schedule_data = self._res_json.get(schedule_key, [])
-            self.raw_schedule_data.loc[(scope, day, direction), "data"] = schedule_data
-        gen_all_field(self.raw_schedule_data, ["time"])  # 合併與排序 'all' 欄位
 
     def _populate_info_data(self) -> None:
         """
@@ -373,10 +362,27 @@ class Buses:
         遍歷 BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION 的所有組合，從 JSON 資料中提取對應的路線資訊，
         並存儲到 info_data DataFrame 中。
         """
-        for scope, direction in product(BUS_TYPE_WITHOUT_ALL, BUS_DIRECTION):
-            info_key = f"toward{self.transform_toward_name(scope, direction)}Info"
+        for route_type, direction in product(BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DIRECTION):
+            info_key = f"toward{self.transform_toward_name(route_type, direction)}Info"
             info_data = self._res_json.get(info_key, {})
-            self.info_data.loc[(scope, direction), "data"] = [info_data]
+            self.info_data.loc[(route_type, direction), "data"] = [info_data]
+
+    def _populate_raw_schedule_data(self) -> None:
+        """
+        將原始 JSON 資料填入 raw_schedule_data DataFrame。
+
+        遍歷 BUS_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION 的所有組合，從 JSON 資料中提取對應的時刻表資料，
+        並存儲到 raw_schedule_data DataFrame 中。
+        """
+        for route_type, day, direction in product(
+            BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
+        ):
+            schedule_key = f"{day}BusScheduleToward{self.transform_toward_name(route_type, direction)}"
+            schedule_data = self._res_json.get(schedule_key, [])
+            self.raw_schedule_data.loc[(route_type, day, direction), "data"] = (
+                schedule_data
+            )
+        gen_the_all_field(self.raw_schedule_data, ["time"])  # 合併與排序 'all' 欄位
 
     def transform_toward_name(
         self, route: Literal["main", "nanda"], direction: Literal["up", "down"]
@@ -524,7 +530,7 @@ class Buses:
         self,
         bus_schedule: List[dict],
         *,
-        scope: Literal["main", "nanda"] = "main",
+        route_type: Literal["main", "nanda"] = "main",
         day: Literal["weekday", "weekend"] = "weekday",
         direction: Literal["up", "down"] = "up",
     ) -> List[dict]:
@@ -533,7 +539,7 @@ class Buses:
 
         Args:
             bus_schedule (List[dict]): 原始公車時刻表資料，包含發車時間、路線等資訊。
-            scope (Literal["main", "nanda"]): 公車類型，'main' 為校本部, 'nanda' 為南大區間車，預設為 'main'。
+            route_type (Literal["main", "nanda"]): 公車類型，'main' 為校本部, 'nanda' 為南大區間車，預設為 'main'。
             day (Literal["weekday", "weekend"]):  平日或假日時刻表，預設為 'weekday'。
             direction (Literal["up", "down"]): 行車方向，預設為 'up'。
 
@@ -543,7 +549,7 @@ class Buses:
         detailed_schedules: List[dict] = []
         for bus in bus_schedule:
             detailed_bus_schedule = self._process_single_bus_schedule(
-                bus, scope=scope, day=day, direction=direction
+                bus, route_type=route_type, day=day, direction=direction
             )
             detailed_schedules.append(detailed_bus_schedule)
         return detailed_schedules
@@ -552,7 +558,7 @@ class Buses:
         self,
         bus: dict,
         *,
-        scope: Literal["main", "nanda"],
+        route_type: Literal["main", "nanda"],
         day: Literal["weekday", "weekend"],
         direction: Literal["up", "down"],
     ) -> dict:
@@ -561,7 +567,7 @@ class Buses:
 
         Args:
             bus (dict): 單個公車班次的原始時刻表資料。
-            scope (Literal["main", "nanda"]): 公車類型。
+            route_type (Literal["main", "nanda"]): 公車類型。
             day (Literal["weekday", "weekend"]): 平日或假日。
             direction (Literal["up", "down"]): 行車方向。
 
@@ -570,12 +576,17 @@ class Buses:
         """
         temp_bus: Dict[str, Any] = {"dep_info": bus, "stops_time": []}
         route: Optional[Route] = self._select_bus_route(
-            bus, scope=scope, direction=direction
+            bus, route_type=route_type, direction=direction
         )
 
         if route:
             self._populate_stop_times_and_update_stop_data(
-                temp_bus, bus, route, scope=scope, day=day, direction=direction
+                temp_bus,
+                bus,
+                route,
+                route_type=route_type,
+                day=day,
+                direction=direction,
             )
         return temp_bus
 
@@ -583,7 +594,7 @@ class Buses:
         self,
         bus: dict,
         *,
-        scope: Literal["main", "nanda"],
+        route_type: Literal["main", "nanda"],
         direction: Literal["up", "down"],
     ) -> Optional[Route]:
         """
@@ -591,15 +602,15 @@ class Buses:
 
         Args:
             bus (dict): 單個公車班次的原始時刻表資料。
-            scope (Literal["main", "nanda"]): 公車類型。
+            route_type (Literal["main", "nanda"]): 公車類型。
             direction (Literal["up", "down"]): 行車方向。
 
         Returns:
             Optional[Route]: 若找到對應的 Route 物件則返回，否則返回 None。
         """
-        if scope == "main":
+        if route_type == "main":
             return self._select_main_bus_route(bus)
-        elif scope == "nanda":
+        elif route_type == "nanda":
             return self._select_nanda_bus_route(direction)
         return None
 
@@ -675,7 +686,7 @@ class Buses:
         bus: dict,
         route: Route,
         *,
-        scope: Literal["main", "nanda"],
+        route_type: Literal["main", "nanda"],
         day: Literal["weekday", "weekend"],
         direction: Literal["up", "down"],
     ) -> None:
@@ -686,7 +697,7 @@ class Buses:
             temp_bus (dict): 儲存單個公車班次詳細時刻表的字典。
             bus (dict): 單個公車班次的原始時刻表資料。
             route (Route): 公車路線物件。
-            scope (Literal["main", "nanda"]): 公車類型。
+            route_type (Literal["main", "nanda"]): 公車類型。
             day (Literal["weekday", "weekend"]): 平日或假日。
             direction (Literal["up", "down"]): 行車方向。
         """
@@ -694,7 +705,12 @@ class Buses:
         for idx, stop in enumerate(route.stops):
             arrive_time = self._add_on_time(bus["time"], acc_times[idx])
             self._update_stop_stopped_bus_data(
-                stop, bus, arrive_time, scope=scope, day=day, direction=direction
+                stop,
+                bus,
+                arrive_time,
+                route_type=route_type,
+                day=day,
+                direction=direction,
             )
             temp_bus["stops_time"].append(
                 {
@@ -709,7 +725,7 @@ class Buses:
         bus: dict,
         arrive_time: str,
         *,
-        scope: Literal["main", "nanda"],
+        route_type: Literal["main", "nanda"],
         day: Literal["weekday", "weekend"],
         direction: Literal["up", "down"],
     ) -> None:
@@ -722,13 +738,13 @@ class Buses:
             stop (Stop): 公車站點物件。
             bus (dict): 單個公車班次的原始時刻表資料。
             arrive_time (str): 公車班次在該站點的抵達時間。
-            scope (Literal["main", "nanda"]): 公車類型。
+            route_type (Literal["main", "nanda"]): 公車類型。
             day (Literal["weekday", "weekend"]): 平日或假日。
             direction (Literal["up", "down"]): 行車方向。
         """
         stop_obj = self._find_stop_from_str(stop.name)
         if stop_obj:
-            stop_obj.stopped_bus.loc[(scope, day, direction), "data"].append(
+            stop_obj.stopped_bus.loc[(route_type, day, direction), "data"].append(
                 {
                     "bus_info": bus,
                     "arrive_time": arrive_time,
@@ -745,23 +761,23 @@ class Buses:
         self._reset_stop_data()  # 清空站點的停靠公車資料，準備重新計算
         # self._update_data()  # 資料更新移至 _process_bus_data 中處理
 
-        for scope, day, direction in product(
-            BUS_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
+        for route_type, day, direction in product(
+            BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION
         ):
-            self.detailed_schedule_data.loc[(scope, day, direction), "data"] = (
+            self.detailed_schedule_data.loc[(route_type, day, direction), "data"] = (
                 self._gen_detailed_bus_schedule(
-                    self.raw_schedule_data.loc[(scope, day, direction), "data"],
-                    scope=scope,
+                    self.raw_schedule_data.loc[(route_type, day, direction), "data"],
+                    route_type=route_type,
                     day=day,
                     direction=direction,
                 )
             )
 
-        gen_all_field(
+        gen_the_all_field(
             self.detailed_schedule_data, ["dep_info", "time"]
         )  # 合併與排序 detailed_schedule_data 的 'all' 欄位
         for stop in stops.values():
-            gen_all_field(
+            gen_the_all_field(
                 stop.stopped_bus, ["arrive_time"]
             )  # 合併與排序每個站點 stopped_bus 的 'all' 欄位
 

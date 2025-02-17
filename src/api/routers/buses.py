@@ -116,7 +116,7 @@ def get_bus_stops_info():
     name="公車時刻表",
 )
 def get_bus_schedule(
-    bus_type: schemas.buses.BusType = constant.buses.BUS_TYPE_QUERY,
+    bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
 ):
@@ -169,7 +169,7 @@ def get_bus_schedule(
 )
 def get_stop_bus_info(
     stop_name: schemas.buses.StopsName = constant.buses.STOPS_NAME_PATH,
-    bus_type: schemas.buses.BusType = constant.buses.BUS_TYPE_QUERY,
+    bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
     query: schemas.buses.BusQuery = Depends(),
@@ -233,7 +233,7 @@ def get_stop_bus_info(
     name="詳細公車時刻表",
 )
 def get_bus_detailed_schedule(
-    bus_type: schemas.buses.BusType = constant.buses.BUS_TYPE_QUERY,
+    bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
     query: schemas.buses.BusQuery = Depends(),

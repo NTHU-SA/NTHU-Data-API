@@ -17,7 +17,7 @@ class StopsName(str, Enum):
     S1 = "南大校區校門口右側(食品路校牆邊)"
 
 
-class BusType(str, Enum):
+class BusRouteType(str, Enum):
     all = "all"
     main = "main"
     nanda = "nanda"
