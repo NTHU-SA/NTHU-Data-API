@@ -175,7 +175,7 @@ class Route:
             stops["M3"]: {stops["M2"]: 1, stops["M4"]: 2, stops["M6"]: 1},
             stops["M4"]: {stops["M2"]: 3, stops["M3"]: 2, stops["M5"]: 2},
             stops["M5"]: {stops["M4"]: 2, stops["M7"]: 1, stops["S1"]: 15},
-            stops["M6"]: {stops["M3"]: 1, stops["M7"]: 2},
+            stops["M6"]: {stops["M2"]: 2, stops["M3"]: 1, stops["M7"]: 2},
             stops["M7"]: {stops["M5"]: 1, stops["M6"]: 2},
             stops["S1"]: {stops["M5"]: 15},
         }
@@ -232,15 +232,15 @@ stop_name_mapping: Dict[str, Stop] = {stop.name: stop for stop in stops.values()
 
 # 紅線
 red_M1_M5 = Route([M1, M2, M3, M4, M5])  # 北校門往台積館
-red_M5_M1 = Route([M5, M7, M6, M3, M2, M1])  # 台積館往北校門
+red_M5_M1 = Route([M5, M7, M6, M2, M1])  # 台積館往北校門
 red_M2_M5 = Route([M2, M3, M4, M5])  # 綜二館往台積館
-red_M5_M2 = Route([M5, M7, M6, M3, M2])  # 台積館往綜二館
+red_M5_M2 = Route([M5, M7, M6, M2])  # 台積館往綜二館
 
 # 綠線
 green_M1_M5 = Route([M1, M2, M3, M6, M7, M5])  # 北校門往台積館
-green_M5_M1 = Route([M5, M4, M3, M2, M1])  # 台積館往北校門
+green_M5_M1 = Route([M5, M4, M2, M1])  # 台積館往北校門
 green_M2_M5 = Route([M2, M3, M6, M7, M5])  # 綜二館往台積館
-green_M5_M2 = Route([M5, M4, M3, M2])  # 台積館往綜二館
+green_M5_M2 = Route([M5, M4, M2])  # 台積館往綜二館
 
 # 校區區間車
 nanda_M1_S1 = Route([M1, M2, M4, M5, S1])  # 南大校區校門口右側往北校門
@@ -513,10 +513,7 @@ class Buses:
             ("校門", "red"): red_M1_M5,
             ("綜二", "red"): red_M2_M5,
             ("校門", "green"): green_M1_M5,
-            (
-                "綜二",
-                "green",
-            ): green_M2_M5,  # 原程式碼有誤，應為 green_M2_M5 而非 green_M5_M2
+            ("綜二", "green"): green_M2_M5,
         }
         key = (
             (dep_stop, line) if "台積" not in dep_stop else (dep_stop, line, from_gen_2)

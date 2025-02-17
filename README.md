@@ -29,6 +29,7 @@ NTHU-Data-API is a project designed for NTHU developers. It provides an easy way
 ## Getting Started
 ### Prerequisites
 Ensure you have Python 3 installed on your machine. You can verify this by running `python3 --version` in your terminal. If you don't have Python 3 installed, you can download it [here](https://www.python.org/downloads/).
+
 ### Installation
 1. Clone the repository:
 ```sh
@@ -42,11 +43,13 @@ cd NTHU-Data-API
 ```sh
 pip3 install -r requirements.txt
 ```
+
 ### Configuration
 Copy the environment template file and fill in your details:
 ```sh
 cp .env.template .env
 ```
+
 ### Running the Application
 ```sh
 python3 main.py
@@ -60,6 +63,7 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 - docs: Documentation changes.
 - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi colons, etc).
 - refactor: Code changes that neither fixes a bug nor adds a feature.
+- update: Document or data changes that neither fixes a bug nor adds a feature.
 - perf: Code changes that improve performance.
 - test: Adding missing tests.
 - chore: Changes to the build process or auxiliary tools and libraries.
@@ -75,6 +79,22 @@ pip3 install -r requirements-dev.txt
 pre-commit install
 ```
 
+### Running Tests
+To run tests locally before committing changes, follow these steps:
+1. Install the required dependencies:
+```sh
+pip3 install -r requirements-tests.txt
+```
+2. Run tests:
+Navigate to the project's root directory and execute:
+```sh
+python3 -m pytest -n auto tests -W ignore::DeprecationWarning
+```
+3. Generate a coverage report (optional):
+If you need a test coverage report, run:
+```sh
+python3 -m pytest -n auto tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
+```
 ## Credit
 This project is maintained by NTHUSA 32nd.
 
