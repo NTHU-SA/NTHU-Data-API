@@ -17,10 +17,16 @@ class StopsName(str, Enum):
     S1 = "南大校區校門口右側(食品路校牆邊)"
 
 
-class BusType(str, Enum):
+class BusRouteType(str, Enum):
     all = "all"
     main = "main"
     nanda = "nanda"
+
+
+class BusType(str, Enum):
+    tour_bus = "tour_bus"
+    middle_sized_bus = "middle-sized_bus"
+    route_83 = "route_83"
 
 
 class BusDirection(str, Enum):
@@ -103,6 +109,8 @@ class BusNandaSchedule(BaseModel):
     time: str = Field(..., description="發車時間")
     description: str = Field(..., description="備註")
     route: str = Field("南大區間車", description="路線")
+    dep_stop: str = Field(..., description="發車地點")
+    bus_type: BusType = Field(..., description="營運車輛類型")
 
 
 class BusMainSchedule(BaseModel):
@@ -111,6 +119,7 @@ class BusMainSchedule(BaseModel):
     route: str = Field("校園公車", description="路線")
     dep_stop: str = Field(..., description="發車地點")
     line: str = Field(..., description="路線")
+    bus_type: BusType = Field(..., description="營運車輛類型")
 
 
 class BusStopsQueryResult(BaseModel):
