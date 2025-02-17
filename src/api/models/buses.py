@@ -384,6 +384,34 @@ class Buses:
             )
         gen_the_all_field(self.raw_schedule_data, ["time"])  # 合併與排序 'all' 欄位
 
+    def _classify_bus_type(
+        self, route_type: str, day: str, description: str
+    ) -> schemas.buses.BusType:
+        """
+        根據公車路線類型、時刻表註解和日期分類，判斷公車類型。
+
+        Args:
+            route_type (str): 公車路線類型，'main' 代表校本部公車，'nanda' 代表南大區間車。
+            day (str): 日期類型，'weekday' 代表平日，'weekend' 代表假日。
+            description (str): 時刻表註解，用於判斷公車類型。
+
+        Returns:
+            schemas.buses.BusType: 公車類型，包含 'route_83', 'tour_bus', 'middle_sized_bus'。
+        """
+        # 優先判斷是否為 83 路
+        if route_type == "nanda" and "83" in description:
+            return schemas.buses.BusType.route_83
+
+        # 校內公車註解中包含 "大" 或南大平日，為大型巴士
+        elif (route_type == "main" and "大" in description) or (
+            route_type == "nanda" and day == "weekday"
+        ):
+            return schemas.buses.BusType.tour_bus
+
+        # 其他校內和校區區間公車為中型巴士
+        else:
+            return schemas.buses.BusType.middle_sized_bus
+
     def _add_fields_to_raw_schedule_data(self) -> None:
         """
         將 raw_schedule_data DataFrame 中的時刻表資料添加額外的欄位。
@@ -396,20 +424,12 @@ class Buses:
             for item in self.raw_schedule_data.loc[
                 (route_type, day, direction), "data"
             ]:
-                # 新增 `bus_type` 欄位
-                ## 優先判斷是否為 83 路
-                if route_type == "nanda" and "83" in item["description"]:
-                    item["bus_type"] = schemas.buses.BusType.route_83
-                ## 校內公車註解中包含 "大" 或南大平日，為大型巴士
-                elif (route_type == "main" and "大" in item["description"]) or (
-                    route_type == "nanda" and day == "weekday"
-                ):
-                    item["bus_type"] = schemas.buses.BusType.tour_bus
-                ## 其他校內和校區區間公車為中型巴士
-                else:
-                    item["bus_type"] = schemas.buses.BusType.middle_sized_bus
+                # 新增 bus_type 欄位
+                item["bus_type"] = self._classify_bus_type(
+                    route_type, day, item["description"]
+                )
 
-                # nanda 新增 `dep_stop` 欄位
+                # nanda 新增 dep_stop 欄位
                 if route_type == "nanda":
                     item["dep_stop"] = "校門" if direction == "up" else "南大"
 
