@@ -384,6 +384,35 @@ class Buses:
             )
         gen_the_all_field(self.raw_schedule_data, ["time"])  # 合併與排序 'all' 欄位
 
+    def _add_fields_to_raw_schedule_data(self) -> None:
+        """
+        將 raw_schedule_data DataFrame 中的時刻表資料添加額外的欄位。
+        - 加入 `bus_type` 欄位。
+        - 若 `route_type` 為 "nanda"，同時新增 `dep_stop`。
+        """
+        for route_type, day, direction in product(
+            BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
+        ):
+            for item in self.raw_schedule_data.loc[
+                (route_type, day, direction), "data"
+            ]:
+                # 新增 `bus_type` 欄位
+                ## 優先判斷是否為 83 路
+                if route_type == "nanda" and "83" in item["description"]:
+                    item["bus_type"] = schemas.buses.BusType.route_83
+                ## 校內公車註解中包含 "大" 或南大平日，為大型巴士
+                elif (route_type == "main" and "大" in item["description"]) or (
+                    route_type == "nanda" and day == "weekday"
+                ):
+                    item["bus_type"] = schemas.buses.BusType.tour_bus
+                ## 其他校內和校區區間公車為中型巴士
+                else:
+                    item["bus_type"] = schemas.buses.BusType.middle_sized_bus
+
+                # nanda 新增 `dep_stop` 欄位
+                if route_type == "nanda":
+                    item["dep_stop"] = "校門" if direction == "up" else "南大"
+
     def transform_toward_name(
         self, route: Literal["main", "nanda"], direction: Literal["up", "down"]
     ) -> str:
