@@ -1,6 +1,7 @@
 import time
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import (
     bulletins,
@@ -17,6 +18,16 @@ from . import (
 )
 
 app = FastAPI()
+
+origins = ["*"]  # 允許來自所有網域 (Public API)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # 允許的來源網域列表
+    allow_credentials=True,  # 允許跨域請求帶有 Cookie 和 HTTP 認證資訊
+    allow_methods=["*"],  # 允許所有 HTTP 方法 (GET, POST, PUT, DELETE 等)
+    allow_headers=["*"],  # 允許所有 HTTP 標頭
+)
 
 
 @app.middleware("http")
