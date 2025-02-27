@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -32,19 +32,12 @@ class LibraryName(str, Enum):
     mainlib = "mainlib"
     hslib = "hslib"
     nandalib = "nandalib"
-
-
-class LibraryOpeningHour(BaseModel):
-    library: LibraryName = Field(..., description="圖書館代號")
-    date: str = Field(..., description="日期")
-    start_time: str = Field(..., description="開館時間")
-    end_time: str = Field(..., description="閉館時間")
-    message: str = Field(..., description="訊息")
+    mainlib_moonlight_area = "mainlib_moonlight_area"
 
 
 class LibraryNumberOfGoods(BaseModel):
-    borrow_quantity: str = Field(..., description="已換證數量")
-    remaining_18_quantity: str = Field(..., description="18歲以上成人剩餘換證數量")
+    borrow_quantity: int = Field(..., description="已換證數量")
+    remaining_18_quantity: int = Field(..., description="18歲以上成人剩餘換證數量")
     remaining_15_18_quantity: str = Field(..., description="15~18歲青少年剩餘換證數量")
 
 
