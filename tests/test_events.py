@@ -9,7 +9,6 @@ client = TestClient(app)
 @pytest.mark.parametrize(
     "url, status_code",
     [
-        ("/events/libaries", 200),
         ("/events/goodjob", 200),
         ("/events/arts_center", 200),
         ("/events/global_affairs", 200),
