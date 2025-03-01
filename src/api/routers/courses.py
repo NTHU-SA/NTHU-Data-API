@@ -1,10 +1,25 @@
-from fastapi import APIRouter, Body, HTTPException, Path, Query, Response
+from contextlib import asynccontextmanager
+
+from fastapi import APIRouter, Body, FastAPI, HTTPException, Path, Query, Response
 
 from src.api import constant, schemas
 from src.api.models.courses import Conditions, Processor
 
-router = APIRouter()
 courses = Processor()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI 的生命週期管理器，用於在應用啟動時更新公車資料。"""
+    global courses
+
+    # tasks when app starts
+    await courses.update_data()
+    yield
+    # tasks when app stops
+
+
+router = APIRouter(lifespan=lifespan)
 
 
 @router.get("/", response_model=list[schemas.courses.CourseData])
