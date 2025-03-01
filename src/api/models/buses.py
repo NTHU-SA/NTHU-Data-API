@@ -294,7 +294,6 @@ class Buses:
         self._res_json: dict = {}  # 儲存原始 JSON 回應資料
         self._start_from_gen_2_bus_info: List[str] = []  # 記錄從綜二館發車的班次資訊
         self._last_updated_time: Optional[float] = None  # 上次資料更新時間戳記
-        # self._init_task = asyncio.create_task(self._initialize_data())
 
     async def _process_bus_data(self) -> None:
         """
