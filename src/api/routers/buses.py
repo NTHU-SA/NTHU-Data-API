@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
+from functools import wraps
 from typing import Literal
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Response
@@ -24,6 +25,16 @@ async def lifespan(app: FastAPI):
 router = APIRouter(lifespan=lifespan)
 
 
+async def add_custom_header(response: Response):
+    """添加 X-Data-Commit-Hash 標頭。
+
+    Args:
+        response: FastAPI 的 Response 對象。
+    """
+
+    response.headers["X-Data-Commit-Hash"] = str(buses.last_commit_hash)
+
+
 def get_current_time_state():
     """
     取得目前時間狀態 (星期別, 時間)。
@@ -37,7 +48,12 @@ def get_current_time_state():
     return current_day, current_time
 
 
-@router.get("/main", response_model=schemas.buses.BusMainData, name="校本部公車資訊")
+@router.get(
+    "/main",
+    response_model=schemas.buses.BusMainData,
+    name="校本部公車資訊",
+    dependencies=[Depends(add_custom_header)],
+)
 async def get_main_bus_data():
     """
     取得校本部公車資訊。
@@ -52,7 +68,10 @@ async def get_main_bus_data():
 
 
 @router.get(
-    "/nanda", response_model=schemas.buses.BusNandaData, name="南大校區區間車資訊"
+    "/nanda",
+    response_model=schemas.buses.BusNandaData,
+    name="南大校區區間車資訊",
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_nanda_bus_data():
     """
@@ -71,6 +90,7 @@ async def get_nanda_bus_data():
     "/info/{bus_type}/{direction}",
     response_model=list[schemas.buses.BusInfo],
     name="公車路線資訊",
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_route_info(
     bus_type: Literal["main", "nanda"] = constant.buses.BUS_TYPE_PATH,
@@ -109,6 +129,7 @@ async def get_bus_route_info(
     "/info/stops",
     response_model=list[schemas.buses.BusStopsInfo],
     name="停靠站資訊",
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_stops_info():
     """
@@ -132,6 +153,7 @@ async def get_bus_stops_info():
         schemas.buses.BusMainSchedule | schemas.buses.BusNandaSchedule | None
     ],
     name="公車時刻表",
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_schedule(
     bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
@@ -185,6 +207,7 @@ async def get_bus_schedule(
     "/stops/{stop_name}/",
     response_model=list[schemas.buses.BusStopsQueryResult | None],
     name="站點停靠公車資訊",
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_stop_bus_info(
     stop_name: schemas.buses.StopsName = constant.buses.STOPS_NAME_PATH,
@@ -251,6 +274,7 @@ async def get_stop_bus_info(
         | None
     ],
     name="詳細公車時刻表",
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_detailed_schedule(
     bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
