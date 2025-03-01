@@ -349,7 +349,7 @@ class Buses:
             description (str): 時刻表註解，用於判斷公車類型。
 
         Returns:
-            schemas.buses.BusType: 公車類型，包含 'route_83', 'tour_bus', 'middle_sized_bus'。
+            schemas.buses.BusType: 公車類型，包含 'route_83', 'large-sized_bus', 'middle-sized_bus'。
         """
         # 優先判斷是否為 83 路
         if route_type == "nanda" and "83" in description:
@@ -359,7 +359,7 @@ class Buses:
         elif (route_type == "main" and "大" in description) or (
             route_type == "nanda" and day == "weekday"
         ):
-            return schemas.buses.BusType.tour_bus
+            return schemas.buses.BusType.large_sized_bus
 
         # 其他校內和校區區間公車為中型巴士
         else:
@@ -470,8 +470,6 @@ class Buses:
         res_commit_hash, self._res_json = await utils.get(
             "buses.json"
         )  # 直接更新 _res_json，後續處理會使用最新的 json 資料
-
-        print(res_commit_hash)
 
         if (
             self._res_json and res_commit_hash != self.last_commit_hash
