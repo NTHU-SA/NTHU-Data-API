@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from functools import reduce
@@ -9,8 +8,8 @@ from itertools import product
 from typing import Any, Dict, List, Literal, Optional
 
 import pandas as pd
-import requests
 
+from src import utils
 from src.api import schemas
 
 # ---------------------------------------------------------------------------
@@ -290,60 +289,14 @@ class Buses:
                 [BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DIRECTION]
             ),
         )
+        self.last_commit_hash = None
+
         self._res_json: dict = {}  # 儲存原始 JSON 回應資料
         self._start_from_gen_2_bus_info: List[str] = []  # 記錄從綜二館發車的班次資訊
         self._last_updated_time: Optional[float] = None  # 上次資料更新時間戳記
-        self._initialize_data()
+        # self._init_task = asyncio.create_task(self._initialize_data())
 
-    def _initialize_data(self) -> None:
-        """
-        初始化公車資料。
-
-        檢查快取資料是否過期，若過期或尚未初始化，則從遠端 JSON 端點獲取最新的公車時刻表資料。
-        資料獲取成功後，會進行資料轉換與處理，並更新上次更新時間戳記。
-        """
-        if not self._res_json or self._is_data_expired():
-            data = self._fetch_bus_data()
-            if data:
-                self._res_json = data
-                self._process_bus_data()
-                self._last_updated_time = time.time()  # 更新時間戳記
-
-    def _is_data_expired(self) -> bool:
-        """
-        檢查快取資料是否過期。
-
-        根據設定的 `DATA_TTL_HOURS` 判斷資料是否需要更新。
-
-        Returns:
-            bool: 若資料已過期或尚未初始化，則返回 True，否則返回 False。
-        """
-        if self._last_updated_time is None:
-            return True  # 尚未載入過資料
-        return time.time() - self._last_updated_time > DATA_TTL_HOURS * 3600
-
-    def _fetch_bus_data(self) -> Optional[dict]:
-        """
-        從遠端 JSON 端點獲取公車時刻表資料。
-
-        使用 `requests` 函式庫向 `JSON_URL` 發送 GET 請求，並處理可能的連線錯誤。
-
-        Returns:
-            Optional[dict]: 若成功獲取資料，則返回 JSON 格式的公車時刻表資料，否則返回 None。
-        """
-        try:
-            response = requests.get(
-                JSON_URL,
-                timeout=10,
-                headers={"User-Agent": "Mozilla/5.0"},
-            )
-            response.raise_for_status()  # 針對 HTTP 錯誤狀態碼拋出例外
-            return response.json()
-        except requests.RequestException as e:
-            print(f"Error fetching data from {JSON_URL}: {e}")
-            return None
-
-    def _process_bus_data(self) -> None:
+    async def _process_bus_data(self) -> None:
         """
         處理從 JSON API 獲取的公車時刻表資料。
 
@@ -353,7 +306,7 @@ class Buses:
         self._populate_info_data()
         self._populate_raw_schedule_data()
         self._add_fields_to_raw_schedule_data()
-        self.gen_bus_detailed_schedule_and_update_stops_data()
+        await self.gen_bus_detailed_schedule_and_update_stops_data()
 
     def _populate_info_data(self) -> None:
         """
@@ -510,13 +463,21 @@ class Buses:
                 index=schedule_index,
             )
 
-    def _update_data(self) -> None:
+    async def update_data(self) -> None:
         """更新公車時刻表資料，包含從 API 獲取最新資料並重新處理。"""
-        self._res_json = (
-            self._fetch_bus_data()
+        # asyncio.gather(self._init_task)  # 等待初始化任務完成
+
+        res_commit_hash, self._res_json = await utils.get(
+            "buses.json"
         )  # 直接更新 _res_json，後續處理會使用最新的 json 資料
-        if self._res_json:  # 只有成功獲取資料才需要重新處理
-            self._process_bus_data()
+
+        print(res_commit_hash)
+
+        if (
+            self._res_json and res_commit_hash != self.last_commit_hash
+        ):  # 只有成功獲取資料且資料不一致時才需要重新處理
+            await self._process_bus_data()
+            self.last_commit_hash = res_commit_hash
         self._start_from_gen_2_bus_info.clear()  # 清空從綜二館發車的班次資訊快取
 
     def _add_on_time(self, start_time: str, time_delta: int) -> str:
@@ -800,7 +761,7 @@ class Buses:
                 }
             )
 
-    def gen_bus_detailed_schedule_and_update_stops_data(self) -> None:
+    async def gen_bus_detailed_schedule_and_update_stops_data(self) -> None:
         """
         產生詳細公車時刻表並更新各站點的停靠公車資訊。
 
@@ -808,7 +769,7 @@ class Buses:
         產生詳細時刻表的過程會計算每個班次在每個站點的預計抵達時間。
         """
         self._reset_stop_data()  # 清空站點的停靠公車資料，準備重新計算
-        # self._update_data()  # 資料更新移至 _process_bus_data 中處理
+        # await self.update_data()  # 又被移回來了：Ｄ ~~資料更新移至 _process_bus_data 中處理~~
 
         for route_type, day, direction in product(
             BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DAY_WITHOUT_ALL, BUS_DIRECTION

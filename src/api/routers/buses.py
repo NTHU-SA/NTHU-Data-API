@@ -1,13 +1,27 @@
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Response
 
 from src.api import constant, schemas
 from src.api.models.buses import Buses, after_specific_time, stops
 
-router = APIRouter()
 buses = Buses()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI 的生命週期管理器，用於在應用啟動時更新公車資料。"""
+    global buses
+
+    # tasks when app starts
+    await buses.update_data()
+    yield
+    # tasks when app stops
+
+
+router = APIRouter(lifespan=lifespan)
 
 
 def get_current_time_state():
@@ -24,10 +38,11 @@ def get_current_time_state():
 
 
 @router.get("/main", response_model=schemas.buses.BusMainData, name="校本部公車資訊")
-def get_main_bus_data():
+async def get_main_bus_data():
     """
     取得校本部公車資訊。
     """
+    await buses.update_data()
     try:
         return buses.get_main_data()
     except Exception as e:
@@ -39,10 +54,11 @@ def get_main_bus_data():
 @router.get(
     "/nanda", response_model=schemas.buses.BusNandaData, name="南大校區區間車資訊"
 )
-def get_nanda_bus_data():
+async def get_nanda_bus_data():
     """
     取得南大校區區間車資訊。
     """
+    await buses.update_data()
     try:
         return buses.get_nanda_data()
     except Exception as e:
@@ -56,7 +72,7 @@ def get_nanda_bus_data():
     response_model=list[schemas.buses.BusInfo],
     name="公車路線資訊",
 )
-def get_bus_route_info(
+async def get_bus_route_info(
     bus_type: Literal["main", "nanda"] = constant.buses.BUS_TYPE_PATH,
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_PATH,
 ):
@@ -73,6 +89,7 @@ def get_bus_route_info(
     Raises:
         HTTPException: 如果無法取得公車路線資訊，則拋出 500 錯誤。
     """
+    await buses.update_data()
     try:
         data = buses.info_data.loc[(bus_type, direction), "data"]
         return data
@@ -93,13 +110,14 @@ def get_bus_route_info(
     response_model=list[schemas.buses.BusStopsInfo],
     name="停靠站資訊",
 )
-def get_bus_stops_info():
+async def get_bus_stops_info():
     """
     取得所有公車停靠站點的資訊。
 
     Returns:
         list[schemas.buses.BusStopsInfo]: 公車停靠站點資訊列表。
     """
+    await buses.update_data()
     try:
         return buses.gen_bus_stops_info()
     except Exception as e:
@@ -115,7 +133,7 @@ def get_bus_stops_info():
     ],
     name="公車時刻表",
 )
-def get_bus_schedule(
+async def get_bus_schedule(
     bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
@@ -134,6 +152,7 @@ def get_bus_schedule(
     Raises:
         HTTPException: 如果無法取得公車時刻表，則拋出 404 或 500 錯誤。
     """
+    await buses.update_data()
     try:
         if day != "current":
             schedule_data = buses.raw_schedule_data.loc[
@@ -167,7 +186,7 @@ def get_bus_schedule(
     response_model=list[schemas.buses.BusStopsQueryResult | None],
     name="站點停靠公車資訊",
 )
-def get_stop_bus_info(
+async def get_stop_bus_info(
     stop_name: schemas.buses.StopsName = constant.buses.STOPS_NAME_PATH,
     bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
@@ -190,6 +209,7 @@ def get_stop_bus_info(
     Raises:
         HTTPException: 如果無法取得站點停靠公車資訊，則拋出 404 或 500 錯誤。
     """
+    await buses.update_data()
     return_limit = (
         query.limits
         if day != "current"
@@ -232,7 +252,7 @@ def get_stop_bus_info(
     ],
     name="詳細公車時刻表",
 )
-def get_bus_detailed_schedule(
+async def get_bus_detailed_schedule(
     bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
     direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
@@ -253,6 +273,7 @@ def get_bus_detailed_schedule(
     Raises:
         HTTPException: 如果無法取得詳細公車時刻表，則拋出 404 或 500 錯誤。
     """
+    await buses.update_data()
     return_limit = (
         query.limits
         if day != "current"
