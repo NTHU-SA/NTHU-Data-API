@@ -1,11 +1,6 @@
 from cachetools import TTLCache, cached
 
-from src.utils.scrapers import (
-    cac_scraper,
-    goodjob_scraper,
-    library_scraper,
-    rpage_scraper,
-)
+from src.utils.scrapers import cac_scraper, goodjob_scraper, rpage_scraper
 
 
 @cached(cache=TTLCache(maxsize=2, ttl=60 * 60 * 4))
@@ -14,7 +9,6 @@ def get_events_list():
     取得所有活動資料。
     """
     event_types = {
-        "libaries": library_scraper.get_parsed_rss_data("exhibit"),
         "goodjob": goodjob_scraper.get_announcements(goodjob_scraper.DataType.EVENT),
         "arts_center": cac_scraper.get_events_list(),
         "global_affairs": rpage_scraper.get_announcement(

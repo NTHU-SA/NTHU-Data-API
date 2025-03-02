@@ -5,6 +5,7 @@ from . import (
     dining,
     energy,
     events,
+    libraries,
     locations,
     newsletter,
     resources,
