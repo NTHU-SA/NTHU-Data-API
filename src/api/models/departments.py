@@ -20,9 +20,7 @@ class Person(BaseModel):
 
 
 class DepartmentDetails(BaseModel):
-    departments: List[dict] = Field(
-        default_factory=list
-    )  # 這裡用 dict 簡化，完整可以再定義 DepartmentBase model
+    departments: List[dict] = Field(default_factory=list)
     contact: Contact = Field(default_factory=Contact)
     people: List[Person] = Field(default_factory=list)
 
