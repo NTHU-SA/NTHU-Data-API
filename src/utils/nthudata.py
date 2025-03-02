@@ -14,9 +14,6 @@ _file_details_cache = {
     "expiry": 60 * 5,
 }  # 快取 file_details.json, 預設 5 分鐘過期
 
-# 建立 httpx AsyncClient session，在模組初始化時建立
-_async_http_client = httpx.AsyncClient()
-
 
 async def _fetch_json(url: str) -> dict | None:
     """
@@ -28,19 +25,20 @@ async def _fetch_json(url: str) -> dict | None:
     Returns:
         dict or None: 如果成功獲取並解析 JSON 資料，則返回字典；如果發生錯誤，則返回 None。
     """
-    try:
-        async with _async_http_client.stream(
-            "GET", url
-        ) as response:  # 使用 async with 確保資源釋放
-            response.raise_for_status()  # 檢查 HTTP 錯誤
-            data = await response.aread()  # 非同步讀取 response 內容
-            return json.loads(data)
-    except httpx.RequestError as e:
-        print(f"Error fetching {url}: {e}")
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON from {url}: {e}")
-        return None
+    async with httpx.AsyncClient() as client:  # 在函式內部建立 AsyncClient
+        try:
+            async with client.stream(
+                "GET", url
+            ) as response:  # 使用 async with 確保資源釋放
+                response.raise_for_status()  # 檢查 HTTP 錯誤
+                data = await response.aread()  # 非同步讀取 response 內容
+                return json.loads(data)
+        except httpx.RequestError as e:
+            print(f"Error fetching {url}: {e}")
+            return None
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from {url}: {e}")
+            return None
 
 
 async def _format_file_details(file_details: dict) -> list:
@@ -177,51 +175,3 @@ async def get(endpoint_name: str) -> tuple[str, dict | list] | None:
                 if cached_data
                 else None
             )
-
-
-# # 在模組載入時，先更新一次 file_details.json 快取 (非同步初始化需要用 asyncio.run 在事件迴圈中執行)
-# async def _initialize_file_details():
-#     await get_file_details()
-# asyncio.get_event_loop().run_until_complete(_initialize_file_details())  # 改到各自 router 的 lifespan 執行
-
-
-if __name__ == "__main__":
-
-    async def main():  # 定義一個 async main 函式來包含所有的 await 操作
-        file_details = await get_file_details()
-        print(
-            "File Details Sections (first 2 keys):",
-            file_details[:2] if file_details else None,
-        )
-
-        endpoint1_data = await get("/buses.json")  # 測試根目錄檔案
-        if endpoint1_data:
-            print(endpoint1_data)
-
-        endpoint2_data = await get(
-            "buses/weekdayBusScheduleTowardMainCampus.json"
-        )  # 測試子目錄檔案
-        if endpoint2_data:
-            print(endpoint2_data)
-
-        endpoint1_data_cached = await get("buses.json")  # 再次請求，應該會使用快取
-        if endpoint1_data_cached:
-            print(endpoint1_data_cached)
-
-        await asyncio.sleep(6 * 60)  # 非同步的 sleep
-
-        endpoint1_data_after_wait = await get("buses.json")  # 等待快取過期後再次請求
-        if endpoint1_data_after_wait:
-            print(endpoint1_data_after_wait)
-
-    async def run_main_with_client():  # 包裹 main 函式在 async with 裡面
-        async with httpx.AsyncClient() as client:  # 使用 async with 建立並管理 AsyncClient
-            global _async_http_client  # 宣告使用全域變數
-            _async_http_client = (
-                client  # 將 client 賦值給全域變數，這樣 _fetch_json 等函式才能使用
-            )
-            await main()
-
-    asyncio.run(
-        run_main_with_client()
-    )  # 使用 asyncio.run() 執行 run_main_with_client 函式
