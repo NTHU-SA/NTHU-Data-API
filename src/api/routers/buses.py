@@ -147,7 +147,7 @@ async def get_bus_stops_info():
 
 
 @router.get(
-    "/schedules/",
+    "/schedules",
     response_model=list[
         schemas.buses.BusMainSchedule | schemas.buses.BusNandaSchedule | None
     ],
@@ -203,7 +203,7 @@ async def get_bus_schedule(
 
 
 @router.get(
-    "/stops/{stop_name}/",
+    "/stops/{stop_name}",
     response_model=list[schemas.buses.BusStopsQueryResult | None],
     name="站點停靠公車資訊",
     dependencies=[Depends(add_custom_header)],
@@ -266,7 +266,7 @@ async def get_stop_bus_info(
 
 
 @router.get(
-    "/detailed/",
+    "/detailed",
     response_model=list[
         schemas.buses.BusMainDetailedSchedule
         | schemas.buses.BusNandaDetailedSchedule

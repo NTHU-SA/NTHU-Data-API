@@ -47,7 +47,7 @@ def get_schedule_by_day_of_week(
 
 
 @router.get(
-    "/search/",
+    "/search",
     response_model=List[schemas.dining.DiningRestaurant],
 )
 def fuzzy_search_restaurant_by_name(
