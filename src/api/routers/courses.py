@@ -1,13 +1,51 @@
-from fastapi import APIRouter, Body, HTTPException, Path, Query, Response
+from contextlib import asynccontextmanager
+
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Path,
+    Query,
+    Response,
+)
 
 from src.api import constant, schemas
 from src.api.models.courses import Conditions, Processor
 
-router = APIRouter()
 courses = Processor()
 
 
-@router.get("/", response_model=list[schemas.courses.CourseData])
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI 的生命週期管理器，用於在應用啟動時更新公車資料。"""
+    global courses
+
+    # tasks when app starts
+    await courses.update_data()
+    yield
+    # tasks when app stops
+
+
+router = APIRouter(lifespan=lifespan)
+
+
+async def add_custom_header(response: Response):
+    """添加 X-Data-Commit-Hash 標頭。
+
+    Args:
+        response: FastAPI 的 Response 對象。
+    """
+
+    response.headers["X-Data-Commit-Hash"] = str(courses.last_commit_hash)
+
+
+@router.get(
+    "/",
+    response_model=list[schemas.courses.CourseData],
+    dependencies=[Depends(add_custom_header)],
+)
 async def get_all_courses_list(
     response: Response,
     limits: int = constant.general.LIMITS_QUERY,
@@ -17,10 +55,15 @@ async def get_all_courses_list(
     """
     result = courses.course_data[:limits]
     response.headers["X-Total-Count"] = str(len(result))
+    response.headers["X-Data-Commit-Hash"] = str(courses.last_commit_hash)
     return result
 
 
-@router.get("/fields/info", response_model=dict[str, str])
+@router.get(
+    "/fields/info",
+    response_model=dict[str, str],
+    dependencies=[Depends(add_custom_header)],
+)
 async def get_all_fields_list_info():
     """
     取得所有欄位的資訊。
@@ -48,7 +91,11 @@ async def get_all_fields_list_info():
     }
 
 
-@router.get("/fields/{field_name}", response_model=list[str])
+@router.get(
+    "/fields/{field_name}",
+    response_model=list[str],
+    dependencies=[Depends(add_custom_header)],
+)
 async def get_selected_fields_list(
     field_name: schemas.courses.CourseFieldName = Path(
         ..., example="id", description="欄位名稱"
@@ -63,7 +110,9 @@ async def get_selected_fields_list(
 
 
 @router.get(
-    "/fields/{field_name}/{value}", response_model=list[schemas.courses.CourseData]
+    "/fields/{field_name}/{value}",
+    response_model=list[schemas.courses.CourseData],
+    dependencies=[Depends(add_custom_header)],
 )
 async def get_selected_field_and_value_data(
     field_name: schemas.courses.CourseFieldName = Path(
@@ -80,7 +129,11 @@ async def get_selected_field_and_value_data(
     return result
 
 
-@router.get("/lists/{list_name}", response_model=list[schemas.courses.CourseData])
+@router.get(
+    "/lists/{list_name}",
+    response_model=list[schemas.courses.CourseData],
+    dependencies=[Depends(add_custom_header)],
+)
 async def get_courses_list(
     list_name: schemas.courses.CourseListName,
     response: Response,
@@ -102,7 +155,11 @@ async def get_courses_list(
     return result
 
 
-@router.get("/searches", response_model=list[schemas.courses.CourseData])
+@router.get(
+    "/searches",
+    response_model=list[schemas.courses.CourseData],
+    dependencies=[Depends(add_custom_header)],
+)
 async def search_by_field_and_value(
     field: schemas.courses.CourseFieldName = Query(
         ...,
@@ -122,7 +179,11 @@ async def search_by_field_and_value(
     return result
 
 
-@router.post("/searches", response_model=list[schemas.courses.CourseData])
+@router.post(
+    "/searches",
+    response_model=list[schemas.courses.CourseData],
+    dependencies=[Depends(add_custom_header)],
+)
 async def get_courses_by_condition(
     query_condition: (
         schemas.courses.CourseQueryCondition | schemas.courses.CourseCondition

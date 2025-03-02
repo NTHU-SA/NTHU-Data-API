@@ -24,9 +24,9 @@ class BusRouteType(str, Enum):
 
 
 class BusType(str, Enum):
-    tour_bus = "tour_bus"
-    middle_sized_bus = "middle-sized_bus"
     route_83 = "route_83"
+    large_sized_bus = "large-sized_bus"
+    middle_sized_bus = "middle-sized_bus"
 
 
 class BusDirection(str, Enum):

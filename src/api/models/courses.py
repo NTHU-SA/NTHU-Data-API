@@ -1,12 +1,9 @@
-import json
 import operator
-import os
 import re
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
-import requests
-from cachetools import TTLCache, cached
+from src import utils
 
 
 # =============================================================================
@@ -203,32 +200,19 @@ class Conditions:
 class Processor:
     """
     課程資料處理
-    資料來源：https://api-json.nthusa.tw/courses/lastest.json
     """
 
-    def __init__(self, json_path: Optional[str] = None) -> None:
-        self.NTHU_COURSE_DATA_URL = (
-            os.getenv("NTHU_DATA_URL", "https://data.nthusa.tw")
-            + "/courses/latest.json"
-        )
-        self.course_data: List[CoursesData] = self._get_course_data(json_path)
+    def __init__(self) -> None:
+        self.course_data: List[CoursesData] = []
+        self.last_commit_hash = None
 
-    @cached(cache=TTLCache(maxsize=1, ttl=60 * 60))
-    def _get_course_data(self, json_path: Optional[str] = None) -> List[CoursesData]:
-        """
-        取得課程資料，若提供 json_path 則由檔案讀取，
-        否則從遠端 URL 取得資料。
-        """
-        if json_path:
-            with open(json_path, "r", encoding="utf-8") as f:
-                course_data_dict_list = json.load(f)
-        else:
-            course_data_resp = requests.get(self.NTHU_COURSE_DATA_URL)
-            course_data_dict_list = course_data_resp.json()
-        return [CoursesData.from_dict(data) for data in course_data_dict_list]
+    async def update_data(self) -> None:
+        self.last_commit_hash, self.course_data = await utils.get("courses.json")
 
-    def update(self, json_path: Optional[str] = None) -> None:
-        self.course_data = self._get_course_data(json_path)
+        # 將 dict 轉換為 CoursesData 物件
+        self.course_data = list(map(CoursesData.from_dict, self.course_data))
+
+        print(self.last_commit_hash)
 
     def list_selected_fields(self, field: str) -> List[str]:
         """回傳所有課程中指定欄位的非空字串集合"""
@@ -290,7 +274,7 @@ if __name__ == "__main__":
     }
     # 可用 sample_data 測試 from_dict：
     course_sample = CoursesData.from_dict(sample_data)
-    logger.info("轉換後的課程資料: {}", course_sample)
+    print("轉換後的課程資料: {}", course_sample)
 
     # 以下為原有的查詢條件範例
     # 範例 1：中文課名為 "文化人類學專題" 且課號為 "11210ANTH651000"
@@ -298,21 +282,21 @@ if __name__ == "__main__":
         "id", "11210ANTH651000"
     )
     result1 = processor.query(condition1)
-    logger.info("中文課名 與 ID (有一堂課): {}", len(result1))
-    logger.info(result1)
+    print("中文課名 與 ID (有一堂課): {}", len(result1))
+    print(result1)
 
     # 範例 2：中文課名為 "化人類學專題" 或課號為 "11210ANTH651000"
     condition2 = Conditions("chinese_title", "化人類學專題") | Conditions(
         "id", "11210ANTH651000"
     )
     result2 = processor.query(condition2)
-    logger.info("中文課名 或 ID (有一堂課): {}", len(result2))
-    logger.info(result2)
+    print("中文課名 或 ID (有一堂課): {}", len(result2))
+    print(result2)
 
     # 範例 3：中文課名包含 "產業"
     condition3 = Conditions("chinese_title", "產業", regex_match=True)
     result3 = processor.query(condition3)
-    logger.info("中文課名包含 '產業' 的課程 (取前5筆): {}", result3[:5])
+    print("中文課名包含 '產業' 的課程 (取前5筆): {}", result3[:5])
 
     # 範例 4：中文課名包含 "產業" 且 credit 為 "2" 且課號包含 "GE"（通識課程）
     condition4 = (
@@ -321,20 +305,20 @@ if __name__ == "__main__":
         & Conditions("id", "GE", regex_match=True)
     )
     result4 = processor.query(condition4)
-    logger.info("符合複合條件的課程 (取前5筆): {}", result4[:5])
+    print("符合複合條件的課程 (取前5筆): {}", result4[:5])
 
-    logger.info("總開課數: {}", len(processor.course_data))
+    print("總開課數: {}", len(processor.course_data))
     # 範例 5：中文授課 或 英文授課
     condition_ce = Conditions("language", "中") | Conditions("language", "英")
     result_ce = processor.query(condition_ce)
-    logger.info("中文授課 或 英文授課 開課數量: {}", len(result_ce))
+    print("中文授課 或 英文授課 開課數量: {}", len(result_ce))
 
     # 範例 6：中文授課
     condition_c = Conditions("language", "中")
     result_c = processor.query(condition_c)
-    logger.info("中文授課 開課數量: {}", len(result_c))
+    print("中文授課 開課數量: {}", len(result_c))
 
     # 範例 7：英文授課
     condition_e = Conditions("language", "英")
     result_e = processor.query(condition_e)
-    logger.info("英文授課 開課數量: {}", len(result_e))
+    print("英文授課 開課數量: {}", len(result_e))

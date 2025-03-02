@@ -63,7 +63,7 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 - docs: Documentation changes.
 - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi colons, etc).
 - refactor: Code changes that neither fixes a bug nor adds a feature.
-- update: Document or data changes that neither fixes a bug nor adds a feature.
+- update: Data changes that neither fixes a bug nor adds a feature.
 - perf: Code changes that improve performance.
 - test: Adding missing tests.
 - chore: Changes to the build process or auxiliary tools and libraries.

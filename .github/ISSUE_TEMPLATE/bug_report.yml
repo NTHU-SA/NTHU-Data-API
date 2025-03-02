@@ -1,0 +1,35 @@
+name: Bug Report
+description: File a bug report.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: More description about this bug.
+      placeholder: Tell us more infomation!
+    validations:
+      required: true
+
+  - type: textarea
+    id: possible-solution
+    attributes:
+      label: Possible Solution
+      description: Any possible solution about this bug.
+      placeholder: Tell us your ideas about this bug!
+    validations:
+      required: false
