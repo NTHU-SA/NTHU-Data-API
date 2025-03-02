@@ -38,5 +38,5 @@ def test_dining_schedules(day_of_week):
 @pytest.mark.parametrize("restaurant_name", restaurant_name_list)
 def test_dining_searches_restaurants(restaurant_name):
     search_param = {"restaurant_name": restaurant_name}
-    response = client.get(url="/dining/searches", params=search_param)
+    response = client.get(url="/dining/search", params=search_param)
     assert response.status_code == 200
