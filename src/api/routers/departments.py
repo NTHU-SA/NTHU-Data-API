@@ -1,16 +1,16 @@
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import requests
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
-from src.api.models.departments import Department, Person
+from src.api.schemas.departments import Department, Person
 
 router = APIRouter()
 directory_data = requests.get("https://data.nthusa.tw/directory.json").json()
 
 
-@router.get("/", response_model=List[Department], summary="取得所有部門列表")
+@router.get("/", response_model=list[Department], summary="取得所有部門列表")
 async def read_all_departments():
     """
     取得所有部門列表。
@@ -20,7 +20,7 @@ async def read_all_departments():
 
 @router.get(
     "/search",
-    response_model=Dict[str, Union[List[Department], List[Person]]],
+    response_model=Dict[str, Union[list[Department], list[Person]]],
     summary="關鍵字搜尋部門與人員名稱",
 )
 async def fuzzy_search_departments(
@@ -54,7 +54,7 @@ async def fuzzy_search_departments(
 
 
 @router.get(
-    "/{index}", response_model=List[Department], summary="依據 index 取得特定部門"
+    "/{index}", response_model=list[Department], summary="依據 index 取得特定部門"
 )  # 需要把它往下移，不然 search 會被擋住
 async def read_department_by_index(index: str):
     for dept in directory_data:

@@ -12,8 +12,6 @@ restaurant_name_list = ["麥當勞", "7-ELEVEN", "全家便利商店", "路易�
     "url, status_code",
     [
         ("/dining/", 200),
-        ("/dining/buildings", 200),
-        ("/dining/restaurants", 200),
     ],
 )
 def test_dining_endpoints(url, status_code):
@@ -29,12 +27,6 @@ def test_dining_buildings(building_name):
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("restaurant_name", restaurant_name_list)
-def test_dining_restaurants(restaurant_name):
-    response = client.get(url=f"/dining/restaurants/{restaurant_name}")
-    assert response.status_code == 200
-
-
 @pytest.mark.parametrize(
     "day_of_week", [_.value for _ in schemas.dining.DiningSceduleName]
 )
@@ -45,5 +37,6 @@ def test_dining_schedules(day_of_week):
 
 @pytest.mark.parametrize("restaurant_name", restaurant_name_list)
 def test_dining_searches_restaurants(restaurant_name):
-    response = client.get(url=f"/dining/searches/restaurants/{restaurant_name}")
+    search_param = {"restaurant_name": restaurant_name}
+    response = client.get(url="/dining/search", params=search_param)
     assert response.status_code == 200

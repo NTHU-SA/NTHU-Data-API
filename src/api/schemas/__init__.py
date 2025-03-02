@@ -1,10 +1,9 @@
 from . import (
     buses,
-    contacts,
     courses,
+    departments,
     dining,
     energy,
-    events,
     libraries,
     locations,
     newsletter,
