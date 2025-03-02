@@ -1,64 +1,31 @@
-import json
-
+import requests
 from fastapi import APIRouter, HTTPException, Path
-from pydantic import HttpUrl
 
-from src.api import schemas
-from src.utils.scrapers import newsletter_scraper
+from src.api.schemas.newsletters import NewsletterInfo, NewsletterName
 
 router = APIRouter()
 
+newsletter_data = requests.get("https://data.nthusa.tw/newsletters.json").json()
 
-@router.get("/", response_model=list[schemas.newsletter.NewsletterInfo])
+
+@router.get("/", response_model=list[NewsletterInfo])
 def get_all_newsletters():
     """
     取得所有的電子報。
     """
-    return newsletter_scraper.get_all_newsletters_list()
+    return newsletter_data
 
 
-@router.get(
-    "/{newsletter_name}", response_model=list[schemas.newsletter.NewsletterData]
-)
+@router.get("/{newsletter_name}", response_model=NewsletterInfo)
 def get_newsletter_by_name(
-    newsletter_name: schemas.newsletter.NewsletterName = Path(
+    newsletter_name: NewsletterName = Path(
         ..., example="國立清華大學學生會電子報", description="抓取的電子報名稱"
     )
 ):
     """
     透過電子報名稱取得指定的電子報列表。
     """
-    with open("data/newsletter_list.json", "r", encoding="utf-8") as f:
-        data = f.read()
-    data = json.loads(data)
-    newsletter_link = None
-    for newsletter in data:
+    for newsletter in newsletter_data:
         if newsletter["name"] == newsletter_name:
-            newsletter_link = newsletter["link"]
-            break
-    if newsletter_link is None:
-        raise HTTPException(status_code=404, detail="Newsletter not found")
-    return newsletter_scraper.get_selected_newsletter_list(newsletter_link)
-
-
-@router.get(
-    "/paths/{newsletter_link:path}",
-    response_model=list[schemas.newsletter.NewsletterData],
-)
-def get_newsletter_by_link(
-    newsletter_link: HttpUrl = Path(
-        ...,
-        example="https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/home-zh-tw/listid-44-",
-        description="抓取的電子報網址",
-    )
-):
-    """
-    透過電子報網址取得指定的電子報列表。
-    """
-    if "nthu.edu.tw" in newsletter_link.host:
-        return newsletter_scraper.get_selected_newsletter_list(str(newsletter_link))
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid URL. Please provide a valid NTHU newsletter URL.",
-        )
+            return newsletter
+    raise HTTPException(status_code=404, detail="電子報名稱不存在")
