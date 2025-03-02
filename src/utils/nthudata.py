@@ -1,12 +1,13 @@
 import asyncio
 import json
+import os
 import time
 
 import httpx
 
 _cache = {}  # 記憶體快取，儲存資料與 commit hash
-_file_details_url = "https://data.nthusa.tw/file_details.json"
-_base_url = "https://data.nthusa.tw"
+_base_url = os.getenv("NTHU_DATA_URL", "https://data.nthusa.tw")
+_file_details_url = _base_url + "/file_details.json"
 _file_details_cache = {
     "data": None,
     "last_updated": None,
@@ -135,7 +136,9 @@ async def get(endpoint_name: str) -> tuple[str, dict | list] | None:
     Returns:
         dict or list or None: 指定 endpoint 的 JSON 資料，可以是字典或列表，如果獲取失敗或 endpoint 不存在則返回 None。
     """
-    if not endpoint_name.startswith("/"):
+    if _base_url.endswith("/") and endpoint_name.startswith("/"):
+        endpoint_name = endpoint_name[1:]
+    elif not _base_url.endswith("/") and not endpoint_name.startswith("/"):
         endpoint_name = "/" + endpoint_name
 
     file_details_sections = await get_file_details()  # 使用 await 調用非同步函式
@@ -156,6 +159,7 @@ async def get(endpoint_name: str) -> tuple[str, dict | list] | None:
         return (cached_data["commit_hash"], cached_data["data"])
     else:
         print(f"Fetching fresh data for '{endpoint_name}'...")
+
         data_url = _base_url + endpoint_name
         fresh_data = await _fetch_json(data_url)  # 使用 await 調用非同步函式
         if fresh_data:

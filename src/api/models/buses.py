@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from functools import reduce
@@ -16,9 +15,6 @@ from src.utils import nthudata
 # 常數與全域變數
 # ---------------------------------------------------------------------------
 DATA_TTL_HOURS = 4  # 資料存活時間 (小時)
-JSON_URL = (
-    os.getenv("NTHU_DATA_URL", "https://data.nthusa.tw") + "/buses.json"
-)  # 公車時刻表 JSON API 端點
 
 # 保持後續程式中 BUS_TYPE, BUS_DAY, BUS_DIRECTION 的順序一致，因 BusType、BusDay 具有 all 選項
 BUS_ROUTE_TYPE: List[str] = [bus_type.value for bus_type in schemas.buses.BusRouteType]
