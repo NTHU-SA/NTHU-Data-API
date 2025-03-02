@@ -15,9 +15,7 @@ async def get_all_announcements():
     return announcements_data
 
 
-@router.get(
-    "/list/department", response_model=list[str], summary="取得所有有公告的部門列表"
-)
+@router.get("/department", response_model=list[str], summary="取得所有有公告的部門列表")
 async def get_all_department():
     """
     取得所有有公告的部門列表。
@@ -29,17 +27,17 @@ async def get_all_department():
 
 
 @router.get(
-    "/department/{department}",
+    "/department/{name}",
     response_model=AnnouncementDetail,
     summary="取得特定部門的公告列表",
 )
 async def get_announcements_by_department(
-    department: str = Path(..., description="部門名稱", example="清華公佈欄")
+    name: str = Path(..., description="部門名稱", example="清華公佈欄")
 ):
     """
     取得特定部門的公告資訊。
     """
     for announcement in announcements_data:
-        if announcement["department"] == department:
+        if announcement["department"] == name:
             return announcement
     raise HTTPException(status_code=404, detail="Not found")
