@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, Optional, Set
 
 import requests
 from thefuzz import fuzz, process
@@ -25,7 +25,7 @@ class Dining:
 
         載入餐廳資料並建立快取，若快取資料過期或尚未初始化，則會從遠端端點重新獲取資料。
         """
-        self.dining_data: List[DiningRestaurant] = []
+        self.dining_data: list[DiningRestaurant] = []
         self._restaurant_names: Set[str] = set()
         self._building_names: Set[str] = set()
         self._last_updated_time: Optional[float] = None  # 上次資料更新時間戳記
@@ -71,14 +71,14 @@ class Dining:
         }
         self._building_names = {building["building"] for building in self.dining_data}
 
-    def _fetch_dining_data(self) -> Optional[List[DiningRestaurant]]:
+    def _fetch_dining_data(self) -> Optional[list[DiningRestaurant]]:
         """
         從遠端 JSON 端點獲取餐廳資料。
 
         使用 `requests` 函式庫向 `JSON_URL` 發送 GET 請求，並處理可能的連線錯誤。
 
         Returns:
-            Optional[List[DiningRestaurant]]: 若成功獲取資料，則返回餐廳資料列表，否則返回 None。
+            Optional[list[DiningRestaurant]]: 若成功獲取資料，則返回餐廳資料列表，否則返回 None。
         """
         try:
             response = requests.get(
@@ -93,22 +93,22 @@ class Dining:
             return None
 
     @property
-    def all_building_names(self) -> List[str]:
+    def all_building_names(self) -> list[str]:
         """
         取得所有餐廳所在建築物名稱列表。
 
         Returns:
-            List[str]: 包含所有建築物名稱的列表。
+            list[str]: 包含所有建築物名稱的列表。
         """
         return list(self._building_names)
 
     @property
-    def all_restaurant_names(self) -> List[str]:
+    def all_restaurant_names(self) -> list[str]:
         """
         取得所有餐廳名稱列表。
 
         Returns:
-            List[str]: 包含所有餐廳名稱的列表。
+            list[str]: 包含所有餐廳名稱的列表。
         """
         return list(self._restaurant_names)
 
@@ -133,7 +133,7 @@ class Dining:
 
     def query_by_restaurant_name(
         self, query_name: str
-    ) -> Optional[List[DiningRestaurant]]:
+    ) -> Optional[list[DiningRestaurant]]:
         """
         根據餐廳名稱查詢餐廳資料。
 
@@ -141,7 +141,7 @@ class Dining:
             query_name (str): 要查詢的餐廳名稱。
 
         Returns:
-            Optional[List[DiningRestaurant]]: 若找到符合的餐廳，則返回包含餐廳資料的列表，
+            Optional[list[DiningRestaurant]]: 若找到符合的餐廳，則返回包含餐廳資料的列表，
                                             若餐廳名稱不在快取中或找不到餐廳，則返回空列表。
         """
         if query_name not in self._restaurant_names:
@@ -177,7 +177,7 @@ class Dining:
 
     def get_open_restaurants_by_day_of_week(
         self, query_day: str
-    ) -> List[DiningRestaurant]:
+    ) -> list[DiningRestaurant]:
         """
         取得在指定星期幾營業的餐廳列表。
 
@@ -185,7 +185,7 @@ class Dining:
             query_day (str): 要查詢的星期幾，使用英文小寫 (例如：'monday')。
 
         Returns:
-            List[DiningRestaurant]: 返回在指定星期幾可能營業的餐廳列表。
+            list[DiningRestaurant]: 返回在指定星期幾可能營業的餐廳列表。
         """
         if query_day == "today":
             query_day = datetime.now().strftime("%A").lower()
@@ -196,7 +196,7 @@ class Dining:
             if self.is_restaurant_open(restaurant, query_day)
         ]
 
-    def fuzzy_search_restaurant_by_name(self, query: str) -> List[DiningRestaurant]:
+    def fuzzy_search_restaurant_by_name(self, query: str) -> list[DiningRestaurant]:
         """
         根據餐廳名稱進行模糊搜尋。
 
@@ -206,7 +206,7 @@ class Dining:
             query (str): 模糊搜尋的查詢字串。
 
         Returns:
-            List[DiningRestaurant]: 返回與查詢字串模糊匹配的餐廳列表，
+            list[DiningRestaurant]: 返回與查詢字串模糊匹配的餐廳列表，
                                      結果會根據相似度排序，並篩選掉低於閾值的結果。
                                      若查詢字串為空或找不到匹配的餐廳，則返回空列表。
         """
@@ -221,7 +221,7 @@ class Dining:
             limit=10,  # 限制結果數量以提升效能
         )
 
-        results: List[DiningRestaurant] = []
+        results: list[DiningRestaurant] = []
         for name, score in fuzzy_results:
             if score >= FUZZY_MATCH_THRESHOLD:
                 results.extend(self.query_by_restaurant_name(name))
