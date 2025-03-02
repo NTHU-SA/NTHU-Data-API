@@ -1,13 +1,13 @@
 from typing import Dict, Union
 
-import requests
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
 from src.api.schemas.departments import Department, Person
+from src.utils import nthudata
 
 router = APIRouter()
-directory_data = requests.get("https://data.nthusa.tw/directory.json").json()
+json_path = "directory.json"
 
 
 @router.get("/", response_model=list[Department], summary="取得所有部門列表")
@@ -15,6 +15,7 @@ async def read_all_departments():
     """
     取得所有部門列表。
     """
+    _commit_hash, directory_data = await nthudata.get(json_path)
     return directory_data
 
 
@@ -29,6 +30,7 @@ async def fuzzy_search_departments(
     """
     使用搜尋演算法搜尋部門與人員名稱。
     """
+    _commit_hash, directory_data = await nthudata.get(json_path)
     department_results = []
     for dept in directory_data:
         similarity = fuzz.partial_ratio(name, dept["name"])
@@ -57,6 +59,7 @@ async def fuzzy_search_departments(
     "/{index}", response_model=list[Department], summary="依據 index 取得特定部門"
 )  # 需要把它往下移，不然 search 會被擋住
 async def read_department_by_index(index: str):
+    _commit_hash, directory_data = await nthudata.get(json_path)
     for dept in directory_data:
         if dept["index"] == index:
             return [dept]

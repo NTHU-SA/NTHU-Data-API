@@ -1,14 +1,11 @@
-import requests
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
 from src.api.schemas.locations import LocationDetail
+from src.utils import nthudata
 
 router = APIRouter()
-
-map_data = requests.get("https://data.nthusa.tw/maps.json").json()
-
-NOT_FOUND_EXCEPTION = HTTPException(status_code=404, detail="Not found")
+json_path = "maps.json"
 
 
 @router.get(
@@ -20,6 +17,7 @@ async def get_all_location():
     """
     取得所有地點資訊。
     """
+    _commit_hash, map_data = await nthudata.get(json_path)
     location_list = []
     for campus_locations in map_data.values():
         for location_name, coordinates in campus_locations.items():
@@ -44,6 +42,7 @@ async def search_location_by_get_method(
     """
     使用名稱模糊搜尋地點資訊。
     """
+    _commit_hash, map_data = await nthudata.get(json_path)
     tmp_results = []
     for campus_locations in map_data.values():
         for location_name, coordinates in campus_locations.items():
@@ -63,5 +62,5 @@ async def search_location_by_get_method(
     tmp_results.sort(key=lambda x: (x[1].name == name, x[0]), reverse=True)
     location_results = [item[1] for item in tmp_results]
     if not location_results:
-        raise NOT_FOUND_EXCEPTION
+        raise HTTPException(status_code=404, detail="Not found")
     return location_results
