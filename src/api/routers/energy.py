@@ -7,7 +7,7 @@ router = APIRouter()
 energy = Energy()
 
 
-@router.get("/usage", response_model=list[schemas.energy.ElectricityInfo])
+@router.get("/electricity_usage", response_model=list[schemas.energy.ElectricityInfo])
 async def get_realtime_electricity_usage():
     """
     取得校園電力即時使用量。
