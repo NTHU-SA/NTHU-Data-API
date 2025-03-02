@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Path
+from typing import List
+
+from fastapi import APIRouter, HTTPException, Path, Query
 
 from src.api import schemas
 from src.api.models.dining import Dining
@@ -7,20 +9,12 @@ router = APIRouter()
 dining = Dining()
 
 
-@router.get("/", response_model=list[schemas.dining.DiningBuilding])
-def get_all_dining_data() -> list[schemas.dining.DiningBuilding]:
+@router.get("/", response_model=List[schemas.dining.DiningBuilding])
+def get_all_dining_data() -> List[schemas.dining.DiningBuilding]:
     """
     取得所有餐廳資料。
     """
     return dining.dining_data
-
-
-@router.get("/buildings", response_model=list[schemas.dining.DiningBuildingName])
-def get_all_building_names() -> list[schemas.dining.DiningBuildingName]:
-    """
-    取得所有建築名稱。
-    """
-    return dining.all_building_names
 
 
 @router.get("/buildings/{building_name}", response_model=schemas.dining.DiningBuilding)
@@ -35,35 +29,14 @@ def get_dining_data_in_buildings(
     return dining.query_by_building_name(building_name)
 
 
-@router.get("/restaurants", response_model=list[str])
-def get_all_restaurant_names() -> list[str]:
-    """
-    取得所有餐廳名稱。
-    """
-    return dining.all_restaurant_names
-
-
 @router.get(
-    "/restaurants/{restaurant_name}",
-    response_model=list[schemas.dining.DiningRestaurant],
-)
-def get_dining_data_by_name(
-    restaurant_name: str = Path(..., example="麥當勞", description="餐廳名稱")
-):
-    """
-    使用餐廳名稱取得指定餐廳資料。
-    """
-    return dining.query_by_restaurant_name(restaurant_name)
-
-
-@router.get(
-    "/schedules/{day_of_week}", response_model=list[schemas.dining.DiningRestaurant]
+    "/schedules/{day_of_week}", response_model=List[schemas.dining.DiningRestaurant]
 )
 def get_schedule_by_day_of_week(
     day_of_week: schemas.dining.DiningSceduleName = Path(
         ..., example="saturday", description="營業日"
     )
-) -> list[schemas.dining.DiningRestaurant]:
+) -> List[schemas.dining.DiningRestaurant]:
     """
     取得所有該營業日的餐廳資訊。
     """
@@ -73,24 +46,13 @@ def get_schedule_by_day_of_week(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/schedules/today", response_model=list[schemas.dining.DiningRestaurant])
-def get_schedule_today() -> list[schemas.dining.DiningRestaurant]:
-    """
-    取得今天有開的餐廳資訊。
-    """
-    try:
-        return dining.get_open_restaurants_today()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.get(
-    "/searches/restaurants/{restaurant_name}",
-    response_model=list[schemas.dining.DiningRestaurant],
+    "/search/",
+    response_model=List[schemas.dining.DiningRestaurant],
 )
 def fuzzy_search_restaurant_by_name(
-    restaurant_name: str = Path(..., example="麵", description="餐廳名稱")
-) -> list[schemas.dining.DiningRestaurant]:
+    restaurant_name: str = Query(..., example="麵", description="餐廳模糊搜尋關鍵字")
+) -> List[schemas.dining.DiningRestaurant]:
     """
     使用餐廳名稱模糊搜尋餐廳資料。
     """

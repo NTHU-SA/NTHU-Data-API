@@ -187,24 +187,14 @@ class Dining:
         Returns:
             List[DiningRestaurant]: 返回在指定星期幾可能營業的餐廳列表。
         """
+        if query_day == "today":
+            query_day = datetime.now().strftime("%A").lower()
         return [
             restaurant
             for building in self.dining_data
             for restaurant in building.get("restaurants", [])
             if self.is_restaurant_open(restaurant, query_day)
         ]
-
-    def get_open_restaurants_today(self) -> List[DiningRestaurant]:
-        """
-        取得今日營業的餐廳列表。
-
-        根據當前日期判斷星期幾，並返回今日可能營業的餐廳列表。
-
-        Returns:
-            List[DiningRestaurant]: 返回今日可能營業的餐廳列表。
-        """
-        today_day_name = datetime.now().strftime("%A").lower()
-        return self.get_open_restaurants_by_day_of_week(today_day_name)
 
     def fuzzy_search_restaurant_by_name(self, query: str) -> List[DiningRestaurant]:
         """
