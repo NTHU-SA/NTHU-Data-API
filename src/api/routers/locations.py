@@ -62,4 +62,6 @@ async def search_location_by_get_method(
     # 先判斷是否與查詢字串相同，再依相似度從高到低排序
     tmp_results.sort(key=lambda x: (x[1].name == name, x[0]), reverse=True)
     location_results = [item[1] for item in tmp_results]
-    return location_results or NOT_FOUND_EXCEPTION
+    if not location_results:
+        raise NOT_FOUND_EXCEPTION
+    return location_results
