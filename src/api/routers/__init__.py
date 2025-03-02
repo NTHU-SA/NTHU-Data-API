@@ -10,7 +10,6 @@ from . import (
     courses,
     dining,
     energy,
-    events,
     libraries,
     locations,
     newsletters,
@@ -49,7 +48,6 @@ app.include_router(newsletters.router, prefix="/newsletters", tags=["Newsletters
 app.include_router(contacts.router, prefix="/phones", tags=["Phones"])
 app.include_router(contacts.router, prefix="/contacts", tags=["Contacts"])
 app.include_router(scrapers.router, prefix="/scrapers", tags=["Scrapers"])
-app.include_router(events.router, prefix="/events", tags=["Events"])
 app.include_router(bulletins.router, prefix="/bulletins", tags=["Bulletins"])
 
 
