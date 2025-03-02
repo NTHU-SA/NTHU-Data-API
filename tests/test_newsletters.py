@@ -8,7 +8,7 @@ client = TestClient(app)
 
 
 def test_newsletter():
-    response = client.get(url="/newsletter/")
+    response = client.get(url="/newsletters/")
     assert response.status_code == 200
 
 

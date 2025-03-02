@@ -15,5 +15,5 @@ def test_locations():
 @pytest.mark.parametrize("name", name_list)
 def test_locations_name(name):
     param = {"name": name}
-    response = client.get(url="/locations/searches", params=param)
+    response = client.get(url="/locations/search", params=param)
     assert response.status_code == 200
