@@ -1,1 +1,10 @@
-from . import buses, contacts, courses, dining, energy, locations, newsletter, resources
+from . import (
+    buses,
+    courses,
+    dining,
+    energy,
+    libraries,
+    locations,
+    newsletter,
+    resources,
+)
