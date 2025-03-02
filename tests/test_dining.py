@@ -28,7 +28,7 @@ def test_dining_buildings(building_name):
 
 
 @pytest.mark.parametrize(
-    "day_of_week", [_.value for _ in schemas.dining.DiningSceduleName]
+    "day_of_week", [_.value for _ in schemas.dining.DiningScheduleName]
 )
 def test_dining_schedules(day_of_week):
     response = client.get(url=f"/dining/schedules/{day_of_week}")

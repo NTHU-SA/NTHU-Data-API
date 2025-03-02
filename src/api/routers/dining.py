@@ -5,11 +5,11 @@ from fastapi import APIRouter, Path, Query
 from thefuzz import fuzz
 
 from src.api.schemas.dining import (
-    DiningBreakKeyword,
     DiningBuilding,
     DiningBuildingName,
     DiningRestaurant,
     DiningScheduleKeyword,
+    DiningScheduleName,
 )
 from src.utils import nthudata
 
@@ -31,8 +31,8 @@ def _is_restaurant_open(restaurant: DiningRestaurant, day: str) -> bool:
         bool: 若餐廳在指定日期可能營業，則返回 True，否則返回 False。
     """
     note = restaurant.get("note", "").lower()
-    for keyword in DiningBreakKeyword.BREAK_KEYWORDS:
-        for day_zh in DiningBreakKeyword.DAY_EN_TO_ZH.get(day, []):
+    for keyword in DiningScheduleKeyword.BREAK_KEYWORDS:
+        for day_zh in DiningScheduleKeyword.DAY_EN_TO_ZH.get(day, []):
             if keyword in note and day_zh in note:
                 return False  # 找到休息關鍵字，判斷為休息
     return True  # 未找到休息關鍵字，判斷為營業
@@ -66,7 +66,7 @@ async def get_dining_data_in_buildings(
 
 @router.get("/schedules/{day_of_week}", response_model=List[DiningRestaurant])
 async def get_schedule_by_day_of_week(
-    day_of_week: DiningScheduleKeyword = Path(
+    day_of_week: DiningScheduleName = Path(
         ..., example="saturday", description="營業日"
     )
 ) -> List[DiningRestaurant]:
