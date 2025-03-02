@@ -3,6 +3,8 @@ import re
 from datetime import datetime, timedelta
 
 import requests
+
+# TODO: 這邊之後可以考慮改寫成 async，避免跟之前一樣有機率等很久甚至卡死
 import xmltodict
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException, Path
@@ -16,7 +18,7 @@ _default_headers = {
 router = APIRouter()
 
 
-@router.get("/space", response_model=list[schemas.resources.LibrarySpace])
+@router.get("/space", response_model=list[schemas.libraries.LibrarySpace])
 def get_library_space_data():
     """
     取得空間使用資訊。
@@ -38,7 +40,7 @@ def get_library_space_data():
 
 
 @router.get(
-    "/lost_and_found", response_model=list[schemas.resources.LibraryLostAndFound]
+    "/lost_and_found", response_model=list[schemas.libraries.LibraryLostAndFound]
 )
 def get_library_lost_and_found():
     """
@@ -99,7 +101,7 @@ def get_library_lost_and_found():
 
 @router.get("/rss/{rss_type}", response_model=list[schemas.resources.RssItem])
 def get_library_rss_data(
-    rss_type: schemas.resources.LibraryRssType = Path(
+    rss_type: schemas.libraries.LibraryRssType = Path(
         ...,
         description="RSS 類型：最新消息(news)、電子資源(eresources)、展覽及活動(exhibit)、南大與人社分館(branches)",
     )
@@ -144,7 +146,7 @@ def get_library_rss_data(
 
 @router.get("/openinghours/{library_name}", response_model=dict)
 def get_library_opening_hours(
-    library_name: schemas.resources.LibraryName = Path(
+    library_name: schemas.libraries.LibraryName = Path(
         ...,
         description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)、夜讀區(mainlib_moonlight_area)",
     )
@@ -166,7 +168,7 @@ def get_library_opening_hours(
         raise HTTPException(status_code=500, detail=f"解析開放時間資料失敗: {e}")
 
 
-@router.get("/goods", response_model=schemas.resources.LibraryNumberOfGoods)
+@router.get("/goods", response_model=schemas.libraries.LibraryNumberOfGoods)
 def get_library_number_of_goods():
     """
     取得總圖換證數量資訊。

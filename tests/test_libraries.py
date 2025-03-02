@@ -20,14 +20,14 @@ def test_libraries_endpoints(url, status_code):
     assert response.status_code == status_code
 
 
-@pytest.mark.parametrize("rss", [_.value for _ in schemas.resources.LibraryRssType])
+@pytest.mark.parametrize("rss", [_.value for _ in schemas.libraries.LibraryRssType])
 def test_libraries_rss(rss):
     response = client.get(url=f"/libraries/rss/{rss}")
     assert response.status_code == 200
 
 
 @pytest.mark.parametrize(
-    "library_name", [_.value for _ in schemas.resources.LibraryName]
+    "library_name", [_.value for _ in schemas.libraries.LibraryName]
 )
 def test_libraries_openinghours(library_name):
     response = client.get(url=f"/libraries/openinghours/{library_name}")
