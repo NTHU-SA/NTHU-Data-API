@@ -4,7 +4,7 @@ import requests
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
-from src.api.models.departments import Department, Person
+from src.api.schemas.departments import Department, Person
 
 router = APIRouter()
 directory_data = requests.get("https://data.nthusa.tw/directory.json").json()
