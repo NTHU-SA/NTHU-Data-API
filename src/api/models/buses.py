@@ -402,6 +402,43 @@ class Buses:
         }
         return trans_list[(route, direction)]
 
+    def _get_route_data(self, route_type: Literal["main", "nanda"]) -> dict:
+        """
+        獲取特定路線類型的公車相關資料。
+
+        Args:
+            route_type (Literal["main", "nanda"]): 路線類型，'main' 代表校本部公車，'nanda' 代表南大區間車。
+
+        Returns:
+            dict: 包含指定路線類型的公車資訊和時刻表的字典。
+        """
+        # 根據路線類型設置不同的向位名稱
+        if route_type == "main":
+            up_name = "TSMC_building"
+            down_name = "main_gate"
+        else:  # route_type == "nanda"
+            up_name = "south_campus"
+            down_name = "main_campus"
+
+        return {
+            f"toward_{up_name}_info": self.info_data.loc[(route_type, "up"), "data"][0],
+            f"weekday_bus_schedule_toward_{up_name}": self.raw_schedule_data.loc[
+                (route_type, "weekday", "up"), "data"
+            ],
+            f"weekend_bus_schedule_toward_{up_name}": self.raw_schedule_data.loc[
+                (route_type, "weekend", "up"), "data"
+            ],
+            f"toward_{down_name}_info": self.info_data.loc[
+                (route_type, "down"), "data"
+            ][0],
+            f"weekday_bus_schedule_toward_{down_name}": self.raw_schedule_data.loc[
+                (route_type, "weekday", "down"), "data"
+            ],
+            f"weekend_bus_schedule_toward_{down_name}": self.raw_schedule_data.loc[
+                (route_type, "weekend", "down"), "data"
+            ],
+        }
+
     def get_main_data(self) -> dict:
         """
         取得校本部公車相關資料。
@@ -409,22 +446,7 @@ class Buses:
         Returns:
             dict: 包含校本部公車路線資訊和時刻表的字典，鍵值包含 'toward_TSMC_building_info', 'weekday_bus_schedule_toward_TSMC_building' 等。
         """
-        return {
-            "toward_TSMC_building_info": self.info_data.loc[("main", "up"), "data"][0],
-            "weekday_bus_schedule_toward_TSMC_building": self.raw_schedule_data.loc[
-                ("main", "weekday", "up"), "data"
-            ],
-            "weekend_bus_schedule_toward_TSMC_building": self.raw_schedule_data.loc[
-                ("main", "weekend", "up"), "data"
-            ],
-            "toward_main_gate_info": self.info_data.loc[("main", "down"), "data"][0],
-            "weekday_bus_schedule_toward_main_gate": self.raw_schedule_data.loc[
-                ("main", "weekday", "down"), "data"
-            ],
-            "weekend_bus_schedule_toward_main_gate": self.raw_schedule_data.loc[
-                ("main", "weekend", "down"), "data"
-            ],
-        }
+        return self._get_route_data("main")
 
     def get_nanda_data(self) -> dict:
         """
@@ -433,22 +455,7 @@ class Buses:
         Returns:
             dict: 包含南大校區區間車路線資訊和時刻表的字典，鍵值包含 'toward_south_campus_info', 'weekday_bus_schedule_toward_south_campus' 等。
         """
-        return {
-            "toward_south_campus_info": self.info_data.loc[("nanda", "up"), "data"][0],
-            "weekday_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
-                ("nanda", "weekday", "up"), "data"
-            ],
-            "weekend_bus_schedule_toward_south_campus": self.raw_schedule_data.loc[
-                ("nanda", "weekend", "up"), "data"
-            ],
-            "toward_main_campus_info": self.info_data.loc[("nanda", "down"), "data"][0],
-            "weekday_bus_schedule_toward_main_campus": self.raw_schedule_data.loc[
-                ("nanda", "weekday", "down"), "data"
-            ],
-            "weekend_bus_schedule_toward_main_campus": self.raw_schedule_data.loc[
-                ("nanda", "weekend", "down"), "data"
-            ],
-        }
+        return self._get_route_data("nanda")
 
     def _reset_stop_data(self) -> None:
         """重新初始化所有 Stop 物件的 stopped_bus DataFrame，用於更新站點公車資訊。"""
@@ -579,7 +586,7 @@ class Buses:
         """
         temp_bus: dict[str, Any] = {"dep_info": bus, "stops_time": []}
         route: Optional[Route] = self._select_bus_route(
-            bus, route_type=route_type, direction=direction
+            bus, route_type=route_type, day=day, direction=direction
         )
 
         if route:
@@ -598,6 +605,7 @@ class Buses:
         bus: dict,
         *,
         route_type: Literal["main", "nanda"],
+        day: Literal["weekday", "weekend"],
         direction: Literal["up", "down"],
     ) -> Optional[Route]:
         """
