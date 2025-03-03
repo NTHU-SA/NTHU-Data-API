@@ -12,7 +12,7 @@ class DiningBuildingName(str, Enum):
     其他餐廳 = "其他餐廳"
 
 
-class DiningSceduleName(str, Enum):
+class DiningScheduleName(str, Enum):
     today = "today"
     weekday = "weekday"
     saturday = "saturday"
@@ -33,7 +33,7 @@ class DiningBuilding(BaseModel):
     restaurants: list[DiningRestaurant] = Field(..., description="餐廳資料")
 
 
-class DiningSceduleKeyword:
+class DiningScheduleKeyword:
     DAY_EN_TO_ZH = {
         "weekday": ["平日"],
         "saturday": ["週六", "星期六", "禮拜六", "六"],

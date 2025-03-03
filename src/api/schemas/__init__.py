@@ -6,6 +6,6 @@ from . import (
     energy,
     libraries,
     locations,
-    newsletter,
+    newsletters,
     resources,
 )

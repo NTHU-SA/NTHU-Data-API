@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from functools import reduce
@@ -9,16 +8,13 @@ from typing import Any, Dict, List, Literal, Optional
 
 import pandas as pd
 
-from src import utils
 from src.api import schemas
+from src.utils import nthudata
 
 # ---------------------------------------------------------------------------
 # 常數與全域變數
 # ---------------------------------------------------------------------------
 DATA_TTL_HOURS = 4  # 資料存活時間 (小時)
-JSON_URL = (
-    os.getenv("NTHU_DATA_URL", "https://data.nthusa.tw") + "/buses.json"
-)  # 公車時刻表 JSON API 端點
 
 # 保持後續程式中 BUS_TYPE, BUS_DAY, BUS_DIRECTION 的順序一致，因 BusType、BusDay 具有 all 選項
 BUS_ROUTE_TYPE: List[str] = [bus_type.value for bus_type in schemas.buses.BusRouteType]
@@ -466,7 +462,7 @@ class Buses:
         """更新公車時刻表資料，包含從 API 獲取最新資料並重新處理。"""
         # asyncio.gather(self._init_task)  # 等待初始化任務完成
 
-        res_commit_hash, self._res_json = await utils.get(
+        res_commit_hash, self._res_json = await nthudata.get(
             "buses.json"
         )  # 直接更新 _res_json，後續處理會使用最新的 json 資料
 

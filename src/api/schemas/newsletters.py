@@ -4,15 +4,17 @@ from typing import Optional
 from pydantic import BaseModel, Field, HttpUrl
 
 
+class NewsletterArticle(BaseModel):
+    title: Optional[str] = Field(..., description="電子報標題")
+    link: Optional[HttpUrl] = Field(..., description="電子報網址")
+    date: Optional[str] = Field(None, description="發布日期")
+
+
 class NewsletterInfo(BaseModel):
     name: str = Field(..., description="該電子報名稱")
     link: HttpUrl = Field(..., description="該電子報網址")
-
-
-class NewsletterData(BaseModel):
-    title: Optional[str] = Field(..., description="電子報標題")
-    link: Optional[HttpUrl] = Field(..., description="電子報網址")
-    date: Optional[str] = Field(..., description="發布日期")
+    details: dict = Field(..., description="該電子報詳細資訊")
+    articles: list[NewsletterArticle] = Field(..., description="該電子報文章列表")
 
 
 class NewsletterName(str, Enum):

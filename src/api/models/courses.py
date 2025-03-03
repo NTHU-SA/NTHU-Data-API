@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
-from src import utils
+from src.utils import nthudata
 
 
 # =============================================================================
@@ -207,7 +207,7 @@ class Processor:
         self.last_commit_hash = None
 
     async def update_data(self) -> None:
-        self.last_commit_hash, self.course_data = await utils.get("courses.json")
+        self.last_commit_hash, self.course_data = await nthudata.get("courses.json")
 
         # 將 dict 轉換為 CoursesData 物件
         self.course_data = list(map(CoursesData.from_dict, self.course_data))

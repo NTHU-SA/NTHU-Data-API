@@ -79,11 +79,11 @@ def test_courses_fields_with_values(field_name, value):
 )
 @pytest.mark.parametrize("value", ["testing"])
 def test_courses_search(field_name, value):
-    response = client.get(url=f"/courses/searches?field={field_name}&value={value}")
+    response = client.get(url=f"/courses/search?field={field_name}&value={value}")
     assert response.status_code == 200
 
 
 @pytest.mark.parametrize("body", [one_condition, two_conditions, multiple_conditions])
 def test_courses_search_post(body):
-    response = client.post(url="/courses/searches", json=body)
+    response = client.post(url="/courses/search", json=body)
     assert response.status_code == 200

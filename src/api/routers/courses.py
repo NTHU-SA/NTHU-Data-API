@@ -156,7 +156,7 @@ async def get_courses_list(
 
 
 @router.get(
-    "/searches",
+    "/search",
     response_model=list[schemas.courses.CourseData],
     dependencies=[Depends(add_custom_header)],
 )
@@ -180,7 +180,7 @@ async def search_by_field_and_value(
 
 
 @router.post(
-    "/searches",
+    "/search",
     response_model=list[schemas.courses.CourseData],
     dependencies=[Depends(add_custom_header)],
 )

@@ -7,16 +7,10 @@ from src.api import schemas
 client = TestClient(app)
 
 
-@pytest.mark.parametrize(
-    "url, status_code",
-    [
-        ("/buses/main/", 200),
-        ("/buses/nanda/", 200),
-    ],
-)
-def test_buses_endpoints(url, status_code):
-    response = client.get(url=url)
-    assert response.status_code == status_code
+@pytest.mark.parametrize("campus", ["main", "nanda"])
+def test_buses_endpoints(campus):
+    response = client.get(url=f"/buses/{campus}")
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize("bus_type", ["main", "nanda"])
@@ -27,7 +21,7 @@ def test_buses_info(bus_type, direction):
 
 
 def test_buses_stops_info():
-    response = client.get(url=f"/buses/info/stops")
+    response = client.get(url="/buses/info/stops")
     assert response.status_code == 200
 
 

@@ -7,16 +7,14 @@ client = TestClient(app)
 search_list = ["校長", "高為元", "總務處"]
 
 
-@pytest.mark.parametrize(
-    "url, status_code",
-    [
-        ("/departments/", 200),
-        ("/departments/01", 200),
-    ],
-)
-def test_departments_endpoints(url, status_code):
-    response = client.get(url=url)
-    assert response.status_code == status_code
+def test_departments_endpoints():
+    response = client.get(url="/departments/")
+    assert response.status_code == 200
+
+
+def test_departments_index():
+    response = client.get(url="/departments/01")
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize("name", search_list)
