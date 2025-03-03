@@ -74,12 +74,7 @@ async def get_main_bus_data():
     取得校本部公車資訊。
     """
     await buses.update_data()
-    try:
-        return buses.get_main_data()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve main bus data: {e}"
-        )
+    return buses.get_main_data()
 
 
 @router.get(
@@ -93,12 +88,7 @@ async def get_nanda_bus_data():
     取得南大校區區間車資訊。
     """
     await buses.update_data()
-    try:
-        return buses.get_nanda_data()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve nanda bus data: {e}"
-        )
+    return buses.get_nanda_data()
 
 
 @router.get(
