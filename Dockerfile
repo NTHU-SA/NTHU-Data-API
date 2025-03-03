@@ -8,10 +8,6 @@ WORKDIR /usr/src/app
 ENV TZ=Asia/Taipei
 RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
-# Set logging level
-ENV LOGURU_LEVEL=ERROR
-ENV NTHU_DATA_URL=https://data.nthusa.tw/
-
 # Install python
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt --no-cache-dir
