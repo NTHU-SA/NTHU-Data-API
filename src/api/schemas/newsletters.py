@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -13,7 +13,7 @@ class NewsletterArticle(BaseModel):
 class NewsletterInfo(BaseModel):
     name: str = Field(..., description="該電子報名稱")
     link: HttpUrl = Field(..., description="該電子報網址")
-    details: Dict = Field(..., description="該電子報詳細資訊")
+    details: dict = Field(..., description="該電子報詳細資訊")
     articles: list[NewsletterArticle] = Field(..., description="該電子報文章列表")
 
 
