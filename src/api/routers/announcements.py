@@ -40,10 +40,10 @@ async def get_announcements_by_department(
     取得特定部門的公告資訊。
     """
     _commit_hash, announcements_data = await nthudata.get(json_path)
-    announcement_list = []
+    announcements = []
     for announcement in announcements_data:
         if announcement["department"] == name:
-            announcement_list.append(announcement)
-    if announcement_list:
-        return announcement_list
+            announcements.append(announcement)
+    if announcements:
+        return announcements
     raise HTTPException(status_code=404, detail="部門名稱不存在")
