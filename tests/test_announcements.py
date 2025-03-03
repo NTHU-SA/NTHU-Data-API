@@ -13,11 +13,11 @@ def test_announcements_endpoints():
 
 
 def test_get_all_department():
-    response = client.get(url="/announcements/department")
+    response = client.get(url="/announcements/departments")
     assert response.status_code == 200
 
 
 @pytest.mark.parametrize("name", department_list)
 def test_get_announcements_by_department(name):
-    response = client.get(url=f"/announcements/department/{name}")
+    response = client.get(url=f"/announcements/departments/{name}")
     assert response.status_code == 200
