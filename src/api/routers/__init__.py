@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import (
     announcements,
-    bulletins,
     buses,
     courses,
     departments,
@@ -14,7 +13,6 @@ from . import (
     libraries,
     locations,
     newsletters,
-    scrapers,
 )
 
 app = FastAPI()
@@ -50,5 +48,3 @@ app.include_router(energy.router, prefix="/energy", tags=["Energy"])
 app.include_router(libraries.router, prefix="/libraries", tags=["Libraries"])
 app.include_router(locations.router, prefix="/locations", tags=["Locations"])
 app.include_router(newsletters.router, prefix="/newsletters", tags=["Newsletters"])
-app.include_router(bulletins.router, prefix="/bulletins", tags=["Bulletins"])
-app.include_router(scrapers.router, prefix="/scrapers", tags=["Scrapers"])

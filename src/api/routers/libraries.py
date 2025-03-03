@@ -9,7 +9,14 @@ import xmltodict
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException, Path
 
-from src.api import schemas
+from src.api.schemas.libraries import (
+    LibraryLostAndFound,
+    LibraryName,
+    LibraryNumberOfGoods,
+    LibraryRssType,
+    LibrarySpace,
+    RssItem,
+)
 
 _default_headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
@@ -18,7 +25,7 @@ _default_headers = {
 router = APIRouter()
 
 
-@router.get("/space", response_model=list[schemas.libraries.LibrarySpace])
+@router.get("/space", response_model=list[LibrarySpace])
 def get_library_space_data():
     """
     取得空間使用資訊。
@@ -39,9 +46,7 @@ def get_library_space_data():
         raise HTTPException(status_code=500, detail="解析空間資料 JSON 失敗")
 
 
-@router.get(
-    "/lost_and_found", response_model=list[schemas.libraries.LibraryLostAndFound]
-)
+@router.get("/lost_and_found", response_model=list[LibraryLostAndFound])
 def get_library_lost_and_found():
     """
     取得失物招領資訊。
@@ -99,9 +104,9 @@ def get_library_lost_and_found():
         raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
 
 
-@router.get("/rss/{rss_type}", response_model=list[schemas.resources.RssItem])
+@router.get("/rss/{rss_type}", response_model=list[RssItem])
 def get_library_rss_data(
-    rss_type: schemas.libraries.LibraryRssType = Path(
+    rss_type: LibraryRssType = Path(
         ...,
         description="RSS 類型：最新消息(news)、電子資源(eresources)、展覽及活動(exhibit)、南大與人社分館(branches)",
     )
@@ -146,7 +151,7 @@ def get_library_rss_data(
 
 @router.get("/openinghours/{library_name}", response_model=dict)
 def get_library_opening_hours(
-    library_name: schemas.libraries.LibraryName = Path(
+    library_name: LibraryName = Path(
         ...,
         description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)、夜讀區(mainlib_moonlight_area)",
     )
@@ -168,7 +173,7 @@ def get_library_opening_hours(
         raise HTTPException(status_code=500, detail=f"解析開放時間資料失敗: {e}")
 
 
-@router.get("/goods", response_model=schemas.libraries.LibraryNumberOfGoods)
+@router.get("/goods", response_model=LibraryNumberOfGoods)
 def get_library_number_of_goods():
     """
     取得總圖換證數量資訊。

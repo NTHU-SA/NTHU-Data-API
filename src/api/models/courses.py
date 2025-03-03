@@ -1,7 +1,7 @@
 import operator
 import re
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 
 from src.utils import nthudata
 
@@ -132,7 +132,7 @@ class Conditions:
         matcher: Optional[Union[str, re.Pattern]] = None,
         regex_match: bool = False,
         *,
-        list_build_target: Optional[List[Any]] = None,
+        list_build_target: Optional[list[Any]] = None,
     ):
         if list_build_target is not None:
             self.condition_stat = list_build_target
@@ -203,7 +203,7 @@ class Processor:
     """
 
     def __init__(self) -> None:
-        self.course_data: List[CoursesData] = []
+        self.course_data: list[CoursesData] = []
         self.last_commit_hash = None
 
     async def update_data(self) -> None:
@@ -214,7 +214,7 @@ class Processor:
 
         print(self.last_commit_hash)
 
-    def list_selected_fields(self, field: str) -> List[str]:
+    def list_selected_fields(self, field: str) -> list[str]:
         """回傳所有課程中指定欄位的非空字串集合"""
         fields_set = {
             getattr(course, field).strip()
@@ -223,7 +223,7 @@ class Processor:
         }
         return list(fields_set)
 
-    def list_credit(self, credit: float, op: str = "") -> List[CoursesData]:
+    def list_credit(self, credit: float, op: str = "") -> list[CoursesData]:
         ops = {
             "gt": operator.gt,
             "lt": operator.lt,
@@ -239,7 +239,7 @@ class Processor:
             if cmp_op(float(course.credit), credit)
         ]
 
-    def query(self, conditions: Conditions) -> List[CoursesData]:
+    def query(self, conditions: Conditions) -> list[CoursesData]:
         """搜尋所有符合條件的課程，傳入的 conditions 為複合條件樹"""
         return [course for course in self.course_data if conditions.accept(course)]
 

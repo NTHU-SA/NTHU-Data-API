@@ -5,16 +5,20 @@
     <em>It provides an easy way to fetch data from the NTHU website.</em>
 </p>
 <p align="center">
-<a href="https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api" target="_blank">
-    <img src="https://www.codefactor.io/repository/github/nthu-sa/nthu-data-api/badge" alt="Codefactor Score">
-</a>
 <a href="https://github.com/psf/black" target="_blank">
     <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black">
 </a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/NTHU-SA/NTHU-Data-API" target="_blank">
     <img src="https://coverage-badge.samuelcolvin.workers.dev/NTHU-SA/NTHU-Data-API.svg" alt="Test Coverage">
 </a>
+<a href="github.com/NTHU-SA/NTHU-Data-API/actions/workflows/tests.yml" target="_blank">
+    <img src="https://github.com/NTHU-SA/NTHU-Data-API/actions/workflows/tests.yml/badge.svg" alt="Test Action Status">
+</a>
 <br>
+<a href="https://sonarcloud.io/summary/new_code?id=NTHU-SA_NTHU-Data-API" target="_blank">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=NTHU-SA_NTHU-Data-API&metric=sqale_rating" alt="
+Maintainability Rating">
+</a>
 <a href="https://sonarcloud.io/summary/new_code?id=NTHU-SA_NTHU-Data-API" target="_blank">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=NTHU-SA_NTHU-Data-API&metric=ncloc" alt="Lines of Code">
 </a>
@@ -22,9 +26,6 @@
     <img src="https://sonarcloud.io/api/project_badges/measure?project=NTHU-SA_NTHU-Data-API&metric=sqale_index" alt="Technical Debt">
 </a>
 </p>
-
-## Introduction
-NTHU-Data-API is a project designed for NTHU developers. It provides an easy way to fetch data from the NTHU website.
 
 ## Getting Started
 ### Prerequisites

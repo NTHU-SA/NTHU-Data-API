@@ -30,7 +30,7 @@ async def get_all_department():
 
 @router.get(
     "/department/{name}",
-    response_model=AnnouncementDetail,
+    response_model=list[AnnouncementDetail],
     summary="取得特定部門的公告列表",
 )
 async def get_announcements_by_department(
@@ -40,7 +40,10 @@ async def get_announcements_by_department(
     取得特定部門的公告資訊。
     """
     _commit_hash, announcements_data = await nthudata.get(json_path)
+    announcements = []
     for announcement in announcements_data:
         if announcement["department"] == name:
-            return announcement
-    raise HTTPException(status_code=404, detail="Not found")
+            announcements.append(announcement)
+    if announcements:
+        return announcements
+    raise HTTPException(status_code=404, detail="部門名稱不存在")

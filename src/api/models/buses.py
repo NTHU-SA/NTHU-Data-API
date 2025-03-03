@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from functools import reduce
 from itertools import product
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal, Optional
 
 import pandas as pd
 
@@ -17,11 +17,11 @@ from src.utils import nthudata
 DATA_TTL_HOURS = 4  # 資料存活時間 (小時)
 
 # 保持後續程式中 BUS_TYPE, BUS_DAY, BUS_DIRECTION 的順序一致，因 BusType、BusDay 具有 all 選項
-BUS_ROUTE_TYPE: List[str] = [bus_type.value for bus_type in schemas.buses.BusRouteType]
-BUS_ROUTE_TYPE_WITHOUT_ALL: List[str] = BUS_ROUTE_TYPE[1:]  # 第一個為 all，故移除
-BUS_DAY: List[str] = [bus_day.value for bus_day in schemas.buses.BusDay]
-BUS_DAY_WITHOUT_ALL: List[str] = BUS_DAY[1:]
-BUS_DIRECTION: List[str] = [bus_dir.value for bus_dir in schemas.buses.BusDirection]
+BUS_ROUTE_TYPE: list[str] = [bus_type.value for bus_type in schemas.buses.BusRouteType]
+BUS_ROUTE_TYPE_WITHOUT_ALL: list[str] = BUS_ROUTE_TYPE[1:]  # 第一個為 all，故移除
+BUS_DAY: list[str] = [bus_day.value for bus_day in schemas.buses.BusDay]
+BUS_DAY_WITHOUT_ALL: list[str] = BUS_DAY[1:]
+BUS_DIRECTION: list[str] = [bus_dir.value for bus_dir in schemas.buses.BusDirection]
 
 schedule_index = pd.MultiIndex.from_product([BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECTION])
 
@@ -29,13 +29,13 @@ schedule_index = pd.MultiIndex.from_product([BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECT
 # ---------------------------------------------------------------------------
 # Helper Functions
 # ---------------------------------------------------------------------------
-def get_nested_value(data: dict, keys: List[str]) -> Any:
+def get_nested_value(data: dict, keys: list[str]) -> Any:
     """
     從巢狀字典中根據鍵路徑 (keys) 取得對應的值。
 
     Args:
         data (dict): 巢狀字典。
-        keys (List[str]): 鍵路徑，依序指定巢狀結構中的鍵。
+        keys (list[str]): 鍵路徑，依序指定巢狀結構中的鍵。
 
     Returns:
         Any: 根據鍵路徑取得的值。若路徑不存在，則返回 None。
@@ -44,19 +44,19 @@ def get_nested_value(data: dict, keys: List[str]) -> Any:
 
 
 def after_specific_time(
-    target_list: List[dict], time_str: str, time_path: Optional[List[str]] = None
-) -> List[dict]:
+    target_list: list[dict], time_str: str, time_path: Optional[list[str]] = None
+) -> list[dict]:
     """
     過濾字典列表，僅保留指定時間之後的資料。
 
     Args:
-        target_list (List[dict]): 包含時間字串的字典列表。
+        target_list (list[dict]): 包含時間字串的字典列表。
         time_str (str): 比較用的時間字串，格式為 'HH:MM'。
-        time_path (Optional[List[str]]): 指定在字典中取得時間字串的鍵路徑。
+        time_path (Optional[list[str]]): 指定在字典中取得時間字串的鍵路徑。
                                         若為 None，則預設字典本身即為時間字串。
 
     Returns:
-        List[dict]: 過濾後的時間在 `time_str` 之後的字典列表。
+        list[dict]: 過濾後的時間在 `time_str` 之後的字典列表。
     """
     ref_hour, ref_minute = map(int, time_str.split(":"))
     filtered_list = []
@@ -70,13 +70,13 @@ def after_specific_time(
     return filtered_list
 
 
-def sort_by_time(target: List[dict], time_path: Optional[List[str]] = None) -> None:
+def sort_by_time(target: list[dict], time_path: Optional[list[str]] = None) -> None:
     """
     依照時間排序字典列表。
 
     Args:
-        target (List[dict]): 包含時間資訊的字典列表。
-        time_path (Optional[List[str]]): 指定在字典中取得時間字串的鍵路徑。
+        target (list[dict]): 包含時間資訊的字典列表。
+        time_path (Optional[list[str]]): 指定在字典中取得時間字串的鍵路徑。
                                         若為 None，則預設字典本身即為時間字串。
         時間字串格式必須為 '%H:%M'。
     """
@@ -87,7 +87,7 @@ def sort_by_time(target: List[dict], time_path: Optional[List[str]] = None) -> N
     )
 
 
-def gen_the_all_field(target_dataframe: pd.DataFrame, time_path: List[str]) -> None:
+def gen_the_all_field(target_dataframe: pd.DataFrame, time_path: list[str]) -> None:
     """
     針對 DataFrame 產品組合欄位，將資料合併至 'all' 欄位，並依照時間排序。
 
@@ -96,7 +96,7 @@ def gen_the_all_field(target_dataframe: pd.DataFrame, time_path: List[str]) -> N
 
     Args:
         target_dataframe (pd.DataFrame): 包含分層索引 (MultiIndex) 的 DataFrame，索引應包含 BUS_TYPE, BUS_DAY, BUS_DIRECTION。
-        time_path (List[str]): 指定在資料中取得時間字串的鍵路徑，用於排序。
+        time_path (list[str]): 指定在資料中取得時間字串的鍵路徑，用於排序。
     """
     # 針對 BUS_TYPE_WITHOUT_ALL 合併 weekday 與 weekend
     for route_type, direction in product(BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DIRECTION):
@@ -155,12 +155,12 @@ class Route:
     公車路線資料類別。
 
     Attributes:
-        stops (List[Stop]):  路線包含的站點列表，依序排列。
-        _delta_time_table (Dict[Stop, Dict[Stop, int]]): 站點間的預估時間差 (分鐘)，用於計算站點抵達時間，初始化後設定。
+        stops (list[Stop]):  路線包含的站點列表，依序排列。
+        _delta_time_table (dict[Stop, dict[Stop, int]]): 站點間的預估時間差 (分鐘)，用於計算站點抵達時間，初始化後設定。
     """
 
-    stops: List[Stop]
-    _delta_time_table: Dict[Stop, Dict[Stop, int]] = field(
+    stops: list[Stop]
+    _delta_time_table: dict[Stop, dict[Stop, int]] = field(
         default_factory=dict, init=False
     )
 
@@ -177,12 +177,12 @@ class Route:
             stops["S1"]: {stops["M5"]: 15},
         }
 
-    def gen_accumulated_time(self) -> List[int]:
+    def gen_accumulated_time(self) -> list[int]:
         """
         計算路線上每個站點的累積時間。
 
         Returns:
-            List[int]: 包含每個站點累積時間的列表，第一個站點時間為 0 分鐘。
+            list[int]: 包含每個站點累積時間的列表，第一個站點時間為 0 分鐘。
         """
         acc_times = [0]
         for i in range(len(self.stops) - 1):
@@ -208,7 +208,7 @@ S1 = Stop(
     "24.79438267696105",
     "120.965382976675",
 )
-stops: Dict[str, Stop] = {
+stops: dict[str, Stop] = {
     "M1": M1,
     "M2": M2,
     "M3": M3,
@@ -218,7 +218,7 @@ stops: Dict[str, Stop] = {
     "M7": M7,
     "S1": S1,
 }
-stop_name_mapping: Dict[str, Stop] = {stop.name: stop for stop in stops.values()}
+stop_name_mapping: dict[str, Stop] = {stop.name: stop for stop in stops.values()}
 
 # 清大路網圖 (單位：分鐘)
 #                        M4
@@ -288,7 +288,7 @@ class Buses:
         self.last_commit_hash = None
 
         self._res_json: dict = {}  # 儲存原始 JSON 回應資料
-        self._start_from_gen_2_bus_info: List[str] = []  # 記錄從綜二館發車的班次資訊
+        self._start_from_gen_2_bus_info: list[str] = []  # 記錄從綜二館發車的班次資訊
         self._last_updated_time: Optional[float] = None  # 上次資料更新時間戳記
 
     async def _process_bus_data(self) -> None:
@@ -514,7 +514,7 @@ class Buses:
             Optional[Route]: 若找到對應的 Route 物件則返回，否則返回 None。
         """
         dep_stop, line = dep_stop.strip(), line.strip()
-        stops_lines_map: Dict[tuple, Route] = {
+        stops_lines_map: dict[tuple, Route] = {
             ("台積館", "red", True): red_M5_M2,
             ("台積館", "red", False): red_M5_M1,
             ("台積館", "green", True): green_M5_M2,
@@ -531,25 +531,25 @@ class Buses:
 
     def _gen_detailed_bus_schedule(
         self,
-        bus_schedule: List[dict],
+        bus_schedule: list[dict],
         *,
         route_type: Literal["main", "nanda"] = "main",
         day: Literal["weekday", "weekend"] = "weekday",
         direction: Literal["up", "down"] = "up",
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         產生詳細的公車時刻表，包含每個班次在每個站點的抵達時間。
 
         Args:
-            bus_schedule (List[dict]): 原始公車時刻表資料，包含發車時間、路線等資訊。
+            bus_schedule (list[dict]): 原始公車時刻表資料，包含發車時間、路線等資訊。
             route_type (Literal["main", "nanda"]): 公車類型，'main' 為校本部, 'nanda' 為南大區間車，預設為 'main'。
             day (Literal["weekday", "weekend"]):  平日或假日時刻表，預設為 'weekday'。
             direction (Literal["up", "down"]): 行車方向，預設為 'up'。
 
         Returns:
-            List[dict]: 詳細公車時刻表列表，每個元素為一個字典，包含班次資訊和每個停靠站點的抵達時間。
+            list[dict]: 詳細公車時刻表列表，每個元素為一個字典，包含班次資訊和每個停靠站點的抵達時間。
         """
-        detailed_schedules: List[dict] = []
+        detailed_schedules: list[dict] = []
         for bus in bus_schedule:
             detailed_bus_schedule = self._process_single_bus_schedule(
                 bus, route_type=route_type, day=day, direction=direction
@@ -577,7 +577,7 @@ class Buses:
         Returns:
             dict: 包含單個公車班次詳細時刻表的字典，包含班次資訊和每個停靠站點的抵達時間。
         """
-        temp_bus: Dict[str, Any] = {"dep_info": bus, "stops_time": []}
+        temp_bus: dict[str, Any] = {"dep_info": bus, "stops_time": []}
         route: Optional[Route] = self._select_bus_route(
             bus, route_type=route_type, direction=direction
         )
@@ -784,12 +784,12 @@ class Buses:
                 stop.stopped_bus, ["arrive_time"]
             )  # 合併與排序每個站點 stopped_bus 的 'all' 欄位
 
-    def gen_bus_stops_info(self) -> List[dict]:
+    def gen_bus_stops_info(self) -> list[dict]:
         """
         產生公車站點資訊列表。
 
         Returns:
-            List[dict]: 包含所有公車站點資訊的列表，每個元素為一個字典，包含 'stop_name', 'stop_name_en', 'latitude', 'longitude' 鍵值。
+            list[dict]: 包含所有公車站點資訊的列表，每個元素為一個字典，包含 'stop_name', 'stop_name_en', 'latitude', 'longitude' 鍵值。
         """
         return [
             {

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,4 +14,4 @@ class AnnouncementDetail(BaseModel):
     link: str = Field(..., description="佈告欄連結")
     language: str = Field(..., description="佈告欄語言")
     department: str = Field(..., description="發布部門")
-    articles: List[Article] = Field(..., description="公告列表")
+    articles: list[Article] = Field(..., description="公告列表")

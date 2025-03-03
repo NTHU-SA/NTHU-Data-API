@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -20,9 +20,9 @@ class Person(BaseModel):
 
 
 class DepartmentDetails(BaseModel):
-    departments: List[dict] = Field(default_factory=list)
+    departments: list[dict] = Field(default_factory=list)
     contact: Contact = Field(default_factory=Contact)
-    people: List[Person] = Field(default_factory=list)
+    people: list[Person] = Field(default_factory=list)
 
 
 class DepartmentBase(BaseModel):

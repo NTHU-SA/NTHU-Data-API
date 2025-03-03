@@ -7,5 +7,4 @@ from . import (
     libraries,
     locations,
     newsletters,
-    resources,
 )
