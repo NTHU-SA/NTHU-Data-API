@@ -472,10 +472,11 @@ class Buses:
         res_commit_hash, self._res_json = await nthudata.get(
             "buses.json"
         )  # 直接更新 _res_json，後續處理會使用最新的 json 資料
-
+        print(self._res_json)
         if (
             self._res_json and res_commit_hash != self.last_commit_hash
         ):  # 只有成功獲取資料且資料不一致時才需要重新處理
+            print("Processing bus data...")
             await self._process_bus_data()
             self.last_commit_hash = res_commit_hash
         self._start_from_gen_2_bus_info.clear()  # 清空從綜二館發車的班次資訊快取
