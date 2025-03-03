@@ -4,8 +4,24 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Response
 
-from src.api import constant, schemas
+from src.api import constant
 from src.api.models.buses import Buses, after_specific_time, stops
+from src.api.schemas.buses import (
+    BusDayWithCurrent,
+    BusDirection,
+    BusInfo,
+    BusMainData,
+    BusMainDetailedSchedule,
+    BusMainSchedule,
+    BusNandaData,
+    BusNandaDetailedSchedule,
+    BusNandaSchedule,
+    BusQuery,
+    BusRouteType,
+    BusStopsInfo,
+    BusStopsQueryResult,
+    StopsName,
+)
 
 buses = Buses()
 
@@ -49,7 +65,7 @@ def get_current_time_state():
 
 @router.get(
     "/main",
-    response_model=schemas.buses.BusMainData,
+    response_model=BusMainData,
     name="校本部公車資訊",
     dependencies=[Depends(add_custom_header)],
 )
@@ -68,7 +84,7 @@ async def get_main_bus_data():
 
 @router.get(
     "/nanda",
-    response_model=schemas.buses.BusNandaData,
+    response_model=BusNandaData,
     name="南大校區區間車資訊",
     dependencies=[Depends(add_custom_header)],
 )
@@ -87,23 +103,23 @@ async def get_nanda_bus_data():
 
 @router.get(
     "/info/{bus_type}/{direction}",
-    response_model=list[schemas.buses.BusInfo],
+    response_model=list[BusInfo],
     name="公車路線資訊",
     dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_route_info(
     bus_type: Literal["main", "nanda"] = constant.buses.BUS_TYPE_PATH,
-    direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_PATH,
+    direction: BusDirection = constant.buses.BUS_DIRECTION_PATH,
 ):
     """
     取得指定公車路線的資訊。
 
     Args:
         bus_type (Literal["main", "nanda"]): 公車類型 (校本部或南大區間車)。
-        direction (schemas.buses.BusDirection): 行車方向 (up 或 down)。
+        direction (BusDirection): 行車方向 (up 或 down)。
 
     Returns:
-        list[schemas.buses.BusInfo]: 公車路線資訊列表。
+        list[BusInfo]: 公車路線資訊列表。
 
     Raises:
         HTTPException: 如果無法取得公車路線資訊，則拋出 500 錯誤。
@@ -126,7 +142,7 @@ async def get_bus_route_info(
 
 @router.get(
     "/info/stops",
-    response_model=list[schemas.buses.BusStopsInfo],
+    response_model=list[BusStopsInfo],
     name="停靠站資訊",
     dependencies=[Depends(add_custom_header)],
 )
@@ -135,7 +151,7 @@ async def get_bus_stops_info():
     取得所有公車停靠站點的資訊。
 
     Returns:
-        list[schemas.buses.BusStopsInfo]: 公車停靠站點資訊列表。
+        list[BusStopsInfo]: 公車停靠站點資訊列表。
     """
     await buses.update_data()
     try:
@@ -148,27 +164,25 @@ async def get_bus_stops_info():
 
 @router.get(
     "/schedules",
-    response_model=list[
-        schemas.buses.BusMainSchedule | schemas.buses.BusNandaSchedule | None
-    ],
+    response_model=list[BusMainSchedule | BusNandaSchedule | None],
     name="公車時刻表",
     dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_schedule(
-    bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
-    day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
-    direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
+    bus_type: BusRouteType = constant.buses.BUS_TYPE_QUERY,
+    day: BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
+    direction: BusDirection = constant.buses.BUS_DIRECTION_QUERY,
 ):
     """
     取得指定條件的公車時刻表。
 
     Args:
-        bus_type (schemas.buses.BusType): 公車類型 (all, main, nanda)。
-        day (schemas.buses.BusDayWithCurrent): 星期別 (all, weekday, weekend, current)。
-        direction (schemas.buses.BusDirection): 行車方向 (all, up, down)。
+        bus_type (BusType): 公車類型 (all, main, nanda)。
+        day (BusDayWithCurrent): 星期別 (all, weekday, weekend, current)。
+        direction (BusDirection): 行車方向 (all, up, down)。
 
     Returns:
-        list[schemas.buses.BusMainSchedule | schemas.buses.BusNandaSchedule | None]: 公車時刻表列表。
+        list[BusMainSchedule | BusNandaSchedule | None]: 公車時刻表列表。
 
     Raises:
         HTTPException: 如果無法取得公車時刻表，則拋出 404 或 500 錯誤。
@@ -204,29 +218,29 @@ async def get_bus_schedule(
 
 @router.get(
     "/stops/{stop_name}",
-    response_model=list[schemas.buses.BusStopsQueryResult | None],
+    response_model=list[BusStopsQueryResult | None],
     name="站點停靠公車資訊",
     dependencies=[Depends(add_custom_header)],
 )
 async def get_stop_bus_info(
-    stop_name: schemas.buses.StopsName = constant.buses.STOPS_NAME_PATH,
-    bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
-    day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
-    direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
-    query: schemas.buses.BusQuery = Depends(),
+    stop_name: StopsName = constant.buses.STOPS_NAME_PATH,
+    bus_type: BusRouteType = constant.buses.BUS_TYPE_QUERY,
+    day: BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
+    direction: BusDirection = constant.buses.BUS_DIRECTION_QUERY,
+    query: BusQuery = Depends(),
 ):
     """
     取得指定站點的公車停靠資訊。
 
     Args:
-        stop_name (schemas.buses.StopsName): 站點名稱 (enum)。
-        bus_type (schemas.buses.BusType): 公車類型 (all, main, nanda)。
-        day (schemas.buses.BusDayWithCurrent): 星期別 (all, weekday, weekend, current)。
-        direction (schemas.buses.BusDirection): 行車方向 (all, up, down)。
-        query (schemas.buses.BusQuery): 查詢參數，包含時間和數量限制。
+        stop_name (StopsName): 站點名稱 (enum)。
+        bus_type (BusType): 公車類型 (all, main, nanda)。
+        day (BusDayWithCurrent): 星期別 (all, weekday, weekend, current)。
+        direction (BusDirection): 行車方向 (all, up, down)。
+        query (BusQuery): 查詢參數，包含時間和數量限制。
 
     Returns:
-        list[schemas.buses.BusStopsQueryResult | None]: 站點停靠公車資訊列表。
+        list[BusStopsQueryResult | None]: 站點停靠公車資訊列表。
 
     Raises:
         HTTPException: 如果無法取得站點停靠公車資訊，則拋出 404 或 500 錯誤。
@@ -267,31 +281,27 @@ async def get_stop_bus_info(
 
 @router.get(
     "/detailed",
-    response_model=list[
-        schemas.buses.BusMainDetailedSchedule
-        | schemas.buses.BusNandaDetailedSchedule
-        | None
-    ],
+    response_model=list[BusMainDetailedSchedule | BusNandaDetailedSchedule | None],
     name="詳細公車時刻表",
     dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_detailed_schedule(
-    bus_type: schemas.buses.BusRouteType = constant.buses.BUS_TYPE_QUERY,
-    day: schemas.buses.BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
-    direction: schemas.buses.BusDirection = constant.buses.BUS_DIRECTION_QUERY,
-    query: schemas.buses.BusQuery = Depends(),
+    bus_type: BusRouteType = constant.buses.BUS_TYPE_QUERY,
+    day: BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
+    direction: BusDirection = constant.buses.BUS_DIRECTION_QUERY,
+    query: BusQuery = Depends(),
 ):
     """
     取得詳細公車時刻表，包含抵達各站時間。
 
     Args:
-        bus_type (schemas.buses.BusType): 公車類型 (all, main, nanda)。
-        day (schemas.buses.BusDayWithCurrent): 星期別 (all, weekday, weekend, current)。
-        direction (schemas.buses.BusDirection): 行車方向 (all, up, down)。
-        query (schemas.buses.BusQuery): 查詢參數，包含時間和數量限制。
+        bus_type (BusType): 公車類型 (all, main, nanda)。
+        day (BusDayWithCurrent): 星期別 (all, weekday, weekend, current)。
+        direction (BusDirection): 行車方向 (all, up, down)。
+        query (BusQuery): 查詢參數，包含時間和數量限制。
 
     Returns:
-        list[schemas.buses.BusMainDetailedSchedule | schemas.buses.BusNandaDetailedSchedule | None]: 詳細公車時刻表列表。
+        list[BusMainDetailedSchedule | BusNandaDetailedSchedule | None]: 詳細公車時刻表列表。
 
     Raises:
         HTTPException: 如果無法取得詳細公車時刻表，則拋出 404 或 500 錯誤。

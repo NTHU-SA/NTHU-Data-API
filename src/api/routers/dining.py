@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from fastapi import APIRouter, Path, Query
 from thefuzz import fuzz
@@ -38,8 +37,8 @@ def _is_restaurant_open(restaurant: DiningRestaurant, day: str) -> bool:
     return True  # 未找到休息關鍵字，判斷為營業
 
 
-@router.get("/", response_model=List[DiningBuilding])
-async def get_all_dining_data() -> List[DiningBuilding]:
+@router.get("/", response_model=list[DiningBuilding])
+async def get_all_dining_data() -> list[DiningBuilding]:
     """
     取得所有餐廳資料。
     https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw
@@ -64,12 +63,12 @@ async def get_dining_data_in_buildings(
     )
 
 
-@router.get("/schedules/{day_of_week}", response_model=List[DiningRestaurant])
+@router.get("/schedules/{day_of_week}", response_model=list[DiningRestaurant])
 async def get_schedule_by_day_of_week(
     day_of_week: DiningScheduleName = Path(
         ..., example="saturday", description="營業日"
     )
-) -> List[DiningRestaurant]:
+) -> list[DiningRestaurant]:
     """
     取得所有該營業日的餐廳資訊。
     """
@@ -86,11 +85,11 @@ async def get_schedule_by_day_of_week(
 
 @router.get(
     "/search",
-    response_model=List[DiningRestaurant],
+    response_model=list[DiningRestaurant],
 )
 async def fuzzy_search_restaurant_by_name(
     restaurant_name: str = Query(..., example="麵", description="餐廳模糊搜尋關鍵字")
-) -> List[DiningRestaurant]:
+) -> list[DiningRestaurant]:
     """
     使用餐廳名稱模糊搜尋餐廳資料。
     """

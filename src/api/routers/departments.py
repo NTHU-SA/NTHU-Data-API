@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Union
 
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
@@ -21,7 +21,7 @@ async def read_all_departments():
 
 @router.get(
     "/search",
-    response_model=Dict[str, Union[list[Department], list[Person]]],
+    response_model=dict[str, Union[list[Department], list[Person]]],
     summary="關鍵字搜尋部門與人員名稱",
 )
 async def fuzzy_search_departments(

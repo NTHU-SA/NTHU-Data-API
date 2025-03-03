@@ -4,7 +4,7 @@ import re
 import requests
 from fastapi import APIRouter, HTTPException
 
-from src.api import schemas
+from src.api.schemas.energy import ElectricityInfo
 
 router = APIRouter()
 
@@ -47,7 +47,7 @@ def _get_realtime_electricity_usage():
     return electricity_usage_data
 
 
-@router.get("/electricity_usage", response_model=list[schemas.energy.ElectricityInfo])
+@router.get("/electricity_usage", response_model=list[ElectricityInfo])
 async def get_realtime_electricity_usage():
     """
     取得校園電力即時使用量。
