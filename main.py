@@ -13,7 +13,7 @@ if __name__ == "__main__":
         uvicorn.run(
             app="src:app",
             host="0.0.0.0",
-            port=int(os.getenv("PORT") or 5000),
+            port=int(os.getenv("PORT", 5000)),
             log_level="debug",
             reload=True,  # reload the server every time code changes
         )
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         uvicorn.run(
             app="src:app",
             host="0.0.0.0",
-            port=int(os.getenv("PORT") or 5000),
+            port=int(os.getenv("PORT", 5000)),
             log_level="error",
             workers=2,
             ssl_keyfile=ssl_keyfile,
