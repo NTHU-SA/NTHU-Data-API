@@ -16,20 +16,22 @@ async def get_all_announcements():
     return announcements_data
 
 
-@router.get("/department", response_model=list[str], summary="取得所有有公告的部門列表")
+@router.get(
+    "/departments", response_model=list[str], summary="取得所有有公告的部門列表"
+)
 async def get_all_department():
     """
     取得所有有公告的部門列表。
     """
     _commit_hash, announcements_data = await nthudata.get(json_path)
-    department_list = set()
+    departments = set()
     for announcement in announcements_data:
-        department_list.add(announcement["department"])
-    return list(department_list)
+        departments.add(announcement["department"])
+    return list(departments)
 
 
 @router.get(
-    "/department/{name}",
+    "/departments/{name}",
     response_model=list[AnnouncementDetail],
     summary="取得特定部門的公告列表",
 )
