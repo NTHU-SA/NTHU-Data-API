@@ -1,4 +1,3 @@
-import asyncio
 import json
 import os
 import time
@@ -25,7 +24,7 @@ async def _fetch_json(url: str) -> dict | None:
     Returns:
         dict or None: 如果成功獲取並解析 JSON 資料，則返回字典；如果發生錯誤，則返回 None。
     """
-    async with httpx.AsyncClient() as client:  # 在函式內部建立 AsyncClient
+    async with httpx.AsyncClient(http2=True) as client:  # 在函式內部建立 AsyncClient
         try:
             async with client.stream(
                 "GET", url

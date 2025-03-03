@@ -6,7 +6,7 @@ python-dotenv==1.0.1
 cachetools==5.5.2
 pyopenssl==25.0.0
 # Crawlers
-httpx==0.28.1
+httpx[http2]==0.28.1
 requests==2.32.3
 beautifulsoup4==4.13.3
 xmltodict==0.14.2
