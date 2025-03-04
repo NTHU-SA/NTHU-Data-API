@@ -83,9 +83,7 @@ async def fuzzy_search_restaurants(
 
 @router.get("/restaurants", response_model=list[DiningRestaurant])
 async def get_all_restaurants(
-    schedule: DiningScheduleName = Query(
-        None, eexample="saturday", description="營業日"
-    )
+    schedule: DiningScheduleName = Query(None, example="saturday", description="營業日")
 ) -> list[DiningRestaurant]:
     """
     取得所有餐廳資料。
