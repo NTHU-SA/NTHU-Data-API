@@ -268,6 +268,13 @@ class Processor:
 if __name__ == "__main__":
     processor = Processor()
 
+    async def test():
+        await processor.update_data()
+
+    import asyncio
+
+    asyncio.run(test())
+
     # 範例資料（原始資料中使用中文欄位名稱）
     sample_data = {
         "科號": "11320AES 370100",
@@ -348,7 +355,7 @@ if __name__ == "__main__":
             "and",
             {"row_field": "credit", "matcher": "4", "regex_match": True},
             "and",
-            {"row_field": "class_room_and_time", "matcher": "W", "regex_match": True},
+            {"row_field": "class_room_and_time", "matcher": "T", "regex_match": True},
         ]
     )
     result_complex = processor.query(condition_complex)

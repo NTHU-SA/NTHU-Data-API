@@ -58,15 +58,42 @@ async def get_all_courses(
 async def search_courses_by_field_and_value(
     request: Request,
     response: Response,
-    chinese_title: str = Query(None, description="中文標題搜尋", example="微積分"),
-    english_title: str = Query(None, description="英文標題搜尋"),
-    teacher: str = Query(None, description="教師搜尋"),
-    department: str = Query(None, description="開課系所搜尋"),
-    credit: str = Query(None, description="學分搜尋", example="3"),
-    note: str = Query(None, description="備註搜尋"),
-    class_room_and_time: str = Query(None, description="教室與時間搜尋"),
-    id: str = Query(None, description="課程ID搜尋"),
-    code: str = Query(None, description="課程代碼搜尋"),
+    id: str = Query(None, description="課號"),
+    chinese_title: str = Query(None, description="課程中文名稱"),
+    english_title: str = Query(None, description="課程英文名稱"),
+    credit: str = Query(None, description="學分數"),
+    size_limit: str = Query(None, description="人限：若為空字串表示無人數限制"),
+    freshman_reservation: str = Query(
+        None, description="新生保留人數：若為0表示無新生保留人數"
+    ),
+    object: str = Query(
+        None,
+        description="通識對象：[代碼說明(課務組)](https://curricul.site.nthu.edu.tw/p/404-1208-11133.php)",
+    ),
+    ge_type: str = Query(None, description="通識類別"),
+    language: schemas.courses.CourseLanguage = Query(
+        None, description='授課語言："中"、"英"'
+    ),
+    note: str = Query(None, description="備註"),
+    suspend: str = Query(None, description='停開註記："停開"或空字串'),
+    class_room_and_time: str = Query(
+        None,
+        description="教室與上課時間：一間教室對應一個上課時間，中間以tab分隔；多個上課教室以new line字元分開",
+    ),
+    teacher: str = Query(
+        None,
+        description="授課教師：多位教師授課以new line字元分開；教師中英文姓名以tab分開",
+    ),
+    prerequisite: str = Query(None, description="擋修說明：會有html entities"),
+    limit_note: str = Query(None, description="課程限制說明"),
+    expertise: str = Query(
+        None, description="第一二專長對應：對應多個專長用tab字元分隔"
+    ),
+    program: str = Query(None, description="學分學程對應：用半形/分隔"),
+    no_extra_selection: str = Query(None, description="不可加簽說明"),
+    required_optional_note: str = Query(
+        None, description="必選修說明：多個必選修班級用tab字元分隔"
+    ),
 ):
     """
     根據提供的欄位和值搜尋課程。
@@ -172,6 +199,25 @@ async def search_courses_by_condition(
                             },
                         ],
                     ],
+                ],
+            },
+            "normal_flatten": {
+                "summary": "多個搜尋條件 (flatten)",
+                "description": "使用多個搜尋條件，例如：微積分 且 4學分 且 開課時間是T",
+                "value": [
+                    {
+                        "row_field": "chinese_title",
+                        "matcher": "微積分",
+                        "regex_match": True,
+                    },
+                    "and",
+                    {"row_field": "credit", "matcher": "4", "regex_match": True},
+                    "and",
+                    {
+                        "row_field": "class_room_and_time",
+                        "matcher": "T",
+                        "regex_match": True,
+                    },
                 ],
             },
         }

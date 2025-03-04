@@ -40,6 +40,13 @@ multiple_conditions = [
         ],
     ],
 ]
+flatten_multiple_conditions = [
+    {"row_field": "chinese_title", "matcher": "微積分", "regex_match": True},
+    "and",
+    {"row_field": "credit", "matcher": "4", "regex_match": True},
+    "and",
+    {"row_field": "class_room_and_time", "matcher": "T", "regex_match": True},
+]
 
 
 @pytest.mark.parametrize(
@@ -64,7 +71,10 @@ def test_courses_search(field_name, value):
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("body", [one_condition, two_conditions, multiple_conditions])
+@pytest.mark.parametrize(
+    "body",
+    [one_condition, two_conditions, multiple_conditions, flatten_multiple_conditions],
+)
 def test_courses_search_post(body):
     response = client.post(url="/courses/search", json=body)
     assert response.status_code == 200
