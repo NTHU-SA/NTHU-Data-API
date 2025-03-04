@@ -115,6 +115,5 @@ class CourseQueryCondition(RootModel):
 
 
 class CourseListName(str, Enum):
-    weeks16 = "16weeks"
     microcredits = "microcredits"
     xclass = "xclass"

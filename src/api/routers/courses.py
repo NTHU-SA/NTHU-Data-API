@@ -142,14 +142,11 @@ async def get_courses_list(
     """
     取得指定類型的課程列表。
     """
-    if list_name == "16weeks":
-        condition = Conditions("note", "16週課程", True)
-    elif list_name == "microcredits":
-        condition = Conditions("credit", "[0-9].[0-9]", True)
-    elif list_name == "xclass":
-        condition = Conditions("note", "X-Class", True)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid list name")
+    match list_name:
+        case "microcredits":
+            condition = Conditions("credit", "[0-9].[0-9]", True)
+        case "xclass":
+            condition = Conditions("note", "X-Class", True)
     result = courses.query(condition)[:limits]
     response.headers["X-Total-Count"] = str(len(result))
     return result
