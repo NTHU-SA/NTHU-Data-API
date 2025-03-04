@@ -92,29 +92,26 @@ class CourseQueryCondition(RootModel):
     @field_validator("root")
     def check_query(cls, v):
         POST_ERROR_INFO = " Also, FYI, the structure of query must be like this: [(nested) Condition, Operation, (nested) Condition]."
-        if len(v) != 3:
-            raise ValueError(
-                "Each level of query must have 3 elements." + POST_ERROR_INFO
-            )
-        elif type(v[0]) not in [CourseQueryCondition, CourseCondition]:
-            raise TypeError(
-                "The first element of query must be a Condition or nested Condition."
-                + POST_ERROR_INFO
-            )
-        elif type(v[1]) is not CourseQueryOperation:
-            raise TypeError(
-                'The second element of query must be a Operation (i.e. "and" or "or").'
-                + POST_ERROR_INFO
-            )
-        elif type(v[2]) not in [CourseQueryCondition, CourseCondition]:
-            raise TypeError(
-                "The third element of query must be a Condition or nested Condition."
-                + POST_ERROR_INFO
-            )
+        for i in range(len(v)):
+            if type(v[i]) is CourseQueryOperation:
+                if i == 0 or i == len(v) - 1:
+                    raise ValueError(
+                        "The first and last elements of query must be a Condition or another course query."
+                        + POST_ERROR_INFO
+                    )
+                elif type(v[i - 1]) not in [CourseQueryCondition, CourseCondition]:
+                    raise TypeError(
+                        "The element before Operation must be a Condition or another course query."
+                        + POST_ERROR_INFO
+                    )
+                elif type(v[i + 1]) not in [CourseQueryCondition, CourseCondition]:
+                    raise TypeError(
+                        "The element after Operation must be a Condition or another course query."
+                        + POST_ERROR_INFO
+                    )
         return v
 
 
 class CourseListName(str, Enum):
-    weeks16 = "16weeks"
     microcredits = "microcredits"
     xclass = "xclass"

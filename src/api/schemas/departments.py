@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class Contact(BaseModel):
+class DepartmentContact(BaseModel):
     extension: Optional[str] = None
     phone: Optional[str] = None
     fax: Optional[str] = None
@@ -11,7 +11,7 @@ class Contact(BaseModel):
     website: Optional[str] = None
 
 
-class Person(BaseModel):
+class DepartmentPerson(BaseModel):
     name: str
     title: Optional[str] = None
     extension: Optional[str] = None
@@ -21,8 +21,8 @@ class Person(BaseModel):
 
 class DepartmentDetails(BaseModel):
     departments: list[dict] = Field(default_factory=list)
-    contact: Contact = Field(default_factory=Contact)
-    people: list[Person] = Field(default_factory=list)
+    contact: DepartmentContact = Field(default_factory=DepartmentContact)
+    people: list[DepartmentPerson] = Field(default_factory=list)
 
 
 class DepartmentBase(BaseModel):

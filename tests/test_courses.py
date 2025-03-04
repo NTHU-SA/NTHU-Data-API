@@ -40,14 +40,19 @@ multiple_conditions = [
         ],
     ],
 ]
+flatten_multiple_conditions = [
+    {"row_field": "chinese_title", "matcher": "微積分", "regex_match": True},
+    "and",
+    {"row_field": "credit", "matcher": "4", "regex_match": True},
+    "and",
+    {"row_field": "class_room_and_time", "matcher": "T", "regex_match": True},
+]
 
 
 @pytest.mark.parametrize(
     "url, status_code",
     [
         ("/courses/", 200),
-        ("/courses/fields/info", 200),
-        ("/courses/lists/16weeks", 200),
         ("/courses/lists/microcredits", 200),
         ("/courses/lists/xclass", 200),
     ],
@@ -60,30 +65,16 @@ def test_courses_endpoints(url, status_code):
 @pytest.mark.parametrize(
     "field_name", [_.value for _ in schemas.courses.CourseFieldName]
 )
-def test_courses_fields(field_name):
-    response = client.get(url=f"/courses/fields/{field_name}")
-    assert response.status_code == 200
-
-
-@pytest.mark.parametrize(
-    "field_name", [_.value for _ in schemas.courses.CourseFieldName]
-)
-@pytest.mark.parametrize("value", ["testing"])
-def test_courses_fields_with_values(field_name, value):
-    response = client.get(url=f"/courses/fields/{field_name}/{value}")
-    assert response.status_code == 200
-
-
-@pytest.mark.parametrize(
-    "field_name", [_.value for _ in schemas.courses.CourseFieldName]
-)
-@pytest.mark.parametrize("value", ["testing"])
+@pytest.mark.parametrize("value", ["中"])
 def test_courses_search(field_name, value):
-    response = client.get(url=f"/courses/search?field={field_name}&value={value}")
+    response = client.get(url=f"/courses/search?{field_name}={value}")
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("body", [one_condition, two_conditions, multiple_conditions])
+@pytest.mark.parametrize(
+    "body",
+    [one_condition, two_conditions, multiple_conditions, flatten_multiple_conditions],
+)
 def test_courses_search_post(body):
     response = client.post(url="/courses/search", json=body)
     assert response.status_code == 200

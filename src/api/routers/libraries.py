@@ -13,9 +13,9 @@ from src.api.schemas.libraries import (
     LibraryLostAndFound,
     LibraryName,
     LibraryNumberOfGoods,
+    LibraryRssItem,
     LibraryRssType,
     LibrarySpace,
-    RssItem,
 )
 
 _default_headers = {
@@ -26,9 +26,10 @@ router = APIRouter()
 
 
 @router.get("/space", response_model=list[LibrarySpace])
-def get_library_space_data():
+def get_library_space_availability():
     """
-    取得空間使用資訊。
+    取得圖書館空間使用資訊。
+    資料來源：[圖書館空間預約系統](https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx)
     """
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
     try:
@@ -47,11 +48,11 @@ def get_library_space_data():
 
 
 @router.get("/lost_and_found", response_model=list[LibraryLostAndFound])
-def get_library_lost_and_found():
+def get_library_lost_and_found_items():
     """
-    取得失物招領資訊。
+    取得圖書館失物招領資訊。
+    資料來源：[圖書館失物招領系統](https://adage.lib.nthu.edu.tw/find)
     """
-    # 來源: https://adage.lib.nthu.edu.tw/find/
     date_end = datetime.now()
     date_start = date_end - timedelta(days=6 * 30)
     date_end = date_end.strftime("%Y-%m-%d")
@@ -104,7 +105,7 @@ def get_library_lost_and_found():
         raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
 
 
-@router.get("/rss/{rss_type}", response_model=list[RssItem])
+@router.get("/rss/{rss_type}", response_model=list[LibraryRssItem])
 def get_library_rss_data(
     rss_type: LibraryRssType = Path(
         ...,
@@ -112,17 +113,8 @@ def get_library_rss_data(
     )
 ):
     """
-    從清華大學圖書館公告欄擷取並解析 RSS 資料。
-
-    Args:
-        rss_type: RSS 類型 ('news', 'eresources', 'exhibit', 'branches')。
-
-    Returns:
-        包含 RSS 項目字典的列表。
-
-    Raises:
-        HTTPException: 如果找不到 RSS 來源 (404)。
-        requests.exceptions.RequestException: 如果擷取 RSS 來源時發生問題。
+    取得指定圖書館的 RSS 資料。
+    資料來源：[圖書館官網展覽與活動](https://www.lib.nthu.edu.tw/events/index.html)
     """
     # 最新消息 RSS:         https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_news.xml
     # 電子資源 RSS:         https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_eresources.xml
@@ -158,6 +150,7 @@ def get_library_opening_hours(
 ):
     """
     取得指定圖書館的開放時間。
+    資料來源：圖書館官網
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{library_name.value}.json"
     try:
@@ -177,6 +170,7 @@ def get_library_opening_hours(
 def get_library_number_of_goods():
     """
     取得總圖換證數量資訊。
+    資料來源：圖書館官網
     """
     url = "https://adage.lib.nthu.edu.tw/goods/Public/number_of_goods_mix.json"
     headers = {

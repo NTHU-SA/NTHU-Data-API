@@ -165,15 +165,33 @@ class Conditions:
         if not isinstance(data, list):
             # 若 data 不是 list 則直接檢查條件
             return self._check_condition(data)
-        lhs, op, rhs = data
-        lhs_value = self._check_condition(lhs)
-        rhs_value = self._check_condition(rhs)
-        if op == "and":
-            return lhs_value and rhs_value
-        elif op == "or":
-            return lhs_value or rhs_value
-        else:
-            raise ValueError(f"Unknown operator: {op}")
+
+        if (
+            len(data) < 3
+        ):  # Handle cases with less than 3 elements, might be single condition or empty list
+            if not data:
+                return True  # No condition means accept all
+            return self._check_condition(
+                data[0]
+            )  # Assume single condition if list is short
+
+        # Handle flat list of conditions and operators iteratively
+        result = self._check_condition(
+            data[0]
+        )  # Initialize result with the first condition
+        i = 1
+        while i < len(data) - 1:
+            op = data[i]
+            next_condition = data[i + 1]
+            next_condition_value = self._check_condition(next_condition)
+            if op == "and":
+                result = result and next_condition_value
+            elif op == "or":
+                result = result or next_condition_value
+            else:
+                raise ValueError(f"Unknown operator: {op}")
+            i += 2
+        return result
 
     def _check_condition(self, item: ConditionType) -> bool:
         if isinstance(item, dict):
@@ -250,6 +268,13 @@ class Processor:
 if __name__ == "__main__":
     processor = Processor()
 
+    async def test():
+        await processor.update_data()
+
+    import asyncio
+
+    asyncio.run(test())
+
     # 範例資料（原始資料中使用中文欄位名稱）
     sample_data = {
         "科號": "11320AES 370100",
@@ -274,7 +299,7 @@ if __name__ == "__main__":
     }
     # 可用 sample_data 測試 from_dict：
     course_sample = CoursesData.from_dict(sample_data)
-    print("轉換後的課程資料: {}", course_sample)
+    print("轉換後的課程資料: {}".format(course_sample))
 
     # 以下為原有的查詢條件範例
     # 範例 1：中文課名為 "文化人類學專題" 且課號為 "11210ANTH651000"
@@ -282,7 +307,7 @@ if __name__ == "__main__":
         "id", "11210ANTH651000"
     )
     result1 = processor.query(condition1)
-    print("中文課名 與 ID (有一堂課): {}", len(result1))
+    print("中文課名 與 ID (有一堂課): {}".format(len(result1)))
     print(result1)
 
     # 範例 2：中文課名為 "化人類學專題" 或課號為 "11210ANTH651000"
@@ -290,13 +315,13 @@ if __name__ == "__main__":
         "id", "11210ANTH651000"
     )
     result2 = processor.query(condition2)
-    print("中文課名 或 ID (有一堂課): {}", len(result2))
+    print("中文課名 或 ID (有一堂課): {}".format(len(result2)))
     print(result2)
 
     # 範例 3：中文課名包含 "產業"
     condition3 = Conditions("chinese_title", "產業", regex_match=True)
     result3 = processor.query(condition3)
-    print("中文課名包含 '產業' 的課程 (取前5筆): {}", result3[:5])
+    print("中文課名包含 '產業' 的課程 (取前5筆): {}".format(result3[:5]))
 
     # 範例 4：中文課名包含 "產業" 且 credit 為 "2" 且課號包含 "GE"（通識課程）
     condition4 = (
@@ -305,20 +330,34 @@ if __name__ == "__main__":
         & Conditions("id", "GE", regex_match=True)
     )
     result4 = processor.query(condition4)
-    print("符合複合條件的課程 (取前5筆): {}", result4[:5])
+    print("符合複合條件的課程 (取前5筆): {}".format(result4[:5]))
 
-    print("總開課數: {}", len(processor.course_data))
+    print("總開課數: {}".format(len(processor.course_data)))
     # 範例 5：中文授課 或 英文授課
     condition_ce = Conditions("language", "中") | Conditions("language", "英")
     result_ce = processor.query(condition_ce)
-    print("中文授課 或 英文授課 開課數量: {}", len(result_ce))
+    print("中文授課 或 英文授課 開課數量: {}".format(len(result_ce)))
 
     # 範例 6：中文授課
     condition_c = Conditions("language", "中")
     result_c = processor.query(condition_c)
-    print("中文授課 開課數量: {}", len(result_c))
+    print("中文授課 開課數量: {}".format(len(result_c)))
 
     # 範例 7：英文授課
     condition_e = Conditions("language", "英")
     result_e = processor.query(condition_e)
-    print("英文授課 開課數量: {}", len(result_e))
+    print("英文授課 開課數量: {}".format(len(result_e)))
+
+    # 範例 8：複雜三條件測試 (微積分, 4學分, 星期W)
+    condition_complex = Conditions(
+        list_build_target=[
+            {"row_field": "chinese_title", "matcher": "微積分", "regex_match": True},
+            "and",
+            {"row_field": "credit", "matcher": "4", "regex_match": True},
+            "and",
+            {"row_field": "class_room_and_time", "matcher": "T", "regex_match": True},
+        ]
+    )
+    result_complex = processor.query(condition_complex)
+    print("複雜條件測試 (微積分, 4學分, 星期W): {}".format(len(result_complex)))
+    print("複雜條件測試結果 (前5筆): {}".format(result_complex[:5]))

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class ElectricityInfo(BaseModel):
+class EnergyElectricityInfo(BaseModel):
     name: str = Field(..., description="電力名稱")
     data: int = Field(..., description="電力使用量")
     capacity: int = Field(..., description="電力容量")

@@ -6,7 +6,7 @@ from fastapi import HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 
-class StopsName(str, Enum):
+class BusStopsName(str, Enum):
     M1 = "北校門口"
     M2 = "綜二館"
     M3 = "楓林小徑"
@@ -131,14 +131,14 @@ class BusArriveTime(BaseModel):
     # {"stop_name": stop.name, "time": arrive_time}
     # TODO: refacter stop_name Literal check
     stop_name: Literal[
-        StopsName.M1,
-        StopsName.M2,
-        StopsName.M3,
-        "人社院/生科館",  # 此處功能同 StopsName.M4，但 / 會影響 url query，故手動更改
-        StopsName.M5,
-        StopsName.M6,
-        StopsName.M7,
-        StopsName.S1,
+        BusStopsName.M1,
+        BusStopsName.M2,
+        BusStopsName.M3,
+        "人社院/生科館",  # 此處功能同 BusStopsName.M4，但 / 會影響 url query，故手動更改
+        BusStopsName.M5,
+        BusStopsName.M6,
+        BusStopsName.M7,
+        BusStopsName.S1,
     ] = Field(..., description="公車站牌名稱")
     time: str = Field(..., description="預計到達時間")
 

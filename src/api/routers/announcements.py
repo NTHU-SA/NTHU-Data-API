@@ -1,25 +1,62 @@
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, Query
+from thefuzz import fuzz
 
-from src.api.schemas.announcements import AnnouncementDetail
+from src.api.schemas.announcements import AnnouncementArticle, AnnouncementDetail
 from src.utils import nthudata
 
 router = APIRouter()
 json_path = "announcements.json"
 
 
-@router.get("/", response_model=list[AnnouncementDetail], summary="取得所有公告列表")
-async def get_all_announcements():
+@router.get("/", response_model=list[AnnouncementDetail])
+async def get_announcements(
+    department: str = Query(None, description="部門名稱", example="清華公佈欄"),
+):
     """
-    取得所有公告資訊。
+    取得校內每個處室的所有公告資訊。
+    資料來源：各處室網站
     """
     _commit_hash, announcements_data = await nthudata.get(json_path)
+    if department:
+        announcements_data = [
+            announcement
+            for announcement in announcements_data
+            if announcement["department"] == department
+        ]
     return announcements_data
 
 
 @router.get(
-    "/departments", response_model=list[str], summary="取得所有有公告的部門列表"
+    "/search",
+    response_model=list[AnnouncementArticle],
 )
-async def get_all_department():
+async def fuzzy_search_announcement_titles(
+    query: str = Query(..., example="中研院", description="要查詢的公告"),
+):
+    """
+    使用名稱模糊搜尋全部公告的標題。
+    """
+    _commit_hash, announcements_data = await nthudata.get(json_path)
+    tmp_results = []
+    for announcement in announcements_data:
+        articles = announcement.get("articles")
+        if articles is None:
+            continue
+        for article in articles:
+            similarity = fuzz.partial_ratio(query, article["title"])
+            if similarity >= 60:
+                tmp_results.append(
+                    (
+                        similarity,  # 儲存相似度
+                        article,
+                    )
+                )
+    tmp_results.sort(key=lambda x: x[0], reverse=True)
+    return [article for _, article in tmp_results]
+
+
+@router.get("/lists/departments", response_model=list[str])
+async def list_announcement_departments():
     """
     取得所有有公告的部門列表。
     """
@@ -28,24 +65,3 @@ async def get_all_department():
     for announcement in announcements_data:
         departments.add(announcement["department"])
     return list(departments)
-
-
-@router.get(
-    "/departments/{name}",
-    response_model=list[AnnouncementDetail],
-    summary="取得特定部門的公告列表",
-)
-async def get_announcements_by_department(
-    name: str = Path(..., description="部門名稱", example="清華公佈欄")
-):
-    """
-    取得特定部門的公告資訊。
-    """
-    _commit_hash, announcements_data = await nthudata.get(json_path)
-    announcements = []
-    for announcement in announcements_data:
-        if announcement["department"] == name:
-            announcements.append(announcement)
-    if announcements:
-        return announcements
-    raise HTTPException(status_code=404, detail="部門名稱不存在")

@@ -17,8 +17,8 @@ def test_departments_index():
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("name", search_list)
-def test_departments_search(name):
-    params = {"name": name}
+@pytest.mark.parametrize("query", search_list)
+def test_departments_search(query):
+    params = {"query": query}
     response = client.get(url="/departments/search/", params=params)
     assert response.status_code == 200

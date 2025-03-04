@@ -3,17 +3,18 @@ from typing import Union
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
-from src.api.schemas.departments import Department, Person
+from src.api.schemas.departments import Department, DepartmentPerson
 from src.utils import nthudata
 
 router = APIRouter()
 json_path = "directory.json"
 
 
-@router.get("/", response_model=list[Department], summary="取得所有部門列表")
-async def read_all_departments():
+@router.get("/", response_model=list[Department])
+async def get_all_departments():
     """
-    取得所有部門列表。
+    取得所有部門與人員資料。
+    資料來源：[清華通訊錄](https://tel.net.nthu.edu.tw/nthusearch/)
     """
     _commit_hash, directory_data = await nthudata.get(json_path)
     return directory_data
@@ -21,19 +22,18 @@ async def read_all_departments():
 
 @router.get(
     "/search",
-    response_model=dict[str, Union[list[Department], list[Person]]],
-    summary="關鍵字搜尋部門與人員名稱",
+    response_model=dict[str, Union[list[Department], list[DepartmentPerson]]],
 )
-async def fuzzy_search_departments(
-    name: str = Query(..., example="校長", title="模糊搜尋關鍵字"),
+async def fuzzy_search_departments_and_people(
+    query: str = Query(..., example="校長"),
 ):
     """
-    使用搜尋演算法搜尋部門與人員名稱。
+    使用搜尋演算法搜尋全校部門與人員名稱。
     """
     _commit_hash, directory_data = await nthudata.get(json_path)
     department_results = []
     for dept in directory_data:
-        similarity = fuzz.partial_ratio(name, dept["name"])
+        similarity = fuzz.partial_ratio(query, dept["name"])
         if similarity >= 60:  # 相似度門檻值，可以調整
             dept["similarity_score"] = similarity  # 加入相似度分數方便排序
             department_results.append(dept)
@@ -44,7 +44,7 @@ async def fuzzy_search_departments(
     people_results = []
     for dept in directory_data:
         for person in dept["details"]["people"]:
-            similarity = fuzz.partial_ratio(name, person["name"])
+            similarity = fuzz.partial_ratio(query, person["name"])
             if similarity >= 70:  # 相似度門檻值，可以調整
                 person["similarity_score"] = similarity
                 people_results.append(person)
@@ -55,12 +55,11 @@ async def fuzzy_search_departments(
     return {"departments": department_results, "people": people_results}
 
 
-@router.get(
-    "/{index}", response_model=list[Department], summary="依據 index 取得特定部門"
-)  # 需要把它往下移，不然 search 會被擋住
-async def read_department_by_index(index: str):
+# 需要把它往下移，不然 search 會被擋住
+@router.get("/{index}", response_model=Department)
+async def get_department_by_index(index: str):
     _commit_hash, directory_data = await nthudata.get(json_path)
     for dept in directory_data:
         if dept["index"] == index:
-            return [dept]
+            return dept
     raise HTTPException(status_code=404, detail="Department not found")
