@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Body, Depends, FastAPI, Query, Response
+from fastapi import APIRouter, Body, Depends, FastAPI, Query, Request, Response
 
 from src.api import schemas
 from src.api.models.courses import Conditions, Processor
@@ -77,20 +77,56 @@ async def get_courses_list(
     dependencies=[Depends(add_custom_header)],
 )
 async def search_by_field_and_value(
-    field: schemas.courses.CourseFieldName = Query(
-        ...,
-        example=schemas.courses.CourseFieldName.chinese_title,
-        description="搜尋的欄位名稱",
-    ),
-    value: str = Query(
-        ..., example="產業.+生涯", description="搜尋的值（可以使用 Regex，正則表達式）"
-    ),
+    request: Request,
+    response: Response,
+    chinese_title: str = Query(None, description="中文標題搜尋", example="微積分"),
+    english_title: str = Query(None, description="英文標題搜尋"),
+    teacher: str = Query(None, description="教師搜尋"),
+    department: str = Query(None, description="開課系所搜尋"),
+    credit: str = Query(None, description="學分搜尋", example="3"),
+    note: str = Query(None, description="備註搜尋"),
+    class_room_and_time: str = Query(None, description="教室與時間搜尋"),
+    id: str = Query(None, description="課程ID搜尋"),
+    code: str = Query(None, description="課程代碼搜尋"),
 ):
     """
-    取得指定欄位滿足搜尋值的課程列表。
+    根據提供的欄位和值搜尋課程。
+    可以直接使用欄位名稱作為查詢參數，例如：
+    /search?chinese_title=產業.+生涯&english_title=...
     """
-    condition = Conditions(field, value, True)
-    result = courses.query(condition)
+    conditions = {}
+    query_params = request.query_params  # 從 Request 物件取得查詢參數
+
+    for field_name in schemas.courses.CourseFieldName:
+        field_value = query_params.get(field_name.value)
+        if field_value:
+            conditions[field_name] = field_value
+
+    if conditions:
+        condition_list = []
+        for name, value in conditions.items():
+            condition_list.append(
+                {
+                    "row_field": name.value,
+                    "matcher": value,
+                    "regex_match": True,
+                }
+            )
+        if len(condition_list) > 1:
+            combined_condition = []
+            for i in range(len(condition_list)):
+                combined_condition.append(condition_list[i])
+                if i < len(condition_list) - 1:
+                    combined_condition.append("and")
+            final_condition = Conditions(list_build_target=combined_condition)
+        else:
+            final_condition = Conditions(list_build_target=condition_list)
+        result = courses.query(final_condition)
+    else:
+        # 沒有條件時，回傳空列表
+        result = []
+
+    response.headers["X-Total-Count"] = str(len(result))
     return result
 
 
