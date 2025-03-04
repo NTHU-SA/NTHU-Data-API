@@ -12,12 +12,14 @@ def test_announcements_endpoints():
     assert response.status_code == 200
 
 
-def test_get_all_department():
-    response = client.get(url="/announcements/departments")
+@pytest.mark.parametrize("department", department_list)
+def test_get_announcements_by_department(department):
+    params = {"department": department}
+    response = client.get(url="/announcements", params=params)
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("name", department_list)
-def test_get_announcements_by_department(name):
-    response = client.get(url=f"/announcements/departments/{name}")
+def test_search_announcements():
+    params = {"query": "清華"}
+    response = client.get(url="/announcements/search", params=params)
     assert response.status_code == 200
