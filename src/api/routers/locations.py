@@ -37,7 +37,7 @@ async def get_all_location():
     summary="使用名稱模糊搜尋地點",
 )
 async def search_location_by_get_method(
-    name: str = Query(..., example="校門", description="要查詢的地點"),
+    query: str = Query(..., example="校門", description="要查詢的地點"),
 ):
     """
     使用名稱模糊搜尋地點資訊。
@@ -46,7 +46,7 @@ async def search_location_by_get_method(
     tmp_results = []
     for campus_locations in map_data.values():
         for location_name, coordinates in campus_locations.items():
-            similarity = fuzz.partial_ratio(name, location_name)
+            similarity = fuzz.partial_ratio(query, location_name)
             if similarity >= 60:
                 tmp_results.append(
                     (
@@ -59,7 +59,7 @@ async def search_location_by_get_method(
                     )
                 )
     # 先判斷是否與查詢字串相同，再依相似度從高到低排序
-    tmp_results.sort(key=lambda x: (x[1].name == name, x[0]), reverse=True)
+    tmp_results.sort(key=lambda x: (x[1].name == query, x[0]), reverse=True)
     location_results = [item[1] for item in tmp_results]
     if not location_results:
         raise HTTPException(status_code=404, detail="Not found")

@@ -5,7 +5,7 @@ from src import app
 from src.api import schemas
 
 client = TestClient(app)
-restaurant_name_list = ["麥當勞", "7-ELEVEN", "全家便利商店", "路易莎", "清華水漾"]
+search_list = ["麥當勞", "7-ELEVEN", "全家便利商店", "路易莎", "清華水漾"]
 
 
 def test_dining_endpoints():
@@ -29,8 +29,8 @@ def test_dining_schedules(day_of_week):
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("restaurant_name", restaurant_name_list)
-def test_dining_searches_restaurants(restaurant_name):
-    search_param = {"restaurant_name": restaurant_name}
-    response = client.get(url="/dining/search", params=search_param)
+@pytest.mark.parametrize("query", search_list)
+def test_dining_searches_restaurants(query):
+    params = {"query": query}
+    response = client.get(url="/dining/search", params=params)
     assert response.status_code == 200

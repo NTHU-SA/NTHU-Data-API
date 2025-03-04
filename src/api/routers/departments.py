@@ -25,7 +25,7 @@ async def read_all_departments():
     summary="關鍵字搜尋部門與人員名稱",
 )
 async def fuzzy_search_departments(
-    name: str = Query(..., example="校長", title="模糊搜尋關鍵字"),
+    query: str = Query(..., example="校長", title="模糊搜尋關鍵字"),
 ):
     """
     使用搜尋演算法搜尋部門與人員名稱。
@@ -33,7 +33,7 @@ async def fuzzy_search_departments(
     _commit_hash, directory_data = await nthudata.get(json_path)
     department_results = []
     for dept in directory_data:
-        similarity = fuzz.partial_ratio(name, dept["name"])
+        similarity = fuzz.partial_ratio(query, dept["name"])
         if similarity >= 60:  # 相似度門檻值，可以調整
             dept["similarity_score"] = similarity  # 加入相似度分數方便排序
             department_results.append(dept)
@@ -44,7 +44,7 @@ async def fuzzy_search_departments(
     people_results = []
     for dept in directory_data:
         for person in dept["details"]["people"]:
-            similarity = fuzz.partial_ratio(name, person["name"])
+            similarity = fuzz.partial_ratio(query, person["name"])
             if similarity >= 70:  # 相似度門檻值，可以調整
                 person["similarity_score"] = similarity
                 people_results.append(person)

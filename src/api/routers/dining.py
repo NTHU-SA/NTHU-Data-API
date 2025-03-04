@@ -88,7 +88,7 @@ async def get_schedule_by_day_of_week(
     response_model=list[DiningRestaurant],
 )
 async def fuzzy_search_restaurant_by_name(
-    restaurant_name: str = Query(..., example="麵", description="餐廳模糊搜尋關鍵字")
+    query: str = Query(..., example="麵", description="餐廳模糊搜尋關鍵字")
 ) -> list[DiningRestaurant]:
     """
     使用餐廳名稱模糊搜尋餐廳資料。
@@ -97,7 +97,7 @@ async def fuzzy_search_restaurant_by_name(
     results = []
     for building in dining_data:
         for restaurant in building.get("restaurants", []):
-            similarity = fuzz.partial_ratio(restaurant_name, restaurant["name"])
+            similarity = fuzz.partial_ratio(query, restaurant["name"])
             if similarity >= 60:  # 相似度門檻值，可以調整
                 restaurant["similarity_score"] = similarity  # 加入相似度分數方便排序
                 results.append(restaurant)
