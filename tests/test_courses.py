@@ -65,7 +65,7 @@ def test_courses_endpoints(url, status_code):
 @pytest.mark.parametrize(
     "field_name", [_.value for _ in schemas.courses.CourseFieldName]
 )
-@pytest.mark.parametrize("value", ["testing"])
+@pytest.mark.parametrize("value", ["中"])
 def test_courses_search(field_name, value):
     response = client.get(url=f"/courses/search?{field_name}={value}")
     assert response.status_code == 200
