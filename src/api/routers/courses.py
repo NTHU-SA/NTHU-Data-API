@@ -1,17 +1,8 @@
 from contextlib import asynccontextmanager
 
-from fastapi import (
-    APIRouter,
-    Body,
-    Depends,
-    FastAPI,
-    HTTPException,
-    Path,
-    Query,
-    Response,
-)
+from fastapi import APIRouter, Body, Depends, FastAPI, Query, Response
 
-from src.api import constant, schemas
+from src.api import schemas
 from src.api.models.courses import Conditions, Processor
 
 courses = Processor()
@@ -48,84 +39,13 @@ async def add_custom_header(response: Response):
 )
 async def get_all_courses_list(
     response: Response,
-    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     取得所有課程。
     """
-    result = courses.course_data[:limits]
+    result = courses.course_data
     response.headers["X-Total-Count"] = str(len(result))
     response.headers["X-Data-Commit-Hash"] = str(courses.last_commit_hash)
-    return result
-
-
-@router.get(
-    "/fields/info",
-    response_model=dict[str, str],
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_all_fields_list_info():
-    """
-    取得所有欄位的資訊。
-    """
-    return {
-        "id": "科號",
-        "chinese_title": "課程中文名稱",
-        "english_title": "課程英文名稱",
-        "credit": "學分數",
-        "size_limit": "人限：若為空字串表示無人數限制",
-        "freshman_reservation": "新生保留人數：若為0表示無新生保留人數",
-        "object": "通識對象：[代碼說明(課務組)](https://curricul.site.nthu.edu.tw/p/404-1208-11133.php)",
-        "ge_type": "通識類別",
-        "language": '授課語言："中"、"英"',
-        "note": "備註",
-        "suspend": '停開註記："停開"或空字串',
-        "class_room_and_time": "教室與上課時間：一間教室對應一個上課時間，中間以tab分隔；多個上課教室以new line字元分開",
-        "teacher": "授課教師：多位教師授課以new line字元分開；教師中英文姓名以tab分開",
-        "prerequisite": "擋修說明：會有html entities",
-        "limit_note": "課程限制說明",
-        "expertise": "第一二專長對應：對應多個專長用tab字元分隔",
-        "program": "學分學程對應：用半形/分隔",
-        "no_extra_selection": "不可加簽說明",
-        "required_optional_note": "必選修說明：多個必選修班級用tab字元分隔",
-    }
-
-
-@router.get(
-    "/fields/{field_name}",
-    response_model=list[str],
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_selected_fields_list(
-    field_name: schemas.courses.CourseFieldName = Path(
-        ..., example="id", description="欄位名稱"
-    ),
-    limits: int = constant.general.LIMITS_QUERY,
-):
-    """
-    取得指定欄位的列表。
-    """
-    result = courses.list_selected_fields(field_name)[:limits]
-    return result
-
-
-@router.get(
-    "/fields/{field_name}/{value}",
-    response_model=list[schemas.courses.CourseData],
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_selected_field_and_value_data(
-    field_name: schemas.courses.CourseFieldName = Path(
-        ..., example="chinese_title", description="搜尋的欄位名稱"
-    ),
-    value: str = Path(..., example="產業創新與生涯探索", description="搜尋的值"),
-    limits: int = constant.general.LIMITS_QUERY,
-):
-    """
-    取得指定欄位滿足搜尋值的課程列表。
-    """
-    condition = Conditions(field_name, value, False)
-    result = courses.query(condition)[:limits]
     return result
 
 
@@ -137,7 +57,6 @@ async def get_selected_field_and_value_data(
 async def get_courses_list(
     list_name: schemas.courses.CourseListName,
     response: Response,
-    limits: int = constant.general.LIMITS_QUERY,
 ) -> list[schemas.courses.CourseData]:
     """
     取得指定類型的課程列表。
@@ -147,7 +66,7 @@ async def get_courses_list(
             condition = Conditions("credit", "[0-9].[0-9]", True)
         case "xclass":
             condition = Conditions("note", "X-Class", True)
-    result = courses.query(condition)[:limits]
+    result = courses.query(condition)
     response.headers["X-Total-Count"] = str(len(result))
     return result
 
@@ -166,13 +85,12 @@ async def search_by_field_and_value(
     value: str = Query(
         ..., example="產業.+生涯", description="搜尋的值（可以使用 Regex，正則表達式）"
     ),
-    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     取得指定欄位滿足搜尋值的課程列表。
     """
     condition = Conditions(field, value, True)
-    result = courses.query(condition)[:limits]
+    result = courses.query(condition)
     return result
 
 
@@ -243,7 +161,6 @@ async def get_courses_by_condition(
             },
         }
     ),
-    limits: int = constant.general.LIMITS_QUERY,
 ):
     """
     根據條件取得課程。
@@ -259,5 +176,5 @@ async def get_courses_by_condition(
         condition = Conditions(
             list_build_target=query_condition.model_dump(mode="json")
         )
-    result = courses.query(condition)[:limits]
+    result = courses.query(condition)
     return result
