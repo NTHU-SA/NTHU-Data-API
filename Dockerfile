@@ -10,7 +10,7 @@ RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezo
 
 # Set logging level
 ENV LOGURU_LEVEL=ERROR
-ENV NTHU_DATA_URL=https://data.nthusa.tw/
+ENV NTHU_DATA_URL="https://data.nthusa.tw/"
 
 # Install python
 COPY requirements.txt .
