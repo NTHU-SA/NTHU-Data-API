@@ -3,7 +3,7 @@ from typing import Union
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
-from src.api.schemas.departments import Department, Person
+from src.api.schemas.departments import Department, DepartmentPerson
 from src.utils import nthudata
 
 router = APIRouter()
@@ -22,7 +22,7 @@ async def get_all_departments():
 
 @router.get(
     "/search",
-    response_model=dict[str, Union[list[Department], list[Person]]],
+    response_model=dict[str, Union[list[Department], list[DepartmentPerson]]],
 )
 async def fuzzy_search_departments_and_people(
     query: str = Query(..., example="校長"),

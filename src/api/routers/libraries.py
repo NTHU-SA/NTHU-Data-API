@@ -13,9 +13,9 @@ from src.api.schemas.libraries import (
     LibraryLostAndFound,
     LibraryName,
     LibraryNumberOfGoods,
+    LibraryRssItem,
     LibraryRssType,
     LibrarySpace,
-    RssItem,
 )
 
 _default_headers = {
@@ -105,7 +105,7 @@ def get_library_lost_and_found_items():
         raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
 
 
-@router.get("/rss/{rss_type}", response_model=list[RssItem])
+@router.get("/rss/{rss_type}", response_model=list[LibraryRssItem])
 def get_library_rss_data(
     rss_type: LibraryRssType = Path(
         ...,

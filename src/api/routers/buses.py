@@ -19,8 +19,8 @@ from src.api.schemas.buses import (
     BusQuery,
     BusRouteType,
     BusStopsInfo,
+    BusStopsName,
     BusStopsQueryResult,
-    StopsName,
 )
 
 buses = Buses()
@@ -195,7 +195,7 @@ async def get_bus_schedules(
     dependencies=[Depends(add_custom_header)],
 )
 async def get_stop_bus_information_by_stop(
-    stop_name: StopsName = constant.buses.STOPS_NAME_PATH,
+    stop_name: BusStopsName = constant.buses.STOPS_NAME_PATH,
     bus_type: BusRouteType = constant.buses.BUS_TYPE_QUERY,
     day: BusDayWithCurrent = constant.buses.BUS_DAY_QUERY,
     direction: BusDirection = constant.buses.BUS_DIRECTION_QUERY,
