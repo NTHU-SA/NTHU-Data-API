@@ -11,11 +11,11 @@ json_path = "maps.json"
 @router.get(
     "/",
     response_model=list[LocationDetail],
-    summary="取得所有地點列表",
 )
-async def get_all_location():
+async def get_all_locations():
     """
-    取得所有地點資訊。
+    取得校內所有地點資訊。
+    資料來源：[國立清華大學校園地圖](https://www.nthu.edu.tw/campusmap)
     """
     _commit_hash, map_data = await nthudata.get(json_path)
     location_list = []
@@ -34,9 +34,8 @@ async def get_all_location():
 @router.get(
     "/search",
     response_model=list[LocationDetail],
-    summary="使用名稱模糊搜尋地點",
 )
-async def search_location_by_get_method(
+async def fuzzy_search_locations(
     query: str = Query(..., example="校門", description="要查詢的地點"),
 ):
     """

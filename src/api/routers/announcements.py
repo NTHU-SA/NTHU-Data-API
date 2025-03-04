@@ -9,11 +9,12 @@ json_path = "announcements.json"
 
 
 @router.get("/", response_model=list[AnnouncementDetail])
-async def get_all_announcements(
+async def get_announcements(
     department: str = Query(None, description="部門名稱", example="清華公佈欄"),
 ):
     """
     取得校內每個處室的所有公告資訊。
+    資料來源：各處室網站
     """
     _commit_hash, announcements_data = await nthudata.get(json_path)
     if department:
@@ -25,23 +26,11 @@ async def get_all_announcements(
     return announcements_data
 
 
-@router.get("/departments", response_model=list[str])
-async def get_all_departments():
-    """
-    取得所有有公告的部門列表。
-    """
-    _commit_hash, announcements_data = await nthudata.get(json_path)
-    departments = set()
-    for announcement in announcements_data:
-        departments.add(announcement["department"])
-    return list(departments)
-
-
 @router.get(
     "/search",
     response_model=list[AnnouncementArticle],
 )
-async def search_announcement(
+async def fuzzy_search_announcement_titles(
     query: str = Query(..., example="中研院", description="要查詢的公告"),
 ):
     """
@@ -64,3 +53,15 @@ async def search_announcement(
                 )
     tmp_results.sort(key=lambda x: x[0], reverse=True)
     return [article for _, article in tmp_results]
+
+
+@router.get("/lists/departments", response_model=list[str])
+async def list_announcement_departments():
+    """
+    取得所有有公告的部門列表。
+    """
+    _commit_hash, announcements_data = await nthudata.get(json_path)
+    departments = set()
+    for announcement in announcements_data:
+        departments.add(announcement["department"])
+    return list(departments)

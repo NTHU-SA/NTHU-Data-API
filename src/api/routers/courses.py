@@ -37,11 +37,12 @@ async def add_custom_header(response: Response):
     response_model=list[schemas.courses.CourseData],
     dependencies=[Depends(add_custom_header)],
 )
-async def get_all_courses_list(
+async def get_all_courses(
     response: Response,
 ):
     """
     取得所有課程。
+    資料來源：[教務處課務組/JSON格式下載](https://curricul.site.nthu.edu.tw/p/406-1208-111356,r7883.php?Lang=zh-tw)
     """
     result = courses.course_data
     response.headers["X-Total-Count"] = str(len(result))
@@ -50,33 +51,11 @@ async def get_all_courses_list(
 
 
 @router.get(
-    "/lists/{list_name}",
-    response_model=list[schemas.courses.CourseData],
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_courses_list(
-    list_name: schemas.courses.CourseListName,
-    response: Response,
-) -> list[schemas.courses.CourseData]:
-    """
-    取得指定類型的課程列表。
-    """
-    match list_name:
-        case "microcredits":
-            condition = Conditions("credit", "[0-9].[0-9]", True)
-        case "xclass":
-            condition = Conditions("note", "X-Class", True)
-    result = courses.query(condition)
-    response.headers["X-Total-Count"] = str(len(result))
-    return result
-
-
-@router.get(
     "/search",
     response_model=list[schemas.courses.CourseData],
     dependencies=[Depends(add_custom_header)],
 )
-async def search_by_field_and_value(
+async def search_courses_by_field_and_value(
     request: Request,
     response: Response,
     chinese_title: str = Query(None, description="中文標題搜尋", example="微積分"),
@@ -91,8 +70,8 @@ async def search_by_field_and_value(
 ):
     """
     根據提供的欄位和值搜尋課程。
-    可以直接使用欄位名稱作為查詢參數，例如：
-    /search?chinese_title=產業.+生涯&english_title=...
+    - 使用欄位名稱作為查詢參數
+    - 例如：/search?chinese_title=產業.+&english_title=...
     """
     conditions = {}
     query_params = request.query_params  # 從 Request 物件取得查詢參數
@@ -135,7 +114,7 @@ async def search_by_field_and_value(
     response_model=list[schemas.courses.CourseData],
     dependencies=[Depends(add_custom_header)],
 )
-async def get_courses_by_condition(
+async def search_courses_by_condition(
     query_condition: (
         schemas.courses.CourseQueryCondition | schemas.courses.CourseCondition
     ) = Body(
@@ -199,7 +178,7 @@ async def get_courses_by_condition(
     ),
 ):
     """
-    根據條件取得課程。
+    根據條件取得課程。可以使用巢狀條件。
     """
     if type(query_condition) is schemas.courses.CourseCondition:
         condition = Conditions(
@@ -213,4 +192,26 @@ async def get_courses_by_condition(
             list_build_target=query_condition.model_dump(mode="json")
         )
     result = courses.query(condition)
+    return result
+
+
+@router.get(
+    "/lists/{list_name}",
+    response_model=list[schemas.courses.CourseData],
+    dependencies=[Depends(add_custom_header)],
+)
+async def list_courses_by_type(
+    list_name: schemas.courses.CourseListName,
+    response: Response,
+) -> list[schemas.courses.CourseData]:
+    """
+    取得指定類型的課程列表。
+    """
+    match list_name:
+        case "microcredits":
+            condition = Conditions("credit", "[0-9].[0-9]", True)
+        case "xclass":
+            condition = Conditions("note", "X-Class", True)
+    result = courses.query(condition)
+    response.headers["X-Total-Count"] = str(len(result))
     return result

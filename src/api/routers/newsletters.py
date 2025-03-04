@@ -11,6 +11,7 @@ json_path = "newsletters.json"
 async def get_all_newsletters():
     """
     取得所有的電子報。
+    資料來源：[國立清華大學電子報系統](https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/)
     """
     _commit_hash, newsletter_data = await nthudata.get(json_path)
     return newsletter_data

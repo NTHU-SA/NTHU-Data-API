@@ -51,6 +51,7 @@ def _get_realtime_electricity_usage():
 async def get_realtime_electricity_usage():
     """
     取得校園電力即時使用量。
+    資料來源：[校園能源查詢管理系統](http://140.114.188.86/powermanage/index.aspx)
     """
     try:
         return _get_realtime_electricity_usage()
