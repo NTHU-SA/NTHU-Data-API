@@ -131,7 +131,8 @@ async def get(endpoint_name: str) -> tuple[str, dict | list] | None:
         endpoint_name (str): endpoint 名稱，例如 "buses.json" 或 "dining/shops.json"。
 
     Returns:
-        dict or list or None: 指定 endpoint 的 JSON 資料，可以是字典或列表，如果獲取失敗或 endpoint 不存在則返回 None。
+        tuple[str, dict or list] or None: 指定 endpoint 資料的 commit hash，及其 JSON 資料（可以是字典或列表）。
+                                          如果獲取失敗或 endpoint 不存在則返回 None。
     """
     if _base_url.endswith("/") and endpoint_name.startswith("/"):
         endpoint_name = endpoint_name[1:]
