@@ -1,18 +1,24 @@
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
+
+from src.utils.schema import url_corrector
 
 
 class NewsletterArticle(BaseModel):
     title: Optional[str] = Field(..., description="電子報標題")
-    link: Optional[HttpUrl] = Field(..., description="電子報網址")
+    link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
+        ..., description="電子報網址"
+    )
     date: Optional[str] = Field(None, description="發布日期")
 
 
 class NewsletterInfo(BaseModel):
     name: str = Field(..., description="該電子報名稱")
-    link: HttpUrl = Field(..., description="該電子報網址")
+    link: Annotated[HttpUrl, BeforeValidator(url_corrector)] = Field(
+        ..., description="該電子報網址"
+    )
     details: dict = Field(..., description="該電子報詳細資訊")
     articles: list[NewsletterArticle] = Field(..., description="該電子報文章列表")
 
