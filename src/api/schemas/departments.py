@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
+
+from src.utils.schema import url_corrector
 
 
 class DepartmentContact(BaseModel):
@@ -8,7 +10,7 @@ class DepartmentContact(BaseModel):
     phone: Optional[str] = None
     fax: Optional[str] = None
     email: Optional[str] = None
-    website: Optional[str] = None
+    website: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = None
 
 
 class DepartmentPerson(BaseModel):
@@ -29,7 +31,7 @@ class DepartmentBase(BaseModel):
     index: str
     name: str
     parent_name: Optional[str] = None
-    url: Optional[str] = None
+    url: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = None
     details: DepartmentDetails = Field(default_factory=DepartmentDetails)
 
 

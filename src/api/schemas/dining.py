@@ -1,7 +1,9 @@
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
+
+from src.utils.schema import url_corrector
 
 
 class DiningBuildingName(str, Enum):
@@ -21,7 +23,9 @@ class DiningScheduleName(str, Enum):
 
 class DiningRestaurant(BaseModel):
     area: str = Field(..., description="餐廳所在建築")
-    image: Optional[HttpUrl] = Field(..., description="餐廳圖片")
+    image: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
+        ..., description="餐廳圖片"
+    )
     name: str = Field(..., description="餐廳名稱")
     note: str = Field(..., description="餐廳備註")
     phone: str = Field(..., description="餐廳電話")
