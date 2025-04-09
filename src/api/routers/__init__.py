@@ -17,14 +17,26 @@ from . import (
 
 app = FastAPI()
 
-origins = ["*"]  # 允許來自所有網域 (Public API)
+# Using explicit origins would be safer, but for a public API that needs to be accessible from anywhere:
+origins = ["*"]  # Allow all domains (Public API)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # 允許的來源網域列表
-    allow_credentials=True,  # 允許跨域請求帶有 Cookie 和 HTTP 認證資訊
-    allow_methods=["*"],  # 允許所有 HTTP 方法 (GET, POST, PUT, DELETE 等)
-    allow_headers=["*"],  # 允許所有 HTTP 標頭
+    allow_origins=origins,  # Allowed origin domains list
+    allow_credentials=False,  # Setting this to False when using wildcard origins
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS",
+        "PATCH",
+    ],  # Explicitly list allowed methods
+    allow_headers=["*"],  # Allow all HTTP headers
+    expose_headers=[
+        "X-Process-Time",
+        "X-Data-Commit-Hash",
+    ],  # Expose custom headers used by the API
 )
 
 
