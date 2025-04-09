@@ -10,6 +10,10 @@ def url_corrector(url: str) -> str:
     Returns:
         str: The fixed URL.
     """
+    if url is None:
+        return url
+
+    url = url.strip()
     if url.startswith("//"):
         return "https:" + url
     else:
