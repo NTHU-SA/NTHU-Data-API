@@ -32,7 +32,7 @@ jobs:
       - name: Test
         run: python -m pytest -n auto tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
       - name: Store coverage files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage
           path: |
