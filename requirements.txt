@@ -4,7 +4,7 @@ uvicorn==0.38.0
 # Environment
 python-dotenv==1.1.0
 cachetools==5.5.2
-pyopenssl==25.0.0
+pyopenssl==25.3.0
 # Crawlers
 httpx[http2]==0.28.1
 beautifulsoup4==4.13.3
