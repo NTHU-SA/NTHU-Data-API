@@ -196,7 +196,7 @@ class Route:
 M1 = Stop("北校門口", "North Main Gate", "24.79589", "120.99633")
 M2 = Stop("綜二館", "General Building II", "24.794176", "120.99376")
 M3 = Stop("楓林小徑", "Maple Path", "24.791388889", "120.991388889")
-M4 = Stop("人社院/生科館", "CHSS/CLS Building", "24.79", "120.990277778")
+M4 = Stop("人社院&生科館", "CHSS&CLS Building", "24.79", "120.990277778")
 M5 = Stop("台積館", "TSMC Building", "24.78695", "120.9884")
 M6 = Stop(
     "奕園停車場", "Yi Pavilion Parking Lot", "24.788284441920126", "120.99246131713849"
