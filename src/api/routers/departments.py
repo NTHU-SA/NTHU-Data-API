@@ -33,7 +33,7 @@ async def fuzzy_search_departments_and_people(
     使用搜尋演算法搜尋全校部門與人員名稱。
     """
     _commit_hash, directory_data = await nthudata.get(JSON_PATH)
-    
+
     # 搜尋部門
     department_results = []
     for dept in directory_data:

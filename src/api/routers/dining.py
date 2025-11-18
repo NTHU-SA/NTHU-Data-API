@@ -90,17 +90,19 @@ async def get_all_restaurants(
     - 可選輸入營業日篩選該營業日有營業的餐廳，預設為全部列出。
     """
     _commit_hash, dining_data = await nthudata.get(JSON_PATH)
-    
+
     # 收集所有餐廳
     all_restaurants = [
         restaurant
         for building in dining_data
         for restaurant in building.get("restaurants", [])
     ]
-    
+
     # 如果指定了營業日，進行過濾
     if schedule:
-        schedule_day = schedule if schedule != "today" else datetime.now().strftime("%A").lower()
+        schedule_day = (
+            schedule if schedule != "today" else datetime.now().strftime("%A").lower()
+        )
         return [r for r in all_restaurants if _is_restaurant_open(r, schedule_day)]
-    
+
     return all_restaurants

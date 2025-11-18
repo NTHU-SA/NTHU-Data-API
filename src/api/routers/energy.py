@@ -29,13 +29,13 @@ async def _fetch_electricity_data(item: dict) -> dict:
             raise HTTPException(
                 status_code=500, detail="Failed to get electricity usage data."
             )
-        
+
         data_match = re.search(r"alt=\"kW: ([\d,-]+?)\"", response.text, re.S)
         if not data_match:
             raise HTTPException(
                 status_code=500, detail="Failed to parse electricity data."
             )
-        
+
         usage_value = int(data_match.group(1).replace(",", ""))
         return {
             **item,
@@ -50,6 +50,7 @@ async def _get_realtime_electricity_usage():
     非同步獲取所有電力系統的即時用電資料。
     """
     import asyncio
+
     tasks = [_fetch_electricity_data(item.copy()) for item in ELECTRICITY_USAGE_DATA]
     return await asyncio.gather(*tasks)
 

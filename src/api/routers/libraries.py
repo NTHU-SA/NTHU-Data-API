@@ -35,12 +35,14 @@ async def get_library_space_availability():
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
             data = response.json()
-            
+
             if data.get("resmsg") != "成功":
                 raise HTTPException(status_code=404, detail="找不到空間資料")
             return data["rows"]
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取空間資料失敗: {e}")
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取空間資料失敗: {e}"
+        )
     except (json.JSONDecodeError, KeyError) as e:
         raise HTTPException(status_code=500, detail=f"解析空間資料失敗: {e}")
 
@@ -53,7 +55,7 @@ async def get_library_lost_and_found_items():
     """
     date_end = datetime.now()
     date_start = date_end - timedelta(days=6 * 30)
-    
+
     post_data = {
         "place": "0",
         "date_start": date_start.strftime("%Y-%m-%d"),
@@ -68,29 +70,33 @@ async def get_library_lost_and_found_items():
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data=post_data, headers=DEFAULT_HEADERS)
             response.raise_for_status()
-            
+
             soup = BeautifulSoup(response.text, "html.parser")
             table = soup.find("table")
             if not table:
                 return []
-            
+
             table_rows = table.find_all("tr")
             if not table_rows:
                 return []
-            
+
             # 提取表格標題
             table_title = [td.text.strip() for td in table_rows[0].find_all("td")]
-            
+
             # 解析表格行
             rows_data = []
             for row in table_rows[1:]:
-                cells = [re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")]
+                cells = [
+                    re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")
+                ]
                 if len(cells) == len(table_title):
                     rows_data.append(dict(zip(table_title, cells)))
-            
+
             return rows_data
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取失物招領資料失敗: {e}")
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取失物招領資料失敗: {e}"
+        )
     except AttributeError:
         return []
     except Exception as e:
@@ -113,23 +119,25 @@ async def get_library_rss_data(
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
-            
+
             xml_string = response.text.replace("<br />", "")
             rss_dict = xmltodict.parse(xml_string)
             rss_data = rss_dict["rss"]["channel"]["item"]
-            
+
             # 確保資料為列表
             if not isinstance(rss_data, list):
                 rss_data = [rss_data]
-            
+
             # 修正圖片 URL
             for item in rss_data:
                 if item["image"]["url"].startswith("//"):
                     item["image"]["url"] = f"https:{item['image']['url']}"
-            
+
             return rss_data
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取 RSS 資料失敗: {e}")
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取 RSS 資料失敗: {e}"
+        )
     except KeyError:
         raise HTTPException(status_code=404, detail="在回應中找不到 RSS 來源")
 
@@ -152,7 +160,9 @@ async def get_library_opening_hours(
             response.raise_for_status()
             return response.json()
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取開放時間資料失敗: {e}")
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取開放時間資料失敗: {e}"
+        )
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"解析開放時間資料 JSON 失敗: {e}")
 
@@ -174,6 +184,8 @@ async def get_library_number_of_goods():
             response.raise_for_status()
             return response.json()
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取換證資料失敗: {e}")
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取換證資料失敗: {e}"
+        )
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"解析換證資料 JSON 失敗: {e}")

@@ -56,10 +56,10 @@ async def fuzzy_search_locations(
                         ),
                     )
                 )
-    
+
     if not tmp_results:
         raise HTTPException(status_code=404, detail="Not found")
-    
+
     # 先判斷是否與查詢字串相同，再依相似度從高到低排序
     tmp_results.sort(key=lambda x: (x[1].name == query, x[0]), reverse=True)
     return [item[1] for item in tmp_results]
