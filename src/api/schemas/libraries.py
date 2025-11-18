@@ -47,8 +47,15 @@ class LibraryName(str, Enum):
 
 class LibraryNumberOfGoods(BaseModel):
     borrow_quantity: int = Field(..., description="已換證數量")
-    remaining_18_quantity: int = Field(..., description="18歲以上成人剩餘換證數量")
-    remaining_15_18_quantity: str = Field(..., description="15~18歲青少年剩餘換證數量")
+    remaining_quantity_18: int = Field(..., description="18歲以上成人剩餘換證數量")
+    remaining_quantity_15_18: int = Field(..., description="15~18歲青少年剩餘換證數量")
+    usage_rate: str = Field(..., description="換證使用率")
+    available_borrow_quantity_18: int = Field(..., description="18歲以上成人可換證數量")
+    available_borrow_quantity_15_18: int = Field(
+        ..., description="15~18歲青少年可換證數量"
+    )
+    borrow_quantity_18: int = Field(..., description="18歲以上成人已換證數量")
+    borrow_quantity_15_18: int = Field(..., description="15~18歲青少年已換證數量")
 
 
 class LibraryRssType(str, Enum):

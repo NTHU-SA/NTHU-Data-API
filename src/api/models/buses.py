@@ -196,7 +196,7 @@ class Route:
 M1 = Stop("北校門口", "North Main Gate", "24.79589", "120.99633")
 M2 = Stop("綜二館", "General Building II", "24.794176", "120.99376")
 M3 = Stop("楓林小徑", "Maple Path", "24.791388889", "120.991388889")
-M4 = Stop("人社院/生科館", "CHSS/CLS Building", "24.79", "120.990277778")
+M4 = Stop("人社院&生科館", "CHSS&CLS Building", "24.79", "120.990277778")
 M5 = Stop("台積館", "TSMC Building", "24.78695", "120.9884")
 M6 = Stop(
     "奕園停車場", "Yi Pavilion Parking Lot", "24.788284441920126", "120.99246131713849"
@@ -397,7 +397,7 @@ class Buses:
         trans_list = {
             ("main", "up"): "TSMCBuilding",
             ("main", "down"): "MainGate",
-            ("nanda", "up"): "SouthCampus",
+            ("nanda", "up"): "Nanda",
             ("nanda", "down"): "MainCampus",
         }
         return trans_list[(route, direction)]
@@ -417,7 +417,7 @@ class Buses:
             up_name = "TSMC_building"
             down_name = "main_gate"
         else:  # route_type == "nanda"
-            up_name = "south_campus"
+            up_name = "nanda"
             down_name = "main_campus"
 
         return {
@@ -453,7 +453,7 @@ class Buses:
         取得南大校區區間車相關資料。
 
         Returns:
-            dict: 包含南大校區區間車路線資訊和時刻表的字典，鍵值包含 'toward_south_campus_info', 'weekday_bus_schedule_toward_south_campus' 等。
+            dict: 包含南大校區區間車路線資訊和時刻表的字典，鍵值包含 'toward_nanda_info', 'weekday_bus_schedule_toward_nanda' 等。
         """
         return self._get_route_data("nanda")
 

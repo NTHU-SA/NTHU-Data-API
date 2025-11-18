@@ -13,7 +13,8 @@ from src.api.schemas.dining import (
 from src.utils import nthudata
 
 router = APIRouter()
-json_path = "dining.json"
+JSON_PATH = "dining.json"
+FUZZY_SEARCH_THRESHOLD = 60
 
 
 def _is_restaurant_open(restaurant: DiningRestaurant, day: str) -> bool:
@@ -33,8 +34,8 @@ def _is_restaurant_open(restaurant: DiningRestaurant, day: str) -> bool:
     for keyword in DiningScheduleKeyword.BREAK_KEYWORDS:
         for day_zh in DiningScheduleKeyword.DAY_EN_TO_ZH.get(day, []):
             if keyword in note and day_zh in note:
-                return False  # 找到休息關鍵字，判斷為休息
-    return True  # 未找到休息關鍵字，判斷為營業
+                return False
+    return True
 
 
 @router.get("/", response_model=list[DiningBuilding])
@@ -47,7 +48,7 @@ async def get_dining_data(
     取得所有餐廳及服務性廠商資料。
     資料來源：[總務處經營管理組/餐廳及服務性廠商](https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw)
     """
-    _commit_hash, dining_data = await nthudata.get(json_path)
+    _commit_hash, dining_data = await nthudata.get(JSON_PATH)
     if building_name:
         return [
             building
@@ -67,17 +68,16 @@ async def fuzzy_search_restaurants(
     """
     使用餐廳名稱模糊搜尋餐廳資料。
     """
-    _commit_hash, dining_data = await nthudata.get(json_path)
+    _commit_hash, dining_data = await nthudata.get(JSON_PATH)
     results = []
     for building in dining_data:
         for restaurant in building.get("restaurants", []):
             similarity = fuzz.partial_ratio(query, restaurant["name"])
-            if similarity >= 60:  # 相似度門檻值，可以調整
-                restaurant["similarity_score"] = similarity  # 加入相似度分數方便排序
-                results.append(restaurant)
-    results.sort(
-        key=lambda x: x.get("similarity_score", 0), reverse=True
-    )  # 根據相似度排序
+            if similarity >= FUZZY_SEARCH_THRESHOLD:
+                # 創建新的字典避免修改原始資料
+                restaurant_with_score = {**restaurant, "similarity_score": similarity}
+                results.append(restaurant_with_score)
+    results.sort(key=lambda x: x["similarity_score"], reverse=True)
     return results
 
 
@@ -89,18 +89,20 @@ async def get_all_restaurants(
     取得所有餐廳資料。
     - 可選輸入營業日篩選該營業日有營業的餐廳，預設為全部列出。
     """
-    _commit_hash, dining_data = await nthudata.get(json_path)
-    if schedule:
-        if schedule == "today":
-            schedule = datetime.now().strftime("%A").lower()
-        return [
-            restaurant
-            for building in dining_data
-            for restaurant in building.get("restaurants", [])
-            if _is_restaurant_open(restaurant, schedule)
-        ]
-    return [
+    _commit_hash, dining_data = await nthudata.get(JSON_PATH)
+
+    # 收集所有餐廳
+    all_restaurants = [
         restaurant
         for building in dining_data
         for restaurant in building.get("restaurants", [])
     ]
+
+    # 如果指定了營業日，進行過濾
+    if schedule:
+        schedule_day = (
+            schedule if schedule != "today" else datetime.now().strftime("%A").lower()
+        )
+        return [r for r in all_restaurants if _is_restaurant_open(r, schedule_day)]
+
+    return all_restaurants

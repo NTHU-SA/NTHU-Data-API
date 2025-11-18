@@ -2,9 +2,7 @@ import json
 import re
 from datetime import datetime, timedelta
 
-import requests
-
-# TODO: 這邊之後可以考慮改寫成 async，避免跟之前一樣有機率等很久甚至卡死
+import httpx
 import xmltodict
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException, Path
@@ -18,7 +16,7 @@ from src.api.schemas.libraries import (
     LibrarySpace,
 )
 
-_default_headers = {
+DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 }
 
@@ -26,42 +24,44 @@ router = APIRouter()
 
 
 @router.get("/space", response_model=list[LibrarySpace])
-def get_library_space_availability():
+async def get_library_space_availability():
     """
     取得圖書館空間使用資訊。
     資料來源：[圖書館空間預約系統](https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx)
     """
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
     try:
-        response = requests.get(url, headers=_default_headers)
-        response.raise_for_status()
-        response_text = response.text
+        async with httpx.AsyncClient(
+            verify=False
+        ) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
+            response = await client.get(url, headers=DEFAULT_HEADERS)
+            response.raise_for_status()
+            data = response.json()
 
-        data = json.loads(response_text)
-        if data["resmsg"] != "成功":
-            raise HTTPException(status_code=404, detail="找不到空間資料")
-        return data["rows"]
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"擷取空間資料失敗: {e}")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="解析空間資料 JSON 失敗")
+            if data.get("resmsg") != "成功":
+                raise HTTPException(status_code=404, detail="找不到空間資料")
+            return data["rows"]
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取空間資料失敗: {e}"
+        )
+    except (json.JSONDecodeError, KeyError) as e:
+        raise HTTPException(status_code=500, detail=f"解析空間資料失敗: {e}")
 
 
 @router.get("/lost_and_found", response_model=list[LibraryLostAndFound])
-def get_library_lost_and_found_items():
+async def get_library_lost_and_found_items():
     """
     取得圖書館失物招領資訊。
     資料來源：[圖書館失物招領系統](https://adage.lib.nthu.edu.tw/find)
     """
     date_end = datetime.now()
     date_start = date_end - timedelta(days=6 * 30)
-    date_end = date_end.strftime("%Y-%m-%d")
-    date_start = date_start.strftime("%Y-%m-%d")
 
     post_data = {
         "place": "0",
-        "date_start": date_start,
-        "date_end": date_end,
+        "date_start": date_start.strftime("%Y-%m-%d"),
+        "date_end": date_end.strftime("%Y-%m-%d"),
         "catalog": "ALL",
         "keyword": "",
         "SUMIT": "送出",
@@ -69,44 +69,44 @@ def get_library_lost_and_found_items():
     url = "https://adage.lib.nthu.edu.tw/find/search_it.php"
 
     try:
-        response = requests.post(url, data=post_data, headers=_default_headers)
-        response.raise_for_status()
-        response_text = response.text
-        soup = BeautifulSoup(response_text, "html.parser")
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.post(url, data=post_data, headers=DEFAULT_HEADERS)
+            response.raise_for_status()
 
-        table = soup.find("table")
-        if not table:
-            return []  # 如果找不到表格，回傳空列表，而不是拋出錯誤
+            soup = BeautifulSoup(response.text, "html.parser")
+            table = soup.find("table")
+            if not table:
+                return []
 
-        table_rows = table.find_all("tr")
-        if not table_rows:
-            return []  # 如果找不到列，回傳空列表
+            table_rows = table.find_all("tr")
+            if not table_rows:
+                return []
 
-        table_title = table_rows[0].find_all("td")
-        table_title = [x.text.strip() for x in table_title]
+            # 提取表格標題
+            table_title = [td.text.strip() for td in table_rows[0].find_all("td")]
 
-        def parse_table_row(table_row):
-            text = table_row.find_all("td")
-            return [re.sub(r"\s+", " ", x.text.strip()) for x in text]
+            # 解析表格行
+            rows_data = []
+            for row in table_rows[1:]:
+                cells = [
+                    re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")
+                ]
+                if len(cells) == len(table_title):
+                    rows_data.append(dict(zip(table_title, cells)))
 
-        rows_data = [parse_table_row(row) for row in table_rows[1:]]
-        rows_data = [
-            dict(zip(table_title, row))
-            for row in rows_data
-            if len(row) == len(table_title)
-        ]  # 確保列長度與標題長度相符
-        return rows_data
-
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"擷取失物招領資料失敗: {e}")
-    except AttributeError:  # 處理 soup.find("table") 回傳 None 的情況
-        return []  # 如果表格解析失敗，回傳空列表
-    except Exception as e:  # 捕捉任何其他解析錯誤
+            return rows_data
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取失物招領資料失敗: {e}"
+        )
+    except AttributeError:
+        return []
+    except Exception as e:
         raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
 
 
 @router.get("/rss/{rss_type}", response_model=list[LibraryRssItem])
-def get_library_rss_data(
+async def get_library_rss_data(
     rss_type: LibraryRssType = Path(
         ...,
         description="RSS 類型：最新消息(news)、電子資源(eresources)、展覽及活動(exhibit)、南大與人社分館(branches)",
@@ -116,33 +116,36 @@ def get_library_rss_data(
     取得指定圖書館的 RSS 資料。
     資料來源：[圖書館官網展覽與活動](https://www.lib.nthu.edu.tw/events/index.html)
     """
-    # 最新消息 RSS:         https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_news.xml
-    # 電子資源 RSS:         https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_eresources.xml
-    # 展覽及活動 RSS:       https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_exhibit.xml
-    # 南大與人社分館 RSS:   https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_branches.xml
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type.value}.xml"
     try:
-        response = requests.get(url, headers=_default_headers)
-        response.raise_for_status()  # 針對錯誤的回應 (4xx 或 5xx) 拋出 HTTPError
-        xml_string = response.text
-        xml_string = xml_string.replace("<br />", "")
-        rss_dict = xmltodict.parse(xml_string)
-        rss_data = rss_dict["rss"]["channel"]["item"]
-        if not isinstance(rss_data, list):
-            rss_data = [rss_data]
-        for item in rss_data:
-            if item["image"]["url"].startswith("//"):
-                item["image"]["url"] = f"https:{item['image']['url']}"
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.get(url, headers=DEFAULT_HEADERS)
+            response.raise_for_status()
 
-        return rss_data
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"擷取 RSS 資料失敗: {e}")
+            xml_string = response.text.replace("<br />", "")
+            rss_dict = xmltodict.parse(xml_string)
+            rss_data = rss_dict["rss"]["channel"]["item"]
+
+            # 確保資料為列表
+            if not isinstance(rss_data, list):
+                rss_data = [rss_data]
+
+            # 修正圖片 URL
+            for item in rss_data:
+                if item["image"]["url"].startswith("//"):
+                    item["image"]["url"] = f"https:{item['image']['url']}"
+
+            return rss_data
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取 RSS 資料失敗: {e}"
+        )
     except KeyError:
         raise HTTPException(status_code=404, detail="在回應中找不到 RSS 來源")
 
 
 @router.get("/openinghours/{library_name}", response_model=dict)
-def get_library_opening_hours(
+async def get_library_opening_hours(
     library_name: LibraryName = Path(
         ...,
         description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)、夜讀區(mainlib_moonlight_area)",
@@ -154,20 +157,20 @@ def get_library_opening_hours(
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{library_name.value}.json"
     try:
-        response = requests.get(url, headers=_default_headers)
-        response.raise_for_status()
-        data_json = response.json()  # parse json
-        return data_json
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"擷取開放時間資料失敗: {e}")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="解析開放時間資料 JSON 失敗")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"解析開放時間資料失敗: {e}")
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.get(url, headers=DEFAULT_HEADERS)
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取開放時間資料失敗: {e}"
+        )
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"解析開放時間資料 JSON 失敗: {e}")
 
 
 @router.get("/goods", response_model=LibraryNumberOfGoods)
-def get_library_number_of_goods():
+async def get_library_number_of_goods():
     """
     取得總圖換證數量資訊。
     資料來源：圖書館官網
@@ -175,16 +178,16 @@ def get_library_number_of_goods():
     url = "https://adage.lib.nthu.edu.tw/goods/Public/number_of_goods_mix.json"
     headers = {
         "Referer": "https://www.lib.nthu.edu.tw/",
-        **_default_headers,
+        **DEFAULT_HEADERS,
     }
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        data_json = response.json()  # parse json
-        return data_json
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"擷取換證資料失敗: {e}")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="解析換證資料 JSON 失敗")
-    except Exception as e:  # 捕捉潛在的解析錯誤
-        raise HTTPException(status_code=500, detail=f"解析換證資料失敗: {e}")
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"擷取換證資料失敗: {e}"
+        )
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"解析換證資料 JSON 失敗: {e}")

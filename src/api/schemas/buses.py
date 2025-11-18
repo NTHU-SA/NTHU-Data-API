@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class BusStopsName(str, Enum):
+    # TODO: 新增教育學院站牌和對應的座標, 發車時間
     M1 = "北校門口"
     M2 = "綜二館"
     M3 = "楓林小徑"
@@ -134,7 +135,7 @@ class BusArriveTime(BaseModel):
         BusStopsName.M1,
         BusStopsName.M2,
         BusStopsName.M3,
-        "人社院/生科館",  # 此處功能同 BusStopsName.M4，但 / 會影響 url query，故手動更改
+        BusStopsName.M4,
         BusStopsName.M5,
         BusStopsName.M6,
         BusStopsName.M7,
@@ -173,11 +174,11 @@ class BusMainData(BaseModel):
 
 
 class BusNandaData(BaseModel):
-    toward_south_campus_info: BusInfo = Field(..., description="本部往南大區間車資訊")
-    weekday_bus_schedule_toward_south_campus: list[BusNandaSchedule] = Field(
+    toward_nanda_info: BusInfo = Field(..., description="本部往南大區間車資訊")
+    weekday_bus_schedule_toward_nanda: list[BusNandaSchedule] = Field(
         ..., description="本部往南大區間車時刻表（平日）"
     )
-    weekend_bus_schedule_toward_south_campus: list[BusNandaSchedule] = Field(
+    weekend_bus_schedule_toward_nanda: list[BusNandaSchedule] = Field(
         ..., description="本部往南大區間車時刻表（假日）"
     )
     toward_main_campus_info: BusInfo = Field(..., description="南大往本部區間車資訊")
