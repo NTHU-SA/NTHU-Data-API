@@ -7,7 +7,7 @@ cachetools==5.5.2
 pyopenssl==25.3.0
 # Crawlers
 httpx[http2]==0.28.1
-beautifulsoup4==4.13.3
+beautifulsoup4==4.14.2
 xmltodict==0.14.2
 pandas==2.2.3
 lxml==6.0.2
