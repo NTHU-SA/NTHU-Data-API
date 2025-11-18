@@ -31,7 +31,9 @@ async def get_library_space_availability():
     """
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(
+            verify=False
+        ) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
             data = response.json()
@@ -67,7 +69,7 @@ async def get_library_lost_and_found_items():
     url = "https://adage.lib.nthu.edu.tw/find/search_it.php"
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             response = await client.post(url, data=post_data, headers=DEFAULT_HEADERS)
             response.raise_for_status()
 
@@ -116,7 +118,7 @@ async def get_library_rss_data(
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type.value}.xml"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
 
@@ -155,7 +157,7 @@ async def get_library_opening_hours(
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{library_name.value}.json"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
             return response.json()
@@ -179,7 +181,7 @@ async def get_library_number_of_goods():
         **DEFAULT_HEADERS,
     }
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             response = await client.get(url, headers=headers)
             response.raise_for_status()
             return response.json()
