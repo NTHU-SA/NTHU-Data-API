@@ -13,6 +13,8 @@ FUZZY_SEARCH_THRESHOLD = 60
 @router.get("/", response_model=list[AnnouncementDetail])
 async def get_announcements(
     department: str = Query(None, description="部門名稱", example="清華公佈欄"),
+    title: str = Query(None, description="公告標題關鍵字", example="行政公告"),
+    language: str = Query(None, description="語言篩選", example="zh-tw"),
 ):
     """
     取得校內每個處室的所有公告資訊。
@@ -24,6 +26,18 @@ async def get_announcements(
             announcement
             for announcement in announcements_data
             if announcement["department"] == department
+        ]
+    if title:
+        announcements_data = [
+            announcement
+            for announcement in announcements_data
+            if title in announcement["title"]
+        ]
+    if language:
+        announcements_data = [
+            announcement
+            for announcement in announcements_data
+            if announcement.get("language") == language
         ]
     return announcements_data
 
