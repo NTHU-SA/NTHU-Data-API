@@ -225,7 +225,12 @@ class Processor:
         self.last_commit_hash = None
 
     async def update_data(self) -> None:
-        self.last_commit_hash, self.course_data = await nthudata.get("courses.json")
+        result = await nthudata.get("courses.json")
+        if result is None:
+            print("Warning: Could not fetch courses.json, keeping existing data")
+            return
+        
+        self.last_commit_hash, self.course_data = result
 
         # 將 dict 轉換為 CoursesData 物件
         self.course_data = list(map(CoursesData.from_dict, self.course_data))
