@@ -81,18 +81,14 @@ class FileDetailsManager:
             or self._cache["last_updated"] is None
             or (current_time - self._cache["last_updated"] > self.cache_expiry)
         ):
-            print("Updating file_details.json...")
             raw_data = await self.fetcher.fetch_json(self.file_details_url)
 
             if raw_data:
                 formatted_data = self._format_file_details(raw_data)
                 self._cache["data"] = formatted_data
                 self._cache["last_updated"] = current_time
-                print("file_details.json updated.")
             else:
                 print("Failed to update file_details.json.")
-        else:
-            print("Using cached file_details.json.")
 
     @staticmethod
     def _format_file_details(file_details: dict) -> list[dict]:
@@ -212,7 +208,6 @@ class NTHUDataManager:
         # Get file details
         file_details = await self.file_details_manager.get_file_details()
         if file_details is None:
-            print("Cannot fetch data because file_details.json is unavailable.")
             return None
 
         # Get expected commit hash
@@ -222,25 +217,20 @@ class NTHUDataManager:
 
         # Check cache validity
         if self.cache.is_valid(endpoint_name, expected_commit_hash):
-            print(f"Using cached data for '{endpoint_name}'.")
             cached = self.cache.get(endpoint_name)
             return (cached["commit_hash"], cached["data"])
 
         # Fetch fresh data
-        print(f"Fetching fresh data for '{endpoint_name}'...")
         data_url = f"{self.base_url}{endpoint_name}"
         fresh_data = await self.fetcher.fetch_json(data_url)
 
         if fresh_data:
             self.cache.set(endpoint_name, fresh_data, expected_commit_hash)
-            print(f"Data for '{endpoint_name}' updated in cache.")
             return (expected_commit_hash, fresh_data)
         else:
-            print(f"Failed to fetch fresh data for '{endpoint_name}'.")
             # Try to return stale cache if available
             cached = self.cache.get(endpoint_name)
             if cached:
-                print(f"Returning stale cache for '{endpoint_name}'.")
                 return (cached["commit_hash"], cached["data"])
             return None
 

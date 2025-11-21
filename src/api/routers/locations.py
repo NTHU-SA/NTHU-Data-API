@@ -18,7 +18,10 @@ async def get_all_locations():
     取得校內所有地點資訊。
     資料來源：[國立清華大學校園地圖](https://www.nthu.edu.tw/campusmap)
     """
-    _commit_hash, map_data = await nthudata.get(JSON_PATH)
+    result = await nthudata.get(JSON_PATH)
+    if result is None:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+    _commit_hash, map_data = result
     return [
         LocationDetail(
             name=location_name,
@@ -40,7 +43,10 @@ async def fuzzy_search_locations(
     """
     使用名稱模糊搜尋地點資訊。
     """
-    _commit_hash, map_data = await nthudata.get(JSON_PATH)
+    result = await nthudata.get(JSON_PATH)
+    if result is None:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+    _commit_hash, map_data = result
     tmp_results = []
     for campus_locations in map_data.values():
         for location_name, coordinates in campus_locations.items():

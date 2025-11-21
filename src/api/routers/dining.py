@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Path, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 from thefuzz import fuzz
 
 from src.data import nthudata
@@ -48,7 +48,10 @@ async def get_dining_data(
     取得所有餐廳及服務性廠商資料。
     資料來源：[總務處經營管理組/餐廳及服務性廠商](https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw)
     """
-    _commit_hash, dining_data = await nthudata.get(JSON_PATH)
+    result = await nthudata.get(JSON_PATH)
+    if result is None:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+    _commit_hash, dining_data = result
     if building_name:
         return [
             building
@@ -68,7 +71,10 @@ async def fuzzy_search_restaurants(
     """
     使用餐廳名稱模糊搜尋餐廳資料。
     """
-    _commit_hash, dining_data = await nthudata.get(JSON_PATH)
+    result = await nthudata.get(JSON_PATH)
+    if result is None:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+    _commit_hash, dining_data = result
     results = []
     for building in dining_data:
         for restaurant in building.get("restaurants", []):
@@ -89,7 +95,10 @@ async def get_all_restaurants(
     取得所有餐廳資料。
     - 可選輸入營業日篩選該營業日有營業的餐廳，預設為全部列出。
     """
-    _commit_hash, dining_data = await nthudata.get(JSON_PATH)
+    result = await nthudata.get(JSON_PATH)
+    if result is None:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+    _commit_hash, dining_data = result
 
     # 收集所有餐廳
     all_restaurants = [
