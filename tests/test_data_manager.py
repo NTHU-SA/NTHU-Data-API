@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.utils.data_manager import (
+from src.utils.nthudata import (
     DataCache,
     DataFetcher,
     FileDetailsManager,

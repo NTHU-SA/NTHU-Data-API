@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from src import config
-from src.data import data_manager
+from src.data import nthudata
 
 from . import (
     announcements,
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     # Startup: Pre-fetch configured endpoints
     print("Starting application...")
     print(f"Pre-fetching {len(config.PREFETCH_ENDPOINTS)} endpoints...")
-    results = await data_manager.prefetch(config.PREFETCH_ENDPOINTS)
+    results = await nthudata.prefetch(config.PREFETCH_ENDPOINTS)
 
     success_count = sum(1 for success in results.values() if success)
     print(

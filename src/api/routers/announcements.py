@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from thefuzz import fuzz
 
-from src.data import data_manager
+from src.data import nthudata
 from src.api.schemas.announcements import AnnouncementArticle, AnnouncementDetail
 
 router = APIRouter()
@@ -20,7 +20,7 @@ async def get_announcements(
     取得校內每個處室的所有公告資訊。
     資料來源：各處室網站
     """
-    _commit_hash, announcements_data = await data_manager.get(ANNOUNCEMENTS_JSON)
+    _commit_hash, announcements_data = await nthudata.get(ANNOUNCEMENTS_JSON)
     if department:
         announcements_data = [
             announcement
@@ -50,7 +50,7 @@ async def get_announcements_list(
     取得校內每個處室的公告列表（不含文章內容）。
     資料來源：各處室網站
     """
-    _commit_hash, announcements_list = await data_manager.get(ANNOUNCEMENTS_LIST_JSON)
+    _commit_hash, announcements_list = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
     if department:
         announcements_list = [
             announcement
@@ -70,7 +70,7 @@ async def fuzzy_search_announcement_titles(
     """
     使用名稱模糊搜尋全部公告的標題。
     """
-    _commit_hash, announcements_data = await data_manager.get(ANNOUNCEMENTS_JSON)
+    _commit_hash, announcements_data = await nthudata.get(ANNOUNCEMENTS_JSON)
     tmp_results = []
     for announcement in announcements_data:
         articles = announcement.get("articles")
@@ -94,6 +94,6 @@ async def list_announcement_departments():
     """
     取得所有有公告的部門列表。
     """
-    _commit_hash, announcements_list = await data_manager.get(ANNOUNCEMENTS_LIST_JSON)
+    _commit_hash, announcements_list = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
     departments = {announcement["department"] for announcement in announcements_list}
     return sorted(departments)
