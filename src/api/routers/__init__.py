@@ -1,7 +1,11 @@
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+
+from src import config
+from src.utils.data_manager import NTHUDataManager
 
 from . import (
     announcements,
@@ -15,7 +19,42 @@ from . import (
     newsletters,
 )
 
-app = FastAPI()
+# Global data manager instance
+data_manager = NTHUDataManager(
+    file_details_cache_expiry=config.FILE_DETAILS_CACHE_EXPIRY
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager for startup and shutdown tasks."""
+    # Startup: Pre-fetch configured endpoints
+    print("Starting application...")
+    print(f"Pre-fetching {len(config.PREFETCH_ENDPOINTS)} endpoints...")
+    results = await data_manager.prefetch(config.PREFETCH_ENDPOINTS)
+
+    success_count = sum(1 for success in results.values() if success)
+    print(
+        f"Pre-fetch complete: {success_count}/{len(config.PREFETCH_ENDPOINTS)} endpoints loaded"
+    )
+
+    for endpoint, success in results.items():
+        status = "✓" if success else "✗"
+        print(f"  {status} {endpoint}")
+
+    # Initialize module-specific data processors
+    print("Initializing data processors...")
+    await courses.courses.update_data()
+    await buses.buses.update_data()
+    print("Data processors initialized.")
+
+    yield
+
+    # Shutdown: cleanup if needed
+    print("Shutting down application...")
+
+
+app = FastAPI(lifespan=lifespan)
 
 # Using explicit origins would be safer, but for a public API that needs to be accessible from anywhere:
 origins = ["*"]  # Allow all domains (Public API)

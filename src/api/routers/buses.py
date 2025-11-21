@@ -1,8 +1,7 @@
-from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 
 from src.api import constant
 from src.api.models.buses import Buses, after_specific_time, stops
@@ -25,19 +24,7 @@ from src.api.schemas.buses import (
 
 buses = Buses()
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """FastAPI 的生命週期管理器，用於在應用啟動時更新公車資料。"""
-    global buses
-
-    # tasks when app starts
-    await buses.update_data()
-    yield
-    # tasks when app stops
-
-
-router = APIRouter(lifespan=lifespan)
+router = APIRouter()
 
 
 async def add_custom_header(response: Response):
