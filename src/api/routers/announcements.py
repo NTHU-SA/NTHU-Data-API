@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
-from src.data import nthudata
 from src.api.schemas.announcements import AnnouncementArticle, AnnouncementDetail
+from src.data import nthudata
 
 router = APIRouter()
 ANNOUNCEMENTS_JSON = "announcements.json"

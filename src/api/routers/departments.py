@@ -3,8 +3,8 @@ from typing import Union
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
-from src.data import nthudata
 from src.api.schemas.departments import Department, DepartmentPerson
+from src.data import nthudata
 
 router = APIRouter()
 JSON_PATH = "directory.json"

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Path
 
-from src.data import nthudata
 from src.api.schemas.newsletters import NewsletterInfo, NewsletterName
+from src.data import nthudata
 
 router = APIRouter()
 JSON_PATH = "newsletters.json"

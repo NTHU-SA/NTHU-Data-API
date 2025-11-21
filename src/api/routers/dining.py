@@ -3,7 +3,6 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Path, Query
 from thefuzz import fuzz
 
-from src.data import nthudata
 from src.api.schemas.dining import (
     DiningBuilding,
     DiningBuildingName,
@@ -11,6 +10,7 @@ from src.api.schemas.dining import (
     DiningScheduleKeyword,
     DiningScheduleName,
 )
+from src.data import nthudata
 
 router = APIRouter()
 JSON_PATH = "dining.json"
