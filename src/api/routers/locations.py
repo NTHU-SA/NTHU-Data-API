@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
+from src.data import data_manager
 from src.api.schemas.locations import LocationDetail
-from src.utils import nthudata
 
 router = APIRouter()
 JSON_PATH = "maps.json"
@@ -18,7 +18,7 @@ async def get_all_locations():
     取得校內所有地點資訊。
     資料來源：[國立清華大學校園地圖](https://www.nthu.edu.tw/campusmap)
     """
-    _commit_hash, map_data = await nthudata.get(JSON_PATH)
+    _commit_hash, map_data = await data_manager.get(JSON_PATH)
     return [
         LocationDetail(
             name=location_name,
@@ -40,7 +40,7 @@ async def fuzzy_search_locations(
     """
     使用名稱模糊搜尋地點資訊。
     """
-    _commit_hash, map_data = await nthudata.get(JSON_PATH)
+    _commit_hash, map_data = await data_manager.get(JSON_PATH)
     tmp_results = []
     for campus_locations in map_data.values():
         for location_name, coordinates in campus_locations.items():

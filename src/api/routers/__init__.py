@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from src import config
-from src.utils.data_manager import NTHUDataManager
+from src.data import data_manager
 
 from . import (
     announcements,
@@ -17,11 +17,6 @@ from . import (
     libraries,
     locations,
     newsletters,
-)
-
-# Global data manager instance
-data_manager = NTHUDataManager(
-    file_details_cache_expiry=config.FILE_DETAILS_CACHE_EXPIRY
 )
 
 

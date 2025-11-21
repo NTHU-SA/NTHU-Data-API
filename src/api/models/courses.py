@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Optional, Union
 
-from src.utils import nthudata
+from src.data import data_manager
 
 
 # =============================================================================
@@ -225,7 +225,7 @@ class Processor:
         self.last_commit_hash = None
 
     async def update_data(self) -> None:
-        result = await nthudata.get("courses.json")
+        result = await data_manager.get("courses.json")
         if result is None:
             print("Warning: Could not fetch courses.json, keeping existing data")
             return

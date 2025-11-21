@@ -3,8 +3,8 @@ from typing import Union
 from fastapi import APIRouter, HTTPException, Query
 from thefuzz import fuzz
 
+from src.data import data_manager
 from src.api.schemas.departments import Department, DepartmentPerson
-from src.utils import nthudata
 
 router = APIRouter()
 JSON_PATH = "directory.json"
@@ -18,7 +18,7 @@ async def get_all_departments():
     取得所有部門與人員資料。
     資料來源：[清華通訊錄](https://tel.net.nthu.edu.tw/nthusearch/)
     """
-    _commit_hash, directory_data = await nthudata.get(JSON_PATH)
+    _commit_hash, directory_data = await data_manager.get(JSON_PATH)
     return directory_data
 
 
@@ -32,7 +32,7 @@ async def fuzzy_search_departments_and_people(
     """
     使用搜尋演算法搜尋全校部門與人員名稱。
     """
-    _commit_hash, directory_data = await nthudata.get(JSON_PATH)
+    _commit_hash, directory_data = await data_manager.get(JSON_PATH)
 
     # 搜尋部門
     department_results = []
@@ -63,7 +63,7 @@ async def get_department_by_index(index: str):
     """
     根據部門索引取得特定部門資訊。
     """
-    _commit_hash, directory_data = await nthudata.get(JSON_PATH)
+    _commit_hash, directory_data = await data_manager.get(JSON_PATH)
     for dept in directory_data:
         if dept["index"] == index:
             return dept
