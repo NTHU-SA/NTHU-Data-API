@@ -473,8 +473,10 @@ class Buses:
         if result is None:
             print("Warning: Could not fetch buses.json, keeping existing data")
             return
-        
-        res_commit_hash, self._res_json = result  # 直接更新 _res_json，後續處理會使用最新的 json 資料
+
+        res_commit_hash, self._res_json = (
+            result  # 直接更新 _res_json，後續處理會使用最新的 json 資料
+        )
 
         if (
             self._res_json and res_commit_hash != self.last_commit_hash

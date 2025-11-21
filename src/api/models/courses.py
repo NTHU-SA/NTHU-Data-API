@@ -229,7 +229,7 @@ class Processor:
         if result is None:
             print("Warning: Could not fetch courses.json, keeping existing data")
             return
-        
+
         self.last_commit_hash, self.course_data = result
 
         # 將 dict 轉換為 CoursesData 物件
