@@ -9,7 +9,7 @@ from typing import Any, Literal, Optional
 import pandas as pd
 
 from src.api import schemas
-from src.utils import nthudata
+from src.data import nthudata
 
 # ---------------------------------------------------------------------------
 # 常數與全域變數
@@ -469,9 +469,14 @@ class Buses:
         """更新公車時刻表資料，包含從 API 獲取最新資料並重新處理。"""
         # asyncio.gather(self._init_task)  # 等待初始化任務完成
 
-        res_commit_hash, self._res_json = await nthudata.get(
-            "buses.json"
-        )  # 直接更新 _res_json，後續處理會使用最新的 json 資料
+        result = await nthudata.get("buses.json")
+        if result is None:
+            print("Warning: Could not fetch buses.json, keeping existing data")
+            return
+
+        res_commit_hash, self._res_json = (
+            result  # 直接更新 _res_json，後續處理會使用最新的 json 資料
+        )
 
         if (
             self._res_json and res_commit_hash != self.last_commit_hash

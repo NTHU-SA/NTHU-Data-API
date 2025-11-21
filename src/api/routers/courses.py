@@ -1,25 +1,11 @@
-from contextlib import asynccontextmanager
-
-from fastapi import APIRouter, Body, Depends, FastAPI, Query, Request, Response
+from fastapi import APIRouter, Body, Depends, Query, Request, Response
 
 from src.api import schemas
 from src.api.models.courses import Conditions, Processor
 
 courses = Processor()
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """FastAPI 的生命週期管理器，用於在應用啟動時更新公車資料。"""
-    global courses
-
-    # tasks when app starts
-    await courses.update_data()
-    yield
-    # tasks when app stops
-
-
-router = APIRouter(lifespan=lifespan)
+router = APIRouter()
 
 
 async def add_custom_header(response: Response):
