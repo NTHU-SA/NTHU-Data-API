@@ -14,7 +14,7 @@ PREFETCH_ENDPOINTS = [
     "dining.json",
     "announcements.json",
     "announcements_list.json",
-    "departments/directory.json",
+    "directory.json",
     "newsletters.json",
 ]
 
