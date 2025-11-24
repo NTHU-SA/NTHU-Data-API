@@ -12,7 +12,10 @@ router = APIRouter()
 
 @router.get("/", response_model=list[schemas.Department])
 async def get_all_departments(response: Response):
-    """Get all departments and personnel."""
+    """
+    取得所有部門與人員資料。
+    資料來源：[清華通訊錄](https://tel.net.nthu.edu.tw/nthusearch/)
+    """
     commit_hash, data = await services.departments_service.get_all_departments()
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
@@ -29,7 +32,7 @@ async def get_all_departments(response: Response):
 async def fuzzy_search_departments_and_people(
     response: Response, query: str = Query(..., example="校長")
 ):
-    """Fuzzy search departments and people."""
+    """使用搜尋演算法搜尋全校部門與人員名稱。"""
     commit_hash, data = (
         await services.departments_service.fuzzy_search_departments_and_people(
             query=query

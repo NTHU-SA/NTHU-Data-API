@@ -4,15 +4,16 @@ Departments domain service.
 Handles department and personnel directory data.
 """
 
-from typing import Optional, Union
+from typing import Optional
 
 from thefuzz import fuzz
 
 from data_api.data.manager import nthudata
 
 JSON_PATH = "directory.json"
-FUZZY_SEARCH_THRESHOLD_DEPT = 60
-FUZZY_SEARCH_THRESHOLD_PERSON = 70
+FUZZY_SEARCH_THRESHOLD_DEPT = 80
+FUZZY_SEARCH_THRESHOLD_PERSON = 80
+FUZZY_SEARCH_THRESHOLD_PERSON_TITLE = 90
 
 
 class DepartmentsService:
@@ -45,10 +46,15 @@ class DepartmentsService:
                 dept_results.append((dept_similarity, department))
 
             # Search people in this department
-            for person in department.get("people", []):
-                person_similarity = fuzz.partial_ratio(query, person["name"])
-                if person_similarity >= FUZZY_SEARCH_THRESHOLD_PERSON:
-                    person_results.append((person_similarity, person))
+            people = department.get("details", {}).get("people", [])
+            for person in people:
+                person_name_similarity = fuzz.partial_ratio(query, person["name"])
+                if person_name_similarity >= FUZZY_SEARCH_THRESHOLD_PERSON:
+                    person_results.append((person_name_similarity, person))
+                    continue  # Skip title check if name matched
+                person_title_similarity = fuzz.partial_ratio(query, person["title"])
+                if person_title_similarity >= FUZZY_SEARCH_THRESHOLD_PERSON_TITLE:
+                    person_results.append((person_title_similarity, person))
 
         dept_results.sort(key=lambda x: x[0], reverse=True)
         person_results.sort(key=lambda x: x[0], reverse=True)

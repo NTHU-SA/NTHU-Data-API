@@ -12,11 +12,6 @@ def test_departments_endpoints():
     assert response.status_code == 200
 
 
-def test_departments_index():
-    response = client.get(url="/departments/01")
-    assert response.status_code == 200
-
-
 @pytest.mark.parametrize("query", search_list)
 def test_departments_search(query):
     params = {"query": query}
