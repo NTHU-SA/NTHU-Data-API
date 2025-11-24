@@ -11,8 +11,8 @@ router = APIRouter()
 @router.get("/", response_model=list[schemas.NewsletterInfo])
 async def get_all_newsletters(response: Response):
     """
-    Get all newsletters.
-    Data source: NTHU Newsletter System
+    取得所有的電子報。
+    資料來源：[國立清華大學電子報系統](https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/)
     """
     commit_hash, data = await services.newsletters_service.get_all_newsletters()
     if commit_hash is None:
@@ -29,7 +29,7 @@ async def get_newsletter_by_name(
         ..., example="國立清華大學學生會電子報"
     ),
 ):
-    """Get newsletter by name."""
+    """取得指定電子報的資訊。"""
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(
         name=newsletter_name
     )

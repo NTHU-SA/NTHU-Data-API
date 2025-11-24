@@ -32,7 +32,9 @@ async def get_all_departments(response: Response):
 async def fuzzy_search_departments_and_people(
     response: Response, query: str = Query(..., example="校長")
 ):
-    """使用搜尋演算法搜尋全校部門與人員名稱。"""
+    """
+    模糊搜尋全校部門與人員名稱。
+    """
     commit_hash, data = (
         await services.departments_service.fuzzy_search_departments_and_people(
             query=query

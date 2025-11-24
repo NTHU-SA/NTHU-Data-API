@@ -11,8 +11,8 @@ router = APIRouter()
 @router.get("/electricity_usage", response_model=list[schemas.EnergyElectricityInfo])
 async def get_realtime_electricity_usage():
     """
-    Get real-time campus electricity usage.
-    Data source: Campus Energy Management System
+    取得校園電力即時使用量。
+    資料來源：[校園能源查詢管理系統](http://140.114.188.86/powermanage/index.aspx)
     """
     try:
         return await services.energy_service.get_realtime_electricity_usage()

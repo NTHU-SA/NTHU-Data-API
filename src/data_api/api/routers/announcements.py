@@ -20,8 +20,8 @@ async def get_announcements(
     language: str = Query(None, description="語言篩選", example="zh-tw"),
 ):
     """
-    Get all announcements from departments.
-    Data source: Department websites
+    取得校內每個處室的所有公告資訊。
+    資料來源：各處室網站
     """
     commit_hash, data = await services.announcements_service.get_announcements(
         department=department, title=title, language=language
@@ -39,8 +39,8 @@ async def get_announcements_list(
     department: str = Query(None, description="部門名稱", example="清華公佈欄"),
 ):
     """
-    Get announcements list (without article content).
-    Data source: Department websites
+    取得公告列表（不包含文章內容）。
+    資料來源：各處室網站
     """
     commit_hash, data = await services.announcements_service.get_announcements_list(
         department=department
@@ -57,7 +57,7 @@ async def fuzzy_search_announcement_titles(
     response: Response,
     query: str = Query(..., example="中研院", description="要查詢的公告"),
 ):
-    """Fuzzy search announcements by title."""
+    """使用公告標題模糊搜尋公告資料。"""
     commit_hash, data = await services.announcements_service.fuzzy_search_announcements(
         query=query
     )
@@ -70,7 +70,7 @@ async def fuzzy_search_announcement_titles(
 
 @router.get("/lists/departments", response_model=list[str])
 async def list_announcement_departments(response: Response):
-    """Get list of all departments with announcements."""
+    """取得所有有公告的部門列表。"""
     commit_hash, data = await services.announcements_service.list_departments()
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")

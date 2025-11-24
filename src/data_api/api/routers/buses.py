@@ -46,8 +46,8 @@ def get_current_time_state():
 )
 async def get_main_campus_bus_data():
     """
-    Get main campus bus information.
-    Data source: General Affairs Office
+    取得校本部公車資訊。
+    來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw)
     """
     await services.buses_service.update_data()
     try:
@@ -65,8 +65,8 @@ async def get_main_campus_bus_data():
 )
 async def get_nanda_campus_bus_data():
     """
-    Get Nanda campus shuttle bus information.
-    Data source: General Affairs Office
+    取得南大校區區間車資訊。
+    來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
     """
     await services.buses_service.update_data()
     try:
@@ -86,7 +86,7 @@ async def get_bus_route_information(
     bus_type: Literal["main", "nanda"],
     direction: schemas.BusDirection,
 ):
-    """Get bus route information for specified type and direction."""
+    """取得指定公車路線的資訊。"""
     await services.buses_service.update_data()
     try:
         data = services.buses_service.info_data.loc[(bus_type, direction), "data"]
@@ -109,7 +109,7 @@ async def get_bus_route_information(
     dependencies=[Depends(add_custom_header)],
 )
 async def get_bus_stops_information():
-    """Get information about all bus stops."""
+    """取得所有公車站牌的資訊。"""
     await services.buses_service.update_data()
     try:
         return services.buses_service.gen_bus_stops_info()
@@ -133,7 +133,7 @@ async def get_bus_schedules(
         ..., example="up", description="上山或下山"
     ),
 ):
-    """Get bus schedules for specified conditions."""
+    """取得指定條件的公車時刻表。"""
     await services.buses_service.update_data()
     try:
         if day != "current":
@@ -175,7 +175,7 @@ async def get_stop_bus_information_by_stop(
     direction: schemas.BusDirection = Query(..., example="up"),
     query: schemas.BusQuery = Depends(),
 ):
-    """Get bus stop information for specified stop."""
+    """取得指定公車站牌的資訊和即將停靠公車。"""
     await services.buses_service.update_data()
     return_limit = (
         query.limits
@@ -223,7 +223,7 @@ async def get_detailed_bus_schedule(
     direction: schemas.BusDirection = Query(..., example="up"),
     query: schemas.BusQuery = Depends(),
 ):
-    """Get detailed bus schedule including arrival times at each stop."""
+    """取得詳細的公車時刻表，包括每個站點的到達時間。"""
     await services.buses_service.update_data()
     return_limit = (
         query.limits

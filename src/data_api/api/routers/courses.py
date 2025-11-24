@@ -22,8 +22,8 @@ def add_custom_header(response: Response):
 )
 async def get_all_courses(response: Response):
     """
-    Get all courses.
-    Data source: Academic Affairs Office
+    取得所有課程。
+    資料來源：[教務處課務組/JSON格式下載](https://curricul.site.nthu.edu.tw/p/406-1208-111356,r7883.php?Lang=zh-tw)
     """
     result = services.courses_service.course_data
     response.headers["X-Total-Count"] = str(len(result))
@@ -62,7 +62,9 @@ async def search_courses_by_field_and_value(
     required_optional_note: str = Query(None, description="必選修說明"),
 ):
     """
-    Search courses by field and value.
+    根據提供的欄位和值搜尋課程。
+    - 使用欄位名稱作為查詢參數
+    - 例如：/search?chinese_title=產業.+&english_title=...
     """
     conditions = {}
     query_params = request.query_params
@@ -126,7 +128,9 @@ async def search_courses_by_condition(
         }
     ),
 ):
-    """Search courses by complex conditions."""
+    """
+    進階搜尋，根據條件取得課程。可以使用巢狀條件。
+    """
     if type(query_condition) is schemas.CourseCondition:
         condition = models.Conditions(
             query_condition.row_field.value,
@@ -150,7 +154,9 @@ async def list_courses_by_type(
     list_name: schemas.CourseListName,
     response: Response,
 ) -> list[schemas.CourseData]:
-    """Get courses by predefined list type."""
+    """
+    取得指定類型的課程列表。
+    """
     match list_name:
         case "microcredits":
             condition = models.Conditions("credit", "[0-9].[0-9]", True)
