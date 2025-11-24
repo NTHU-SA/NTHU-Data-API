@@ -22,17 +22,12 @@ def test_dining_buildings(building_name):
     assert response.status_code == 200
 
 
-def test_dining_restaurants():
-    response = client.get(url="/dining/restaurants")
-    assert response.status_code == 200
-
-
 @pytest.mark.parametrize(
     "schedule", [_.value for _ in schemas.dining.DiningScheduleName]
 )
-def test_dining_schedules(schedule):
+def test_dining_open(schedule):
     params = {"schedule": schedule}
-    response = client.get(url="/dining/restaurants", params=params)
+    response = client.get(url="/dining/open", params=params)
     assert response.status_code == 200
 
 
