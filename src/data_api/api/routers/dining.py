@@ -18,7 +18,7 @@ router = APIRouter()
 async def get_dining_data(
     response: Response,
     building_name: schemas.DiningBuildingName = Query(
-        None, example="小吃部", description="餐廳建築名稱（可選）"
+        None, description="餐廳建築名稱（可選）"
     ),
 ) -> list[schemas.DiningBuilding]:
     """
@@ -42,9 +42,7 @@ async def get_dining_data(
 )
 async def get_open_restaurants(
     response: Response,
-    schedule: schemas.DiningScheduleName = Query(
-        ..., example="today", description="營業時間查詢"
-    ),
+    schedule: schemas.DiningScheduleName = Query(..., description="營業時間查詢"),
 ):
     """取得指定營業日的餐廳資料。"""
     commit_hash, data = await services.dining_service.get_open_restaurants(
@@ -64,7 +62,7 @@ async def get_open_restaurants(
 )
 async def fuzzy_search_restaurants(
     response: Response,
-    query: str = Query(..., example="麥當勞", description="要查詢的餐廳名稱"),
+    query: str = Query(..., description="要查詢的餐廳名稱"),
 ):
     """使用餐廳名稱模糊搜尋餐廳資料。"""
     commit_hash, data = await services.dining_service.fuzzy_search_restaurants(

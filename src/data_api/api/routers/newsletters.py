@@ -31,9 +31,7 @@ async def get_all_newsletters(response: Response):
 )
 async def get_newsletter_by_name(
     response: Response,
-    newsletter_name: schemas.NewsletterName = Path(
-        ..., example="國立清華大學學生會電子報"
-    ),
+    newsletter_name: schemas.NewsletterName = Path(...),
 ):
     """取得指定電子報的資訊。"""
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(

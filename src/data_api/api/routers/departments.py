@@ -33,7 +33,7 @@ async def get_all_departments(response: Response):
     operation_id="searchDepartmentsAndPeople",
 )
 async def fuzzy_search_departments_and_people(
-    response: Response, query: str = Query(..., example="校長")
+    response: Response, query: str = Query(..., description="要查詢的部門或人員名稱")
 ):
     """
     模糊搜尋全校部門與人員名稱。

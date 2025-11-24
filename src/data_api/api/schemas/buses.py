@@ -46,9 +46,7 @@ class BusQuery(BaseModel):
     """Query parameters for bus endpoints."""
 
     time: Optional[str] = Field(
-        Query(
-            "0:00", example="8:10", description="時間。若搜尋 day 選擇 current 時失效。"
-        ),
+        Query(None, description="時間。若搜尋 day 選擇 current 時失效。"),
         description="時間",
     )
     limits: Optional[int] = Field(

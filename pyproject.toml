@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nthu-data-api"
 version = "2.0.0"
-description = "NTHU Data API - Clean Architecture"
+description = "NTHU Data API"
 readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "NTHU-SA", email = "contact@example.com"}
+    {name = "NTHU-SA", email = "it@nthusa.tw"}
 ]
 dependencies = [
     "fastapi==0.115.12",

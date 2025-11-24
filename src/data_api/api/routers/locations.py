@@ -31,7 +31,7 @@ async def get_all_locations(response: Response):
 )
 async def fuzzy_search_locations(
     response: Response,
-    query: str = Query(..., example="校門", description="要查詢的地點"),
+    query: str = Query(..., description="要查詢的地點"),
 ):
     """使用名稱模糊搜尋地點資訊。"""
     commit_hash, data = await services.locations_service.fuzzy_search_locations(

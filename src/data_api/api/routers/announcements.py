@@ -19,9 +19,9 @@ router = APIRouter()
 )
 async def get_announcements(
     response: Response,
-    department: str = Query(None, description="部門名稱", example="清華公佈欄"),
-    title: str = Query(None, description="公告標題關鍵字", example="行政公告"),
-    language: str = Query(None, description="語言篩選", example="zh-tw"),
+    department: str = Query(None, description="部門名稱"),
+    title: str = Query(None, description="公告標題關鍵字"),
+    language: str = Query(None, description="語言篩選"),
 ):
     """
     取得校內每個處室的所有公告資訊。
@@ -40,7 +40,7 @@ async def get_announcements(
 @router.get("/lists", response_model=list[dict], operation_id="getAnnouncementsList")
 async def get_announcements_list(
     response: Response,
-    department: str = Query(None, description="部門名稱", example="清華公佈欄"),
+    department: str = Query(None, description="部門名稱"),
 ):
     """
     取得公告列表（不包含文章內容）。
@@ -63,7 +63,7 @@ async def get_announcements_list(
 )
 async def fuzzy_search_announcement_titles(
     response: Response,
-    query: str = Query(..., example="中研院", description="要查詢的公告"),
+    query: str = Query(..., description="要查詢的公告"),
 ):
     """使用公告標題模糊搜尋公告資料。"""
     commit_hash, data = await services.announcements_service.fuzzy_search_announcements(

@@ -8,7 +8,7 @@ Delegates business logic to domain services.
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, Path
 
 from data_api.api.schemas import buses as schemas
 from data_api.domain.buses import services
@@ -86,8 +86,8 @@ async def get_nanda_campus_bus_data():
     operation_id="getBusRouteInformation",
 )
 async def get_bus_route_information(
-    bus_type: Literal["main", "nanda"],
-    direction: schemas.BusDirection,
+    bus_type: Literal["main", "nanda"] = Path(..., description="車種選擇"),
+    direction: schemas.BusDirection = Path(..., description="方向選擇"),
 ):
     """取得指定公車路線的資訊。"""
     await services.buses_service.update_data()
@@ -128,15 +128,12 @@ async def get_bus_stops_information():
     response_model=list[schemas.BusMainSchedule | schemas.BusNandaSchedule | None],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusSchedules",
+    response_description="取得公車時刻表信息。",
 )
 async def get_bus_schedules(
-    bus_type: schemas.BusRouteType = Query(..., example="main", description="車種選擇"),
-    day: schemas.BusDayWithCurrent = Query(
-        ..., example="weekday", description="平日、假日或目前時刻"
-    ),
-    direction: schemas.BusDirection = Query(
-        ..., example="up", description="上山或下山"
-    ),
+    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
+    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
+    direction: schemas.BusDirection = Query(..., description="上山或下山"),
 ):
     """取得指定條件的公車時刻表。"""
     await services.buses_service.update_data()
@@ -176,9 +173,9 @@ async def get_bus_schedules(
 )
 async def get_stop_bus_information_by_stop(
     stop_name: schemas.BusStopsName,
-    bus_type: schemas.BusRouteType = Query(..., example="main"),
-    day: schemas.BusDayWithCurrent = Query(..., example="weekday"),
-    direction: schemas.BusDirection = Query(..., example="up"),
+    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
+    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
+    direction: schemas.BusDirection = Query(..., description="上山或下山"),
     query: schemas.BusQuery = Depends(),
 ):
     """取得指定公車站牌的資訊和即將停靠公車。"""
@@ -225,9 +222,9 @@ async def get_stop_bus_information_by_stop(
     operation_id="getDetailedBusSchedule",
 )
 async def get_detailed_bus_schedule(
-    bus_type: schemas.BusRouteType = Query(..., example="main"),
-    day: schemas.BusDayWithCurrent = Query(..., example="weekday"),
-    direction: schemas.BusDirection = Query(..., example="up"),
+    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
+    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
+    direction: schemas.BusDirection = Query(..., description="上山或下山"),
     query: schemas.BusQuery = Depends(),
 ):
     """取得詳細的公車時刻表，包括每個站點的到達時間。"""
