@@ -206,11 +206,11 @@ class BusesService:
         res_commit_hash, self._res_json = result
 
         if self._res_json and res_commit_hash != self.last_commit_hash:
-            await self._process_bus_data()
+            self._process_bus_data()
             self.last_commit_hash = res_commit_hash
         self._start_from_gen_2_bus_info.clear()
 
-    async def _process_bus_data(self) -> None:
+    def _process_bus_data(self) -> None:
         """Process bus data from JSON."""
         self._populate_info_data()
         self._populate_raw_schedule_data()
