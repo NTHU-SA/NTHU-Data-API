@@ -1,3 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nthu-data-api"
+version = "2.0.0"
+description = "NTHU Data API - Clean Architecture"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "NTHU-SA", email = "contact@example.com"}
+]
+dependencies = [
+    "fastapi==0.115.12",
+    "uvicorn==0.38.0",
+    "python-dotenv==1.1.0",
+    "pydantic-settings>=2.0.0",
+    "cachetools==5.5.2",
+    "pyopenssl==25.3.0",
+    "httpx[http2]==0.28.1",
+    "beautifulsoup4==4.14.2",
+    "xmltodict==0.14.2",
+    "pandas==2.2.3",
+    "lxml==6.0.2",
+    "jieba==0.42.1",
+    "python-Levenshtein==0.27.1",
+    "thefuzz==0.22.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit==4.2.0",
+    "black",
+]
+test = [
+    "pytest==8.3.5",
+    "pytest-xdist==3.6.1",
+    "pytest-cov==7.0.0",
+    "httpx==0.28.1",
+]
+
+[tool.setuptools]
+packages = ["data_api"]
+package-dir = {"" = "src"}
+
 [tool.isort]
 profile = "black"
 multi_line_output = 3
@@ -5,3 +52,14 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 88
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"

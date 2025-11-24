@@ -12,6 +12,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from data_api.core import config
+from data_api.core.settings import settings
 from data_api.data.manager import nthudata
 from data_api.domain.buses import services as buses_services
 
@@ -36,8 +37,9 @@ async def lifespan(app: FastAPI):
     # Initialize module-specific data processors
     print("Initializing data processors...")
     await buses_services.buses_service.update_data()
-    # TODO: Add other module services as they are migrated
-    # await courses_services.courses_service.update_data()
+    
+    from data_api.domain.courses import services as courses_services
+    await courses_services.courses_service.update_data()
     print("Data processors initialized.")
 
     yield
@@ -57,7 +59,7 @@ def create_app() -> FastAPI:
 
     # CORS configuration
     # Using explicit origins would be safer, but for a public API:
-    origins = ["*"]  # Allow all domains (Public API)
+    origins = settings.cors_origins  # From settings
 
     app.add_middleware(
         CORSMiddleware,
@@ -91,6 +93,7 @@ def create_app() -> FastAPI:
     from data_api.api.routers import (
         announcements,
         buses,
+        courses,
         departments,
         dining,
         energy,
@@ -101,7 +104,7 @@ def create_app() -> FastAPI:
 
     app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
-    # app.include_router(courses.router, prefix="/courses", tags=["Courses"])  # TODO: Migrate courses
+    app.include_router(courses.router, prefix="/courses", tags=["Courses"])
     app.include_router(departments.router, prefix="/departments", tags=["Departments"])
     app.include_router(dining.router, prefix="/dining", tags=["Dining"])
     app.include_router(energy.router, prefix="/energy", tags=["Energy"])

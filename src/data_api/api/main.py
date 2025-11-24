@@ -2,24 +2,20 @@
 Application entry point.
 
 This module provides the uvicorn entry point for running the application.
+Uses pydantic-settings for configuration.
 """
 
-import os
-
 import uvicorn
-from dotenv import load_dotenv
 
-load_dotenv()
-
-PORT = int(os.getenv("PORT", 5000))
+from data_api.core.settings import settings
 
 if __name__ == "__main__":
-    if os.getenv("DEV_MODE") == "True":
+    if settings.dev_mode:
         # Development
         uvicorn.run(
             app="data_api.api.api:app",
-            host="0.0.0.0",
-            port=PORT,
+            host=settings.host,
+            port=settings.port,
             log_level="debug",
             reload=True,  # reload the server every time code changes
         )
@@ -27,8 +23,8 @@ if __name__ == "__main__":
         # Production
         uvicorn.run(
             app="data_api.api.api:app",
-            host="0.0.0.0",
-            port=PORT,
-            log_level="error",
-            workers=2,
+            host=settings.host,
+            port=settings.port,
+            log_level=settings.log_level,
+            workers=settings.workers,
         )

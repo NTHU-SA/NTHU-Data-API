@@ -3,6 +3,7 @@
 from . import (
     announcements,
     buses,
+    courses,
     departments,
     dining,
     energy,
@@ -14,6 +15,7 @@ from . import (
 __all__ = [
     "announcements",
     "buses",
+    "courses",
     "departments",
     "dining",
     "energy",

@@ -1,28 +1,17 @@
-import os
+"""
+Application entry point - delegates to new structure.
 
-import uvicorn
-from dotenv import load_dotenv
+Run with: python main.py
+Or use: python -m data_api.api.main
+"""
 
-load_dotenv()
+import sys
+from pathlib import Path
 
-PORT = int(os.getenv("PORT", 5000))
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
+# Import and run from new structure
 if __name__ == "__main__":
-    if os.getenv("DEV_MODE") == "True":
-        # Development
-        uvicorn.run(
-            app="src:app",
-            host="0.0.0.0",
-            port=PORT,
-            log_level="debug",
-            reload=True,  # reload the server every time code changes
-        )
-    else:
-        # Production
-        uvicorn.run(
-            app="src:app",
-            host="0.0.0.0",
-            port=PORT,
-            log_level="error",
-            workers=2,
-        )
+    from data_api.api import main
+    # Entry point is in data_api.api.main module

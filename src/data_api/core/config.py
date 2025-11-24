@@ -17,6 +17,3 @@ PREFETCH_ENDPOINTS = [
     "directory.json",
     "newsletters.json",
 ]
-
-# File details cache expiry time in seconds (default: 5 minutes)
-FILE_DETAILS_CACHE_EXPIRY = 60 * 5
