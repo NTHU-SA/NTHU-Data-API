@@ -21,12 +21,14 @@ class NewslettersService:
             return None, []
         return result
 
-    async def get_newsletter_by_name(self, name: str) -> tuple[Optional[str], Optional[dict]]:
+    async def get_newsletter_by_name(
+        self, name: str
+    ) -> tuple[Optional[str], Optional[dict]]:
         """Get newsletter by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
             return None, None
-        
+
         commit_hash, newsletter_data = result
         for newsletter in newsletter_data:
             if newsletter["name"] == name:

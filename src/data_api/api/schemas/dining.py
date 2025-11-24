@@ -11,7 +11,12 @@ from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
 from data_api.domain.dining.enums import DiningBuildingName, DiningScheduleName
 from data_api.utils.schema import url_corrector
 
-__all__ = ["DiningBuildingName", "DiningScheduleName", "DiningRestaurant", "DiningBuilding"]
+__all__ = [
+    "DiningBuildingName",
+    "DiningScheduleName",
+    "DiningRestaurant",
+    "DiningBuilding",
+]
 
 
 class DiningRestaurant(BaseModel):

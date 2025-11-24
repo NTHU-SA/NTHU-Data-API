@@ -28,7 +28,7 @@ async def get_announcements(
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
@@ -47,7 +47,7 @@ async def get_announcements_list(
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
@@ -63,7 +63,7 @@ async def fuzzy_search_announcement_titles(
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
@@ -74,6 +74,6 @@ async def list_announcement_departments(response: Response):
     commit_hash, data = await services.announcements_service.list_departments()
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

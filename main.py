@@ -14,4 +14,5 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 # Import and run from new structure
 if __name__ == "__main__":
     from data_api.api import main
+
     # Entry point is in data_api.api.main module

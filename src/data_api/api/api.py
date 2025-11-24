@@ -37,8 +37,9 @@ async def lifespan(app: FastAPI):
     # Initialize module-specific data processors
     print("Initializing data processors...")
     await buses_services.buses_service.update_data()
-    
+
     from data_api.domain.courses import services as courses_services
+
     await courses_services.courses_service.update_data()
     print("Data processors initialized.")
 
@@ -51,7 +52,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """
     Create and configure the FastAPI application.
-    
+
     Returns:
         FastAPI: Configured application instance.
     """
@@ -102,7 +103,9 @@ def create_app() -> FastAPI:
         newsletters,
     )
 
-    app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
+    app.include_router(
+        announcements.router, prefix="/announcements", tags=["Announcements"]
+    )
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
     app.include_router(courses.router, prefix="/courses", tags=["Courses"])
     app.include_router(departments.router, prefix="/departments", tags=["Departments"])

@@ -26,16 +26,16 @@ class AnnouncementsService:
     ) -> tuple[Optional[str], list[dict]]:
         """
         Get announcements with optional filtering.
-        
+
         Returns:
             tuple: (commit_hash, filtered_announcements)
         """
         result = await nthudata.get(ANNOUNCEMENTS_JSON)
         if result is None:
             return None, []
-        
+
         commit_hash, announcements_data = result
-        
+
         if department:
             announcements_data = [
                 announcement
@@ -54,7 +54,7 @@ class AnnouncementsService:
                 for announcement in announcements_data
                 if announcement.get("language") == language
             ]
-        
+
         return commit_hash, announcements_data
 
     async def get_announcements_list(
@@ -64,16 +64,16 @@ class AnnouncementsService:
         result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
         if result is None:
             return None, []
-        
+
         commit_hash, announcements_list = result
-        
+
         if department:
             announcements_list = [
                 announcement
                 for announcement in announcements_list
                 if announcement["department"] == department
             ]
-        
+
         return commit_hash, announcements_list
 
     async def fuzzy_search_announcements(
@@ -83,9 +83,9 @@ class AnnouncementsService:
         result = await nthudata.get(ANNOUNCEMENTS_JSON)
         if result is None:
             return None, []
-        
+
         commit_hash, announcements_data = result
-        
+
         tmp_results = []
         for announcement in announcements_data:
             articles = announcement.get("articles")
@@ -95,7 +95,7 @@ class AnnouncementsService:
                 similarity = fuzz.partial_ratio(query, article["title"])
                 if similarity >= FUZZY_SEARCH_THRESHOLD:
                     tmp_results.append((similarity, article))
-        
+
         tmp_results.sort(key=lambda x: x[0], reverse=True)
         return commit_hash, [article for _, article in tmp_results]
 
@@ -104,9 +104,9 @@ class AnnouncementsService:
         result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
         if result is None:
             return None, []
-        
+
         commit_hash, announcements_list = result
-        
+
         departments = {
             announcement["department"] for announcement in announcements_list
         }

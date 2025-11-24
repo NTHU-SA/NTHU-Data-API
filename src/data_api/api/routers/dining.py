@@ -28,7 +28,7 @@ async def get_dining_data(
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
@@ -46,7 +46,7 @@ async def get_open_restaurants(
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
@@ -62,6 +62,6 @@ async def fuzzy_search_restaurants(
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

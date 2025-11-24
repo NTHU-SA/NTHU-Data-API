@@ -97,8 +97,12 @@ class BusNandaSchedule(BusSchedule):
 class BusDetailedSchedule:
     """Detailed bus schedule with arrival times at each stop."""
 
-    dep_info: dict[str, str]  # departure information: {"time": "HH:MM", "description": "..."}
-    arr_info: list[dict[str, str]]  # arrival info: [{"stop": "...", "arrive_time": "HH:MM"}, ...]
+    dep_info: dict[
+        str, str
+    ]  # departure information: {"time": "HH:MM", "description": "..."}
+    arr_info: list[
+        dict[str, str]
+    ]  # arrival info: [{"stop": "...", "arrive_time": "HH:MM"}, ...]
     bus_type: str
 
 

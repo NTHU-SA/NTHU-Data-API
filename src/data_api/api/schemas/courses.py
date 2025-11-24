@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, RootModel, field_validator
 
 class CourseFieldName(str, Enum):
     """Course field names for querying."""
+
     id = "id"
     chinese_title = "chinese_title"
     english_title = "english_title"
@@ -31,12 +32,14 @@ class CourseFieldName(str, Enum):
 
 class CourseLanguage(str, Enum):
     """Course language options."""
+
     Chinese = "中"
     English = "英"
 
 
 class CourseCreditOperation(str, Enum):
     """Credit comparison operations."""
+
     GreaterThan = "gt"
     LessThan = "lt"
     GreaterThanOrEqual = "gte"
@@ -45,6 +48,7 @@ class CourseCreditOperation(str, Enum):
 
 class CourseData(BaseModel):
     """Course data schema."""
+
     id: str = Field(..., description="課號")
     chinese_title: str = Field(..., description="課程中文名稱")
     english_title: str = Field(..., description="課程英文名稱")
@@ -68,6 +72,7 @@ class CourseData(BaseModel):
 
 class CourseCondition(BaseModel):
     """Single course query condition."""
+
     row_field: CourseFieldName = Field(..., description="搜尋的欄位名稱")
     matcher: str = Field(..., description="搜尋的值")
     regex_match: bool = Field(False, description="是否使用正則表達式")
@@ -75,29 +80,42 @@ class CourseCondition(BaseModel):
 
 class CourseQueryOperation(str, Enum):
     """Query operation type."""
+
     and_ = "and"
     or_ = "or"
 
 
 class CourseQueryCondition(RootModel):
     """Complex course query condition."""
-    root: list[Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]]
+
+    root: list[
+        Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]
+    ]
 
     @field_validator("root")
     def check_query(cls, v):
-        POST_ERROR_INFO = " Structure: [(nested) Condition, Operation, (nested) Condition]."
+        POST_ERROR_INFO = (
+            " Structure: [(nested) Condition, Operation, (nested) Condition]."
+        )
         for i in range(len(v)):
             if type(v[i]) is CourseQueryOperation:
                 if i == 0 or i == len(v) - 1:
-                    raise ValueError("First/last elements must be Condition." + POST_ERROR_INFO)
+                    raise ValueError(
+                        "First/last elements must be Condition." + POST_ERROR_INFO
+                    )
                 elif type(v[i - 1]) not in [CourseQueryCondition, CourseCondition]:
-                    raise TypeError("Before Operation must be Condition." + POST_ERROR_INFO)
+                    raise TypeError(
+                        "Before Operation must be Condition." + POST_ERROR_INFO
+                    )
                 elif type(v[i + 1]) not in [CourseQueryCondition, CourseCondition]:
-                    raise TypeError("After Operation must be Condition." + POST_ERROR_INFO)
+                    raise TypeError(
+                        "After Operation must be Condition." + POST_ERROR_INFO
+                    )
         return v
 
 
 class CourseListName(str, Enum):
     """Predefined course lists."""
+
     microcredits = "microcredits"
     xclass = "xclass"

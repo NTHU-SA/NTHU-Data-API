@@ -17,7 +17,7 @@ async def get_all_newsletters(response: Response):
     commit_hash, data = await services.newsletters_service.get_all_newsletters()
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
@@ -25,7 +25,9 @@ async def get_all_newsletters(response: Response):
 @router.get("/{newsletter_name}", response_model=schemas.NewsletterInfo)
 async def get_newsletter_by_name(
     response: Response,
-    newsletter_name: schemas.NewsletterName = Path(..., example="國立清華大學學生會電子報"),
+    newsletter_name: schemas.NewsletterName = Path(
+        ..., example="國立清華大學學生會電子報"
+    ),
 ):
     """Get newsletter by name."""
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(
@@ -35,6 +37,6 @@ async def get_newsletter_by_name(
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
     if data is None:
         raise HTTPException(status_code=404, detail="電子報名稱不存在")
-    
+
     response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

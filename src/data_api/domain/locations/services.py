@@ -21,7 +21,7 @@ class LocationsService:
         result = await nthudata.get(JSON_PATH)
         if result is None:
             return None, []
-        
+
         commit_hash, map_data = result
         locations = [
             {
@@ -34,12 +34,14 @@ class LocationsService:
         ]
         return commit_hash, locations
 
-    async def fuzzy_search_locations(self, query: str) -> tuple[Optional[str], list[dict]]:
+    async def fuzzy_search_locations(
+        self, query: str
+    ) -> tuple[Optional[str], list[dict]]:
         """Fuzzy search locations by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
             return None, []
-        
+
         commit_hash, map_data = result
         tmp_results = []
         for campus_locations in map_data.values():
@@ -52,7 +54,7 @@ class LocationsService:
                         "longitude": coordinates["longitude"],
                     }
                     tmp_results.append((similarity, location))
-        
+
         # Sort by exact match first, then by similarity
         tmp_results.sort(key=lambda x: (x[1]["name"] == query, x[0]), reverse=True)
         return commit_hash, [item[1] for item in tmp_results]
