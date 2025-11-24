@@ -10,7 +10,9 @@ from data_api.domain.departments import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.Department])
+@router.get(
+    "/", response_model=list[schemas.Department], operation_id="getAllDepartments"
+)
 async def get_all_departments(response: Response):
     """
     取得所有部門與人員資料。
@@ -28,6 +30,7 @@ async def get_all_departments(response: Response):
     response_model=dict[
         str, Union[list[schemas.Department], list[schemas.DepartmentPerson]]
     ],
+    operation_id="searchDepartmentsAndPeople",
 )
 async def fuzzy_search_departments_and_people(
     response: Response, query: str = Query(..., example="校長")

@@ -6,6 +6,8 @@ and registers all routers.
 """
 
 import time
+import os
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -15,6 +17,8 @@ from data_api.core import config
 from data_api.core.settings import settings
 from data_api.data.manager import nthudata
 from data_api.domain.buses import services as buses_services
+
+from fastmcp import FastMCP
 
 
 @asynccontextmanager
@@ -132,4 +136,19 @@ def create_app() -> FastAPI:
 
 
 # Create the app instance
-app = create_app()
+fast_api_app = create_app()
+
+# MCP Integration
+mcp = FastMCP.from_fastapi(app=fast_api_app, name="NTHU Data API")
+mcp_app = mcp.http_app(path="/mcp")
+# 要開啟實驗性功能（但之後會變正式版本），不然 openapi.json 解析會有問題
+os.environ["FASTMCP_EXPERIMENTAL_ENABLE_NEW_OPENAPI_PARSER"] = "true"
+
+combined_app = FastAPI(
+    title="NTHU Data API with MCP",
+    version="1.0.0",
+    description="NTHU Data API integrated with FastMCP for monitoring and control.",
+    routes=[*mcp_app.routes, *fast_api_app.routes],
+    lifespan=mcp_app.lifespan,
+)
+app = combined_app

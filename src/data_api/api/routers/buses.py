@@ -43,6 +43,7 @@ def get_current_time_state():
     "/main",
     response_model=schemas.BusMainData,
     dependencies=[Depends(add_custom_header)],
+    operation_id="getMainCampusBusData",
 )
 async def get_main_campus_bus_data():
     """
@@ -62,6 +63,7 @@ async def get_main_campus_bus_data():
     "/nanda",
     response_model=schemas.BusNandaData,
     dependencies=[Depends(add_custom_header)],
+    operation_id="getNandaCampusBusData",
 )
 async def get_nanda_campus_bus_data():
     """
@@ -81,6 +83,7 @@ async def get_nanda_campus_bus_data():
     "/info/{bus_type}/{direction}",
     response_model=list[schemas.BusInfo],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getBusRouteInformation",
 )
 async def get_bus_route_information(
     bus_type: Literal["main", "nanda"],
@@ -107,6 +110,7 @@ async def get_bus_route_information(
     "/info/stops",
     response_model=list[schemas.BusStopsInfo],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getBusStopsInformation",
 )
 async def get_bus_stops_information():
     """取得所有公車站牌的資訊。"""
@@ -123,6 +127,7 @@ async def get_bus_stops_information():
     "/schedules",
     response_model=list[schemas.BusMainSchedule | schemas.BusNandaSchedule | None],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getBusSchedules",
 )
 async def get_bus_schedules(
     bus_type: schemas.BusRouteType = Query(..., example="main", description="車種選擇"),
@@ -167,6 +172,7 @@ async def get_bus_schedules(
     "/stops/{stop_name}",
     response_model=list[schemas.BusStopsQueryResult | None],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getStopBusInformationByStop",
 )
 async def get_stop_bus_information_by_stop(
     stop_name: schemas.BusStopsName,
@@ -216,6 +222,7 @@ async def get_stop_bus_information_by_stop(
         schemas.BusMainDetailedSchedule | schemas.BusNandaDetailedSchedule | None
     ],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getDetailedBusSchedule",
 )
 async def get_detailed_bus_schedule(
     bus_type: schemas.BusRouteType = Query(..., example="main"),

@@ -23,7 +23,11 @@ DEFAULT_HEADERS = {
 router = APIRouter()
 
 
-@router.get("/space", response_model=list[LibrarySpace])
+@router.get(
+    "/space",
+    response_model=list[LibrarySpace],
+    operation_id="getLibrarySpaceAvailability",
+)
 async def get_library_space_availability():
     """
     取得圖書館空間使用資訊。
@@ -49,7 +53,11 @@ async def get_library_space_availability():
         raise HTTPException(status_code=500, detail=f"解析空間資料失敗: {e}")
 
 
-@router.get("/lost_and_found", response_model=list[LibraryLostAndFound])
+@router.get(
+    "/lost_and_found",
+    response_model=list[LibraryLostAndFound],
+    operation_id="getLibraryLostAndFoundItems",
+)
 async def get_library_lost_and_found_items():
     """
     取得圖書館失物招領資訊。
@@ -105,7 +113,11 @@ async def get_library_lost_and_found_items():
         raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
 
 
-@router.get("/rss/{rss_type}", response_model=list[LibraryRssItem])
+@router.get(
+    "/rss/{rss_type}",
+    response_model=list[LibraryRssItem],
+    operation_id="getLibraryRssData",
+)
 async def get_library_rss_data(
     rss_type: LibraryRssType = Path(
         ...,
@@ -144,7 +156,11 @@ async def get_library_rss_data(
         raise HTTPException(status_code=404, detail="在回應中找不到 RSS 來源")
 
 
-@router.get("/openinghours/{library_name}", response_model=dict)
+@router.get(
+    "/openinghours/{library_name}",
+    response_model=dict,
+    operation_id="getLibraryOpeningHours",
+)
 async def get_library_opening_hours(
     library_name: LibraryName = Path(
         ...,
@@ -169,7 +185,11 @@ async def get_library_opening_hours(
         raise HTTPException(status_code=500, detail=f"解析開放時間資料 JSON 失敗: {e}")
 
 
-@router.get("/goods", response_model=LibraryNumberOfGoods)
+@router.get(
+    "/goods",
+    response_model=LibraryNumberOfGoods,
+    operation_id="getLibraryNumberOfGoods",
+)
 async def get_library_number_of_goods():
     """
     取得總圖換證數量資訊。

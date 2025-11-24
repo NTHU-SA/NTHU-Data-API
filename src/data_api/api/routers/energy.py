@@ -8,7 +8,11 @@ from data_api.domain.energy import services
 router = APIRouter()
 
 
-@router.get("/electricity_usage", response_model=list[schemas.EnergyElectricityInfo])
+@router.get(
+    "/electricity_usage",
+    response_model=list[schemas.EnergyElectricityInfo],
+    operation_id="getRealtimeElectricityUsage",
+)
 async def get_realtime_electricity_usage():
     """
     取得校園電力即時使用量。

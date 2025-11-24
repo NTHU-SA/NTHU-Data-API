@@ -12,7 +12,9 @@ from data_api.domain.dining import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.DiningBuilding])
+@router.get(
+    "/", response_model=list[schemas.DiningBuilding], operation_id="getDiningData"
+)
 async def get_dining_data(
     response: Response,
     building_name: schemas.DiningBuildingName = Query(
@@ -33,7 +35,11 @@ async def get_dining_data(
     return data
 
 
-@router.get("/open", response_model=list[schemas.DiningRestaurant])
+@router.get(
+    "/open",
+    response_model=list[schemas.DiningRestaurant],
+    operation_id="getOpenRestaurants",
+)
 async def get_open_restaurants(
     response: Response,
     schedule: schemas.DiningScheduleName = Query(
@@ -51,7 +57,11 @@ async def get_open_restaurants(
     return data
 
 
-@router.get("/search", response_model=list[schemas.DiningRestaurant])
+@router.get(
+    "/search",
+    response_model=list[schemas.DiningRestaurant],
+    operation_id="fuzzySearchRestaurants",
+)
 async def fuzzy_search_restaurants(
     response: Response,
     query: str = Query(..., example="麥當勞", description="要查詢的餐廳名稱"),
