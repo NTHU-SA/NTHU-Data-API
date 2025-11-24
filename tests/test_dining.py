@@ -29,10 +29,3 @@ def test_dining_open(schedule):
     params = {"schedule": schedule}
     response = client.get(url="/dining/open", params=params)
     assert response.status_code == 200
-
-
-@pytest.mark.parametrize("query", search_list)
-def test_dining_searches_restaurants(query):
-    params = {"query": query}
-    response = client.get(url="/dining/search", params=params)
-    assert response.status_code == 200

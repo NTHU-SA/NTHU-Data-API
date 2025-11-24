@@ -39,7 +39,7 @@ class DiningService:
     """Service for dining data operations."""
 
     async def get_dining_data(
-        self, building_name: Optional[str] = None
+        self, building_name: Optional[str] = None, restaurant_name: Optional[str] = None
     ) -> tuple[Optional[str], list[dict]]:
         """Get dining data with optional building filter."""
         result = await nthudata.get(JSON_PATH)
@@ -48,12 +48,27 @@ class DiningService:
 
         commit_hash, dining_data = result
 
-        if building_name:
-            dining_data = [
-                building
-                for building in dining_data
-                if building["building"] == building_name
-            ]
+        filtered = []
+
+        for b in dining_data:
+            # 篩建築物
+            if building_name and b["building"] != building_name:
+                continue
+            # 篩餐廳
+            restaurants = b["restaurants"]
+            if restaurant_name:
+                restaurants = [r for r in restaurants if restaurant_name in r["name"]]
+
+            # 沒餐廳就不要放進去，免得空殼 building 出現
+            if restaurants:
+                filtered.append(
+                    {
+                        **b,
+                        "restaurants": restaurants,
+                    }
+                )
+
+        dining_data = filtered
 
         return commit_hash, dining_data
 
@@ -84,25 +99,68 @@ class DiningService:
 
         return commit_hash, open_restaurants
 
-    async def fuzzy_search_restaurants(
-        self, query: str
+    async def fuzzy_search_dining_data(
+        self, building_name: Optional[str] = None, restaurant_name: Optional[str] = None
     ) -> tuple[Optional[str], list[dict]]:
-        """Fuzzy search restaurants by name."""
+        """
+        Fuzzy search dining data while maintaining the nested structure.
+        Returns: list[DiningBuilding]
+        """
         result = await nthudata.get(JSON_PATH)
         if result is None:
             return None, []
 
-        commit_hash, dining_data = result
+        commit_hash, raw_data = result
+        filtered_results = []
 
-        results_with_score = []
-        for building in dining_data:
-            for restaurant in building["restaurants"]:
-                similarity = fuzz.partial_ratio(query, restaurant["name"])
-                if similarity >= FUZZY_SEARCH_THRESHOLD:
-                    results_with_score.append((similarity, restaurant))
+        # 2. 遍歷每一棟建築
+        for building in raw_data:
+            # --- Level 1: 建築名稱篩選 ---
+            # 如果有給 building_name，就先檢查建築名稱是否符合
+            if building_name:
+                b_score = fuzz.partial_ratio(
+                    building_name, building.get("building", "")
+                )
+                if b_score < FUZZY_SEARCH_THRESHOLD:
+                    # 建築名稱不符合，直接跳過整棟
+                    continue
 
-        results_with_score.sort(key=lambda x: x[0], reverse=True)
-        return commit_hash, [restaurant for _, restaurant in results_with_score]
+            # 取得該建築內的所有餐廳
+            original_restaurants = building.get("restaurants", [])
+            matched_restaurants = []
+
+            # --- Level 2: 餐廳名稱篩選 ---
+            if restaurant_name:
+                # 如果有搜餐廳名，則過濾內部的餐廳
+                temp_scores = []
+                for restaurant in original_restaurants:
+                    r_score = fuzz.partial_ratio(
+                        restaurant_name, restaurant.get("name", "")
+                    )
+                    if r_score >= FUZZY_SEARCH_THRESHOLD:
+                        temp_scores.append((r_score, restaurant))
+
+                # 如果這棟樓裡面，沒有任何一家餐廳符合搜尋，這棟樓就不用回傳了
+                # (除非使用者只搜了建築名，沒搜餐廳名，那下面 else 會處理)
+                if not temp_scores:
+                    continue
+
+                # 依照分數排序內部的餐廳
+                temp_scores.sort(key=lambda x: x[0], reverse=True)
+                matched_restaurants = [item[1] for item in temp_scores]
+
+            else:
+                # 如果沒有搜餐廳名 (只搜建築)，則保留該建築內所有餐廳
+                matched_restaurants = original_restaurants
+
+            # 3. 重組資料結構
+            # 複製一份建築資料，避免改到快取
+            new_building = building.copy()
+            new_building["restaurants"] = matched_restaurants
+
+            filtered_results.append(new_building)
+
+        return commit_hash, filtered_results
 
 
 # Global service instance

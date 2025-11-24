@@ -20,14 +20,23 @@ async def get_dining_data(
     building_name: schemas.DiningBuildingName = Query(
         None, description="餐廳建築名稱（可選）"
     ),
+    restaurant_name: str = Query(None, description="餐廳名稱（可選）"),
+    fuzzy: bool = Query(False, description="是否進行模糊搜尋"),
 ) -> list[schemas.DiningBuilding]:
     """
     取得所有餐廳及廠商資料。
     資料來源：[總務處經營管理組](https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw)
     """
-    commit_hash, data = await services.dining_service.get_dining_data(
-        building_name=building_name
-    )
+    if fuzzy:
+        commit_hash, data = await services.dining_service.fuzzy_search_dining_data(
+            building_name=building_name,
+            restaurant_name=restaurant_name,
+        )
+    else:
+        commit_hash, data = await services.dining_service.get_dining_data(
+            building_name=building_name,
+            restaurant_name=restaurant_name,
+        )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
 
@@ -47,26 +56,6 @@ async def get_open_restaurants(
     """取得指定營業日的餐廳資料。"""
     commit_hash, data = await services.dining_service.get_open_restaurants(
         schedule=schedule
-    )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
-    return data
-
-
-@router.get(
-    "/search",
-    response_model=list[schemas.DiningRestaurant],
-    operation_id="fuzzySearchRestaurants",
-)
-async def fuzzy_search_restaurants(
-    response: Response,
-    query: str = Query(..., description="要查詢的餐廳名稱"),
-):
-    """使用餐廳名稱模糊搜尋餐廳資料。"""
-    commit_hash, data = await services.dining_service.fuzzy_search_restaurants(
-        query=query
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
