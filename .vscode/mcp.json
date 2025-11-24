@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"NTHU-Data-API": {
+			"url": "http://localhost:5000/mcp",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}

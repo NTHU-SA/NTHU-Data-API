@@ -6,7 +6,7 @@ Delegates business logic to domain services.
 """
 
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
@@ -29,9 +29,6 @@ def add_custom_header(response: Response):
 def get_current_time_state():
     """
     Get current time state (day type and time).
-
-    Returns:
-        tuple[str, str]: Current day type ('weekday' or 'weekend') and time ('HH:MM').
     """
     current = datetime.now()
     current_time = current.time().strftime("%H:%M")
@@ -40,66 +37,26 @@ def get_current_time_state():
 
 
 @router.get(
-    "/main",
-    response_model=schemas.BusMainData,
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_main_campus_bus_data():
-    """
-    取得校本部公車資訊。
-    來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw)
-    """
-    await services.buses_service.update_data()
-    try:
-        return services.buses_service.get_main_data()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve main bus data: {e}"
-        )
-
-
-@router.get(
-    "/nanda",
-    response_model=schemas.BusNandaData,
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_nanda_campus_bus_data():
-    """
-    取得南大校區區間車資訊。
-    來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
-    """
-    await services.buses_service.update_data()
-    try:
-        return services.buses_service.get_nanda_data()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve nanda bus data: {e}"
-        )
-
-
-@router.get(
-    "/info/{bus_type}/{direction}",
+    "/routes",
     response_model=list[schemas.BusInfo],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getBusRouteData",
 )
-async def get_bus_route_information(
-    bus_type: Literal["main", "nanda"],
-    direction: schemas.BusDirection,
+async def get_bus_route_metadata(
+    bus_type: Literal["main", "nanda"] = Query(None, description="車種選擇"),
+    direction: Literal["up", "down"] = Query(None, description="方向選擇"),
 ):
-    """取得指定公車路線的資訊。"""
+    """
+    取得校園公車資訊。
+    - 校本部來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw)
+    - 南大來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
+    """
     await services.buses_service.update_data()
     try:
-        data = services.buses_service.info_data.loc[(bus_type, direction), "data"]
-        return data
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Bus info not found for type '{bus_type}' and direction '{direction}'.",
-        )
+        return services.buses_service.get_route_info(bus_type, direction)
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve bus info: {e}",
+            status_code=500, detail=f"Failed to retrieve bus metadata: {e}"
         )
 
 
@@ -107,9 +64,10 @@ async def get_bus_route_information(
     "/info/stops",
     response_model=list[schemas.BusStopsInfo],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getBusStopsInformation",
 )
 async def get_bus_stops_information():
-    """取得所有公車站牌的資訊。"""
+    """取得所有公車站牌的經緯度與資訊。"""
     await services.buses_service.update_data()
     try:
         return services.buses_service.gen_bus_stops_info()
@@ -121,42 +79,57 @@ async def get_bus_stops_information():
 
 @router.get(
     "/schedules",
-    response_model=list[schemas.BusMainSchedule | schemas.BusNandaSchedule | None],
+    # 使用 Union 整合兩種回傳模型
+    response_model=list[
+        Union[
+            schemas.BusMainDetailedSchedule,
+            schemas.BusNandaDetailedSchedule,
+            schemas.BusMainSchedule,
+            schemas.BusNandaSchedule,
+            None,
+        ]
+    ],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getBusSchedules",
+    response_description="取得公車時刻表信息。",
 )
 async def get_bus_schedules(
-    bus_type: schemas.BusRouteType = Query(..., example="main", description="車種選擇"),
-    day: schemas.BusDayWithCurrent = Query(
-        ..., example="weekday", description="平日、假日或目前時刻"
-    ),
-    direction: schemas.BusDirection = Query(
-        ..., example="up", description="上山或下山"
-    ),
+    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
+    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
+    direction: schemas.BusDirection = Query(..., description="上山或下山"),
+    details: bool = Query(False, description="是否包含詳細站點時間資訊"),  # 新增參數
+    query: schemas.BusQuery = Depends(),
 ):
-    """取得指定條件的公車時刻表。"""
+    """
+    取得指定條件的公車時刻表。
+    - **details=False**: 回傳簡易時刻表（僅發車時間）。
+    - **details=True**: 回傳詳細時刻表（包含每站預估到達時間）。
+    """
     await services.buses_service.update_data()
+
+    # 1. 計算要查詢的時間點與模式
+    find_day, after_time = (
+        (day, query.time) if day != "current" else get_current_time_state()
+    )
+
     try:
-        if day != "current":
-            schedule_data = services.buses_service.raw_schedule_data.loc[
-                (bus_type, day, direction), "data"
-            ]
-            return schedule_data
-        else:
-            current_day, current_time = get_current_time_state()
-            schedule_data = services.buses_service.raw_schedule_data.loc[
-                (bus_type, current_day, direction), "data"
-            ]
-            res = services.after_specific_time(
-                schedule_data,
-                current_time,
-                ["time"],
-            )
-            return res[:DEFAULT_LIMIT_DAY_CURRENT]
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Schedule not found for type '{bus_type}', day '{day}', and direction '{direction}'.",
+        time_path = ["dep_info", "time"] if details else ["time"]
+        raw_data = services.buses_service.get_schedule(
+            route_type=bus_type,
+            day=find_day,
+            direction=direction,
+            detailed=details,
         )
+
+        res = services.after_specific_time(
+            raw_data,
+            after_time or "",
+            time_path,
+        )
+
+        limit = query.limits
+        return res[:limit]
+
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve bus schedule: {e}"
@@ -167,90 +140,37 @@ async def get_bus_schedules(
     "/stops/{stop_name}",
     response_model=list[schemas.BusStopsQueryResult | None],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getStopBusInformationByStop",
 )
 async def get_stop_bus_information_by_stop(
     stop_name: schemas.BusStopsName,
-    bus_type: schemas.BusRouteType = Query(..., example="main"),
-    day: schemas.BusDayWithCurrent = Query(..., example="weekday"),
-    direction: schemas.BusDirection = Query(..., example="up"),
+    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
+    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
+    direction: schemas.BusDirection = Query(..., description="上山或下山"),
     query: schemas.BusQuery = Depends(),
 ):
     """取得指定公車站牌的資訊和即將停靠公車。"""
     await services.buses_service.update_data()
-    return_limit = (
-        query.limits
-        if day != "current"
-        else min(filter(None, (query.limits, DEFAULT_LIMIT_DAY_CURRENT)))
-    )
+
+    # Time calculation logic...
     find_day, after_time = (
         (day, query.time) if day != "current" else get_current_time_state()
     )
 
-    try:
-        stop_data = services.stops[stop_name.name].stopped_bus_data[
-            (bus_type, find_day, direction)
-        ]
-        res = services.after_specific_time(
-            stop_data,
-            after_time,
-            ["arrive_time"],
-        )
-        return res[:return_limit]
-
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"""No bus stop data found for stop '{stop_name}', type '{bus_type}', day '{day}', \
-            and direction '{direction}'.""",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve stop bus info: {e}",
-        )
-
-
-@router.get(
-    "/detailed",
-    response_model=list[
-        schemas.BusMainDetailedSchedule | schemas.BusNandaDetailedSchedule | None
-    ],
-    dependencies=[Depends(add_custom_header)],
-)
-async def get_detailed_bus_schedule(
-    bus_type: schemas.BusRouteType = Query(..., example="main"),
-    day: schemas.BusDayWithCurrent = Query(..., example="weekday"),
-    direction: schemas.BusDirection = Query(..., example="up"),
-    query: schemas.BusQuery = Depends(),
-):
-    """取得詳細的公車時刻表，包括每個站點的到達時間。"""
-    await services.buses_service.update_data()
-    return_limit = (
-        query.limits
-        if day != "current"
-        else min(filter(None, (query.limits, DEFAULT_LIMIT_DAY_CURRENT)))
-    )
-    find_day, after_time = (
-        (day, query.time) if day != "current" else get_current_time_state()
+    # Updated: Query via Service instead of Stop Instance
+    raw_data = services.buses_service.get_stop_schedule(
+        stop_name, bus_type, find_day, direction
     )
 
-    try:
-        detailed_schedule_data = services.buses_service.detailed_schedule_data.loc[
-            (bus_type, find_day, direction), "data"
-        ]
-        res = services.after_specific_time(
-            detailed_schedule_data,
-            after_time,
-            ["dep_info", "time"],
-        )
-        return res[:return_limit]
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Detailed schedule not found for type '{bus_type}', day '{day}', and direction '{direction}'.",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve detailed bus schedule: {e}",
-        )
+    if not raw_data and not services.buses_service.stops_schedule_registry:
+        # Handle case where registry might be empty/error
+        pass
+
+    res = services.after_specific_time(
+        raw_data,
+        after_time or "",
+        ["arrive_time"],
+    )
+
+    limit = query.limits
+    return res[:limit]

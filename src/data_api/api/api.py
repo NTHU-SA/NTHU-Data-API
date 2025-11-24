@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastmcp import FastMCP
 
 from data_api.core import config
 from data_api.core.settings import settings
@@ -132,4 +133,17 @@ def create_app() -> FastAPI:
 
 
 # Create the app instance
-app = create_app()
+fast_api_app = create_app()
+
+# MCP Integration
+mcp = FastMCP.from_fastapi(app=fast_api_app, name="NTHU Data API")
+mcp_app = mcp.http_app(path="/mcp")
+
+combined_app = FastAPI(
+    title="NTHU Data API with MCP",
+    version="1.0.0",
+    description="NTHU Data API integrated with FastMCP for monitoring and control.",
+    routes=[*mcp_app.routes, *fast_api_app.routes],
+    lifespan=mcp_app.lifespan,
+)
+app = combined_app

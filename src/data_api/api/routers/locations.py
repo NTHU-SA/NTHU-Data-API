@@ -8,7 +8,9 @@ from data_api.domain.locations import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.LocationDetail])
+@router.get(
+    "/", response_model=list[schemas.LocationDetail], operation_id="getAllLocations"
+)
 async def get_all_locations(response: Response):
     """
     取得校內所有地點資訊。
@@ -22,10 +24,14 @@ async def get_all_locations(response: Response):
     return data
 
 
-@router.get("/search", response_model=list[schemas.LocationDetail])
+@router.get(
+    "/search",
+    response_model=list[schemas.LocationDetail],
+    operation_id="fuzzySearchLocations",
+)
 async def fuzzy_search_locations(
     response: Response,
-    query: str = Query(..., example="校門", description="要查詢的地點"),
+    query: str = Query(..., description="要查詢的地點"),
 ):
     """使用名稱模糊搜尋地點資訊。"""
     commit_hash, data = await services.locations_service.fuzzy_search_locations(

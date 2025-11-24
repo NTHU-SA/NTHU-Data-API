@@ -4,6 +4,7 @@ Announcements API schemas.
 Pydantic models for announcements request/response validation.
 """
 
+from enum import Enum
 from typing import Annotated, Optional
 
 from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
@@ -31,3 +32,8 @@ class AnnouncementDetail(BaseModel):
     language: str = Field(..., description="佈告欄語言")
     department: str = Field(..., description="發布部門")
     articles: list[AnnouncementArticle] = Field(..., description="公告列表")
+
+
+class AnnouncementLanguageOption(str, Enum):
+    ZH_TW = "zh-tw"
+    EN = "en"

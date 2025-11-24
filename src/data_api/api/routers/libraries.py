@@ -9,8 +9,6 @@ from fastapi import APIRouter, HTTPException, Path
 
 from data_api.api.schemas.libraries import (
     LibraryLostAndFound,
-    LibraryName,
-    LibraryNumberOfGoods,
     LibraryRssItem,
     LibraryRssType,
     LibrarySpace,
@@ -23,7 +21,11 @@ DEFAULT_HEADERS = {
 router = APIRouter()
 
 
-@router.get("/space", response_model=list[LibrarySpace])
+@router.get(
+    "/space",
+    response_model=list[LibrarySpace],
+    operation_id="getLibrarySpaceAvailability",
+)
 async def get_library_space_availability():
     """
     取得圖書館空間使用資訊。
@@ -49,7 +51,11 @@ async def get_library_space_availability():
         raise HTTPException(status_code=500, detail=f"解析空間資料失敗: {e}")
 
 
-@router.get("/lost_and_found", response_model=list[LibraryLostAndFound])
+@router.get(
+    "/lost_and_found",
+    response_model=list[LibraryLostAndFound],
+    operation_id="getLibraryLostAndFoundItems",
+)
 async def get_library_lost_and_found_items():
     """
     取得圖書館失物招領資訊。
@@ -105,7 +111,11 @@ async def get_library_lost_and_found_items():
         raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
 
 
-@router.get("/rss/{rss_type}", response_model=list[LibraryRssItem])
+@router.get(
+    "/rss/{rss_type}",
+    response_model=list[LibraryRssItem],
+    operation_id="getLibraryRssData",
+)
 async def get_library_rss_data(
     rss_type: LibraryRssType = Path(
         ...,
@@ -142,52 +152,3 @@ async def get_library_rss_data(
         )
     except KeyError:
         raise HTTPException(status_code=404, detail="在回應中找不到 RSS 來源")
-
-
-@router.get("/openinghours/{library_name}", response_model=dict)
-async def get_library_opening_hours(
-    library_name: LibraryName = Path(
-        ...,
-        description="圖書館代號：總圖(mainlib)、人社圖書館(hslib)、南大圖書館(nandalib)、夜讀區(mainlib_moonlight_area)",
-    )
-):
-    """
-    取得指定圖書館的開放時間。
-    資料來源：圖書館官網
-    """
-    url = f"https://www.lib.nthu.edu.tw/bulletin/OpeningHours/{library_name.value}.json"
-    try:
-        async with httpx.AsyncClient(verify=False) as client:
-            response = await client.get(url, headers=DEFAULT_HEADERS)
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code, detail=f"擷取開放時間資料失敗: {e}"
-        )
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=500, detail=f"解析開放時間資料 JSON 失敗: {e}")
-
-
-@router.get("/goods", response_model=LibraryNumberOfGoods)
-async def get_library_number_of_goods():
-    """
-    取得總圖換證數量資訊。
-    資料來源：圖書館官網
-    """
-    url = "https://adage.lib.nthu.edu.tw/goods/Public/number_of_goods_mix.json"
-    headers = {
-        "Referer": "https://www.lib.nthu.edu.tw/",
-        **DEFAULT_HEADERS,
-    }
-    try:
-        async with httpx.AsyncClient(verify=False) as client:
-            response = await client.get(url, headers=headers)
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code, detail=f"擷取換證資料失敗: {e}"
-        )
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=500, detail=f"解析換證資料 JSON 失敗: {e}")

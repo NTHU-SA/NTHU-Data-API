@@ -5,11 +5,10 @@ Pydantic models for request/response validation.
 Enums are imported from domain layer to avoid duplication.
 """
 
-import re
 from typing import Optional
 
-from fastapi import HTTPException, Query
-from pydantic import BaseModel, Field, field_validator
+from fastapi import Query
+from pydantic import BaseModel, Field
 
 # Import enums from domain
 from data_api.domain.buses.enums import (
@@ -46,44 +45,17 @@ class BusQuery(BaseModel):
     """Query parameters for bus endpoints."""
 
     time: Optional[str] = Field(
-        Query(
-            "0:00", example="8:10", description="時間。若搜尋 day 選擇 current 時失效。"
-        ),
+        Query(None, description="時間。若搜尋 day 選擇 current 時失效。"),
         description="時間",
     )
     limits: Optional[int] = Field(
         Query(
-            None,
+            5,
             ge=1,
-            description="最大回傳資料筆數。若搜尋 day 選擇 current 且大於 5 時失效。",
+            description="最大回傳資料筆數。預設為 5 筆，可以透過查詢參數調整。",
         ),
         description="最大回傳資料筆數",
     )
-
-    @field_validator("time")
-    def validate_time(cls, v):
-        splited = v.split(":")
-        if len(splited) != 2:
-            raise HTTPException(
-                status_code=422, detail="Time must be in format of HH:MM or H:MM."
-            )
-        elif re.match(r"^\d{1,2}$", splited[0]) is None:
-            raise HTTPException(
-                status_code=422, detail="Hour must be in format of HH or H."
-            )
-        elif re.match(r"^\d{2}$", splited[1]) is None:
-            raise HTTPException(
-                status_code=422, detail="Minute must be in format of MM."
-            )
-        elif int(splited[0]) < 0 or int(splited[0]) > 23:
-            raise HTTPException(
-                status_code=422, detail="Hour must be positive and less than 24."
-            )
-        elif int(splited[1]) < 0 or int(splited[1]) > 59:
-            raise HTTPException(
-                status_code=422, detail="Minute must be positive and less than 60."
-            )
-        return v
 
 
 class BusInfo(BaseModel):
@@ -128,6 +100,7 @@ class BusStopsQueryResult(BaseModel):
 
     arrive_time: str = Field(..., description="預計到達時間")
     dep_time: str = Field(..., description="發車時間")
+    dep_stop: str = Field(..., description="發車站牌")
     description: str = Field(..., description="備註")
     bus_type: BusType = Field(..., description="營運車輛類型")
 

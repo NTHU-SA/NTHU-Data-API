@@ -5,19 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nthu-data-api"
 version = "2.0.0"
-description = "NTHU Data API - Clean Architecture"
+description = "NTHU Data API"
 readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "NTHU-SA", email = "contact@example.com"}
+    {name = "NTHU-SA", email = "it@nthusa.tw"}
 ]
 dependencies = [
     "fastapi==0.115.12",
     "uvicorn==0.38.0",
     "python-dotenv==1.1.0",
     "pydantic-settings>=2.0.0",
-    "cachetools==5.5.2",
     "pyopenssl==25.3.0",
     "httpx[http2]==0.28.1",
     "beautifulsoup4==4.14.2",
@@ -27,6 +26,7 @@ dependencies = [
     "jieba==0.42.1",
     "python-Levenshtein==0.27.1",
     "thefuzz==0.22.1",
+    "fastmcp==2.13.1",
 ]
 
 [project.optional-dependencies]

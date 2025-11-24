@@ -19,6 +19,7 @@ def add_custom_header(response: Response):
     "/",
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
+    operation_id="getAllCourses",
 )
 async def get_all_courses(response: Response):
     """
@@ -37,6 +38,7 @@ async def get_all_courses(response: Response):
     "/search",
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
+    operation_id="searchCoursesByFieldAndValue",
 )
 async def search_courses_by_field_and_value(
     request: Request,
@@ -105,6 +107,7 @@ async def search_courses_by_field_and_value(
     "/search",
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
+    operation_id="searchCoursesByCondition",
 )
 async def search_courses_by_condition(
     query_condition: schemas.CourseQueryCondition | schemas.CourseCondition = Body(
@@ -149,6 +152,7 @@ async def search_courses_by_condition(
     "/lists/{list_name}",
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
+    operation_id="listCoursesByType",
 )
 async def list_courses_by_type(
     list_name: schemas.CourseListName,

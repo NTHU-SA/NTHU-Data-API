@@ -17,7 +17,7 @@ class BusStopsName(str, Enum):
     M4 = "人社院&生科館"
     M5 = "台積館"
     M6 = "奕園停車場"
-    M7 = "南門停車場"
+    M7 = "教育學院大樓&南門停車場"
     S1 = "南大校區校門口右側(食品路校牆邊)"
 
 
@@ -40,6 +40,7 @@ class BusType(str, Enum):
 class BusDirection(str, Enum):
     """Bus direction."""
 
+    all = "all"
     up = "up"
     down = "down"
 
@@ -47,7 +48,6 @@ class BusDirection(str, Enum):
 class BusDay(str, Enum):
     """Day type for bus schedule."""
 
-    all = "all"
     weekday = "weekday"
     weekend = "weekend"
 
@@ -55,7 +55,6 @@ class BusDay(str, Enum):
 class BusDayWithCurrent(str, Enum):
     """Day type including current day option."""
 
-    all = "all"
     weekday = "weekday"
     weekend = "weekend"
     current = "current"

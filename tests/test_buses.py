@@ -8,15 +8,9 @@ client = TestClient(app)
 
 
 @pytest.mark.parametrize("campus", ["main", "nanda"])
-def test_buses_endpoints(campus):
-    response = client.get(url=f"/buses/{campus}")
-    assert response.status_code == 200
-
-
-@pytest.mark.parametrize("bus_type", ["main", "nanda"])
 @pytest.mark.parametrize("direction", ["up", "down"])
-def test_buses_info(bus_type, direction):
-    response = client.get(url=f"/buses/info/{bus_type}/{direction}")
+def test_buses_endpoints(campus, direction):
+    response = client.get(url=f"/buses/routes/?bus_type={campus}&direction={direction}")
     assert response.status_code == 200
 
 
@@ -39,18 +33,9 @@ def test_buses_schedules(bus_type, day, direction):
 @pytest.mark.parametrize("bus_type", [_.value for _ in schemas.buses.BusRouteType])
 @pytest.mark.parametrize("day", [_.value for _ in schemas.buses.BusDayWithCurrent])
 @pytest.mark.parametrize("direction", [_.value for _ in schemas.buses.BusDirection])
-def test_buses_stops(stop_name, bus_type, day, direction):
+@pytest.mark.parametrize("details", [True, False])
+def test_buses_stops(stop_name, bus_type, day, direction, details):
     response = client.get(
-        url=f"/buses/stops/{stop_name}/?bus_type={bus_type}&day={day}&direction={direction}"
-    )
-    assert response.status_code == 200
-
-
-@pytest.mark.parametrize("bus_type", [_.value for _ in schemas.buses.BusRouteType])
-@pytest.mark.parametrize("day", [_.value for _ in schemas.buses.BusDayWithCurrent])
-@pytest.mark.parametrize("direction", [_.value for _ in schemas.buses.BusDirection])
-def test_buses_detailed(bus_type, day, direction):
-    response = client.get(
-        url=f"/buses/detailed?bus_type={bus_type}&day={day}&direction={direction}"
+        url=f"/buses/stops/{stop_name}/?bus_type={bus_type}&day={day}&direction={direction}&details={details}"
     )
     assert response.status_code == 200

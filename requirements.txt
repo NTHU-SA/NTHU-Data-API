@@ -3,7 +3,6 @@ fastapi==0.115.12
 uvicorn==0.38.0
 # Environment
 python-dotenv==1.1.0
-cachetools==5.5.2
 pyopenssl==25.3.0
 pydantic_settings==2.12.0
 # Crawlers
@@ -16,3 +15,5 @@ lxml==6.0.2
 jieba==0.42.1
 python-Levenshtein==0.27.1
 thefuzz==0.22.1
+# MCP
+fastmcp==2.13.1

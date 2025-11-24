@@ -8,7 +8,9 @@ from data_api.domain.newsletters import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.NewsletterInfo])
+@router.get(
+    "/", response_model=list[schemas.NewsletterInfo], operation_id="getAllNewsletters"
+)
 async def get_all_newsletters(response: Response):
     """
     取得所有的電子報。
@@ -22,12 +24,14 @@ async def get_all_newsletters(response: Response):
     return data
 
 
-@router.get("/{newsletter_name}", response_model=schemas.NewsletterInfo)
+@router.get(
+    "/{newsletter_name}",
+    response_model=schemas.NewsletterInfo,
+    operation_id="getNewsletterByName",
+)
 async def get_newsletter_by_name(
     response: Response,
-    newsletter_name: schemas.NewsletterName = Path(
-        ..., example="國立清華大學學生會電子報"
-    ),
+    newsletter_name: schemas.NewsletterName = Path(...),
 ):
     """取得指定電子報的資訊。"""
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(
