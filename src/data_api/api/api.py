@@ -56,7 +56,12 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: Configured application instance.
     """
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(
+        lifespan=lifespan,
+        title="NTHU Data API",
+        version="1.0.0",
+        description="由國立清華大學校內各單位資料所組成的公共資料 API。",
+    )
 
     # CORS configuration
     # Using explicit origins would be safer, but for a public API:
@@ -89,6 +94,14 @@ def create_app() -> FastAPI:
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)
         return response
+
+    # Add favicon route
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon():
+        """Favicon route."""
+        from fastapi.responses import RedirectResponse
+
+        return RedirectResponse(url="https://www.nthu.edu.tw/favicon.ico")
 
     # Register routers
     from data_api.api.routers import (
