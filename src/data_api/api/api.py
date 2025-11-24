@@ -88,19 +88,26 @@ def create_app() -> FastAPI:
         return response
 
     # Register routers
-    from data_api.api.routers import buses
+    from data_api.api.routers import (
+        announcements,
+        buses,
+        departments,
+        dining,
+        energy,
+        libraries,
+        locations,
+        newsletters,
+    )
 
+    app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
-
-    # TODO: Add other routers as modules are migrated
-    # app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
-    # app.include_router(courses.router, prefix="/courses", tags=["Courses"])
-    # app.include_router(departments.router, prefix="/departments", tags=["Departments"])
-    # app.include_router(dining.router, prefix="/dining", tags=["Dining"])
-    # app.include_router(energy.router, prefix="/energy", tags=["Energy"])
-    # app.include_router(libraries.router, prefix="/libraries", tags=["Libraries"])
-    # app.include_router(locations.router, prefix="/locations", tags=["Locations"])
-    # app.include_router(newsletters.router, prefix="/newsletters", tags=["Newsletters"])
+    # app.include_router(courses.router, prefix="/courses", tags=["Courses"])  # TODO: Migrate courses
+    app.include_router(departments.router, prefix="/departments", tags=["Departments"])
+    app.include_router(dining.router, prefix="/dining", tags=["Dining"])
+    app.include_router(energy.router, prefix="/energy", tags=["Energy"])
+    app.include_router(libraries.router, prefix="/libraries", tags=["Libraries"])
+    app.include_router(locations.router, prefix="/locations", tags=["Locations"])
+    app.include_router(newsletters.router, prefix="/newsletters", tags=["Newsletters"])
 
     return app
 

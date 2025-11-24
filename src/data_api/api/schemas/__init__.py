@@ -1,5 +1,23 @@
 """API schemas package."""
 
-from . import buses
+from . import (
+    announcements,
+    buses,
+    departments,
+    dining,
+    energy,
+    libraries,
+    locations,
+    newsletters,
+)
 
-__all__ = ["buses"]
+__all__ = [
+    "announcements",
+    "buses",
+    "departments",
+    "dining",
+    "energy",
+    "libraries",
+    "locations",
+    "newsletters",
+]
