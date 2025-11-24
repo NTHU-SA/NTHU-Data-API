@@ -6,7 +6,7 @@ Enums are imported from domain layer to avoid duplication.
 """
 
 import re
-from typing import Literal, Optional
+from typing import Optional
 
 from fastapi import HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
