@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from src import app
-from src.api import schemas
+from data_api.api import schemas
+from data_api.api.api import app
 
 client = TestClient(app)
 one_condition = {

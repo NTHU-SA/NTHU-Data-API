@@ -5,6 +5,7 @@ uvicorn==0.38.0
 python-dotenv==1.1.0
 cachetools==5.5.2
 pyopenssl==25.3.0
+pydantic_settings==2.12.0
 # Crawlers
 httpx[http2]==0.28.1
 beautifulsoup4==4.14.2

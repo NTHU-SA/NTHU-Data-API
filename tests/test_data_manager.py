@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 
-from src import app
-from src.utils.nthudata import DataCache, FileDetailsManager
+from data_api.api.api import app
+from data_api.data.nthudata import DataCache, FileDetailsManager
 
 client = TestClient(app)
 
@@ -52,7 +52,7 @@ class TestFileDetailsManager:
 
     def test_get_commit_hash(self):
         """Test getting commit hash from file details."""
-        from src.utils.nthudata import DataFetcher
+        from data_api.data.nthudata import DataFetcher
 
         fetcher = DataFetcher("https://example.com")
         manager = FileDetailsManager(fetcher, "https://example.com/file_details.json")

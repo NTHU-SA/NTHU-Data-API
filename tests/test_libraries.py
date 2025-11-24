@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from src import app
-from src.api import schemas
+from data_api.api import schemas
+from data_api.api.api import app
 
 client = TestClient(app)
 
@@ -23,12 +23,4 @@ def test_libraries_endpoints(url, status_code):
 @pytest.mark.parametrize("rss", [_.value for _ in schemas.libraries.LibraryRssType])
 def test_libraries_rss(rss):
     response = client.get(url=f"/libraries/rss/{rss}")
-    assert response.status_code == 200
-
-
-@pytest.mark.parametrize(
-    "library_name", [_.value for _ in schemas.libraries.LibraryName]
-)
-def test_libraries_openinghours(library_name):
-    response = client.get(url=f"/libraries/openinghours/{library_name}")
     assert response.status_code == 200

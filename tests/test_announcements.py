@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from src import app
+from data_api.api.api import app
 
 client = TestClient(app)
 department_list = ["清華公佈欄", "國立清華大學學生會"]
