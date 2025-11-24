@@ -79,16 +79,7 @@ async def get_bus_stops_information():
 
 @router.get(
     "/schedules",
-    # 使用 Union 整合兩種回傳模型
-    response_model=list[
-        Union[
-            schemas.BusMainDetailedSchedule,
-            schemas.BusNandaDetailedSchedule,
-            schemas.BusMainSchedule,
-            schemas.BusNandaSchedule,
-            None,
-        ]
-    ],
+    response_model=list[Union[schemas.BusDetailedSchedule, schemas.BusSchedule, None]],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusSchedules",
     response_description="取得公車時刻表信息。",
@@ -97,7 +88,7 @@ async def get_bus_schedules(
     bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
     day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
     direction: schemas.BusDirection = Query(..., description="上山或下山"),
-    details: bool = Query(False, description="是否包含詳細站點時間資訊"),  # 新增參數
+    details: bool = Query(False, description="是否包含詳細站點時間資訊"),
     query: schemas.BusQuery = Depends(),
 ):
     """

@@ -167,6 +167,16 @@ class RouteResolver:
             # Going to Nanda
             return nanda_M1_S1_r2 if is_route_2 else nanda_M1_S1_r1
 
+    @staticmethod
+    def get_nanda_line(description: str) -> str:
+        """
+        Determines the Nanda route line from the description.
+        Returns 'route_1' or 'route_2'.
+        """
+        description = description or ""
+        is_route_2 = "路線二" in description or "教育學院" in description
+        return "route_2" if is_route_2 else "route_1"
+
 
 # Instantiate global resolver
 resolver = RouteResolver()

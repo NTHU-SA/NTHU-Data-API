@@ -34,7 +34,7 @@ class BusSchedule:
     time: str
     description: str
     bus_type: str
-    line: str = ""  # red/green
+    line: str = ""  # Main campus: red/green, Nanda: route_1/route_2
     dep_stop: str = ""
 
 

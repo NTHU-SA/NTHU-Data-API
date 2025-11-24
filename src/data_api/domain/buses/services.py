@@ -183,6 +183,10 @@ class BusesService:
 
                 if rtype == "nanda":
                     bus["dep_stop"] = "校門" if rdir == "up" else "南大"
+                    # Add line field for Nanda buses (route_1 or route_2)
+                    bus["line"] = graph.resolver.get_nanda_line(
+                        bus.get("description", "")
+                    )
 
                 if rtype == "main" and "綜二" in bus.get("dep_stop", ""):
                     line = bus.get("line", "")
