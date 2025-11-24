@@ -38,7 +38,6 @@ test = [
     "pytest==8.3.5",
     "pytest-xdist==3.6.1",
     "pytest-cov==7.0.0",
-    "httpx==0.28.1",
 ]
 
 [tool.setuptools]
@@ -55,10 +54,11 @@ line_length = 88
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py313']
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
