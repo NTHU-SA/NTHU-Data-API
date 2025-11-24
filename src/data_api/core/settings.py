@@ -6,6 +6,7 @@ Settings are loaded from environment variables and .env file.
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
 
 class Settings(BaseSettings):
@@ -37,6 +38,9 @@ class Settings(BaseSettings):
         description="CORS allowed origins",
     )
 
+
+# FastMCP 要開啟實驗性功能（但之後會變正式版本），不然 openapi.json 解析會有問題
+os.environ["FASTMCP_EXPERIMENTAL_ENABLE_NEW_OPENAPI_PARSER"] = "true"
 
 # Global settings instance
 settings = Settings()

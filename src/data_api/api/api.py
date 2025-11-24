@@ -138,9 +138,6 @@ def create_app() -> FastAPI:
 # Create the app instance
 fast_api_app = create_app()
 
-# 要開啟實驗性功能（但之後會變正式版本），不然 openapi.json 解析會有問題
-os.environ["FASTMCP_EXPERIMENTAL_ENABLE_NEW_OPENAPI_PARSER"] = "True"
-
 # MCP Integration
 mcp = FastMCP.from_fastapi(app=fast_api_app, name="NTHU Data API")
 mcp_app = mcp.http_app(path="/mcp")
