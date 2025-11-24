@@ -5,7 +5,6 @@ Creates the FastAPI app instance, configures middleware,
 and registers all routers.
 """
 
-import os
 import time
 from contextlib import asynccontextmanager
 

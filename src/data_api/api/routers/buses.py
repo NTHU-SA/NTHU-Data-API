@@ -8,7 +8,7 @@ Delegates business logic to domain services.
 from datetime import datetime
 from typing import Literal, Union
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
 from data_api.api.schemas import buses as schemas
 from data_api.domain.buses import services

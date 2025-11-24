@@ -108,8 +108,6 @@ class AnnouncementsService:
                 score = fuzz.partial_ratio(department, dept_name)
                 if score < FUZZY_SEARCH_THRESHOLD:
                     continue
-                else:
-                    pass  # 部門符合，繼續處理
 
             # 取出該處室的所有文章
             original_articles = source.get("articles", [])
