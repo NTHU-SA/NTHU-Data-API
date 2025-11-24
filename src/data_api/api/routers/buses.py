@@ -19,9 +19,11 @@ DEFAULT_LIMIT_DAY_CURRENT = 5
 router = APIRouter()
 
 
-async def add_custom_header(response: Response):
+def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    response.headers["X-Data-Commit-Hash"] = str(services.buses_service.last_commit_hash)
+    response.headers["X-Data-Commit-Hash"] = str(
+        services.buses_service.last_commit_hash
+    )
 
 
 def get_current_time_state():
@@ -124,8 +126,12 @@ async def get_bus_stops_information():
 )
 async def get_bus_schedules(
     bus_type: schemas.BusRouteType = Query(..., example="main", description="車種選擇"),
-    day: schemas.BusDayWithCurrent = Query(..., example="weekday", description="平日、假日或目前時刻"),
-    direction: schemas.BusDirection = Query(..., example="up", description="上山或下山"),
+    day: schemas.BusDayWithCurrent = Query(
+        ..., example="weekday", description="平日、假日或目前時刻"
+    ),
+    direction: schemas.BusDirection = Query(
+        ..., example="up", description="上山或下山"
+    ),
 ):
     """Get bus schedules for specified conditions."""
     await services.buses_service.update_data()
@@ -206,7 +212,9 @@ async def get_stop_bus_information_by_stop(
 
 @router.get(
     "/detailed",
-    response_model=list[schemas.BusMainDetailedSchedule | schemas.BusNandaDetailedSchedule | None],
+    response_model=list[
+        schemas.BusMainDetailedSchedule | schemas.BusNandaDetailedSchedule | None
+    ],
     dependencies=[Depends(add_custom_header)],
 )
 async def get_detailed_bus_schedule(

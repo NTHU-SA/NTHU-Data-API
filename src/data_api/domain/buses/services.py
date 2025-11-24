@@ -121,7 +121,9 @@ def _init_stop_data():
     """Initialize stopped_bus_data for all stops."""
     for stop in stops.values():
         stop.stopped_bus_data = {}
-        for route_type, day, direction in product(BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECTION):
+        for route_type, day, direction in product(
+            BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECTION
+        ):
             stop.stopped_bus_data[(route_type, day, direction)] = []
 
 
@@ -148,7 +150,13 @@ red_M5_M1.delta_time_table = {M5: {M7: 1}, M7: {M6: 2}, M6: {M2: 1}, M2: {M1: 1}
 red_M2_M5.delta_time_table = {M2: {M3: 1}, M3: {M4: 2}, M4: {M5: 2}}
 red_M5_M2.delta_time_table = {M5: {M7: 1}, M7: {M6: 2}, M6: {M2: 1}}
 
-green_M1_M5.delta_time_table = {M1: {M2: 1}, M2: {M3: 1}, M3: {M6: 1}, M6: {M7: 2}, M7: {M5: 1}}
+green_M1_M5.delta_time_table = {
+    M1: {M2: 1},
+    M2: {M3: 1},
+    M3: {M6: 1},
+    M6: {M7: 2},
+    M7: {M5: 1},
+}
 green_M5_M1.delta_time_table = {M5: {M4: 2}, M4: {M2: 3}, M2: {M1: 1}}
 green_M2_M5.delta_time_table = {M2: {M3: 1}, M3: {M6: 1}, M6: {M7: 2}, M7: {M5: 1}}
 green_M5_M2.delta_time_table = {M5: {M4: 2}, M4: {M2: 3}}
@@ -160,7 +168,7 @@ nanda_S1_M1.delta_time_table = {S1: {M5: 15}, M5: {M4: 2}, M4: {M2: 3}, M2: {M1:
 class BusesService:
     """
     Bus schedule management service.
-    
+
     Provides data fetching, processing, and query functions for campus bus schedules.
     """
 
@@ -207,7 +215,7 @@ class BusesService:
         self._populate_info_data()
         self._populate_raw_schedule_data()
         self._add_fields_to_raw_schedule_data()
-        await self.gen_bus_detailed_schedule_and_update_stops_data()
+        self.gen_bus_detailed_schedule_and_update_stops_data()
 
     def _populate_info_data(self) -> None:
         """Populate info_data DataFrame from JSON."""
@@ -228,9 +236,7 @@ class BusesService:
             )
         gen_the_all_field(self.raw_schedule_data, ["time"])
 
-    def _classify_bus_type(
-        self, route_type: str, day: str, description: str
-    ) -> str:
+    def _classify_bus_type(self, route_type: str, day: str, description: str) -> str:
         """Classify bus type based on route, day, and description."""
         if route_type == "nanda" and "83" in description:
             return enums.BusType.route_83.value
@@ -315,10 +321,10 @@ class BusesService:
             for stop in stops.values()
         ]
 
-    async def gen_bus_detailed_schedule_and_update_stops_data(self) -> None:
+    def gen_bus_detailed_schedule_and_update_stops_data(self) -> None:
         """Generate detailed schedules and update stop data."""
         self._reset_stop_data()
-        
+
         for route_type, day, direction in product(
             BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION
         ):
