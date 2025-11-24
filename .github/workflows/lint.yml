@@ -1,5 +1,7 @@
 name: lint with black and isort
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   lint:
     runs-on: ubuntu-latest
