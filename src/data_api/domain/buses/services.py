@@ -34,12 +34,12 @@ def after_specific_time(
 ) -> list[dict]:
     """
     Filter list to keep only items after specified time.
-    
+
     Args:
         target_list: List of dictionaries to filter
         time_str: Reference time in "HH:MM" format
         time_keys: Path to the time field (e.g., ["time"] or ["dep_info", "time"])
-        
+
     Returns:
         Filtered list containing only items with time >= time_str
     """
@@ -79,11 +79,11 @@ def _extract_nested_value(data: dict, keys: list[str]) -> Any:
 def add_time(time_str: str, minutes: int) -> str:
     """
     Add minutes to HH:MM string safely.
-    
+
     Args:
         time_str: Time in "HH:MM" format
         minutes: Minutes to add (can be negative)
-        
+
     Returns:
         New time string in "HH:MM" format, or original on error
     """
@@ -97,7 +97,7 @@ def add_time(time_str: str, minutes: int) -> str:
 def sort_by_time(target: list[dict], time_keys: list[str]) -> None:
     """
     Sort list of dictionaries by time field in-place.
-    
+
     Args:
         target: List to sort
         time_keys: Path to the time field (e.g., ["time"] or ["dep_info", "time"])
@@ -118,13 +118,13 @@ def sort_by_time(target: list[dict], time_keys: list[str]) -> None:
 class BusesService:
     """
     Bus schedule management service.
-    
+
     This service handles:
     - Fetching and caching bus schedule data from remote source
     - Processing raw schedules into detailed schedules with arrival times
     - Managing route information and stop registries
     - Providing query methods for schedules and stop information
-    
+
     The service maintains three main data structures:
     1. raw_schedule_data: Basic departure times and info
     2. detailed_schedule_data: Schedules with calculated arrival times per stop
@@ -157,7 +157,7 @@ class BusesService:
     async def update_data(self) -> None:
         """
         Update bus schedule data from remote source.
-        
+
         Fetches buses.json and processes it if the data has changed.
         Only reprocesses when commit hash differs from cached version.
         """
@@ -180,7 +180,7 @@ class BusesService:
     def _process_all_data(self) -> None:
         """
         Main processing pipeline for bus data.
-        
+
         Steps:
         1. Reset all data structures
         2. Populate route info (metadata)
@@ -246,7 +246,9 @@ class BusesService:
     ) -> dict:
         """Enhance a single schedule item with additional fields."""
         bus = item.copy()
-        bus["bus_type"] = self._classify_bus_type(rtype, day, bus.get("description", ""))
+        bus["bus_type"] = self._classify_bus_type(
+            rtype, day, bus.get("description", "")
+        )
 
         if rtype == "nanda":
             self._enhance_nanda_schedule(bus, rdir)
@@ -272,18 +274,18 @@ class BusesService:
     def _classify_bus_type(self, rtype: str, day: str, desc: str) -> str:
         """
         Classify the bus vehicle type based on route, day, and description.
-        
+
         Rules:
         - Nanda buses with "83" in description -> route_83 (city bus)
         - Main campus buses with "大" (large) in description -> large_sized_bus
         - Nanda weekday buses -> large_sized_bus
         - All others -> middle_sized_bus
-        
+
         Args:
             rtype: Route type ('main' or 'nanda')
             day: Day type ('weekday' or 'weekend')
             desc: Bus description text
-            
+
         Returns:
             Bus type enum value
         """
@@ -369,12 +371,12 @@ class BusesService:
     ) -> Optional[models.Route]:
         """
         Determine the route for a bus schedule entry.
-        
+
         Args:
             bus: Bus schedule dictionary with time, line, dep_stop, etc.
             rtype: Route type ('main' or 'nanda')
             rdir: Direction ('up' or 'down')
-            
+
         Returns:
             Route object if found, None otherwise
         """
@@ -402,9 +404,7 @@ class BusesService:
     def _resolve_nanda_route(self, bus: dict, rdir: str) -> Optional[models.Route]:
         """Resolve Nanda route based on description and direction."""
         direction = cast(Literal["up", "down"], rdir)
-        return graph.resolver.resolve_nanda_route(
-            direction, bus.get("description", "")
-        )
+        return graph.resolver.resolve_nanda_route(direction, bus.get("description", ""))
 
     def _add_to_stop_registry(
         self, stop_id: str, rtype: str, day: str, rdir: str, data: dict
