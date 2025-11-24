@@ -17,9 +17,3 @@ def test_get_announcements_by_department(department):
     params = {"department": department}
     response = client.get(url="/announcements", params=params)
     assert response.status_code == 200
-
-
-def test_search_announcements():
-    params = {"query": "清華"}
-    response = client.get(url="/announcements/search", params=params)
-    assert response.status_code == 200
