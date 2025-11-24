@@ -4,9 +4,10 @@ Application settings using pydantic-settings.
 Settings are loaded from environment variables and .env file.
 """
 
+import os
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import os
 
 
 class Settings(BaseSettings):

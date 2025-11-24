@@ -4,8 +4,8 @@ Announcements API schemas.
 Pydantic models for announcements request/response validation.
 """
 
-from typing import Annotated, Optional
 from enum import Enum
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
 

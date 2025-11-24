@@ -3,7 +3,8 @@ Buses graph definition.
 Contains Route topology, Stop definitions, and Route selection logic.
 """
 
-from typing import Optional, Literal
+from typing import Literal, Optional
+
 from . import models
 
 # --- 1. Stop Definitions ---

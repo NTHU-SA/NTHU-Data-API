@@ -11,7 +11,7 @@ from typing import Any, Literal, Optional, cast
 
 from data_api.core import constants
 from data_api.data.manager import nthudata
-from data_api.domain.buses import enums, models, graph
+from data_api.domain.buses import enums, graph, models
 
 # Constants
 DATA_TTL_HOURS = constants.DATA_TTL_HOURS

@@ -5,20 +5,18 @@ Creates the FastAPI app instance, configures middleware,
 and registers all routers.
 """
 
-import time
 import os
-
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastmcp import FastMCP
 
 from data_api.core import config
 from data_api.core.settings import settings
 from data_api.data.manager import nthudata
 from data_api.domain.buses import services as buses_services
-
-from fastmcp import FastMCP
 
 
 @asynccontextmanager

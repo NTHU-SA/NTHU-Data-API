@@ -9,7 +9,6 @@ import uvicorn
 
 from data_api.core.settings import settings
 
-
 if settings.dev_mode:
     # Development
     uvicorn.run(
