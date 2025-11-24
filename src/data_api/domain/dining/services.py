@@ -7,9 +7,10 @@ Handles business logic for dining data fetching and filtering.
 from datetime import datetime
 from typing import Optional
 
+from thefuzz import fuzz
+
 from data_api.data.manager import nthudata
 from data_api.domain.dining import enums
-from thefuzz import fuzz
 
 JSON_PATH = "dining.json"
 FUZZY_SEARCH_THRESHOLD = 60

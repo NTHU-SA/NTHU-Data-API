@@ -6,8 +6,9 @@ Handles library data fetching and search.
 
 from typing import Optional
 
-from data_api.data.manager import nthudata
 from thefuzz import fuzz
+
+from data_api.data.manager import nthudata
 
 JSON_PATH = "libraries.json"
 FUZZY_SEARCH_THRESHOLD = 70

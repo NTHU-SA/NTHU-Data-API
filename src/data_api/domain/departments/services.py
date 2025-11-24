@@ -6,8 +6,9 @@ Handles department and personnel directory data.
 
 from typing import Optional, Union
 
-from data_api.data.manager import nthudata
 from thefuzz import fuzz
+
+from data_api.data.manager import nthudata
 
 JSON_PATH = "directory.json"
 FUZZY_SEARCH_THRESHOLD_DEPT = 60

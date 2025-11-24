@@ -1,7 +1,9 @@
 """Departments router."""
 
 from typing import Union
+
 from fastapi import APIRouter, HTTPException, Query, Response
+
 from data_api.api.schemas import departments as schemas
 from data_api.domain.departments import services
 

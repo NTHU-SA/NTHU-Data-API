@@ -6,8 +6,9 @@ Simple data fetching and filtering service for announcements.
 
 from typing import Optional
 
-from data_api.data.manager import nthudata
 from thefuzz import fuzz
+
+from data_api.data.manager import nthudata
 
 # Constants
 ANNOUNCEMENTS_JSON = "announcements.json"

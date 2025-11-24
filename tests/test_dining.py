@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from data_api.api.api import app
 from data_api.api import schemas
+from data_api.api.api import app
 
 client = TestClient(app)
 search_list = ["麥當勞", "7-ELEVEN", "全家便利商店", "路易莎", "清華水漾"]

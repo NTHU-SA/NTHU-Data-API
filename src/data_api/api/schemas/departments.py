@@ -1,10 +1,12 @@
 """Departments API schemas."""
 
-from pydantic import BaseModel, Field, BeforeValidator
-from data_api.utils.schema import url_corrector
 from typing import Optional
-from typing_extensions import Annotated
+
+from pydantic import BaseModel, BeforeValidator, Field
 from pydantic.networks import HttpUrl
+from typing_extensions import Annotated
+
+from data_api.utils.schema import url_corrector
 
 
 class DepartmentPerson(BaseModel):
