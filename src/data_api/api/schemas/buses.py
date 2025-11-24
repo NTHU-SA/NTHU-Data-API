@@ -50,9 +50,9 @@ class BusQuery(BaseModel):
     )
     limits: Optional[int] = Field(
         Query(
-            None,
+            5,
             ge=1,
-            description="最大回傳資料筆數。",
+            description="最大回傳資料筆數。預設為 5 筆，可以透過查詢參數調整。",
         ),
         description="最大回傳資料筆數",
     )
