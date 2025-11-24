@@ -26,11 +26,15 @@ async def fetch_electricity_data(item: dict) -> dict:
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
-            raise Exception("Failed to get electricity usage data.")
+            raise httpx.HTTPStatusError(
+                "Failed to fetch electricity data.",
+                request=response.request,
+                response=response,
+            )
 
         data_match = re.search(r"alt=\"kW: ([\d,-]+?)\"", response.text, re.S)
         if not data_match:
-            raise Exception("Failed to parse electricity data.")
+            raise ValueError("Failed to parse electricity data.")
 
         usage_value = int(data_match.group(1).replace(",", ""))
         return {
