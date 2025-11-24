@@ -85,7 +85,7 @@ class BusSchedule(BaseModel):
     description: str = Field(..., description="備註")
     dep_stop: str = Field(..., description="發車地點")
     line: str = Field(
-        ..., description="路線 (主校區: red/green, 南大: route_1/route_2)"
+        "", description="路線 (主校區: red/green, 南大: route_1/route_2)"
     )
     bus_type: BusType = Field(..., description="營運車輛類型")
 
