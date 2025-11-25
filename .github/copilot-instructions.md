@@ -33,10 +33,10 @@ pre-commit run --all-files
 
 ```sh
 # Run tests
-python -m pytest tests -W
+python -m pytest tests
 
 # Run tests with coverage
-python -m pytest tests -W --cov=src --cov=tests --cov-report=term-missing
+python -m pytest tests --cov=src --cov=tests --cov-report=term-missing
 ```
 
 ## Code Style
