@@ -33,10 +33,10 @@ pre-commit run --all-files
 
 ```sh
 # Run tests
-python -m pytest tests -W ignore::DeprecationWarning
+python -m pytest tests -W
 
 # Run tests with coverage
-python -m pytest tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=term-missing
+python -m pytest tests -W --cov=src --cov=tests --cov-report=term-missing
 ```
 
 ## Code Style
@@ -46,3 +46,11 @@ This project uses:
 - **isort** for import sorting
 
 Both are configured in `pyproject.toml` and enforced by pre-commit hooks.
+
+## Commit Message Guidelines
+
+When making commits, please follow these guidelines for commit messages. Here are the types of commits we accept:
+- feat: Add or modify features.
+- fix: Bug fixes.
+- docs: Documentation changes.
+... etc. (refer to README.md for full list)
