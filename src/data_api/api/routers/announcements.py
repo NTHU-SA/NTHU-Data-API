@@ -25,7 +25,7 @@ async def get_announcements(
     ),
     title: str = Query(None, description="公告標題關鍵字"),
     language: schemas.AnnouncementLanguageOption = Query(None, description="語言篩選"),
-    fuzzy: bool = Query(False, description="是否進行模糊搜尋，若不啟用則必須完全符合（不建議）"),
+    fuzzy: bool = Query(True, description="是否進行模糊搜尋，若不啟用則必須完全符合（不建議）"),
 ):
     """
     取得校內每個處室的所有公告資訊。

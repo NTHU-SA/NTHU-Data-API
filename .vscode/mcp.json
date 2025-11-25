@@ -1,7 +1,11 @@
 {
 	"servers": {
-		"NTHU-Data-API": {
+		"NTHU-Data-API-Local": {
 			"url": "http://localhost:5000/mcp",
+			"type": "http"
+		},
+		"NTHU-Data-API-Prod": {
+			"url": "https://api.nthusa.tw/mcp",
 			"type": "http"
 		}
 	},
