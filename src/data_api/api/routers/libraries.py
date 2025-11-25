@@ -1,8 +1,10 @@
 import json
 import re
+import ssl
 from datetime import datetime, timedelta
 
 import httpx
+import truststore
 import xmltodict
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException, Path
@@ -20,6 +22,8 @@ DEFAULT_HEADERS = {
 
 router = APIRouter()
 
+ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
 
 @router.get(
     "/space",
@@ -33,7 +37,7 @@ async def get_library_space_availability():
     """
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
     try:
-        async with httpx.AsyncClient(verify=False) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
+        async with httpx.AsyncClient(verify=ctx) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
             data = response.json()
@@ -71,7 +75,7 @@ async def get_library_lost_and_found_items():
     url = "https://adage.lib.nthu.edu.tw/find/search_it.php"
 
     try:
-        async with httpx.AsyncClient(verify=False) as client:
+        async with httpx.AsyncClient(verify=ctx) as client:
             response = await client.post(url, data=post_data, headers=DEFAULT_HEADERS)
             response.raise_for_status()
 
@@ -120,7 +124,7 @@ async def get_library_rss_data(
     """
     url = f"https://www.lib.nthu.edu.tw/bulletin/RSS/export/rss_{rss_type.value}.xml"
     try:
-        async with httpx.AsyncClient(verify=False) as client:
+        async with httpx.AsyncClient(verify=ctx) as client:
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
 
