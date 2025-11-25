@@ -9,7 +9,7 @@ truststore==0.10.4
 httpx[http2]==0.28.1
 beautifulsoup4==4.14.2
 xmltodict==1.0.2
-pandas==2.2.3
+pandas==2.3.3
 lxml==6.0.2
 # Search
 jieba==0.42.1
