@@ -66,8 +66,8 @@ python3 main.py
 ## Contributing
 We follow certain guidelines for contributing. Here are the types of commits we accept:
 
-- feat: Add or modify features.
-- fix: Bug fixes.
+- `feat: Add or modify features`
+- `fix: Fix a bug`
 ... You can refer to the full list of commit types in the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
 ### Running Tests
