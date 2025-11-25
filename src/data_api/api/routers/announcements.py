@@ -32,10 +32,8 @@ async def get_announcements(
     資料來源：各處室網站
     """
     if fuzzy:
-        commit_hash, data = (
-            await services.announcements_service.fuzzy_search_announcements(
-                department=department, title=title, language=language
-            )
+        commit_hash, data = await services.announcements_service.fuzzy_search_announcements(
+            department=department, title=title, language=language
         )
     else:
         commit_hash, data = await services.announcements_service.get_announcements(

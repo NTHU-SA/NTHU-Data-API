@@ -80,9 +80,7 @@ class TestRouteResolver:
 
     def test_resolve_main_campus_red_downhill_from_gen2(self):
         """Test resolving red line downhill route ending at Gen2."""
-        route = graph.RouteResolver.resolve_main_campus_route(
-            "red", "台積館", is_from_gen2=True
-        )
+        route = graph.RouteResolver.resolve_main_campus_route("red", "台積館", is_from_gen2=True)
         assert route == graph.red_M5_M2
 
     def test_resolve_main_campus_red_from_gen2(self):

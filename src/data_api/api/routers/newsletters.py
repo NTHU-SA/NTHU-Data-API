@@ -8,9 +8,7 @@ from data_api.domain.newsletters import services
 router = APIRouter()
 
 
-@router.get(
-    "/", response_model=list[schemas.NewsletterInfo], operation_id="getAllNewsletters"
-)
+@router.get("/", response_model=list[schemas.NewsletterInfo], operation_id="getAllNewsletters")
 async def get_all_newsletters(response: Response):
     """
     取得所有的電子報。

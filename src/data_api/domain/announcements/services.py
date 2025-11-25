@@ -152,9 +152,7 @@ class AnnouncementsService:
 
         commit_hash, announcements_list = result
 
-        departments = {
-            announcement["department"] for announcement in announcements_list
-        }
+        departments = {announcement["department"] for announcement in announcements_list}
         return commit_hash, sorted(departments)
 
 

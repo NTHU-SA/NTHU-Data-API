@@ -72,9 +72,7 @@ class DiningService:
 
         return commit_hash, dining_data
 
-    async def get_open_restaurants(
-        self, schedule: str
-    ) -> tuple[Optional[str], list[dict]]:
+    async def get_open_restaurants(self, schedule: str) -> tuple[Optional[str], list[dict]]:
         """Get currently open restaurants based on schedule."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
@@ -118,9 +116,7 @@ class DiningService:
             # --- Level 1: 建築名稱篩選 ---
             # 如果有給 building_name，就先檢查建築名稱是否符合
             if building_name:
-                b_score = fuzz.partial_ratio(
-                    building_name, building.get("building", "")
-                )
+                b_score = fuzz.partial_ratio(building_name, building.get("building", ""))
                 if b_score < FUZZY_SEARCH_THRESHOLD:
                     # 建築名稱不符合，直接跳過整棟
                     continue
@@ -134,9 +130,7 @@ class DiningService:
                 # 如果有搜餐廳名，則過濾內部的餐廳
                 temp_scores = []
                 for restaurant in original_restaurants:
-                    r_score = fuzz.partial_ratio(
-                        restaurant_name, restaurant.get("name", "")
-                    )
+                    r_score = fuzz.partial_ratio(restaurant_name, restaurant.get("name", ""))
                     if r_score >= FUZZY_SEARCH_THRESHOLD:
                         temp_scores.append((r_score, restaurant))
 

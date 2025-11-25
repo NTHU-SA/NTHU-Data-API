@@ -105,16 +105,12 @@ class TestBusesEndpoints:
 
     def test_buses_routes_with_params(self):
         """Test bus routes with parameters."""
-        response = client.get(
-            url="/buses/routes/?bus_type=main&direction=up"
-        )
+        response = client.get(url="/buses/routes/?bus_type=main&direction=up")
         assert response.status_code == 200
 
     def test_buses_routes_nanda(self):
         """Test Nanda bus routes."""
-        response = client.get(
-            url="/buses/routes/?bus_type=nanda&direction=up"
-        )
+        response = client.get(url="/buses/routes/?bus_type=nanda&direction=up")
         assert response.status_code == 200
 
 

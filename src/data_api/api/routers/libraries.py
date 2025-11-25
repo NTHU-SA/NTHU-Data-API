@@ -33,9 +33,7 @@ async def get_library_space_availability():
     """
     url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
     try:
-        async with httpx.AsyncClient(
-            verify=False
-        ) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
+        async with httpx.AsyncClient(verify=False) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
             response = await client.get(url, headers=DEFAULT_HEADERS)
             response.raise_for_status()
             data = response.json()
@@ -44,9 +42,7 @@ async def get_library_space_availability():
                 raise HTTPException(status_code=404, detail="找不到空間資料")
             return data["rows"]
     except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code, detail=f"擷取空間資料失敗: {e}"
-        )
+        raise HTTPException(status_code=e.response.status_code, detail=f"擷取空間資料失敗: {e}")
     except (json.JSONDecodeError, KeyError) as e:
         raise HTTPException(status_code=500, detail=f"解析空間資料失敗: {e}")
 
@@ -94,17 +90,13 @@ async def get_library_lost_and_found_items():
             # 解析表格行
             rows_data = []
             for row in table_rows[1:]:
-                cells = [
-                    re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")
-                ]
+                cells = [re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")]
                 if len(cells) == len(table_title):
                     rows_data.append(dict(zip(table_title, cells)))
 
             return rows_data
     except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code, detail=f"擷取失物招領資料失敗: {e}"
-        )
+        raise HTTPException(status_code=e.response.status_code, detail=f"擷取失物招領資料失敗: {e}")
     except AttributeError:
         return []
     except Exception as e:
@@ -147,8 +139,6 @@ async def get_library_rss_data(
 
             return rss_data
     except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code, detail=f"擷取 RSS 資料失敗: {e}"
-        )
+        raise HTTPException(status_code=e.response.status_code, detail=f"擷取 RSS 資料失敗: {e}")
     except KeyError:
         raise HTTPException(status_code=404, detail="在回應中找不到 RSS 來源")

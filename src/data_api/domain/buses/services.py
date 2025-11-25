@@ -29,9 +29,7 @@ RouteInfoKey = tuple[str, str]
 
 
 # --- Helper Functions ---
-def after_specific_time(
-    target_list: list[dict], time_str: str, time_keys: list[str]
-) -> list[dict]:
+def after_specific_time(target_list: list[dict], time_str: str, time_keys: list[str]) -> list[dict]:
     """
     Filter list to keep only items after specified time.
 
@@ -138,9 +136,7 @@ class BusesService:
         self._route_info: dict[RouteInfoKey, dict[str, Any]] = {}
 
         # Stop data aggregation (Stop ID -> {(RouteType, Day, Direction) -> List[Items]})
-        self.stops_schedule_registry: dict[
-            str, dict[ScheduleKey, list[dict[str, Any]]]
-        ] = {}
+        self.stops_schedule_registry: dict[str, dict[ScheduleKey, list[dict[str, Any]]]] = {}
 
         self.last_commit_hash = None
         self._res_json: dict[str, Any] = {}
@@ -241,14 +237,10 @@ class BusesService:
             toward_name = "Nanda" if rdir == "up" else "MainCampus"
         return f"{day}BusScheduleToward{toward_name}"
 
-    def _enhance_schedule_item(
-        self, item: dict, rtype: str, day: str, rdir: str
-    ) -> dict:
+    def _enhance_schedule_item(self, item: dict, rtype: str, day: str, rdir: str) -> dict:
         """Enhance a single schedule item with additional fields."""
         bus = item.copy()
-        bus["bus_type"] = self._classify_bus_type(
-            rtype, day, bus.get("description", "")
-        )
+        bus["bus_type"] = self._classify_bus_type(rtype, day, bus.get("description", ""))
 
         if rtype == "nanda":
             self._enhance_nanda_schedule(bus, rdir)
@@ -291,9 +283,7 @@ class BusesService:
         """
         if rtype == "nanda" and "83" in desc:
             return enums.BusType.route_83.value
-        if (rtype == "main" and "大" in desc) or (
-            rtype == "nanda" and day == "weekday"
-        ):
+        if (rtype == "main" and "大" in desc) or (rtype == "nanda" and day == "weekday"):
             return enums.BusType.large_sized_bus.value
         return enums.BusType.middle_sized_bus.value
 
@@ -309,16 +299,12 @@ class BusesService:
 
             detailed_list = []
             for bus in raw_list:
-                detailed_entry = self._create_detailed_schedule_entry(
-                    bus, rtype, day, rdir
-                )
+                detailed_entry = self._create_detailed_schedule_entry(bus, rtype, day, rdir)
                 detailed_list.append(detailed_entry)
 
             self.detailed_schedule_data[(rtype, day, rdir)] = detailed_list
 
-    def _create_detailed_schedule_entry(
-        self, bus: dict, rtype: str, day: str, rdir: str
-    ) -> dict:
+    def _create_detailed_schedule_entry(self, bus: dict, rtype: str, day: str, rdir: str) -> dict:
         """Create a detailed schedule entry with stop arrival times."""
         route = self._get_route_from_graph(bus, rtype, rdir)
         stops_time_info = []
@@ -366,9 +352,7 @@ class BusesService:
             )
         return stops_time_info
 
-    def _get_route_from_graph(
-        self, bus: dict, rtype: str, rdir: str
-    ) -> Optional[models.Route]:
+    def _get_route_from_graph(self, bus: dict, rtype: str, rdir: str) -> Optional[models.Route]:
         """
         Determine the route for a bus schedule entry.
 
@@ -395,8 +379,7 @@ class BusesService:
         # Check if this bus departs from Gen2 (綜二) by inference
         identifier = f"{time_val}{line}"
         is_from_gen2 = (
-            identifier in self._gen2_departures
-            or f"0{identifier}" in self._gen2_departures
+            identifier in self._gen2_departures or f"0{identifier}" in self._gen2_departures
         )
 
         return graph.resolver.resolve_main_campus_route(line, dep_stop, is_from_gen2)
@@ -426,20 +409,14 @@ class BusesService:
     # --- 4. Post-Processing ("All" fields) ---
     def _derive_combined_views(self) -> None:
         self._combine_route_types_for_store(self.raw_schedule_data, ["time"])
-        self._combine_route_types_for_store(
-            self.detailed_schedule_data, ["dep_info", "time"]
-        )
+        self._combine_route_types_for_store(self.detailed_schedule_data, ["dep_info", "time"])
         self._combine_route_types_for_stops()
 
         self._combine_directions_for_store(self.raw_schedule_data, ["time"])
-        self._combine_directions_for_store(
-            self.detailed_schedule_data, ["dep_info", "time"]
-        )
+        self._combine_directions_for_store(self.detailed_schedule_data, ["dep_info", "time"])
         self._combine_directions_for_stops()
 
-    def _combine_route_types_for_store(
-        self, store: ScheduleStore, time_path: list[str]
-    ) -> None:
+    def _combine_route_types_for_store(self, store: ScheduleStore, time_path: list[str]) -> None:
         for day, rdir in product(BUS_DAY, BUS_DIRECTION_WITHOUT_ALL):
             combined = [
                 *store.get(("main", day, rdir), []),
@@ -449,9 +426,7 @@ class BusesService:
                 sort_by_time(combined, time_path)
             store[("all", day, rdir)] = combined
 
-    def _combine_directions_for_store(
-        self, store: ScheduleStore, time_path: list[str]
-    ) -> None:
+    def _combine_directions_for_store(self, store: ScheduleStore, time_path: list[str]) -> None:
         for rtype, day in product(BUS_ROUTE_TYPE, BUS_DAY):
             combined = [
                 *store.get((rtype, day, "up"), []),
@@ -506,9 +481,7 @@ class BusesService:
 
         return bundle
 
-    def get_route_info(
-        self, route_type: Optional[str], direction: Optional[str]
-    ) -> list[dict]:
+    def get_route_info(self, route_type: Optional[str], direction: Optional[str]) -> list[dict]:
         # 用篩選條件取得路線資訊
         results = []
         for (rtype, rdir), info in self._route_info.items():
@@ -535,12 +508,8 @@ class BusesService:
             for s in graph.STOPS_DATA.values()
         ]
 
-    def get_stop_schedule(
-        self, stop_name: str, rtype: str, day: str, rdir: str
-    ) -> list[dict]:
-        stop_id = next(
-            (k for k, v in graph.STOPS_DATA.items() if v.name == stop_name), None
-        )
+    def get_stop_schedule(self, stop_name: str, rtype: str, day: str, rdir: str) -> list[dict]:
+        stop_id = next((k for k, v in graph.STOPS_DATA.items() if v.name == stop_name), None)
         if not stop_id:
             return []
 

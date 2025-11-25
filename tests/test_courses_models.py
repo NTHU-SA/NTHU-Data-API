@@ -125,9 +125,7 @@ class TestConditions:
 
     def test_conditions_and(self):
         """Test AND combination of conditions."""
-        course = CourseData.from_dict(
-            {"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"}
-        )
+        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"})
         cond1 = Conditions(row_field="id", matcher="MATH", regex_match=True)
         cond2 = Conditions(row_field="credit", matcher="3", regex_match=False)
         combined = cond1 & cond2
@@ -143,9 +141,7 @@ class TestConditions:
 
     def test_conditions_complex(self):
         """Test complex condition tree."""
-        course = CourseData.from_dict(
-            {"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"}
-        )
+        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"})
         cond1 = Conditions(row_field="id", matcher="MATH", regex_match=True)
         cond2 = Conditions(row_field="credit", matcher="3", regex_match=False)
         cond3 = Conditions(row_field="id", matcher="CS", regex_match=True)

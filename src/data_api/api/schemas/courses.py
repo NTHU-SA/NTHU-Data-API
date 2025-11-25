@@ -88,29 +88,19 @@ class CourseQueryOperation(str, Enum):
 class CourseQueryCondition(RootModel):
     """Complex course query condition."""
 
-    root: list[
-        Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]
-    ]
+    root: list[Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]]
 
     @field_validator("root")
     def check_query(cls, v):
-        POST_ERROR_INFO = (
-            " Structure: [(nested) Condition, Operation, (nested) Condition]."
-        )
+        POST_ERROR_INFO = " Structure: [(nested) Condition, Operation, (nested) Condition]."
         for i in range(len(v)):
             if type(v[i]) is CourseQueryOperation:
                 if i == 0 or i == len(v) - 1:
-                    raise ValueError(
-                        "First/last elements must be Condition." + POST_ERROR_INFO
-                    )
+                    raise ValueError("First/last elements must be Condition." + POST_ERROR_INFO)
                 elif type(v[i - 1]) not in [CourseQueryCondition, CourseCondition]:
-                    raise TypeError(
-                        "Before Operation must be Condition." + POST_ERROR_INFO
-                    )
+                    raise TypeError("Before Operation must be Condition." + POST_ERROR_INFO)
                 elif type(v[i + 1]) not in [CourseQueryCondition, CourseCondition]:
-                    raise TypeError(
-                        "After Operation must be Condition." + POST_ERROR_INFO
-                    )
+                    raise TypeError("After Operation must be Condition." + POST_ERROR_INFO)
         return v
 
 

@@ -146,14 +146,10 @@ class Conditions:
         self.course = None
 
     def __and__(self, other: "Conditions") -> "Conditions":
-        return Conditions(
-            list_build_target=[self.condition_stat, "and", other.condition_stat]
-        )
+        return Conditions(list_build_target=[self.condition_stat, "and", other.condition_stat])
 
     def __or__(self, other: "Conditions") -> "Conditions":
-        return Conditions(
-            list_build_target=[self.condition_stat, "or", other.condition_stat]
-        )
+        return Conditions(list_build_target=[self.condition_stat, "or", other.condition_stat])
 
     def _solve_condition_stat(self, data: Any) -> bool:
         """Recursively evaluate condition tree."""

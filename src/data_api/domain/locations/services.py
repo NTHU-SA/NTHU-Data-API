@@ -35,9 +35,7 @@ class LocationsService:
         ]
         return commit_hash, locations
 
-    async def fuzzy_search_locations(
-        self, query: str
-    ) -> tuple[Optional[str], list[dict]]:
+    async def fuzzy_search_locations(self, query: str) -> tuple[Optional[str], list[dict]]:
         """Fuzzy search locations by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
