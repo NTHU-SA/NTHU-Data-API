@@ -136,6 +136,9 @@ mcp = FastMCP.from_fastapi(app=fast_api_app, name="NTHU Data API")
 mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
 
 combined_app = FastAPI(
+    title=fast_api_app.title,
+    version=fast_api_app.version,
+    description=fast_api_app.description,
     routes=[*mcp_app.routes, *fast_api_app.routes],
     lifespan=mcp_app.lifespan,
 )
