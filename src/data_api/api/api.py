@@ -58,7 +58,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         lifespan=lifespan,
         title="NTHU Data API",
-        version="1.0.0",
+        version="2.0.0",
         description="由國立清華大學校內各單位資料所組成的公共資料 API。",
     )
 
@@ -133,12 +133,9 @@ fast_api_app = create_app()
 
 # MCP Integration
 mcp = FastMCP.from_fastapi(app=fast_api_app, name="NTHU Data API")
-mcp_app = mcp.http_app(path="/mcp")
+mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
 
 combined_app = FastAPI(
-    title="NTHU Data API with MCP",
-    version="1.0.0",
-    description="NTHU Data API integrated with FastMCP for monitoring and control.",
     routes=[*mcp_app.routes, *fast_api_app.routes],
     lifespan=mcp_app.lifespan,
 )
