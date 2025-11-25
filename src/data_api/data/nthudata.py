@@ -51,9 +51,7 @@ class DataFetcher:
 class FileDetailsManager:
     """Manages file_details.json for tracking commit hashes."""
 
-    def __init__(
-        self, fetcher: DataFetcher, file_details_url: str, cache_expiry: int = 300
-    ):
+    def __init__(self, fetcher: DataFetcher, file_details_url: str, cache_expiry: int = 300):
         self.fetcher = fetcher
         self.file_details_url = file_details_url
         self.cache_expiry = cache_expiry
@@ -115,9 +113,7 @@ class FileDetailsManager:
                     )
         return formatted
 
-    def get_commit_hash(
-        self, endpoint_name: str, file_details: list[dict]
-    ) -> Optional[str]:
+    def get_commit_hash(self, endpoint_name: str, file_details: list[dict]) -> Optional[str]:
         """
         Get the expected commit hash for an endpoint from file details.
 
@@ -173,9 +169,7 @@ class NTHUDataManager:
     Provides a centralized interface for fetching and caching data from data.nthusa.tw.
     """
 
-    def __init__(
-        self, base_url: Optional[str] = None, file_details_cache_expiry: int = 300
-    ):
+    def __init__(self, base_url: Optional[str] = None, file_details_cache_expiry: int = 300):
         """
         Initialize the data manager.
 

@@ -24,9 +24,7 @@ class LibrariesService:
             return None, []
         return result
 
-    async def get_library_by_name(
-        self, name: str
-    ) -> tuple[Optional[str], Optional[dict]]:
+    async def get_library_by_name(self, name: str) -> tuple[Optional[str], Optional[dict]]:
         """Get library by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
@@ -38,9 +36,7 @@ class LibrariesService:
                 return commit_hash, library
         return commit_hash, None
 
-    async def fuzzy_search_libraries(
-        self, query: str
-    ) -> tuple[Optional[str], list[dict]]:
+    async def fuzzy_search_libraries(self, query: str) -> tuple[Optional[str], list[dict]]:
         """Fuzzy search libraries by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:

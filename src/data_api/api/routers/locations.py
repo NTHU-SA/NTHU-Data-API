@@ -8,9 +8,7 @@ from data_api.domain.locations import services
 router = APIRouter()
 
 
-@router.get(
-    "/", response_model=list[schemas.LocationDetail], operation_id="getAllLocations"
-)
+@router.get("/", response_model=list[schemas.LocationDetail], operation_id="getAllLocations")
 async def get_all_locations(response: Response):
     """
     取得校內所有地點資訊。
@@ -34,9 +32,7 @@ async def fuzzy_search_locations(
     query: str = Query(..., description="要查詢的地點"),
 ):
     """使用名稱模糊搜尋地點資訊。"""
-    commit_hash, data = await services.locations_service.fuzzy_search_locations(
-        query=query
-    )
+    commit_hash, data = await services.locations_service.fuzzy_search_locations(query=query)
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
     if not data:

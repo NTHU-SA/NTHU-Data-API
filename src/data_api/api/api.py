@@ -27,9 +27,7 @@ async def lifespan(app: FastAPI):
     results = await nthudata.prefetch(config.PREFETCH_ENDPOINTS)
 
     success_count = sum(1 for success in results.values() if success)
-    print(
-        f"Pre-fetch complete: {success_count}/{len(config.PREFETCH_ENDPOINTS)} endpoints loaded"
-    )
+    print(f"Pre-fetch complete: {success_count}/{len(config.PREFETCH_ENDPOINTS)} endpoints loaded")
 
     for endpoint, success in results.items():
         status = "✓" if success else "✗"
@@ -117,9 +115,7 @@ def create_app() -> FastAPI:
         newsletters,
     )
 
-    app.include_router(
-        announcements.router, prefix="/announcements", tags=["Announcements"]
-    )
+    app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
     app.include_router(courses.router, prefix="/courses", tags=["Courses"])
     app.include_router(departments.router, prefix="/departments", tags=["Departments"])

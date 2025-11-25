@@ -25,17 +25,15 @@ async def get_announcements(
     ),
     title: str = Query(None, description="公告標題關鍵字"),
     language: schemas.AnnouncementLanguageOption = Query(None, description="語言篩選"),
-    fuzzy: bool = Query(False, description="是否進行模糊搜尋"),
+    fuzzy: bool = Query(False, description="是否進行模糊搜尋，若不啟用則必須完全符合（不建議）"),
 ):
     """
     取得校內每個處室的所有公告資訊。
     資料來源：各處室網站
     """
     if fuzzy:
-        commit_hash, data = (
-            await services.announcements_service.fuzzy_search_announcements(
-                department=department, title=title, language=language
-            )
+        commit_hash, data = await services.announcements_service.fuzzy_search_announcements(
+            department=department, title=title, language=language
         )
     else:
         commit_hash, data = await services.announcements_service.get_announcements(

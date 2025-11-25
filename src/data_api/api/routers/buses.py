@@ -21,9 +21,7 @@ router = APIRouter()
 
 def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    response.headers["X-Data-Commit-Hash"] = str(
-        services.buses_service.last_commit_hash
-    )
+    response.headers["X-Data-Commit-Hash"] = str(services.buses_service.last_commit_hash)
 
 
 def get_current_time_state():
@@ -55,9 +53,7 @@ async def get_bus_route_metadata(
     try:
         return services.buses_service.get_route_info(bus_type, direction)
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve bus metadata: {e}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve bus metadata: {e}")
 
 
 @router.get(
@@ -72,9 +68,7 @@ async def get_bus_stops_information():
     try:
         return services.buses_service.gen_bus_stops_info()
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve bus stops info: {e}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve bus stops info: {e}")
 
 
 @router.get(
@@ -99,9 +93,7 @@ async def get_bus_schedules(
     await services.buses_service.update_data()
 
     # 1. 計算要查詢的時間點與模式
-    find_day, after_time = (
-        (day, query.time) if day != "current" else get_current_time_state()
-    )
+    find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
 
     try:
         time_path = ["dep_info", "time"] if details else ["time"]
@@ -122,9 +114,7 @@ async def get_bus_schedules(
         return res[:limit]
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve bus schedule: {e}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve bus schedule: {e}")
 
 
 @router.get(
@@ -144,14 +134,10 @@ async def get_stop_bus_information_by_stop(
     await services.buses_service.update_data()
 
     # Time calculation logic...
-    find_day, after_time = (
-        (day, query.time) if day != "current" else get_current_time_state()
-    )
+    find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
 
     # Updated: Query via Service instead of Stop Instance
-    raw_data = services.buses_service.get_stop_schedule(
-        stop_name, bus_type, find_day, direction
-    )
+    raw_data = services.buses_service.get_stop_schedule(stop_name, bus_type, find_day, direction)
 
     if not raw_data and not services.buses_service.stops_schedule_registry:
         # Handle case where registry might be empty/error

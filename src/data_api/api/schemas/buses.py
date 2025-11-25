@@ -110,9 +110,7 @@ class BusDetailedSchedule(BaseModel):
 class BusMainData(BaseModel):
     """Main campus bus data."""
 
-    toward_TSMC_building_info: BusInfo = Field(
-        ..., description="校門口往台積館公車資訊"
-    )
+    toward_TSMC_building_info: BusInfo = Field(..., description="校門口往台積館公車資訊")
     weekday_bus_schedule_toward_TSMC_building: list[BusSchedule] = Field(
         ..., description="校門口往台積館公車時刻表（平日）"
     )

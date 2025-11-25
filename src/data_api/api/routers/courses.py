@@ -10,9 +10,7 @@ router = APIRouter()
 
 def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    response.headers["X-Data-Commit-Hash"] = str(
-        services.courses_service.last_commit_hash
-    )
+    response.headers["X-Data-Commit-Hash"] = str(services.courses_service.last_commit_hash)
 
 
 @router.get(
@@ -28,9 +26,7 @@ async def get_all_courses(response: Response):
     """
     result = services.courses_service.course_data
     response.headers["X-Total-Count"] = str(len(result))
-    response.headers["X-Data-Commit-Hash"] = str(
-        services.courses_service.last_commit_hash
-    )
+    response.headers["X-Data-Commit-Hash"] = str(services.courses_service.last_commit_hash)
     return result
 
 
@@ -141,9 +137,7 @@ async def search_courses_by_condition(
             query_condition.regex_match,
         )
     elif type(query_condition) is schemas.CourseQueryCondition:
-        condition = models.Conditions(
-            list_build_target=query_condition.model_dump(mode="json")
-        )
+        condition = models.Conditions(list_build_target=query_condition.model_dump(mode="json"))
     result = services.courses_service.query(condition)
     return result
 

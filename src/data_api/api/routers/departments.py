@@ -10,9 +10,7 @@ from data_api.domain.departments import services
 router = APIRouter()
 
 
-@router.get(
-    "/", response_model=list[schemas.Department], operation_id="getAllDepartments"
-)
+@router.get("/", response_model=list[schemas.Department], operation_id="getAllDepartments")
 async def get_all_departments(response: Response):
     """
     取得所有部門與人員資料。
@@ -27,9 +25,7 @@ async def get_all_departments(response: Response):
 
 @router.get(
     "/search",
-    response_model=dict[
-        str, Union[list[schemas.Department], list[schemas.DepartmentPerson]]
-    ],
+    response_model=dict[str, Union[list[schemas.Department], list[schemas.DepartmentPerson]]],
     operation_id="searchDepartmentsAndPeople",
 )
 async def fuzzy_search_departments_and_people(
@@ -38,10 +34,8 @@ async def fuzzy_search_departments_and_people(
     """
     模糊搜尋全校部門與人員名稱。
     """
-    commit_hash, data = (
-        await services.departments_service.fuzzy_search_departments_and_people(
-            query=query
-        )
+    commit_hash, data = await services.departments_service.fuzzy_search_departments_and_people(
+        query=query
     )
     if commit_hash is None:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")

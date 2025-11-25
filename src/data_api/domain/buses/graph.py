@@ -12,13 +12,9 @@ STOPS_DATA = {
     "M1": models.Stop("M1", "北校門口", "North Main Gate", "24.79589", "120.99633"),
     "M2": models.Stop("M2", "綜二館", "General Building II", "24.79417", "120.99376"),
     "M3": models.Stop("M3", "楓林小徑", "Maple Path", "24.79138", "120.99138"),
-    "M4": models.Stop(
-        "M4", "人社院&生科館", "CHSS/CLS Building", "24.78973", "120.99001"
-    ),
+    "M4": models.Stop("M4", "人社院&生科館", "CHSS/CLS Building", "24.78973", "120.99001"),
     "M5": models.Stop("M5", "台積館", "TSMC Building", "24.78695", "120.9884"),
-    "M6": models.Stop(
-        "M6", "奕園停車場", "Yi Pavilion Parking Lot", "24.78828", "120.99246"
-    ),
+    "M6": models.Stop("M6", "奕園停車場", "Yi Pavilion Parking Lot", "24.78828", "120.99246"),
     "M7": models.Stop(
         "M7",
         "教育學院大樓&南門停車場",
@@ -76,34 +72,22 @@ red_M5_M2 = create_route("red_M5_M2", ["M5", "M7", "M6", "M2"], [0, 1, 2, 1])
 
 # Green Lines
 # M1 -> M2 (1m) -> M3 (1m) -> M6 (1m) -> M7 (2m) -> M5 (1m)
-green_M1_M5 = create_route(
-    "green_M1_M5", ["M1", "M2", "M3", "M6", "M7", "M5"], [0, 1, 1, 1, 2, 1]
-)
-green_M2_M5 = create_route(
-    "green_M2_M5", ["M2", "M3", "M6", "M7", "M5"], [0, 1, 1, 2, 1]
-)
+green_M1_M5 = create_route("green_M1_M5", ["M1", "M2", "M3", "M6", "M7", "M5"], [0, 1, 1, 1, 2, 1])
+green_M2_M5 = create_route("green_M2_M5", ["M2", "M3", "M6", "M7", "M5"], [0, 1, 1, 2, 1])
 # M5 -> M4 (2m) -> M2 (3m) -> M1 (1m)
 green_M5_M1 = create_route("green_M5_M1", ["M5", "M4", "M2", "M1"], [0, 2, 3, 1])
 green_M5_M2 = create_route("green_M5_M2", ["M5", "M4", "M2"], [0, 2, 3])
 
 # Nanda Lines
 # Route 1: M1 -> M2 (1m) -> M4 (2m) -> M5 (2m) -> S1 (15m) (Estimated)
-nanda_M1_S1_r1 = create_route(
-    "nanda_M1_S1_r1", ["M1", "M2", "M4", "M5", "S1"], [0, 1, 2, 2, 15]
-)
+nanda_M1_S1_r1 = create_route("nanda_M1_S1_r1", ["M1", "M2", "M4", "M5", "S1"], [0, 1, 2, 2, 15])
 # Route 2: M1 -> M2 (1m) -> M6 (4m) -> M7 (2m) -> S1 (15m)
-nanda_M1_S1_r2 = create_route(
-    "nanda_M1_S1_r2", ["M1", "M2", "M6", "M7", "S1"], [0, 1, 4, 2, 15]
-)
+nanda_M1_S1_r2 = create_route("nanda_M1_S1_r2", ["M1", "M2", "M6", "M7", "S1"], [0, 1, 4, 2, 15])
 
 # Return: S1 -> M5 (15m) -> M4 (2m) -> M2 (2m) -> M1 (1m)
-nanda_S1_M1_r1 = create_route(
-    "nanda_S1_M1_r1", ["S1", "M5", "M4", "M2", "M1"], [0, 15, 2, 2, 1]
-)
+nanda_S1_M1_r1 = create_route("nanda_S1_M1_r1", ["S1", "M5", "M4", "M2", "M1"], [0, 15, 2, 2, 1])
 # Return Route 2: S1 -> M7 (15m) -> M6 (2m) -> M2 (4m) -> M1 (1m)
-nanda_S1_M1_r2 = create_route(
-    "nanda_S1_M1_r2", ["S1", "M7", "M6", "M2", "M1"], [0, 15, 2, 4, 1]
-)
+nanda_S1_M1_r2 = create_route("nanda_S1_M1_r2", ["S1", "M7", "M6", "M2", "M1"], [0, 15, 2, 4, 1])
 
 
 # --- 4. Route Resolver Logic ---
@@ -150,9 +134,7 @@ class RouteResolver:
         return None
 
     @staticmethod
-    def resolve_nanda_route(
-        direction: Literal["up", "down"], description: str
-    ) -> models.Route:
+    def resolve_nanda_route(direction: Literal["up", "down"], description: str) -> models.Route:
         """
         Resolves Nanda routes based on description logic.
         direction: 'up' (Main -> Nanda) or 'down' (Nanda -> Main)
@@ -171,17 +153,17 @@ class RouteResolver:
     def get_nanda_line(description: str) -> str:
         """
         Determines the Nanda route line from the description.
-        
+
         Route detection logic:
         - Route 2: If description contains "路線二" or "教育學院"
         - Route 1: All other cases (default)
-        
+
         Args:
             description: Bus schedule description text
-            
+
         Returns:
             'route_1' or 'route_2'
-            
+
         Examples:
             >>> get_nanda_line("路線二經過教育學院")
             'route_2'

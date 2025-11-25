@@ -13,18 +13,14 @@ def test_dining_endpoints():
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize(
-    "building_name", [_.value for _ in schemas.dining.DiningBuildingName]
-)
+@pytest.mark.parametrize("building_name", [_.value for _ in schemas.dining.DiningBuildingName])
 def test_dining_buildings(building_name):
     params = {"building_name": building_name}
     response = client.get(url="/dining", params=params)
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize(
-    "schedule", [_.value for _ in schemas.dining.DiningScheduleName]
-)
+@pytest.mark.parametrize("schedule", [_.value for _ in schemas.dining.DiningScheduleName])
 def test_dining_open(schedule):
     params = {"schedule": schedule}
     response = client.get(url="/dining/open", params=params)
