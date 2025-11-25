@@ -24,10 +24,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV TZ=Asia/Taipei
 RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
-RUN apt-get update && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 # Create a non-root user
 RUN groupadd -g 1000 appuser && \
     useradd -r -u 1000 -g appuser appuser
