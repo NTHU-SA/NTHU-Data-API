@@ -17,7 +17,7 @@ async def get_dining_data(
     response: Response,
     building_name: schemas.DiningBuildingName = Query(None, description="餐廳建築名稱（可選）"),
     restaurant_name: str = Query(None, description="餐廳名稱（可選）"),
-    fuzzy: bool = Query(False, description="是否進行模糊搜尋"),
+    fuzzy: bool = Query(False, description="是否進行模糊搜尋，若不啟用則必須完全符合（不建議）"),
 ) -> list[schemas.DiningBuilding]:
     """
     取得所有餐廳及廠商資料。
