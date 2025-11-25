@@ -49,8 +49,6 @@ Both are configured in `pyproject.toml` and enforced by pre-commit hooks.
 
 ## Commit Message Guidelines
 
-When making commits, please follow these guidelines for commit messages. Here are the types of commits we accept:
-- feat: Add or modify features.
-- fix: Bug fixes.
-- docs: Documentation changes.
-... etc. (refer to README.md for full list)
+We use Conventional Commits for commit messages. Examples include:
+- `feat: add new feature`
+- `fix: fix a bug` ...
