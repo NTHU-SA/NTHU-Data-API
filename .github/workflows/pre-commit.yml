@@ -1,4 +1,4 @@
-name: lint with pre-commit
+name: Lint with pre-commit
 on: [push, pull_request]
 permissions:
   contents: read
