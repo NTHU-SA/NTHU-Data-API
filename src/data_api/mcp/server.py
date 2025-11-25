@@ -61,8 +61,10 @@ async def _search_campus(query: str) -> dict:
     _, locations = await locations_services.locations_service.fuzzy_search_locations(query=query)
 
     # Search departments and people
-    _, dept_results = await departments_services.departments_service.fuzzy_search_departments_and_people(
-        query=query
+    _, dept_results = (
+        await departments_services.departments_service.fuzzy_search_departments_and_people(
+            query=query
+        )
     )
 
     return {
@@ -113,13 +115,15 @@ async def _get_next_buses(
     buses = []
     for bus in filtered[:limit]:
         dep_info = bus.get("dep_info", {})
-        buses.append({
-            "departure_time": dep_info.get("time"),
-            "departure_stop": dep_info.get("dep_stop"),
-            "description": dep_info.get("description"),
-            "bus_type": bus.get("bus_type"),
-            "stops": bus.get("stops_time", []),
-        })
+        buses.append(
+            {
+                "departure_time": dep_info.get("time"),
+                "departure_stop": dep_info.get("dep_stop"),
+                "description": dep_info.get("description"),
+                "bus_type": bus.get("bus_type"),
+                "stops": bus.get("stops_time", []),
+            }
+        )
 
     return {
         "current_time": current_time,
@@ -173,10 +177,7 @@ async def _search_courses(
     if course_id:
         id_cond = {"row_field": "id", "matcher": course_id, "regex_match": True}
         if conditions_list:
-            if isinstance(conditions_list[0], list):
-                conditions_list = [conditions_list[0], "and", id_cond]
-            else:
-                conditions_list = [conditions_list[0], "and", id_cond]
+            conditions_list = [conditions_list[0], "and", id_cond]
         else:
             conditions_list.append(id_cond)
 
@@ -238,18 +239,20 @@ async def _get_announcements(
     for source in data[:10]:  # Limit departments
         articles = source.get("articles", [])[:limit]
         if articles:
-            result.append({
-                "department": source.get("department"),
-                "language": source.get("language"),
-                "articles": [
-                    {
-                        "title": a.get("title"),
-                        "link": a.get("link"),
-                        "date": a.get("date"),
-                    }
-                    for a in articles
-                ],
-            })
+            result.append(
+                {
+                    "department": source.get("department"),
+                    "language": source.get("language"),
+                    "articles": [
+                        {
+                            "title": a.get("title"),
+                            "link": a.get("link"),
+                            "date": a.get("date"),
+                        }
+                        for a in articles
+                    ],
+                }
+            )
 
     return {
         "count": sum(len(d["articles"]) for d in result),
@@ -300,18 +303,20 @@ async def _find_dining(
         for b in data:
             restaurants = b.get("restaurants", [])
             if restaurants:
-                buildings.append({
-                    "building": b.get("building"),
-                    "restaurants": [
-                        {
-                            "name": r.get("name"),
-                            "phone": r.get("phone"),
-                            "schedule": r.get("schedule"),
-                            "note": r.get("note") if r.get("note") else None,
-                        }
-                        for r in restaurants[:10]
-                    ],
-                })
+                buildings.append(
+                    {
+                        "building": b.get("building"),
+                        "restaurants": [
+                            {
+                                "name": r.get("name"),
+                                "phone": r.get("phone"),
+                                "schedule": r.get("schedule"),
+                                "note": r.get("note") if r.get("note") else None,
+                            }
+                            for r in restaurants[:10]
+                        ],
+                    }
+                )
 
         return {
             "buildings": buildings,
@@ -336,9 +341,7 @@ async def _get_library_info(
     import truststore
 
     ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
     if info_type == "space":
         url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
@@ -430,8 +433,7 @@ async def _get_newsletters(
         from thefuzz import fuzz
 
         newsletters = [
-            n for n in newsletters
-            if fuzz.partial_ratio(search, n.get("name", "")) >= 60
+            n for n in newsletters if fuzz.partial_ratio(search, n.get("name", "")) >= 60
         ]
 
     return {
@@ -459,18 +461,20 @@ async def _get_energy_usage() -> dict:
     """
     try:
         data = await energy_services.energy_service.get_realtime_electricity_usage()
-        return {
-            "zones": [
+        zones = []
+        for item in data:
+            capacity = item.get("capacity") or 1  # Avoid division by zero
+            usage = item.get("data", 0)
+            zones.append(
                 {
                     "name": item.get("name"),
-                    "usage_kw": item.get("data"),
+                    "usage_kw": usage,
                     "capacity_kw": item.get("capacity"),
-                    "usage_percent": round(item.get("data", 0) / item.get("capacity", 1) * 100, 1),
+                    "usage_percent": round(usage / capacity * 100, 1) if capacity > 0 else 0,
                     "last_updated": item.get("last_updated"),
                 }
-                for item in data
-            ]
-        }
+            )
+        return {"zones": zones}
     except Exception as e:
         return {"error": f"Failed to fetch energy data: {str(e)}"}
 
@@ -601,4 +605,3 @@ async def get_energy_usage() -> dict:
 async def get_bus_stops() -> dict:
     """Get all bus stop locations on campus."""
     return await _get_bus_stops()
-
