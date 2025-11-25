@@ -10,7 +10,6 @@ from typing import Optional
 from fastapi import Query
 from pydantic import BaseModel, Field
 
-# Import enums from domain
 from data_api.domain.buses.enums import (
     BusDay,
     BusDayWithCurrent,
@@ -31,13 +30,9 @@ __all__ = [
     "BusInfo",
     "BusStopsInfo",
     "BusSchedule",
-    "BusNandaSchedule",  # Deprecated
-    "BusMainSchedule",  # Deprecated
     "BusStopsQueryResult",
     "BusArriveTime",
     "BusDetailedSchedule",
-    "BusNandaDetailedSchedule",  # Deprecated
-    "BusMainDetailedSchedule",  # Deprecated
     "BusMainData",
     "BusNandaData",
 ]
@@ -84,31 +79,7 @@ class BusSchedule(BaseModel):
     time: str = Field(..., description="發車時間")
     description: str = Field(..., description="備註")
     dep_stop: str = Field(..., description="發車地點")
-    line: str = Field(
-        "", description="路線 (主校區: red/green, 南大: route_1/route_2)"
-    )
-    bus_type: BusType = Field(..., description="營運車輛類型")
-
-
-# Deprecated: Use BusSchedule instead
-class BusNandaSchedule(BaseModel):
-    """Nanda campus bus schedule entry. Deprecated - use BusSchedule."""
-
-    time: str = Field(..., description="發車時間")
-    description: str = Field(..., description="備註")
-    dep_stop: str = Field(..., description="發車地點")
-    line: str = Field("", description="路線")
-    bus_type: BusType = Field(..., description="營運車輛類型")
-
-
-# Deprecated: Use BusSchedule instead
-class BusMainSchedule(BaseModel):
-    """Main campus bus schedule entry. Deprecated - use BusSchedule."""
-
-    time: str = Field(..., description="發車時間")
-    description: str = Field(..., description="備註")
-    dep_stop: str = Field(..., description="發車地點")
-    line: str = Field(..., description="路線")
+    line: str = Field("", description="路線 (主校區: red/green, 南大: route_1/route_2)")
     bus_type: BusType = Field(..., description="營運車輛類型")
 
 
@@ -133,22 +104,6 @@ class BusDetailedSchedule(BaseModel):
     """Unified detailed bus schedule for both Main and Nanda campus."""
 
     dep_info: BusSchedule = Field(..., description="發車資訊")
-    stops_time: list[BusArriveTime] = Field(..., description="各站發車時間")
-
-
-# Deprecated: Use BusDetailedSchedule instead
-class BusNandaDetailedSchedule(BaseModel):
-    """Detailed Nanda campus bus schedule. Deprecated - use BusDetailedSchedule."""
-
-    dep_info: BusNandaSchedule = Field(..., description="發車資訊")
-    stops_time: list[BusArriveTime] = Field(..., description="各站發車時間")
-
-
-# Deprecated: Use BusDetailedSchedule instead
-class BusMainDetailedSchedule(BaseModel):
-    """Detailed main campus bus schedule. Deprecated - use BusDetailedSchedule."""
-
-    dep_info: BusMainSchedule = Field(..., description="發車資訊")
     stops_time: list[BusArriveTime] = Field(..., description="各站發車時間")
 
 
