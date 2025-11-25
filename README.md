@@ -42,13 +42,20 @@ cd NTHU-Data-API
 ```
 3. Install the required dependencies:
 ```sh
-pip3 install -r requirements.txt
+pip3 install -r requirements-dev.txt
 ```
 
 ### Configuration
 Copy the environment template file and fill in your details:
 ```sh
 cp .env.template .env
+```
+
+### Install Pre-commit Hooks (For Contributors)
+To ensure code quality and consistency, we use pre-commit hooks. 
+The pre-commit will automatically format your code before each commit. Install them by running:
+```sh
+pre-commit install
 ```
 
 ### Running the Application
@@ -61,24 +68,7 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 
 - feat: Add or modify features.
 - fix: Bug fixes.
-- docs: Documentation changes.
-- style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi colons, etc).
-- refactor: Code changes that neither fixes a bug nor adds a feature.
-- update: Data changes that neither fixes a bug nor adds a feature.
-- perf: Code changes that improve performance.
-- test: Adding missing tests.
-- chore: Changes to the build process or auxiliary tools and libraries.
-- revert: Reverts a previous commit.
-
-### pre-commit
-1. Before committing, use `pre-commit` to ensure the format.
-```sh
-pip3 install -r requirements-dev.txt
-```
-2. Install `pre-commit`.
-```sh
-pre-commit install
-```
+... You can refer to the full list of commit types in the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
 ### Running Tests
 To run tests locally before committing changes, follow these steps:
@@ -89,12 +79,12 @@ pip3 install -r requirements-tests.txt
 2. Run tests:
 Navigate to the project's root directory and execute:
 ```sh
-python3 -m pytest -n auto tests -W ignore::DeprecationWarning
+python3 -m pytest -n auto tests
 ```
 3. Generate a coverage report (optional):
 If you need a test coverage report, run:
 ```sh
-python3 -m pytest -n auto tests -W ignore::DeprecationWarning --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
+python3 -m pytest -n auto tests --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
 ```
 ## Credit
 This project is maintained by NTHUSA 32nd.
