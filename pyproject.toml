@@ -7,7 +7,7 @@ name = "nthu-data-api"
 version = "2.0.0"
 description = "NTHU Data API"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 license = {text = "MIT"}
 authors = [
     {name = "NTHU-SA", email = "it@nthusa.tw"}
