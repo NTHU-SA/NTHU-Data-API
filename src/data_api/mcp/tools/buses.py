@@ -71,7 +71,7 @@ async def _get_next_buses(
 
 
 async def _get_bus_stops(
-    stop_name: Optional[BusStopsName] = None,
+    stop_name: BusStopsName,
     route: Literal["main", "nanda", "all"] = "all",
     direction: Literal["up", "down", "all"] = "all",
     limit: int = 5,
@@ -80,15 +80,13 @@ async def _get_bus_stops(
     Get bus stop information and upcoming buses.
 
     Args:
-        stop_name: Optional specific stop to query (e.g., '北校門口', '綜二館').
-                   If provided, returns upcoming buses for that stop.
+        stop_name: Specific stop to query.
         route: Bus route type filter - 'main', 'nanda', or 'all'.
         direction: Direction filter - 'up', 'down', or 'all'.
         limit: Maximum number of upcoming buses to return per stop (default 5).
 
     Returns:
-        Dictionary with bus stop locations, and if stop_name is provided,
-        upcoming buses arriving at that stop.
+        Dictionary with query bus stop details and upcoming bus schedules.
     """
     await buses_services.buses_service.update_data()
     stops = buses_services.buses_service.gen_bus_stops_info()
@@ -97,7 +95,9 @@ async def _get_bus_stops(
     current_time = current.time().strftime("%H:%M")
     current_day = "weekday" if current.weekday() < 5 else "weekend"
 
-    result = {
+    result = {}
+
+    all_stops = {
         "stops": [
             {
                 "name": s.get("name"),
@@ -109,35 +109,35 @@ async def _get_bus_stops(
         ]
     }
 
-    # If a specific stop is requested, get upcoming buses for that stop
-    if stop_name:
-        stop_name_str = stop_name.value if hasattr(stop_name, "value") else stop_name
+    stop_name_str = stop_name.value
 
-        # Get schedule for the specific stop
-        raw_data = buses_services.buses_service.get_stop_schedule(
-            stop_name_str, route, current_day, direction
-        )
+    result["stop_info"] = [s for s in all_stops["stops"] if s["name"] == stop_name_str]
 
-        # Filter to buses after current time
-        filtered = buses_services.after_specific_time(
-            raw_data,
-            current_time,
-            ["arrive_time"],
-        )
+    # Get schedule for the specific stop
+    raw_data = buses_services.buses_service.get_stop_schedule(
+        stop_name_str, route, current_day, direction
+    )
 
-        result["stop_name"] = stop_name_str
-        result["current_time"] = current_time
-        result["day_type"] = current_day
-        result["upcoming_buses"] = [
-            {
-                "arrive_time": bus.get("arrive_time"),
-                "departure_time": bus.get("dep_time"),
-                "departure_stop": bus.get("dep_stop"),
-                "description": bus.get("description"),
-                "bus_type": bus.get("bus_type"),
-            }
-            for bus in filtered[:limit]
-        ]
+    # Filter to buses after current time
+    filtered = buses_services.after_specific_time(
+        raw_data,
+        current_time,
+        ["arrive_time"],
+    )
+
+    result["stop_name"] = stop_name_str
+    result["current_time"] = current_time
+    result["day_type"] = current_day
+    result["upcoming_buses"] = [
+        {
+            "arrive_time": bus.get("arrive_time"),
+            "departure_time": bus.get("dep_time"),
+            "departure_stop": bus.get("dep_stop"),
+            "description": bus.get("description"),
+            "bus_type": bus.get("bus_type"),
+        }
+        for bus in filtered[:limit]
+    ]
 
     return result
 
@@ -145,6 +145,10 @@ async def _get_bus_stops(
 @mcp.tool(
     description="Get the next available campus buses. "
     "Use this when someone asks about bus schedules, when the next bus is, or how to get around campus."
+    "- If they are going TO Nanda Campus, query the 'up' schedule."
+    "- If they are going TO Main Campus, query the 'down' schedule."
+    "- Warning: If they take the bus TO Nanda (`up`), they cannot get off at other stops inside the Main Campus."
+    "- Warning: If they take the bus TO Main Campus (`down`), they cannot get on the bus at stops inside the Main Campus."
 )
 async def get_next_buses(
     route: Literal["main", "nanda", "all"] = "all",
@@ -161,7 +165,7 @@ async def get_next_buses(
     "Available stops: 北校門口, 綜二館, 楓林小徑, 人社院&生科館, 台積館, 奕園停車場, 教育學院大樓&南門停車場, 南大校區校門口右側(食品路校牆邊)"
 )
 async def get_bus_stops(
-    stop_name: Optional[BusStopsName] = None,
+    stop_name: BusStopsName,
     route: Literal["main", "nanda", "all"] = "all",
     direction: Literal["up", "down", "all"] = "all",
     limit: int = 5,
