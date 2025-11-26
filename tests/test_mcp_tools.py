@@ -3,7 +3,6 @@
 import pytest
 import pytest_asyncio
 
-
 from data_api.mcp.tools.announcements import _get_announcements
 from data_api.mcp.tools.buses import _get_bus_stops, _get_next_buses
 from data_api.mcp.tools.campus import _search_campus
