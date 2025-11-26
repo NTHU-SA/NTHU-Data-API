@@ -1,21 +1,16 @@
-"""
-Tests for the new data manager module.
-"""
+"""Tests for the data manager module."""
 
-from unittest.mock import MagicMock, patch
-
-from fastapi.testclient import TestClient
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from data_api.api.api import app
-from data_api.data.nthudata import DataCache, FileDetailsManager
-
-client = TestClient(app)
+from data_api.data.nthudata import DataCache, DataFetcher, FileDetailsManager
 
 
 class TestFileDetailsManager:
-    """Test FileDetailsManager class."""
+    """Tests for FileDetailsManager class."""
 
-    def test_format_file_details(self):
+    async def test_format_file_details(self):
         """Test file details formatting."""
         raw_data = {
             "file_details": {
@@ -50,10 +45,8 @@ class TestFileDetailsManager:
             "last_updated": "2024-01-02",
         }
 
-    def test_get_commit_hash(self):
+    async def test_get_commit_hash(self):
         """Test getting commit hash from file details."""
-        from data_api.data.nthudata import DataFetcher
-
         fetcher = DataFetcher("https://example.com")
         manager = FileDetailsManager(fetcher, "https://example.com/file_details.json")
 
@@ -78,9 +71,9 @@ class TestFileDetailsManager:
 
 
 class TestDataCache:
-    """Test DataCache class."""
+    """Tests for DataCache class."""
 
-    def test_set_and_get(self):
+    async def test_set_and_get(self):
         """Test setting and getting cache."""
         cache = DataCache()
         cache.set("key1", {"data": "value"}, "commit_hash_123")
@@ -90,7 +83,7 @@ class TestDataCache:
         assert result["data"] == {"data": "value"}
         assert result["commit_hash"] == "commit_hash_123"
 
-    def test_is_valid(self):
+    async def test_is_valid(self):
         """Test cache validity check."""
         cache = DataCache()
         cache.set("key1", {"data": "value"}, "commit_hash_123")
@@ -99,26 +92,40 @@ class TestDataCache:
         assert cache.is_valid("key1", "different_hash") is False
         assert cache.is_valid("nonexistent", "any_hash") is False
 
-    def test_clear(self):
-        """Test cache clearing."""
+    async def test_clear_specific_key(self):
+        """Test clearing a specific cache key."""
         cache = DataCache()
         cache.set("key1", {"data": "value1"}, "hash1")
         cache.set("key2", {"data": "value2"}, "hash2")
 
-        # Clear specific key
         cache.clear("key1")
         assert cache.get("key1") is None
         assert cache.get("key2") is not None
 
-        # Clear all
+    async def test_clear_all_keys(self):
+        """Test clearing all cache keys."""
+        cache = DataCache()
+        cache.set("key1", {"data": "value1"}, "hash1")
+        cache.set("key2", {"data": "value2"}, "hash2")
+
         cache.clear()
+        assert cache.get("key1") is None
         assert cache.get("key2") is None
 
 
-def test_api_endpoints():
-    """Test that API endpoints work with the data manager."""
-    # This will fail if there's no network, but that's expected
-    # The important thing is that it doesn't crash on import
-    response = client.get("/announcements/lists/departments")
-    # Accept both 200 (success) and 503 (service unavailable)
-    assert response.status_code in [200, 503]
+class TestDataManagerIntegration:
+    """Integration tests for data manager with API endpoints."""
+
+    @pytest.fixture
+    async def client(self):
+        """Create async test client."""
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
+        ) as client:
+            yield client
+
+    async def test_api_endpoints_with_data_manager(self, client: AsyncClient):
+        """Test that API endpoints work with the data manager."""
+        response = await client.get("/announcements/lists/departments")
+        # Accept both 200 (success) and 503 (service unavailable)
+        assert response.status_code in [200, 503]

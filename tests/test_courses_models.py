@@ -8,7 +8,7 @@ from data_api.domain.courses.models import Condition, Conditions, CourseData
 class TestCourseData:
     """Tests for CourseData model."""
 
-    def test_from_dict_with_chinese_keys(self):
+    async def test_from_dict_with_chinese_keys(self):
         """Test creating CourseData from dict with Chinese keys."""
         data = {
             "科號": "MATH1001",
@@ -37,7 +37,7 @@ class TestCourseData:
         assert course.english_title == "Calculus"
         assert course.credit == "3"
 
-    def test_from_dict_with_english_keys(self):
+    async def test_from_dict_with_english_keys(self):
         """Test creating CourseData from dict with English keys."""
         data = {
             "id": "CS1001",
@@ -64,7 +64,7 @@ class TestCourseData:
         assert course.id == "CS1001"
         assert course.chinese_title == "程式設計"
 
-    def test_from_dict_missing_fields(self):
+    async def test_from_dict_missing_fields(self):
         """Test creating CourseData with missing fields defaults to empty string."""
         data = {"科號": "TEST001"}
         course = CourseData.from_dict(data)
@@ -72,7 +72,7 @@ class TestCourseData:
         assert course.chinese_title == ""
         assert course.credit == ""
 
-    def test_repr(self):
+    async def test_repr(self):
         """Test CourseData string representation."""
         data = {"科號": "TEST001", "課程中文名稱": "測試課程"}
         course = CourseData.from_dict(data)
@@ -83,31 +83,31 @@ class TestCourseData:
 class TestCondition:
     """Tests for Condition model."""
 
-    def test_condition_exact_match(self):
+    async def test_condition_exact_match(self):
         """Test exact match condition."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
         cond = Condition(row_field="id", matcher="MATH1001", regex_match=False)
         assert cond.check(course) is True
 
-    def test_condition_exact_match_fail(self):
+    async def test_condition_exact_match_fail(self):
         """Test exact match condition fails for non-matching."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
         cond = Condition(row_field="id", matcher="CS1001", regex_match=False)
         assert cond.check(course) is False
 
-    def test_condition_regex_match(self):
+    async def test_condition_regex_match(self):
         """Test regex match condition."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
         cond = Condition(row_field="id", matcher="MATH", regex_match=True)
         assert cond.check(course) is True
 
-    def test_condition_regex_match_fail(self):
+    async def test_condition_regex_match_fail(self):
         """Test regex match condition fails for non-matching."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
         cond = Condition(row_field="id", matcher="CS", regex_match=True)
         assert cond.check(course) is False
 
-    def test_condition_field_name_lowercase(self):
+    async def test_condition_field_name_lowercase(self):
         """Test field name is converted to lowercase."""
         course = CourseData.from_dict({"科號": "MATH1001"})
         cond = Condition(row_field="ID", matcher="MATH1001", regex_match=False)
@@ -117,13 +117,13 @@ class TestCondition:
 class TestConditions:
     """Tests for Conditions model."""
 
-    def test_conditions_single(self):
+    async def test_conditions_single(self):
         """Test single condition."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
         conds = Conditions(row_field="id", matcher="MATH", regex_match=True)
         assert conds.accept(course) is True
 
-    def test_conditions_and(self):
+    async def test_conditions_and(self):
         """Test AND combination of conditions."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"})
         cond1 = Conditions(row_field="id", matcher="MATH", regex_match=True)
@@ -131,7 +131,7 @@ class TestConditions:
         combined = cond1 & cond2
         assert combined.accept(course) is True
 
-    def test_conditions_or(self):
+    async def test_conditions_or(self):
         """Test OR combination of conditions."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
         cond1 = Conditions(row_field="id", matcher="CS", regex_match=True)
@@ -139,7 +139,7 @@ class TestConditions:
         combined = cond1 | cond2
         assert combined.accept(course) is True
 
-    def test_conditions_complex(self):
+    async def test_conditions_complex(self):
         """Test complex condition tree."""
         course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"})
         cond1 = Conditions(row_field="id", matcher="MATH", regex_match=True)
@@ -148,7 +148,7 @@ class TestConditions:
         combined = (cond1 & cond2) | cond3
         assert combined.accept(course) is True
 
-    def test_conditions_from_list(self):
+    async def test_conditions_from_list(self):
         """Test conditions from list_build_target."""
         course = CourseData.from_dict({"科號": "MATH1001"})
         conds = Conditions(
@@ -160,18 +160,18 @@ class TestConditions:
         )
         assert conds.accept(course) is True
 
-    def test_conditions_empty_list(self):
+    async def test_conditions_empty_list(self):
         """Test conditions with empty list returns True."""
         course = CourseData.from_dict({"科號": "MATH1001"})
         conds = Conditions(list_build_target=[])
         assert conds.accept(course) is True
 
-    def test_conditions_no_args_raises(self):
+    async def test_conditions_no_args_raises(self):
         """Test that missing required args raises ValueError."""
         with pytest.raises(ValueError):
             Conditions()
 
-    def test_conditions_unknown_operator_raises(self):
+    async def test_conditions_unknown_operator_raises(self):
         """Test that unknown operator raises ValueError."""
         course = CourseData.from_dict({"科號": "MATH1001"})
         conds = Conditions(
@@ -184,7 +184,7 @@ class TestConditions:
         with pytest.raises(ValueError, match="Unknown operator"):
             conds.accept(course)
 
-    def test_conditions_invalid_item_type_raises(self):
+    async def test_conditions_invalid_item_type_raises(self):
         """Test that invalid condition item type raises TypeError."""
         course = CourseData.from_dict({"科號": "MATH1001"})
         conds = Conditions(list_build_target=["invalid_string", "and", True])
