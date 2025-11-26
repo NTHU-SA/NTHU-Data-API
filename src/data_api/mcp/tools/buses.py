@@ -71,7 +71,7 @@ async def _get_next_buses(
 
 
 async def _get_bus_stops(
-    stop_name: BusStopsName,
+    stop_name: BusStopsName | str,
     route: Literal["main", "nanda", "all"] = "all",
     direction: Literal["up", "down", "all"] = "all",
     limit: int = 5,
@@ -108,6 +108,9 @@ async def _get_bus_stops(
             for s in stops
         ]
     }
+
+    if not isinstance(stop_name, BusStopsName):
+        stop_name = BusStopsName(stop_name)
 
     stop_name_str = stop_name.value
 
