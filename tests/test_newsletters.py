@@ -1,18 +1,33 @@
+"""Tests for newsletters endpoints."""
+
 import pytest
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
 from data_api.api.api import app
 
-client = TestClient(app)
 
+class TestNewslettersEndpoints:
+    """Tests for newsletters endpoints."""
 
-def test_newsletter():
-    response = client.get(url="/newsletters/")
-    assert response.status_code == 200
+    @pytest.fixture
+    async def client(self):
+        """Create async test client."""
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
+        ) as client:
+            yield client
 
+    async def test_get_all_newsletters(self, client: AsyncClient):
+        """Test getting all newsletters."""
+        response = await client.get("/newsletters/")
+        assert response.status_code == 200
 
-@pytest.mark.parametrize("newsletter_name", [_.value for _ in schemas.newsletters.NewsletterName])
-def test_newsletter_searches(newsletter_name):
-    response = client.get(url=f"/newsletters/{newsletter_name}")
-    assert response.status_code == 200
+    @pytest.mark.parametrize(
+        "newsletter_name",
+        [_.value for _ in schemas.newsletters.NewsletterName],
+    )
+    async def test_get_newsletter_by_name(self, client: AsyncClient, newsletter_name: str):
+        """Test getting newsletter by name."""
+        response = await client.get(f"/newsletters/{newsletter_name}")
+        assert response.status_code == 200
