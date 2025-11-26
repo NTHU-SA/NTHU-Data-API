@@ -1,7 +1,7 @@
 """Bus-related MCP tools."""
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from data_api.domain.buses import services as buses_services
 from data_api.domain.buses.enums import BusStopsName
