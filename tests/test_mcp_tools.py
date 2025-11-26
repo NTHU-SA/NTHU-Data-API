@@ -2,17 +2,14 @@
 
 import pytest
 
-from data_api.mcp.server import (
-    _find_dining,
-    _get_announcements,
-    _get_bus_stops,
-    _get_energy_usage,
-    _get_library_info,
-    _get_newsletters,
-    _get_next_buses,
-    _search_campus,
-    _search_courses,
-)
+from data_api.mcp.tools.announcements import _get_announcements
+from data_api.mcp.tools.buses import _get_bus_stops, _get_next_buses
+from data_api.mcp.tools.campus import _search_campus
+from data_api.mcp.tools.courses import _search_courses
+from data_api.mcp.tools.dining import _find_dining
+from data_api.mcp.tools.energy import _get_energy_usage
+from data_api.mcp.tools.library import _get_library_info
+from data_api.mcp.tools.newsletters import _get_newsletters
 
 
 class TestMCPTools:
@@ -161,10 +158,32 @@ class TestMCPTools:
 
     @pytest.mark.asyncio
     async def test_get_bus_stops(self):
-        """Test get bus stops."""
+        """Test get bus stops without stop_name."""
         result = await _get_bus_stops()
         assert "stops" in result
         assert isinstance(result["stops"], list)
+
+    @pytest.mark.asyncio
+    async def test_get_bus_stops_with_stop_name(self):
+        """Test get bus stops with specific stop_name to get upcoming buses."""
+        from data_api.domain.buses.enums import BusStopsName
+
+        result = await _get_bus_stops(stop_name=BusStopsName.M1)
+        assert "stops" in result
+        assert "stop_name" in result
+        assert result["stop_name"] == "北校門口"
+        assert "current_time" in result
+        assert "day_type" in result
+        assert "upcoming_buses" in result
+        assert isinstance(result["upcoming_buses"], list)
+
+    @pytest.mark.asyncio
+    async def test_get_bus_stops_with_stop_name_string(self):
+        """Test get bus stops with stop_name as string."""
+        result = await _get_bus_stops(stop_name="綜二館")
+        assert "stops" in result
+        assert "stop_name" in result
+        assert "upcoming_buses" in result
 
 
 class TestMCPToolIntegration:
@@ -221,3 +240,11 @@ class TestMCPToolIntegration:
                 article = source["articles"][0]
                 assert "title" in article
                 assert "link" in article
+
+    @pytest.mark.asyncio
+    async def test_get_bus_stops_upcoming_buses_respects_limit(self):
+        """Test that bus stops upcoming buses respects limit parameter."""
+        from data_api.domain.buses.enums import BusStopsName
+
+        result = await _get_bus_stops(stop_name=BusStopsName.M1, limit=2)
+        assert len(result.get("upcoming_buses", [])) <= 2
