@@ -2,6 +2,7 @@ import json
 import re
 import ssl
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 
 import httpx
 import truststore
@@ -19,10 +20,22 @@ from data_api.api.schemas.libraries import (
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 }
+LIBRARY_BASE_URL = "https://www.lib.nthu.edu.tw/"
 
 router = APIRouter()
 
 ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
+
+def _normalize_rss_item_urls(item: dict) -> None:
+    if item.get("link"):
+        item["link"] = urljoin(LIBRARY_BASE_URL, item["link"])
+
+    image = item.get("image")
+    if isinstance(image, dict):
+        for field in ("url", "link"):
+            if image.get(field):
+                image[field] = urljoin(LIBRARY_BASE_URL, image[field])
 
 
 @router.get(
@@ -136,10 +149,9 @@ async def get_library_rss_data(
             if not isinstance(rss_data, list):
                 rss_data = [rss_data]
 
-            # 修正圖片 URL
+            # 將 RSS 中的相對連結解析為圖書館網站的絕對 URL
             for item in rss_data:
-                if item["image"]["url"].startswith("//"):
-                    item["image"]["url"] = f"https:{item['image']['url']}"
+                _normalize_rss_item_urls(item)
 
             return rss_data
     except httpx.HTTPStatusError as e:

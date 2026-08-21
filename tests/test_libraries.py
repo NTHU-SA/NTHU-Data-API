@@ -5,6 +5,23 @@ from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
 from data_api.api.api import app
+from data_api.api.routers.libraries import _normalize_rss_item_urls
+
+
+def test_normalize_rss_relative_urls():
+    item = {
+        "link": "recruit",
+        "image": {
+            "url": "//www.lib.nthu.edu.tw/image/news/recruit.jpg",
+            "link": "/",
+        },
+    }
+
+    _normalize_rss_item_urls(item)
+
+    assert item["link"] == "https://www.lib.nthu.edu.tw/recruit"
+    assert item["image"]["url"] == "https://www.lib.nthu.edu.tw/image/news/recruit.jpg"
+    assert item["image"]["link"] == "https://www.lib.nthu.edu.tw/"
 
 
 class TestLibrariesEndpoints:

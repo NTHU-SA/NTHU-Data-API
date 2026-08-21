@@ -210,7 +210,9 @@ class BusesService:
             ("nanda", "down"): "towardMainCampusInfo",
         }
         for (rtype, rdir), json_key in mapping.items():
-            self._route_info[(rtype, rdir)] = self._res_json.get(json_key, {})
+            info = self._res_json.get(json_key)
+            if isinstance(info, dict) and info:
+                self._route_info[(rtype, rdir)] = info
 
     # --- 2. Raw Schedule ---
     def _populate_raw_schedule(self) -> None:
