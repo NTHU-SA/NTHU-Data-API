@@ -1,5 +1,10 @@
 """Tests for MCP tools."""
 
+import json
+
+from httpx import ASGITransport, AsyncClient
+
+from data_api.api.api import app
 from data_api.mcp.tools.announcements import _get_announcements
 from data_api.mcp.tools.buses import _get_bus_stops, _get_next_buses
 from data_api.mcp.tools.campus import _search_campus
@@ -12,6 +17,34 @@ from data_api.mcp.tools.newsletters import _get_newsletters
 
 class TestMCPTools:
     """Tests for MCP tools functionality."""
+
+    async def test_mcp_http_initialize(self):
+        """Test the mounted MCP endpoint accepts an initialize request."""
+        request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-11-25",
+                "capabilities": {},
+                "clientInfo": {"name": "test-client", "version": "1.0"},
+            },
+        }
+
+        async with app.router.lifespan_context(app):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as client:
+                response = await client.post(
+                    "/mcp",
+                    headers={"Accept": "application/json, text/event-stream"},
+                    json=request,
+                )
+
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/event-stream")
+        payload = json.loads(response.text.split("data: ", maxsplit=1)[1])
+        assert payload["result"]["serverInfo"]["name"] == "NTHU Campus Assistant"
 
     async def test_search_campus(self):
         """Test campus search tool."""
