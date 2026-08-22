@@ -1,0 +1,14 @@
+{
+  "source_id": "official_nthu",
+  "display_name": "國立清華大學行事曆",
+  "source_url": "https://calendar.google.com/calendar/ical/nthu.acad%40gmail.com/public/basic.ics",
+  "official_publication_url": "https://dgaa.site.nthu.edu.tw/p/412-1209-2942.php?Lang=zh-tw",
+  "retrieved_at": "2026-08-22T21:50:15Z",
+  "upstream_sha256": "5c4049811b3b86d7aea7cf7c1753527621b19253bc7d5ede39b9336d0dd71def",
+  "fixture_scope": "Minimal public excerpt retained for deterministic parser tests; it contains two 115 academic-year events and one public timed event. The official page embeds the same public Google Calendar; the stable basic.ics feed is used at runtime.",
+  "event_uids": [
+    "475cegj8e9rkd5vr64db1ajik1@google.com",
+    "3rgv73genscf2n9b7j4fvciqs7@google.com",
+    "oqovglvign9q7fsr0bsh1bd7a4@google.com"
+  ]
+}

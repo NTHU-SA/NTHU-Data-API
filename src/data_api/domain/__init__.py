@@ -1,6 +1,7 @@
 """Domain layer - business logic and models."""
 
 from . import (
+    academic_calendar,
     announcements,
     buses,
     courses,
@@ -13,6 +14,7 @@ from . import (
 )
 
 __all__ = [
+    "academic_calendar",
     "announcements",
     "buses",
     "courses",
