@@ -53,21 +53,24 @@ async def fetch_official_nthu_ics(client: httpx.AsyncClient | None = None) -> st
     owns_client = client is None
     active_client = client or httpx.AsyncClient(
         timeout=10.0,
+        follow_redirects=False,
         headers={"Accept": "text/calendar, application/octet-stream;q=0.9"},
     )
 
     try:
-        async with active_client.stream("GET", OFFICIAL_NTHU_ICS_URL) as response:
+        async with active_client.stream(
+            "GET", OFFICIAL_NTHU_ICS_URL, follow_redirects=False
+        ) as response:
             response.raise_for_status()
             _raise_if_oversized(response.headers.get("Content-Length"))
 
             content = bytearray()
             async for chunk in response.aiter_bytes():
-                content.extend(chunk)
-                if len(content) > MAX_OFFICIAL_NTHU_ICS_BYTES:
+                if len(content) + len(chunk) > MAX_OFFICIAL_NTHU_ICS_BYTES:
                     raise AcademicCalendarSourceError(
                         "Official NTHU academic calendar exceeds the parser size limit."
                     )
+                content.extend(chunk)
 
         return bytes(content).decode("utf-8")
     except (httpx.HTTPError, UnicodeDecodeError) as exc:

@@ -28,6 +28,19 @@ def load_fixture() -> str:
     return ICS_FIXTURE.read_text(encoding="utf-8")
 
 
+class OneChunkAsyncByteStream(httpx.AsyncByteStream):
+    """Emit one chunk without a Content-Length header for source-limit tests."""
+
+    def __init__(self, chunk: bytes):
+        self.chunk = chunk
+
+    async def __aiter__(self):
+        yield self.chunk
+
+    async def aclose(self):
+        return None
+
+
 class TestOfficialNTHUCalendarParser:
     """The adapter preserves source semantics instead of guessing dates."""
 
@@ -108,6 +121,16 @@ class TestOfficialNTHUCalendarSource:
             with pytest.raises(AcademicCalendarSourceError, match="503"):
                 await fetch_official_nthu_ics(client=client)
 
+    async def test_does_not_follow_redirects_from_the_official_source(self):
+        def redirect(_: httpx.Request) -> httpx.Response:
+            return httpx.Response(302, headers={"Location": "https://example.test/calendar.ics"})
+
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(redirect), follow_redirects=True
+        ) as client:
+            with pytest.raises(AcademicCalendarSourceError, match="302"):
+                await fetch_official_nthu_ics(client=client)
+
     async def test_rejects_ics_that_exceeds_the_parser_size_limit(self):
         def oversized(_: httpx.Request) -> httpx.Response:
             return httpx.Response(
@@ -117,4 +140,23 @@ class TestOfficialNTHUCalendarSource:
 
         async with httpx.AsyncClient(transport=httpx.MockTransport(oversized)) as client:
             with pytest.raises(AcademicCalendarSourceError, match="size limit"):
+                await fetch_official_nthu_ics(client=client)
+
+    async def test_rejects_chunked_ics_that_exceeds_the_parser_size_limit(self):
+        def oversized(_: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                200,
+                stream=OneChunkAsyncByteStream(b"x" * (MAX_OFFICIAL_NTHU_ICS_BYTES + 1)),
+            )
+
+        async with httpx.AsyncClient(transport=httpx.MockTransport(oversized)) as client:
+            with pytest.raises(AcademicCalendarSourceError, match="size limit"):
+                await fetch_official_nthu_ics(client=client)
+
+    async def test_raises_source_error_for_non_utf8_ics(self):
+        def non_utf8(_: httpx.Request) -> httpx.Response:
+            return httpx.Response(200, content=b"\xff")
+
+        async with httpx.AsyncClient(transport=httpx.MockTransport(non_utf8)) as client:
+            with pytest.raises(AcademicCalendarSourceError, match="Failed to fetch"):
                 await fetch_official_nthu_ics(client=client)
