@@ -3,5 +3,12 @@ __pycache__
 *.pyc
 *.log
 venv/
+.venv/
 .env
+.env.*
 tests/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
