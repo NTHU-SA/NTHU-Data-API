@@ -6,8 +6,10 @@ that app is not carried over and has to be chained explicitly. These tests guard
 against that wiring regressing again, which would silently leave every
 startup-loaded service empty.
 
-Note: the MCP session manager may only be started once per process, so the real
-lifespan is entered exactly once here, by ``TestCoursesAfterStartup``.
+Note: the MCP session manager may only be started once per process, so its
+lifespan is stubbed out here. The data layer is stubbed as well, which keeps
+these tests off the network and makes them fail for one reason only: the
+lifespan wiring being broken.
 """
 
 from contextlib import asynccontextmanager
@@ -80,16 +82,52 @@ class TestCombinedLifespan:
         output.encode("ascii")
 
 
-class TestCoursesAfterStartup:
-    """Tests that the real lifespan is attached to the app that gets served."""
+FAKE_COURSE = {
+    "id": "11410TEST100000",
+    "chinese_title": "測試課程",
+    "english_title": "Test Course",
+    "credit": "3",
+    "size_limit": "50",
+    "freshman_reservation": "0",
+    "object": "",
+    "ge_type": "",
+    "language": "中",
+    "note": "",
+    "suspend": "",
+    "class_room_and_time": "T3T4",
+    "teacher": "測試教師",
+    "prerequisite": "",
+    "limit_note": "",
+    "expertise": "",
+    "program": "",
+    "no_extra_selection": "",
+    "required_optional_note": "",
+}
 
-    async def test_courses_endpoint_returns_data_after_startup(self):
+
+async def _fake_get(endpoint_name: str):
+    """Serve in-memory data in place of a request to data.nthusa.tw."""
+    if endpoint_name.endswith("courses.json"):
+        return ("testcommithash", [FAKE_COURSE])
+    return ("testcommithash", {})
+
+
+class TestCoursesAfterStartup:
+    """Tests that the app's own lifespan is attached to the app that gets served."""
+
+    async def test_courses_endpoint_returns_data_after_startup(self, monkeypatch):
         """Test /courses/ is populated once the app's own lifespan has run.
 
         ``courses_service`` is only filled during startup and no route refreshes
         it, so a lifespan that is not wired up makes this endpoint return an
-        empty list with a 200 status code.
+        empty list with a 200 status code. The data layer is stubbed so that the
+        real ``update_data`` runs against fixed data: this test then fails only
+        when the lifespan wiring itself is broken.
         """
+        monkeypatch.setattr(api_module, "mcp_app", SimpleNamespace(lifespan=_noop_lifespan))
+        monkeypatch.setattr(nthudata, "get", _fake_get)
+        monkeypatch.setattr(courses_services.courses_service, "course_data", [])
+
         async with app.router.lifespan_context(app):
             assert courses_services.courses_service.course_data, "courses data was not loaded"
 
@@ -99,4 +137,5 @@ class TestCoursesAfterStartup:
                 response = await client.get("/courses/")
 
         assert response.status_code == 200
-        assert len(response.json()) > 0
+        assert len(response.json()) == 1
+        assert response.json()[0]["chinese_title"] == "測試課程"
