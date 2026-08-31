@@ -30,7 +30,8 @@ async def lifespan(app: FastAPI):
     print(f"Pre-fetch complete: {success_count}/{len(config.PREFETCH_ENDPOINTS)} endpoints loaded")
 
     for endpoint, success in results.items():
-        status = "✓" if success else "✗"
+        # 使用 ASCII 標記，避免在非 UTF-8 主控台（如 Windows cp950）拋出 UnicodeEncodeError
+        status = "[OK]" if success else "[FAIL]"
         print(f"  {status} {endpoint}")
 
     # Initialize module-specific data processors
@@ -134,11 +135,27 @@ fast_api_app = create_app()
 # MCP Integration - Using curated MCP tools designed for LLM agents
 mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
 
+
+@asynccontextmanager
+async def combined_lifespan(app: FastAPI):
+    """
+    Lifespan for the combined app.
+
+    ``combined_app`` only copies the *routes* of ``fast_api_app``, so the lifespan
+    declared on it is never executed. Both lifespans must therefore be chained
+    here: the MCP session manager first, then the application startup that
+    pre-fetches data and initializes the stateful services.
+    """
+    async with mcp_app.lifespan(app):
+        async with lifespan(app):
+            yield
+
+
 combined_app = FastAPI(
     title=fast_api_app.title,
     version=fast_api_app.version,
     description=fast_api_app.description,
     routes=[*mcp_app.routes, *fast_api_app.routes],
-    lifespan=mcp_app.lifespan,
+    lifespan=combined_lifespan,
 )
 app = combined_app
