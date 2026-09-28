@@ -11,9 +11,11 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.19 /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml uv.lock README.md ./
+# jieba has no wheel; building its hash-locked sdist is required.
 RUN uv sync --locked --no-dev --no-install-project
 COPY src ./src
 COPY main.py ./
+# Build the local project after installing the locked third-party dependencies.
 RUN uv sync --locked --no-dev
 
 # Stage 2: Final image

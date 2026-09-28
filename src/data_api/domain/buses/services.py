@@ -88,7 +88,7 @@ def add_time(time_str: str, minutes: int) -> str:
     try:
         dt = datetime.strptime(time_str, "%H:%M") + timedelta(minutes=minutes)
         return dt.strftime("%H:%M")
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return time_str
 
 
@@ -107,7 +107,7 @@ def sort_by_time(target: list[dict], time_keys: list[str]) -> None:
             return datetime.max
         try:
             return datetime.strptime(time_str, "%H:%M")
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             return datetime.max  # Push invalid to end
 
     target.sort(key=get_sort_key)
