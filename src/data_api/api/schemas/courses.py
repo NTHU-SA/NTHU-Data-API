@@ -1,9 +1,10 @@
 """Courses API schemas."""
 
+import re
 from enum import Enum
-from typing import Union
+from typing import Self, Union
 
-from pydantic import BaseModel, Field, RootModel, field_validator
+from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
 
 
 class CourseFieldName(str, Enum):
@@ -76,6 +77,16 @@ class CourseCondition(BaseModel):
     row_field: CourseFieldName = Field(..., description="搜尋的欄位名稱")
     matcher: str = Field(..., description="搜尋的值")
     regex_match: bool = Field(False, description="是否使用正則表達式")
+
+    @model_validator(mode="after")
+    def check_regex(self) -> Self:
+        """Validate regex syntax even when no course data is available."""
+        if self.regex_match:
+            try:
+                re.compile(self.matcher)
+            except (re.error, OverflowError, RecursionError) as exc:
+                raise ValueError("Invalid regular expression") from exc
+        return self
 
 
 class CourseQueryOperation(str, Enum):

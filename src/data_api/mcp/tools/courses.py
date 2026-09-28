@@ -1,69 +1,50 @@
 """Course search MCP tool."""
 
-from typing import Optional
+import re
+from typing import Annotated, Optional
+
+from pydantic import Field, validate_call
 
 from data_api.domain.courses import models as courses_models
 from data_api.domain.courses import services as courses_services
 from data_api.mcp.server import mcp
 
+CourseSearchLimit = Annotated[int, Field(ge=1, le=100)]
 
+
+@validate_call
 async def _search_courses(
     keyword: Optional[str] = None,
     teacher: Optional[str] = None,
     course_id: Optional[str] = None,
-    limit: int = 20,
+    limit: CourseSearchLimit = 20,
 ) -> dict:
     """
     Search for courses at NTHU.
 
     Args:
-        keyword: Search in course titles (Chinese or English).
-        teacher: Teacher name to search for.
-        course_id: Specific course ID to look up.
-        limit: Maximum number of results to return (default 20).
+        keyword: Literal, case-sensitive substring in Chinese or English titles.
+        teacher: Literal, case-sensitive substring in teacher names.
+        course_id: Literal, case-sensitive substring in course IDs.
+        limit: Maximum number of results to return (1-100, default 20).
+
+    All supplied filters are combined with AND.
 
     Returns:
         Dictionary with matching courses.
     """
-    # Build search conditions
-    conditions_list = []
+    condition = courses_models.Conditions(list_build_target=[])
 
     if keyword:
-        # Search both Chinese and English titles
-        conditions_list.append(
-            [
-                {"row_field": "chinese_title", "matcher": keyword, "regex_match": True},
-                "or",
-                {"row_field": "english_title", "matcher": keyword, "regex_match": True},
-            ]
-        )
+        condition &= courses_models.Conditions(
+            "chinese_title", re.escape(keyword), regex_match=True
+        ) | courses_models.Conditions("english_title", re.escape(keyword), regex_match=True)
 
-    if teacher:
-        teacher_cond = {"row_field": "teacher", "matcher": teacher, "regex_match": True}
-        if conditions_list:
-            conditions_list = [conditions_list[0], "and", teacher_cond]
-        else:
-            conditions_list.append(teacher_cond)
+    for field_name, value in (("teacher", teacher), ("id", course_id)):
+        if value:
+            condition &= courses_models.Conditions(field_name, re.escape(value), regex_match=True)
 
-    if course_id:
-        id_cond = {"row_field": "id", "matcher": course_id, "regex_match": True}
-        if conditions_list:
-            conditions_list = [conditions_list[0], "and", id_cond]
-        else:
-            conditions_list.append(id_cond)
-
-    if not conditions_list:
-        # Return all courses if no filter specified
-        courses = courses_services.courses_service.course_data[:limit]
-    else:
-        # Build and execute query
-        if len(conditions_list) == 1:
-            query_target = conditions_list[0]
-        else:
-            query_target = conditions_list
-
-        condition = courses_models.Conditions(list_build_target=query_target)
-        courses = courses_services.courses_service.query(condition)[:limit]
+    courses = courses_services.courses_service.query(condition)[:limit]
 
     # Format response
     return {
@@ -85,14 +66,15 @@ async def _search_courses(
 
 
 @mcp.tool(
-    description="Search for courses at NTHU. "
-    "Use this to find courses by name, teacher, time, or other criteria."
+    description="Search for courses at NTHU by title, teacher, or course ID. "
+    "Inputs are literal, case-sensitive substrings, not regular expressions. "
+    "All supplied filters must match. Limit must be 1-100 (default 20)."
 )
 async def search_courses(
     keyword: Optional[str] = None,
     teacher: Optional[str] = None,
     course_id: Optional[str] = None,
-    limit: int = 20,
+    limit: CourseSearchLimit = 20,
 ) -> dict:
     """Search for courses at NTHU."""
     return await _search_courses(keyword, teacher, course_id, limit)

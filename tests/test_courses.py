@@ -5,6 +5,18 @@ from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
 from data_api.api.api import app
+from data_api.domain.courses.models import CourseData
+from data_api.domain.courses.services import courses_service
+
+INVALID_REGEX_PATTERNS = [
+    "[",
+    "(",
+    "\\",
+    "*",
+    "(?invalid)",
+    pytest.param("a{99999999999999999999}", id="repeat-overflow"),
+    pytest.param("(" * 1000, id="nesting-too-deep"),
+]
 
 
 class TestCoursesEndpoints:
@@ -113,3 +125,117 @@ class TestCoursesSearchPost:
         ]
         response = await client.post("/courses/search", json=body)
         assert response.status_code == 200
+
+
+class TestCourseSearchValidation:
+    """Exercise the exported app with deterministic, non-empty course data."""
+
+    @pytest.fixture
+    async def client(self, monkeypatch):
+        monkeypatch.setattr(
+            courses_service,
+            "course_data",
+            [
+                CourseData.from_dict(
+                    {
+                        "id": "CS100",
+                        "chinese_title": "程式設計",
+                        "english_title": "C++ [AI]",
+                        "teacher": "Teacher (AI)",
+                        "language": "英",
+                    }
+                ),
+                CourseData.from_dict(
+                    {
+                        "id": "MATH100",
+                        "chinese_title": "微積分",
+                        "english_title": "Calculus",
+                        "teacher": "Someone else",
+                        "language": "英",
+                    }
+                ),
+            ],
+        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            yield client
+
+    @pytest.mark.parametrize("empty_data", [False, True])
+    @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
+    @pytest.mark.parametrize("field", ["chinese_title", "teacher", "id"])
+    async def test_get_invalid_regex(self, client, monkeypatch, empty_data, pattern, field):
+        if empty_data:
+            monkeypatch.setattr(courses_service, "course_data", [])
+        response = await client.get("/courses/search", params={field: pattern})
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Invalid regular expression for course field '{field}'."
+        }
+
+    @pytest.mark.parametrize("empty_data", [False, True])
+    @pytest.mark.parametrize("nested", [False, True])
+    @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
+    async def test_post_invalid_regex(self, client, monkeypatch, empty_data, nested, pattern):
+        if empty_data:
+            monkeypatch.setattr(courses_service, "course_data", [])
+        body = {"row_field": "teacher", "matcher": pattern, "regex_match": True}
+        if nested:
+            body = [
+                {"row_field": "id", "matcher": "DOES_NOT_EXIST"},
+                "and",
+                [{"row_field": "credit", "matcher": "3"}, "or", body],
+            ]
+        response = await client.post("/courses/search", json=body)
+        assert response.status_code == 422
+        assert any(
+            "Invalid regular expression" in error["msg"] for error in response.json()["detail"]
+        )
+        assert "Traceback" not in response.text
+
+    async def test_get_preserves_regex_and_all_filters(self, client):
+        response = await client.get(
+            "/courses/search",
+            params={"english_title": r"^C\+\+", "teacher": r"Teacher \(AI\)", "id": "^CS"},
+        )
+        assert response.status_code == 200
+        assert [course["id"] for course in response.json()] == ["CS100"]
+        assert response.headers["X-Total-Count"] == "1"
+
+        response = await client.get(
+            "/courses/search",
+            params={"english_title": r"^C\+\+", "teacher": "impossible", "id": "^CS"},
+        )
+        assert response.status_code == 200
+        assert response.json() == []
+        assert response.headers["X-Total-Count"] == "0"
+
+    @pytest.mark.parametrize("matcher", ["C++ [AI]", "C++", "["])
+    async def test_post_preserves_exact_matching(self, client, matcher):
+        response = await client.post(
+            "/courses/search",
+            json={"row_field": "english_title", "matcher": matcher, "regex_match": False},
+        )
+        assert response.status_code == 200
+        assert [course["id"] for course in response.json()] == (
+            ["CS100"] if matcher == "C++ [AI]" else []
+        )
+
+    async def test_post_preserves_nested_regex(self, client):
+        response = await client.post(
+            "/courses/search",
+            json=[
+                {"row_field": "id", "matcher": "^CS", "regex_match": True},
+                "and",
+                [
+                    {"row_field": "teacher", "matcher": "absent"},
+                    "or",
+                    {"row_field": "english_title", "matcher": r"\[AI\]", "regex_match": True},
+                ],
+            ],
+        )
+        assert response.status_code == 200
+        assert [course["id"] for course in response.json()] == ["CS100"]
+
+    async def test_get_without_filters_remains_empty(self, client):
+        response = await client.get("/courses/search")
+        assert response.status_code == 200
+        assert response.json() == []

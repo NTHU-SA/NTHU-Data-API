@@ -70,6 +70,23 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 - `fix: Fix a bug`
 ... You can refer to the full list of commit types in the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
+### Search behavior
+- MCP `search_courses` matches case-sensitive literal substrings in course titles,
+  teacher names, and course IDs. Supplied filters are combined with AND; a keyword
+  can match either the Chinese or English title. Regex characters such as `C++`
+  and `[AI]` are treated literally. `limit` defaults to 20 and must be 1-100;
+  zero, negative, and larger values are rejected.
+- REST `GET /courses/search` retains regular-expression matching and ANDs the
+  supplied fields. `POST /courses/search` retains nested AND/OR conditions and
+  exact matching unless `regex_match` is true. Invalid regex syntax returns HTTP
+  422, including when the course dataset is empty.
+- MCP `find_dining` applies building and restaurant-name fuzzy filters together
+  with `check_open`, before limiting results. Open-status remains based on the
+  existing schedule-note heuristic, not a guarantee that a restaurant is open.
+- The exported REST/MCP app applies CORS and returns `X-Process-Time`. CORS
+  exposes `X-Total-Count`, `X-Data-Commit-Hash`, and `X-Process-Time` to browser
+  clients from configured origins.
+
 ### Running Tests
 To run tests locally before committing changes, follow these steps:
 1. Install the required dependencies:
