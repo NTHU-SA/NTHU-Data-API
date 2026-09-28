@@ -83,6 +83,7 @@ def create_app() -> FastAPI:
         expose_headers=[
             "X-Process-Time",
             "X-Data-Commit-Hash",
+            "X-Total-Count",
         ],
     )
 

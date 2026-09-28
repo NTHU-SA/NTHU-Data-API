@@ -26,6 +26,19 @@ RSS_DATA = {
             },
         }
     ],
+    # The scraper emits null for missing RSS tags, including items without an image.
+    "eresources": [
+        {
+            "guid": None,
+            "category": None,
+            "title": "No image",
+            "link": None,
+            "pubDate": None,
+            "description": "",
+            "author": None,
+            "image": None,
+        }
+    ],
 }
 
 
@@ -140,6 +153,11 @@ class TestLibraryRss:
         data = response.json()
         assert len(data) == 1
         assert data[0]["title"] == "Library news"
+
+    async def test_nullable_fields(self, client: AsyncClient, fake_data):
+        response = await client.get("/libraries/rss/eresources")
+        assert response.status_code == 200
+        assert response.json()[0]["image"] is None
 
     async def test_missing_feed(self, client: AsyncClient, fake_data):
         response = await client.get("/libraries/rss/exhibit")

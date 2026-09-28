@@ -8,24 +8,26 @@ from data_api.utils.schema import url_corrector
 
 class LibraryRssImage(BaseModel):
     # url 使用 str 而非 HttpUrl，因為有些圖片的 url 並非合法的 url，例如: //www.lib.nthu.edu.tw/image/news/8/20230912.jpg
-    url: Annotated[HttpUrl, BeforeValidator(url_corrector)] = Field(..., description="圖片網址")
-    title: str = Field(..., description="圖片標題")
+    url: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
+        ..., description="圖片網址"
+    )
+    title: Optional[str] = Field(..., description="圖片標題")
     link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
         ..., description="連結"
     )
 
 
 class LibraryRssItem(BaseModel):
-    guid: str = Field(..., description="文章 id")
-    category: str = Field(..., description="文章分類")
+    guid: Optional[str] = Field(..., description="文章 id")
+    category: Optional[str] = Field(..., description="文章分類")
     title: str = Field(..., description="文章標題")
     link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
         ..., description="文章連結"
     )
-    pubDate: str = Field(..., description="文章發布日期")
+    pubDate: Optional[str] = Field(..., description="文章發布日期")
     description: str = Field(..., description="文章內容")
-    author: str = Field(..., description="文章作者")
-    image: LibraryRssImage = Field(..., description="文章圖片")
+    author: Optional[str] = Field(..., description="文章作者")
+    image: Optional[LibraryRssImage] = Field(..., description="文章圖片")
 
 
 class LibraryRssData(BaseModel):
