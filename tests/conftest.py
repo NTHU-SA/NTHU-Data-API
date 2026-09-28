@@ -22,6 +22,7 @@ async def dataset_runtime():
             {"id": "11410TEST100000", "chinese_title": "Test course", "language": "中"}
         ],
         "/buses.json": {},
+        "/calendars.json": [],
         "/announcements.json": [],
         "/announcements_list.json": [],
         "/dining.json": [],

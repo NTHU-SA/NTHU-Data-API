@@ -11,6 +11,7 @@ should be pre-fetched at application startup.
 PREFETCH_ENDPOINTS = [
     "buses.json",
     "courses.json",
+    "calendars.json",
     "dining.json",
     "announcements.json",
     "announcements_list.json",
