@@ -3,5 +3,6 @@ __pycache__
 *.pyc
 *.log
 venv/
+.venv/
 .env
 tests/
