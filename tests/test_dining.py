@@ -6,6 +6,8 @@ from httpx import ASGITransport, AsyncClient
 from data_api.api import schemas
 from data_api.api.api import app
 
+pytestmark = pytest.mark.usefixtures("dataset_runtime")
+
 
 class TestDiningEndpoints:
     """Tests for dining endpoints."""

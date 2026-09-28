@@ -30,7 +30,11 @@ class Settings(BaseSettings):
     # Data settings
     file_details_cache_expiry: int = Field(
         default=300,
-        description="File details cache expiry time in seconds (default: 5 minutes)",
+        gt=0,
+        description="Request-driven dataset freshness check TTL in seconds",
+    )
+    data_http_timeout: float = Field(
+        default=15, gt=0, description="Upstream HTTP timeout in seconds"
     )
 
     # API settings

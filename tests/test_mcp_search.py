@@ -3,6 +3,7 @@
 from copy import deepcopy
 from datetime import datetime
 from itertools import product
+from unittest.mock import AsyncMock
 
 import pytest
 from fastmcp import Client
@@ -17,6 +18,11 @@ from data_api.mcp.tools.courses import _search_courses
 from data_api.mcp.tools.dining import _find_dining
 
 FILTER_COMBINATIONS = list(product([False, True], repeat=3))
+
+
+@pytest.fixture(autouse=True)
+def fixed_course_refresh(monkeypatch):
+    monkeypatch.setattr(courses_service, "update_data", AsyncMock())
 
 
 @pytest.fixture

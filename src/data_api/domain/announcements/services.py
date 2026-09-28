@@ -8,6 +8,7 @@ from typing import Optional
 
 from thefuzz import fuzz
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 
 # Constants
@@ -33,7 +34,7 @@ class AnnouncementsService:
         """
         result = await nthudata.get(ANNOUNCEMENTS_JSON)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, announcements_data = result
 
@@ -64,7 +65,7 @@ class AnnouncementsService:
         """Get announcements list (without article content)."""
         result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, announcements_list = result
 
@@ -90,7 +91,7 @@ class AnnouncementsService:
         # 1. 取得原始資料
         result = await nthudata.get(ANNOUNCEMENTS_JSON)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, raw_data = result
 
@@ -148,7 +149,7 @@ class AnnouncementsService:
         """Get list of all departments with announcements."""
         result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, announcements_list = result
 

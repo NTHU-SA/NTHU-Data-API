@@ -2,7 +2,7 @@
 
 from typing import Union
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import departments as schemas
 from data_api.domain.departments import services
@@ -17,9 +17,8 @@ async def get_all_departments(response: Response):
     資料來源：[清華通訊錄](https://tel.net.nthu.edu.tw/nthusearch/)
     """
     commit_hash, data = await services.departments_service.get_all_departments()
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
 
@@ -37,7 +36,6 @@ async def fuzzy_search_departments_and_people(
     commit_hash, data = await services.departments_service.fuzzy_search_departments_and_people(
         query=query
     )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

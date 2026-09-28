@@ -5,13 +5,16 @@ Creates the FastAPI app instance, configures middleware,
 and registers all routers.
 """
 
+import logging
 import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from data_api.core import config
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.core.settings import settings
 from data_api.data.manager import nthudata
 from data_api.domain.buses import services as buses_services
@@ -21,32 +24,21 @@ from data_api.mcp import mcp
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown tasks."""
-    # Startup: Pre-fetch configured endpoints
-    print("Starting application...")
-    print(f"Pre-fetching {len(config.PREFETCH_ENDPOINTS)} endpoints...")
-    results = await nthudata.prefetch(config.PREFETCH_ENDPOINTS)
-
-    success_count = sum(1 for success in results.values() if success)
-    print(f"Pre-fetch complete: {success_count}/{len(config.PREFETCH_ENDPOINTS)} endpoints loaded")
-
-    for endpoint, success in results.items():
-        # 使用 ASCII 標記，避免在非 UTF-8 主控台（如 Windows cp950）拋出 UnicodeEncodeError
-        status = "[OK]" if success else "[FAIL]"
-        print(f"  {status} {endpoint}")
-
-    # Initialize module-specific data processors
-    print("Initializing data processors...")
-    await buses_services.buses_service.update_data()
-
     from data_api.domain.courses import services as courses_services
 
-    await courses_services.courses_service.update_data()
-    print("Data processors initialized.")
-
-    yield
-
-    # Shutdown: cleanup if needed
-    print("Shutting down application...")
+    async with nthudata.lifespan():
+        app.state.datasets = nthudata
+        results = await nthudata.prefetch(config.PREFETCH_ENDPOINTS)
+        logging.getLogger(__name__).info(
+            "Data startup: %s/%s datasets usable", sum(results.values()), len(results)
+        )
+        for service in (buses_services.buses_service, courses_services.courses_service):
+            try:
+                await service.update_data()
+            except DataNotAvailableException:
+                # The manager records the failure. Other datasets must remain available.
+                continue
+        yield
 
 
 # MCP's session manager must run alongside the data initialization lifespan.
@@ -75,6 +67,10 @@ def create_app() -> FastAPI:
         version="2.0.0",
         description="由國立清華大學校內各單位資料所組成的公共資料 API。",
     )
+
+    @app.exception_handler(DataNotAvailableException)
+    async def dataset_unavailable(request: Request, exc: DataNotAvailableException):
+        return JSONResponse(status_code=503, content={"detail": "Service temporarily unavailable"})
 
     # CORS configuration
     # Using explicit origins would be safer, but for a public API:

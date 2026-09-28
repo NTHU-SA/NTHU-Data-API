@@ -8,6 +8,7 @@ from typing import Optional
 
 from thefuzz import fuzz
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 
 JSON_PATH = "directory.json"
@@ -23,7 +24,7 @@ class DepartmentsService:
         """Get all departments."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
         return result
 
     async def fuzzy_search_departments_and_people(
@@ -32,7 +33,7 @@ class DepartmentsService:
         """Fuzzy search departments and people."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, {"departments": [], "people": []}
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, directory_data = result
 

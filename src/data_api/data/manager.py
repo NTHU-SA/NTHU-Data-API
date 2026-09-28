@@ -9,4 +9,7 @@ from data_api.core.settings import settings
 from data_api.data import NTHUDataManager
 
 # Global data manager instance
-nthudata = NTHUDataManager(file_details_cache_expiry=settings.file_details_cache_expiry)
+nthudata = NTHUDataManager(
+    file_details_cache_expiry=settings.file_details_cache_expiry,
+    http_timeout=settings.data_http_timeout,
+)

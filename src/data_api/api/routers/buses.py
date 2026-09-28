@@ -19,9 +19,11 @@ DEFAULT_LIMIT_DAY_CURRENT = 5
 router = APIRouter()
 
 
-def add_custom_header(response: Response):
+async def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    response.headers["X-Data-Commit-Hash"] = str(services.buses_service.last_commit_hash)
+    await services.buses_service.update_data()
+    if services.buses_service.last_commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = services.buses_service.last_commit_hash
 
 
 def get_current_time_state():
@@ -49,7 +51,6 @@ async def get_bus_route_metadata(
     - 校本部來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw)
     - 南大來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
     """
-    await services.buses_service.update_data()
     try:
         return services.buses_service.get_route_info(bus_type, direction)
     except Exception as e:
@@ -64,7 +65,6 @@ async def get_bus_route_metadata(
 )
 async def get_bus_stops_information():
     """取得所有公車站牌的經緯度與資訊。"""
-    await services.buses_service.update_data()
     try:
         return services.buses_service.gen_bus_stops_info()
     except Exception as e:
@@ -90,8 +90,6 @@ async def get_bus_schedules(
     - **details=False**: 回傳簡易時刻表（僅發車時間）。
     - **details=True**: 回傳詳細時刻表（包含每站預估到達時間）。
     """
-    await services.buses_service.update_data()
-
     # 1. 計算要查詢的時間點與模式
     find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
 
@@ -131,8 +129,6 @@ async def get_stop_bus_information_by_stop(
     query: schemas.BusQuery = Depends(),
 ):
     """取得指定公車站牌的資訊和即將停靠公車。"""
-    await services.buses_service.update_data()
-
     # Time calculation logic...
     find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
 

@@ -4,7 +4,7 @@ Dining router.
 Handles HTTP endpoints for dining information.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import dining as schemas
 from data_api.domain.dining import services
@@ -33,10 +33,8 @@ async def get_dining_data(
             building_name=building_name,
             restaurant_name=restaurant_name,
         )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
 
@@ -51,8 +49,6 @@ async def get_open_restaurants(
 ):
     """取得指定營業日的餐廳資料。"""
     commit_hash, data = await services.dining_service.get_open_restaurants(schedule=schedule)
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

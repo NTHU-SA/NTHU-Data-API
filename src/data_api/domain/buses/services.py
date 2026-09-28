@@ -9,8 +9,11 @@ from datetime import datetime, timedelta
 from itertools import product
 from typing import Any, Literal, Optional, cast
 
+from pydantic import TypeAdapter
+
 from data_api.core import constants
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import FetchFailure, JsonData, NTHUDataManager
 from data_api.domain.buses import enums, graph, models
 
 # Constants
@@ -129,7 +132,9 @@ class BusesService:
     3. stops_schedule_registry: Index of all buses arriving at each stop
     """
 
-    def __init__(self) -> None:
+    def __init__(self, manager: NTHUDataManager | None = None) -> None:
+        self.manager = manager
+        self.state = manager.register("buses.json", self.prepare) if manager is not None else None
         # Schedule data stores: (route_type, day, direction) -> list of schedules
         self.raw_schedule_data = self._new_schedule_store()
         self.detailed_schedule_data = self._new_schedule_store()
@@ -157,21 +162,57 @@ class BusesService:
         Fetches buses.json and processes it if the data has changed.
         Only reprocesses when commit hash differs from cached version.
         """
-        result = await nthudata.get("buses.json")
-        if result is None:
-            if self.last_commit_hash is None:
-                print("Warning: Could not fetch buses.json and no cache available.")
-            return
+        if self.manager is None or self.state is None:
+            raise RuntimeError("Bus service has no data manager")
+        snapshot = await self.manager.get_snapshot("buses.json", self.state)
+        candidate = snapshot.data
+        # Publish complete derived structures without yielding to another reader.
+        self.raw_schedule_data = candidate.raw_schedule_data
+        self.detailed_schedule_data = candidate.detailed_schedule_data
+        self.stops_schedule_registry = candidate.stops_schedule_registry
+        self._route_info = candidate._route_info
+        self._res_json = candidate._res_json
+        self._gen2_departures = candidate._gen2_departures
+        self.last_commit_hash = snapshot.version
 
-        res_commit_hash, payload = result
-        if not isinstance(payload, dict):
-            return
+    @staticmethod
+    def prepare(raw: JsonData) -> BusesService:
+        from data_api.api.schemas.buses import BusInfo, BusSchedule
 
-        self._res_json = payload
-
-        if self._res_json and res_commit_hash != self.last_commit_hash:
-            self._process_all_data()
-            self.last_commit_hash = res_commit_hash
+        if not isinstance(raw, dict):
+            raise FetchFailure("payload_type")
+        candidate = BusesService()
+        info_keys = {
+            "towardTSMCBuildingInfo",
+            "towardMainGateInfo",
+            "towardNandaInfo",
+            "towardMainCampusInfo",
+        }
+        schedule_keys = {
+            candidate._get_schedule_json_key(rtype, day, direction)
+            for rtype, day, direction in product(
+                BUS_ROUTE_TYPE_WITHOUT_ALL, BUS_DAY, BUS_DIRECTION_WITHOUT_ALL
+            )
+        }
+        if raw and not (info_keys | schedule_keys).intersection(raw):
+            raise FetchFailure("validation")
+        for key in info_keys.intersection(raw):
+            BusInfo.model_validate(raw[key])
+        for key in schedule_keys.intersection(raw):
+            rows = TypeAdapter(list[dict[str, str]]).validate_python(raw[key], strict=True)
+            for row in rows:
+                if "time" not in row or "description" not in row:
+                    raise FetchFailure("validation")
+                try:
+                    datetime.strptime(row["time"], "%H:%M")
+                except ValueError as exc:
+                    raise FetchFailure("validation") from exc
+        candidate._res_json = raw
+        candidate._process_all_data()
+        for schedules in candidate.raw_schedule_data.values():
+            for schedule in schedules:
+                BusSchedule.model_validate(schedule)
+        return candidate
 
     def _process_all_data(self) -> None:
         """
@@ -520,4 +561,4 @@ class BusesService:
 
 
 # Global Instance
-buses_service = BusesService()
+buses_service = BusesService(nthudata)

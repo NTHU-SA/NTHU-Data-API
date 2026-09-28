@@ -268,4 +268,4 @@ class TestLibrariesLiveEndpoints:
     async def test_libraries_endpoints(self, client: AsyncClient, url: str):
         """Accept 200 or 500 since the library service may be unavailable."""
         response = await client.get(url)
-        assert response.status_code in [200, 500]
+        assert response.status_code == 503

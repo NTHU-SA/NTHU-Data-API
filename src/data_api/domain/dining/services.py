@@ -9,6 +9,7 @@ from typing import Optional
 
 from thefuzz import fuzz
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 from data_api.domain.dining import enums
 
@@ -44,7 +45,7 @@ class DiningService:
         """Get dining data with optional building filter."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, dining_data = result
 
@@ -106,7 +107,7 @@ class DiningService:
         """
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, raw_data = result
         filtered_results = []

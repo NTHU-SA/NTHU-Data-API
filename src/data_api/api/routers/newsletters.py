@@ -15,10 +15,8 @@ async def get_all_newsletters(response: Response):
     資料來源：[國立清華大學電子報系統](https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/)
     """
     commit_hash, data = await services.newsletters_service.get_all_newsletters()
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
 
@@ -35,10 +33,9 @@ async def get_newsletter_by_name(
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(
         name=newsletter_name
     )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
     if data is None:
         raise HTTPException(status_code=404, detail="電子報名稱不存在")
 
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

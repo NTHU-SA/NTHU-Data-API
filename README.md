@@ -103,6 +103,111 @@ If you need a test coverage report, run:
 ```sh
 uv run --group test pytest -n auto tests --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
 ```
+
+### Dataset lifecycle on Cloud Run
+
+The published datasets at `NTHU_DATA_URL` are the persistent source of truth.
+Each application process owns disposable in-memory snapshots, per-dataset async
+locks, freshness/error metadata, and one HTTPX client managed by its lifespan.
+REST and MCP share these services, including transformed courses and bus indexes.
+Multiple workers in one container are also independent processes.
+
+Requests drive refresh; there is no permanent background refresh loop, disk cache,
+distributed lock, or cross-instance cache synchronization. Startup prefetch is an
+optimization, not a requirement for serving requests. An unavailable dataset does
+not prevent the application or other datasets from starting.
+
+- `FILE_DETAILS_CACHE_EXPIRY` (positive seconds, default **300**) controls freshness
+  checks. Within the TTL, requests use the active snapshot without upstream access.
+  The manifest is shared across datasets; reusing it does not extend its freshness.
+  After expiry, one caller per dataset checks the version while concurrent callers
+  wait and re-check the state. Unrelated dataset downloads do not block each other.
+- A known matching version avoids downloading the dataset. A changed or previously
+  unknown active version triggers download, checksum verification when supplied,
+  validation, and complete transformation before atomic installation. Valid `[]`
+  or `{}` replaces older records for datasets whose schema accepts that shape.
+- A manifest failure or unknown expected version retains existing data as
+  **unverified**. With no snapshot, direct loading is attempted and remains
+  unverified. Unknown versions are never considered a confirmed match.
+- Failed downloads, invalid schemas, or failed transformations preserve the
+  last-known-good snapshot as **stale**, with bounded retry attempts (one per TTL,
+  including failed cold starts). Cancellation does not prevent subsequent retries.
+  There are no automatic HTTP retries.
+- With no usable snapshot, REST returns **503** and MCP returns a controlled tool
+  error, not a successful empty result. Valid empty datasets still succeed. Missing
+  version metadata does not imply missing data: `X-Data-Commit-Hash` is omitted when
+  unknown rather than inventing a version. Endpoint names and response bodies are
+  otherwise unchanged, including existing not-found behavior.
+- `DATA_HTTP_TIMEOUT` (positive seconds, default **15**) sets the pooled dataset
+  client's HTTPX connect/read/write/pool timeouts. Shutdown closes the client,
+  including when startup fails.
+
+Last-known-good is an **instance-local availability optimization**, not durable
+storage. Instances can temporarily serve different versions within the freshness
+window. Restart/scale-to-zero loses the snapshot; a new instance must load upstream
+data and can return 503 if that is unavailable. No cache survives via the container
+filesystem.
+
+#### Published manifest contract
+
+The API consumes `file_details.json` in the publisher's existing shape:
+
+```json
+{
+  "file_details": {
+    "/": [
+      {
+        "name": "courses.json",
+        "last_commit": "opaque-version",
+        "last_updated": "2026-09-27T22:24:37+08:00"
+      }
+    ],
+    "libraries": [
+      {"name": "rss.json", "version": "opaque-version"}
+    ]
+  }
+}
+```
+
+Section plus `name` identifies the dataset path. `last_commit` is preferred for
+compatibility; `version` is a fallback. The current publisher also supplies an
+optional lowercase `sha256` digest of file bytes. When present, it prevents a
+manifest/data publication race from installing bytes under the wrong version.
+Legacy manifests without a checksum remain supported but cannot provide this
+integrity guarantee. Versions are opaque equality tokens, not sortable revisions.
+
+`last_updated` is optional source metadata, not the local load/check time.
+Extra fields are ignored; missing entries/versions mean unverified freshness.
+Malformed entries, duplicate paths, and malformed manifests fail the check safely;
+previous manifest entries are not reused as evidence of a successful new check.
+No publishing pipeline change is required.
+
+#### Availability and diagnostics
+
+`app.state.datasets.states` exposes internal per-dataset `snapshot`, `usable`,
+`freshness`, `last_checked_at`, `last_refresh_attempt_at`,
+`last_refresh_success_at`, and safe `last_error` category/status/time information.
+Snapshots separately retain load time and optional published time. TTL scheduling
+uses a monotonic clock; diagnostic timestamps use UTC.
+
+These distinguish liveness from dataset readiness without adding a new health
+endpoint: stale/unverified data with `usable=True` is still available and should
+not make the container unhealthy. A cold unavailable dataset has `usable=False`.
+Logs record loads and failures without payloads or exception URLs; ordinary hits
+are not logged at INFO. Set the Python application's logging configuration to
+enable `data_api.data.nthudata` INFO/DEBUG events when needed.
+
+Live electricity, library space, and lost-and-found integrations are not published
+datasets and retain their existing on-demand behavior and separate HTTP clients.
+They are not covered by snapshot freshness or last-known-good guarantees.
+Public per-object freshness/provenance metadata, a health endpoint, and product
+changes to dining/bus semantics are deferred.
+
+Tests use mock transports and injected clocks; the default suite blocks real
+HTTPX network traffic. Lifecycle coverage is in `tests/test_data_manager.py` and
+`tests/test_runtime_lifecycle.py`; existing REST/MCP query and middleware tests
+remain in the suite.
+
 ## Credit
 This project is maintained by NTHUSA 32nd.
 

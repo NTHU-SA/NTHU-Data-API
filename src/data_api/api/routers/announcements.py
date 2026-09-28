@@ -4,7 +4,7 @@ Announcements router.
 Handles HTTP endpoints for announcements.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import announcements as schemas
 from data_api.domain.announcements import services
@@ -39,10 +39,8 @@ async def get_announcements(
         commit_hash, data = await services.announcements_service.get_announcements(
             department=department, title=title, language=language
         )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
 
@@ -58,10 +56,8 @@ async def get_announcements_list(
     commit_hash, data = await services.announcements_service.get_announcements_list(
         department=department
     )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data
 
 
@@ -73,8 +69,6 @@ async def get_announcements_list(
 async def list_announcement_departments(response: Response):
     """取得所有有公告的部門列表。"""
     commit_hash, data = await services.announcements_service.list_departments()
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail="Service temporarily unavailable")
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

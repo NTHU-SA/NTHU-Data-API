@@ -5,6 +5,8 @@ from httpx import ASGITransport, AsyncClient
 
 from data_api.api.api import app
 
+pytestmark = pytest.mark.usefixtures("dataset_runtime")
+
 
 class TestAnnouncementsEndpoints:
     """Tests for announcements endpoints."""

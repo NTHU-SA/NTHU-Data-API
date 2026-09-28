@@ -33,6 +33,7 @@ async def _search_courses(
     Returns:
         Dictionary with matching courses.
     """
+    await courses_services.courses_service.update_data()
     condition = courses_models.Conditions(list_build_target=[])
 
     if keyword:
