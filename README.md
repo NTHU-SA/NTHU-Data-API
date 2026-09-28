@@ -29,7 +29,7 @@ Maintainability Rating">
 
 ## Getting Started
 ### Prerequisites
-Ensure you have Python 3 installed on your machine. You can verify this by running `python3 --version` in your terminal. If you don't have Python 3 installed, you can download it [here](https://www.python.org/downloads/).
+Ensure you have Python 3.14 or later and [uv](https://docs.astral.sh/uv/getting-started/installation/) installed.
 
 ### Installation
 1. Clone the repository:
@@ -40,9 +40,9 @@ git clone https://github.com/NTHU-SA/NTHU-Data-API.git
 ```sh
 cd NTHU-Data-API
 ```
-3. Install the required dependencies:
+3. Create the virtual environment and install all dependencies:
 ```sh
-pip3 install -r requirements-dev.txt
+uv sync --all-groups
 ```
 
 ### Configuration
@@ -55,12 +55,12 @@ cp .env.template .env
 To ensure code quality and consistency, we use pre-commit hooks. 
 The pre-commit will automatically format your code before each commit. Install them by running:
 ```sh
-pre-commit install
+uv run pre-commit install
 ```
 
 ### Running the Application
 ```sh
-python3 main.py
+uv run python main.py
 ```
 
 ## Contributing
@@ -74,17 +74,17 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 To run tests locally before committing changes, follow these steps:
 1. Install the required dependencies:
 ```sh
-pip3 install -r requirements-tests.txt
+uv sync --group test
 ```
 2. Run tests:
 Navigate to the project's root directory and execute:
 ```sh
-python3 -m pytest -n auto tests
+uv run --group test pytest -n auto tests
 ```
 3. Generate a coverage report (optional):
 If you need a test coverage report, run:
 ```sh
-python3 -m pytest -n auto tests --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
+uv run --group test pytest -n auto tests --cov=src --cov=tests --cov-report=xml --cov-report=html:coverage --cov-fail-under=85
 ```
 ## Credit
 This project is maintained by NTHUSA 32nd.

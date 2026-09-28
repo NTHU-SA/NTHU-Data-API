@@ -1,6 +1,0 @@
--r requirements.txt
-# Tests
-pytest
-pytest-xdist
-pytest-cov
-pytest-asyncio

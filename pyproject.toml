@@ -1,26 +1,51 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "nthu-data-api"
 version = "2.0.0"
 description = "NTHU Data API"
 readme = "README.md"
 requires-python = ">=3.14"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "NTHU-SA", email = "it@nthusa.tw"}
 ]
-dependencies = {file = ["requirements.txt"]}
+dependencies = [
+    "beautifulsoup4",
+    "fastapi",
+    "fastmcp",
+    "httpx[http2]",
+    "jieba",
+    "lxml",
+    "pandas",
+    "pydantic-settings",
+    "python-dotenv",
+    "python-levenshtein",
+    "thefuzz",
+    "truststore",
+    "uvicorn",
+]
 
-[project.optional-dependencies]
-dev = {file = ["requirements-dev.txt"]}
-test = {file = ["requirements-tests.txt"]}
+[dependency-groups]
+dev = [
+    "black",
+    "isort",
+    "pre-commit",
+]
+test = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-xdist",
+]
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["data_api"]
 package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.isort]
 profile = "black"
