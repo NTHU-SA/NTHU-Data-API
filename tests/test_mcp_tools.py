@@ -8,10 +8,23 @@ from data_api.mcp.tools.campus import _search_campus
 from data_api.mcp.tools.courses import _search_courses
 from data_api.mcp.tools.dining import _find_dining
 from data_api.mcp.tools.energy import _get_energy_usage
-from data_api.mcp.tools.library import _get_library_info
+from data_api.mcp.tools.library import _get_library_info, _parse_lost_items
 from data_api.mcp.tools.newsletters import _get_newsletters
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
+
+
+@pytest.mark.parametrize("html", ["", "<table></table>", "<table><tr><td>ID</td></tr></table>"])
+def test_lost_items_empty_tables(html):
+    assert _parse_lost_items(html) == []
+
+
+def test_lost_items_limits_rows_and_skips_malformed_cells():
+    header = "<tr><td> ID </td><td> Item </td></tr>"
+    invalid = "<tr><td>incomplete</td></tr>"
+    rows = "".join(f"<tr><td>{i}</td><td> Book\n  title </td></tr>" for i in range(12))
+    html = f"<table>{header}{invalid}{rows}</table>"
+    assert _parse_lost_items(html) == [{"ID": str(i), "Item": "Book title"} for i in range(9)]
 
 
 class TestMCPTools:

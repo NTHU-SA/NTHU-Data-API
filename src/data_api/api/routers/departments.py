@@ -1,6 +1,6 @@
 """Departments router."""
 
-from typing import Union
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Query, Response
 
@@ -28,7 +28,7 @@ async def get_all_departments(response: Response):
     operation_id="searchDepartmentsAndPeople",
 )
 async def fuzzy_search_departments_and_people(
-    response: Response, query: str = Query(..., description="要查詢的部門或人員名稱")
+    response: Response, query: Annotated[str, Query(description="要查詢的部門或人員名稱")]
 ):
     """
     模糊搜尋全校部門與人員名稱。

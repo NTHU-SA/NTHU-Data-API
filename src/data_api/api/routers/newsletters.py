@@ -1,5 +1,7 @@
 """Newsletters router."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, HTTPException, Path, Response
 
 from data_api.api.schemas import newsletters as schemas
@@ -24,10 +26,11 @@ async def get_all_newsletters(response: Response):
     "/{newsletter_name}",
     response_model=schemas.NewsletterInfo,
     operation_id="getNewsletterByName",
+    responses={404: {"description": "Newsletter not found"}},
 )
 async def get_newsletter_by_name(
     response: Response,
-    newsletter_name: schemas.NewsletterName = Path(...),
+    newsletter_name: Annotated[schemas.NewsletterName, Path()],
 ):
     """取得指定電子報的資訊。"""
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(

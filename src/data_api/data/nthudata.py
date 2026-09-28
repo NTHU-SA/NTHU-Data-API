@@ -318,15 +318,7 @@ class NTHUDataManager:
             version,
         )
         try:
-            raw = await self.fetcher.fetch_json(
-                f"{self.base_url}{endpoint}", entry.sha256 if entry else None
-            )
-            try:
-                candidate = state.prepare(raw)
-            except ValidationError as exc:
-                raise FetchFailure("validation") from exc
-            except ValueError as exc:
-                raise FetchFailure("transformation") from exc
+            raw, candidate = await self._load_candidate(endpoint, state, entry)
         except FetchFailure as exc:
             state.last_error = RefreshError(
                 exc.category, datetime.now(timezone.utc), exc.status_code
@@ -356,21 +348,36 @@ class NTHUDataManager:
                 state.freshness,
             )
 
+    async def _load_candidate(
+        self, endpoint: str, state: DatasetState[T], entry: ManifestEntry | None
+    ) -> tuple[JsonData, T]:
+        raw = await self.fetcher.fetch_json(
+            f"{self.base_url}{endpoint}", entry.sha256 if entry else None
+        )
+        try:
+            return raw, state.prepare(raw)
+        except ValidationError as exc:
+            raise FetchFailure("validation") from exc
+        except ValueError as exc:
+            raise FetchFailure("transformation") from exc
+
     async def get(self, endpoint_name: str) -> tuple[str | None, JsonData]:
         snapshot = await self.get_snapshot(endpoint_name, self.state_for(endpoint_name))
         return snapshot.version, snapshot.raw
 
     async def prefetch(self, endpoints: list[str]) -> dict[str, bool]:
-        async def load(endpoint: str) -> tuple[str, bool]:
+        async def load(endpoint: str) -> bool:
             try:
                 await self.get(endpoint)
             except DataNotAvailableException:
-                return endpoint, False
-            return endpoint, True
+                return False
+            return True
 
+        tasks = {}
         async with asyncio.TaskGroup() as group:
-            tasks = [group.create_task(load(endpoint)) for endpoint in endpoints]
-        return dict(task.result() for task in tasks)
+            for endpoint in endpoints:
+                tasks[endpoint] = group.create_task(load(endpoint))
+        return {endpoint: task.result() for endpoint, task in tasks.items()}
 
     @staticmethod
     def _normalize_endpoint_name(endpoint_name: str) -> str:

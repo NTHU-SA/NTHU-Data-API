@@ -71,6 +71,30 @@ class CourseData(BaseModel):
     required_optional_note: str = Field(..., description="必選修說明")
 
 
+class CourseSearchParams(BaseModel):
+    """Optional GET filters, combined with AND using regular-expression matching."""
+
+    id: str | None = Field(None, description="課號")
+    chinese_title: str | None = Field(None, description="課程中文名稱")
+    english_title: str | None = Field(None, description="課程英文名稱")
+    credit: str | None = Field(None, description="學分數")
+    size_limit: str | None = Field(None, description="人限")
+    freshman_reservation: str | None = Field(None, description="新生保留人數")
+    object: str | None = Field(None, description="通識對象")
+    ge_type: str | None = Field(None, description="通識類別")
+    language: CourseLanguage | None = Field(None, description="授課語言")
+    note: str | None = Field(None, description="備註")
+    suspend: str | None = Field(None, description="停開註記")
+    class_room_and_time: str | None = Field(None, description="教室與上課時間")
+    teacher: str | None = Field(None, description="授課教師")
+    prerequisite: str | None = Field(None, description="擋修說明")
+    limit_note: str | None = Field(None, description="課程限制說明")
+    expertise: str | None = Field(None, description="第一二專長對應")
+    program: str | None = Field(None, description="學分學程對應")
+    no_extra_selection: str | None = Field(None, description="不可加簽說明")
+    required_optional_note: str | None = Field(None, description="必選修說明")
+
+
 class CourseCondition(BaseModel):
     """Single course query condition."""
 

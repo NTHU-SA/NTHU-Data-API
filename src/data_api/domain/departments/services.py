@@ -53,7 +53,7 @@ class DepartmentsService:
                 if person_name_similarity >= FUZZY_SEARCH_THRESHOLD_PERSON:
                     person_results.append((person_name_similarity, person))
                     continue  # Skip title check if name matched
-                person_title_similarity = fuzz.partial_ratio(query, person["title"])
+                person_title_similarity = fuzz.partial_ratio(query, person.get("title") or "")
                 if person_title_similarity >= FUZZY_SEARCH_THRESHOLD_PERSON_TITLE:
                     person_results.append((person_title_similarity, person))
 

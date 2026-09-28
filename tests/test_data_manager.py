@@ -65,6 +65,28 @@ class Publisher:
         return httpx.AsyncClient(transport=httpx.MockTransport(self))
 
 
+async def test_prefetch_starts_datasets_concurrently_and_reports_failures(monkeypatch):
+    manager = NTHUDataManager()
+    started = set()
+    all_started = asyncio.Event()
+    endpoints = ["first.json", "unavailable.json", "last.json"]
+
+    async def get(endpoint):
+        started.add(endpoint)
+        if started == set(endpoints):
+            all_started.set()
+        await all_started.wait()
+        if endpoint == "unavailable.json":
+            raise DataNotAvailableException("Unavailable")
+        return "version", []
+
+    monkeypatch.setattr(manager, "get", get)
+    async with asyncio.timeout(5):
+        result = await manager.prefetch(endpoints)
+    assert result == {"first.json": True, "unavailable.json": False, "last.json": True}
+    assert await manager.prefetch([]) == {}
+
+
 @pytest.mark.parametrize("initial,new", [([1], [2]), ([1], []), ({"a": 1}, {})])
 async def test_successful_replacement_including_empty(initial, new):
     clock, publisher = Clock(), Publisher(initial)

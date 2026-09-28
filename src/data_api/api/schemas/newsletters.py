@@ -7,9 +7,9 @@ from data_api.utils.schema import url_corrector
 
 
 class NewsletterArticle(BaseModel):
-    title: Optional[str] = Field(..., description="電子報標題")
+    title: Optional[str] = Field(None, description="電子報標題")
     link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        ..., description="電子報網址"
+        None, description="電子報網址"
     )
     date: Optional[str] = Field(None, description="發布日期")
 

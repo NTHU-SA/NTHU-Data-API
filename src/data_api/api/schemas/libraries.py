@@ -9,31 +9,31 @@ from data_api.utils.schema import url_corrector
 class LibraryRssImage(BaseModel):
     # url 使用 str 而非 HttpUrl，因為有些圖片的 url 並非合法的 url，例如: //www.lib.nthu.edu.tw/image/news/8/20230912.jpg
     url: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        ..., description="圖片網址"
+        None, description="圖片網址"
     )
-    title: Optional[str] = Field(..., description="圖片標題")
+    title: Optional[str] = Field(None, description="圖片標題")
     link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        ..., description="連結"
+        None, description="連結"
     )
 
 
 class LibraryRssItem(BaseModel):
-    guid: Optional[str] = Field(..., description="文章 id")
-    category: Optional[str] = Field(..., description="文章分類")
+    guid: Optional[str] = Field(None, description="文章 id")
+    category: Optional[str] = Field(None, description="文章分類")
     title: str = Field(..., description="文章標題")
     link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        ..., description="文章連結"
+        None, description="文章連結"
     )
-    pubDate: Optional[str] = Field(..., description="文章發布日期")
+    pubDate: Optional[str] = Field(None, description="文章發布日期")
     description: str = Field(..., description="文章內容")
-    author: Optional[str] = Field(..., description="文章作者")
-    image: Optional[LibraryRssImage] = Field(..., description="文章圖片")
+    author: Optional[str] = Field(None, description="文章作者")
+    image: Optional[LibraryRssImage] = Field(None, description="文章圖片")
 
 
 class LibraryRssData(BaseModel):
-    title: Optional[str] = Field(..., description="電子報標題")
+    title: Optional[str] = Field(None, description="電子報標題")
     link: Annotated[HttpUrl, BeforeValidator(url_corrector)] = Field(..., description="電子報網址")
-    date: Optional[str] = Field(..., description="發布日期")
+    date: Optional[str] = Field(None, description="發布日期")
 
 
 class LibraryRssType(str, Enum):
@@ -53,16 +53,16 @@ class LibraryCalendar(BaseModel):
     id: LibraryCalendarId = Field(
         ..., description="行事曆 id：總圖(main)、人社分館(hss)、南大分館(nanda)"
     )
-    name: Optional[str] = Field(..., description="行事曆名稱")
-    description: Optional[str] = Field(..., description="行事曆說明")
-    timezone: Optional[str] = Field(..., description="時區")
+    name: Optional[str] = Field(None, description="行事曆名稱")
+    description: Optional[str] = Field(None, description="行事曆說明")
+    timezone: Optional[str] = Field(None, description="時區")
     url: HttpUrl = Field(..., description="Google 行事曆網址")
 
 
 class LibraryCalendarEvent(BaseModel):
     id: str = Field(..., description="事件 id")
     title: str = Field(..., description="事件標題，例如開館時間或休館")
-    description: Optional[str] = Field(..., description="事件說明")
+    description: Optional[str] = Field(None, description="事件說明")
     start: str = Field(
         ..., description="開始時間；全天事件為日期 (YYYY-MM-DD)，否則為 ISO 8601 時間"
     )

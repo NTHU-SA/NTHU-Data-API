@@ -1,9 +1,28 @@
 """Library information MCP tool."""
 
+import re
 from datetime import datetime
 from typing import Literal
 
+from bs4 import BeautifulSoup
+
 from data_api.mcp.server import mcp
+
+
+def _parse_lost_items(html: str) -> list[dict[str, str]]:
+    table = BeautifulSoup(html, "html.parser").find("table")
+    if not table:
+        return []
+    rows = table.find_all("tr")
+    if not rows:
+        return []
+    titles = [td.text.strip() for td in rows[0].find_all("td")]
+    items = []
+    for row in rows[1:11]:
+        cells = [re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")]
+        if len(cells) == len(titles):
+            items.append(dict(zip(titles, cells)))
+    return items
 
 
 async def _get_library_info(
@@ -52,10 +71,7 @@ async def _get_library_info(
             return {"error": f"Failed to fetch library space: {str(e)}"}
 
     elif info_type == "lost_and_found":
-        import re
         from datetime import timedelta
-
-        from bs4 import BeautifulSoup
 
         date_end = datetime.now()
         date_start = date_end - timedelta(days=6 * 30)
@@ -75,23 +91,7 @@ async def _get_library_info(
                 response = await client.post(url, data=post_data, headers=headers)
                 response.raise_for_status()
 
-                soup = BeautifulSoup(response.text, "html.parser")
-                table = soup.find("table")
-                if not table:
-                    return {"items": []}
-
-                table_rows = table.find_all("tr")
-                if not table_rows:
-                    return {"items": []}
-
-                table_title = [td.text.strip() for td in table_rows[0].find_all("td")]
-                items = []
-                for row in table_rows[1:11]:  # Limit to 10 items
-                    cells = [re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")]
-                    if len(cells) == len(table_title):
-                        items.append(dict(zip(table_title, cells)))
-
-                return {"items": items}
+                return {"items": _parse_lost_items(response.text)}
         except Exception as e:
             return {"error": f"Failed to fetch lost and found: {str(e)}"}
 

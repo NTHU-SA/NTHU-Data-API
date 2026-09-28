@@ -12,6 +12,7 @@ from thefuzz import fuzz
 from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 from data_api.domain.dining import enums
+from data_api.utils.search import fuzzy_matches
 
 JSON_PATH = "dining.json"
 FUZZY_SEARCH_THRESHOLD = 60
@@ -129,20 +130,14 @@ class DiningService:
             # --- Level 2: 餐廳名稱篩選 ---
             if restaurant_name:
                 # 如果有搜餐廳名，則過濾內部的餐廳
-                temp_scores = []
-                for restaurant in original_restaurants:
-                    r_score = fuzz.partial_ratio(restaurant_name, restaurant.get("name", ""))
-                    if r_score >= FUZZY_SEARCH_THRESHOLD:
-                        temp_scores.append((r_score, restaurant))
+                matched_restaurants = fuzzy_matches(
+                    original_restaurants, restaurant_name, "name", FUZZY_SEARCH_THRESHOLD
+                )
 
                 # 如果這棟樓裡面，沒有任何一家餐廳符合搜尋，這棟樓就不用回傳了
                 # (除非使用者只搜了建築名，沒搜餐廳名，那下面 else 會處理)
-                if not temp_scores:
+                if not matched_restaurants:
                     continue
-
-                # 依照分數排序內部的餐廳
-                temp_scores.sort(key=lambda x: x[0], reverse=True)
-                matched_restaurants = [item[1] for item in temp_scores]
 
             else:
                 # 如果沒有搜餐廳名 (只搜建築)，則保留該建築內所有餐廳

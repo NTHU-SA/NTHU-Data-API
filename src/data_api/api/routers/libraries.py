@@ -34,6 +34,10 @@ ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     "/space",
     response_model=list[LibrarySpace],
     operation_id="getLibrarySpaceAvailability",
+    responses={
+        404: {"description": "Library space data not found"},
+        500: {"description": "Unable to parse library space data"},
+    },
 )
 async def get_library_space_availability():
     """
@@ -60,6 +64,7 @@ async def get_library_space_availability():
     "/lost_and_found",
     response_model=list[LibraryLostAndFound],
     operation_id="getLibraryLostAndFoundItems",
+    responses={500: {"description": "Unable to parse lost-and-found data"}},
 )
 async def get_library_lost_and_found_items():
     """
@@ -116,6 +121,7 @@ async def get_library_lost_and_found_items():
     "/rss/{rss_type}",
     response_model=list[LibraryRssItem],
     operation_id="getLibraryRssData",
+    responses={404: {"description": "RSS feed not found"}},
 )
 async def get_library_rss_data(
     response: Response,
@@ -160,6 +166,7 @@ async def get_all_library_calendars(response: Response):
     "/calendars/{calendar_id}",
     response_model=LibraryCalendar,
     operation_id="getLibraryCalendar",
+    responses={404: {"description": "Calendar not found"}},
 )
 async def get_library_calendar(
     response: Response,
@@ -179,6 +186,10 @@ async def get_library_calendar(
     "/calendars/{calendar_id}/events",
     response_model=list[LibraryCalendarEvent],
     operation_id="searchLibraryCalendarEvents",
+    responses={
+        400: {"description": "Start date must not follow end date"},
+        404: {"description": "Calendar not found"},
+    },
 )
 async def search_library_calendar_events(
     response: Response,
@@ -218,6 +229,7 @@ async def search_library_calendar_events(
     "/calendars/{calendar_id}/events/{event_id}",
     response_model=LibraryCalendarEvent,
     operation_id="getLibraryCalendarEvent",
+    responses={404: {"description": "Calendar event not found"}},
 )
 async def get_library_calendar_event(
     response: Response,

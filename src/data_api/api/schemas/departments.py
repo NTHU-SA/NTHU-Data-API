@@ -11,10 +11,10 @@ from data_api.utils.schema import url_corrector
 
 class DepartmentPerson(BaseModel):
     name: str = Field(..., description="姓名")
-    title: Optional[str] = Field(..., description="職稱")
-    extension: Optional[str] = Field(..., description="分機")
+    title: Optional[str] = Field(None, description="職稱")
+    extension: Optional[str] = Field(None, description="分機")
     note: Optional[str] = Field(None, description="備註")
-    email: Optional[str] = Field(..., description="電子郵件")
+    email: Optional[str] = Field(None, description="電子郵件")
 
 
 class DepartmentContact(BaseModel):
