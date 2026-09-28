@@ -9,7 +9,7 @@ from data_api.mcp.server import mcp
 async def _find_dining(
     restaurant_name: Optional[str] = None,
     building: Optional[str] = None,
-    check_open: Literal["today", "weekday", "saturday", "sunday"] = None,
+    check_open: Optional[Literal["today", "weekday", "saturday", "sunday"]] = None,
 ) -> dict:
     """
     Find dining options on campus.
@@ -21,10 +21,14 @@ async def _find_dining(
 
     Returns:
         Dictionary with restaurant information.
+
+    Building, restaurant name, and open-status filters apply together.
     """
     if check_open:
         _, restaurants = await dining_services.dining_service.get_open_restaurants(
-            schedule=check_open
+            schedule=check_open,
+            building_name=building,
+            restaurant_name=restaurant_name,
         )
         return {
             "schedule": check_open,
@@ -71,12 +75,13 @@ async def _find_dining(
 
 @mcp.tool(
     description="Find restaurants and dining options on campus. "
-    "Use this to find where to eat, check which restaurants are open, or search for specific food."
+    "Use this to find where to eat, check which restaurants are open, or search for specific food. "
+    "Building, restaurant name, and open-status filters apply together."
 )
 async def find_dining(
     restaurant_name: Optional[str] = None,
     building: Optional[str] = None,
-    check_open: Literal["today", "weekday", "saturday", "sunday"] = None,
+    check_open: Optional[Literal["today", "weekday", "saturday", "sunday"]] = None,
 ) -> dict:
     """Find dining options on campus."""
     return await _find_dining(restaurant_name, building, check_open)

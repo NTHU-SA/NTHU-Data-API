@@ -49,6 +49,18 @@ async def lifespan(app: FastAPI):
     print("Shutting down application...")
 
 
+# MCP's session manager must run alongside the data initialization lifespan.
+mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
+
+
+@asynccontextmanager
+async def combined_lifespan(app: FastAPI):
+    """Run both MCP and data lifespans on the exported application."""
+    async with mcp_app.lifespan(app):
+        async with lifespan(app):
+            yield
+
+
 def create_app() -> FastAPI:
     """
     Create and configure the FastAPI application.
@@ -57,7 +69,8 @@ def create_app() -> FastAPI:
         FastAPI: Configured application instance.
     """
     app = FastAPI(
-        lifespan=lifespan,
+        lifespan=combined_lifespan,
+        routes=list(mcp_app.routes),
         title="NTHU Data API",
         version="2.0.0",
         description="由國立清華大學校內各單位資料所組成的公共資料 API。",
@@ -130,33 +143,7 @@ def create_app() -> FastAPI:
     return app
 
 
-# Create the app instance
-fast_api_app = create_app()
+app = create_app()
 
-# MCP Integration - Using curated MCP tools designed for LLM agents
-mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
-
-
-@asynccontextmanager
-async def combined_lifespan(app: FastAPI):
-    """
-    Lifespan for the combined app.
-
-    ``combined_app`` only copies the *routes* of ``fast_api_app``, so the lifespan
-    declared on it is never executed. Both lifespans must therefore be chained
-    here: the MCP session manager first, then the application startup that
-    pre-fetches data and initializes the stateful services.
-    """
-    async with mcp_app.lifespan(app):
-        async with lifespan(app):
-            yield
-
-
-combined_app = FastAPI(
-    title=fast_api_app.title,
-    version=fast_api_app.version,
-    description=fast_api_app.description,
-    routes=[*mcp_app.routes, *fast_api_app.routes],
-    lifespan=combined_lifespan,
-)
-app = combined_app
+# Preserve module aliases without constructing a second, unconfigured app.
+fast_api_app = combined_app = app

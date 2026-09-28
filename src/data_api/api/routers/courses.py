@@ -1,6 +1,7 @@
 """Courses router."""
 
-from fastapi import APIRouter, Body, Depends, Query, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
+from pydantic import ValidationError
 
 from data_api.api.schemas import courses as schemas
 from data_api.domain.courses import models, services
@@ -62,6 +63,7 @@ async def search_courses_by_field_and_value(
     """
     根據提供的欄位和值搜尋課程。
     - 使用欄位名稱作為查詢參數
+    - 值使用正則表達式；格式無效時回傳 HTTP 422
     - 例如：/search?chinese_title=產業.+&english_title=...
     """
     conditions = {}
@@ -73,24 +75,22 @@ async def search_courses_by_field_and_value(
             conditions[field_name] = field_value
 
     if conditions:
-        condition_list = []
+        final_condition = models.Conditions(list_build_target=[])
         for name, value in conditions.items():
-            condition_list.append(
-                {
-                    "row_field": name.value,
-                    "matcher": value,
-                    "regex_match": True,
-                }
+            try:
+                query_condition = schemas.CourseCondition(
+                    row_field=name, matcher=value, regex_match=True
+                )
+            except ValidationError as exc:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Invalid regular expression for course field '{name.value}'.",
+                ) from exc
+            final_condition &= models.Conditions(
+                query_condition.row_field.value,
+                query_condition.matcher,
+                query_condition.regex_match,
             )
-        if len(condition_list) > 1:
-            combined_condition = []
-            for i in range(len(condition_list)):
-                combined_condition.append(condition_list[i])
-                if i < len(condition_list) - 1:
-                    combined_condition.append("and")
-            final_condition = models.Conditions(list_build_target=combined_condition)
-        else:
-            final_condition = models.Conditions(list_build_target=condition_list)
         result = services.courses_service.query(final_condition)
     else:
         result = []
@@ -129,6 +129,7 @@ async def search_courses_by_condition(
 ):
     """
     進階搜尋，根據條件取得課程。可以使用巢狀條件。
+    regex_match 啟用時使用正則表達式，格式無效時回傳 HTTP 422；否則使用完全符合。
     """
     if type(query_condition) is schemas.CourseCondition:
         condition = models.Conditions(

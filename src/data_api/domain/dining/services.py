@@ -72,26 +72,26 @@ class DiningService:
 
         return commit_hash, dining_data
 
-    async def get_open_restaurants(self, schedule: str) -> tuple[Optional[str], list[dict]]:
-        """Get currently open restaurants based on schedule."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            return None, []
+    async def get_open_restaurants(
+        self,
+        schedule: str,
+        building_name: Optional[str] = None,
+        restaurant_name: Optional[str] = None,
+    ) -> tuple[Optional[str], list[dict]]:
+        """Get possibly open restaurants after fuzzy building and name filtering."""
+        commit_hash, dining_data = await self.fuzzy_search_dining_data(
+            building_name=building_name, restaurant_name=restaurant_name
+        )
 
-        commit_hash, dining_data = result
+        if schedule == "today":
+            current_day = datetime.now().strftime("%A").lower()
+            day = current_day if current_day in ["saturday", "sunday"] else "weekday"
+        else:
+            day = schedule
 
         open_restaurants = []
         for building in dining_data:
             for restaurant in building["restaurants"]:
-                if schedule == "today":
-                    current_day = datetime.now().strftime("%A").lower()
-                    if current_day in ["saturday", "sunday"]:
-                        day = current_day
-                    else:
-                        day = "weekday"
-                else:
-                    day = schedule
-
                 if is_restaurant_open(restaurant, day):
                     open_restaurants.append(restaurant)
 
