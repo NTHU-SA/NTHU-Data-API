@@ -107,7 +107,7 @@ uv pip compile .github/smokeshow.in --python-version 3.14 --universal --only-bin
 ```
 
 Review dependency and hash changes before merging. The uploader checks out its
-trusted workflow revision, downloads artifacts from the exact successful push
+trusted default-branch revision, downloads artifacts from the exact successful push
 run, and uses a commit-pinned artifact Action. Only the upload job receives
 `statuses: write`; the 85% coverage threshold remains unchanged.
 
@@ -115,6 +115,41 @@ The test workflows and Docker builder still need source builds for the
 hash-locked `jieba` source distribution and the local project. Their existing
 Sonar build-script warnings remain accepted risks, not eliminated vulnerabilities;
 disabling all builds would break installation.
+
+### Campus calendars
+
+Campus calendars are loaded from `https://data.nthusa.tw/calendars.json` through
+the shared dataset cache. The current calendar id is `academic`; use the list
+endpoint to discover additional calendars as they are published.
+
+| Endpoint | Response |
+| --- | --- |
+| `GET /calendars/` | All calendar metadata, without events |
+| `GET /calendars/{calendar_id}` | One calendar's metadata, without events |
+| `GET /calendars/{calendar_id}/events` | Filtered, paginated events |
+| `GET /calendars/{calendar_id}/events/{event_id}` | One event |
+
+For example, get academic events overlapping October 2026:
+
+```text
+/calendars/academic/events?start=2026-10-01&end=2026-10-31&limit=100&offset=0
+```
+
+- `start` and `end` are optional inclusive dates (`YYYY-MM-DD`), interpreted using
+  the local dates in the source calendar (`Asia/Taipei` for `academic`). Events
+  overlapping any part of the range are included, not just events starting in it.
+  All-day event `end` values remain exclusive, as in the source; a timed event
+  ending at midnight does not cover the following day.
+- `keyword` is an optional case-insensitive literal substring in the title or
+  description. Whitespace is trimmed; blank keywords apply no filter. All
+  supplied filters are combined with AND.
+- Events are sorted by `start`, then `id`. `limit` defaults to 100 (1-1000);
+  `offset` defaults to 0 (nonnegative). `X-Total-Count` reports the filtered count
+  before pagination; `X-Data-Commit-Hash` identifies the snapshot when known.
+- Missing calendars/events return 404, reversed date ranges return 400, and
+  malformed dates or invalid pagination return 422. No matches return `[]`.
+  Unavailable data without a usable snapshot returns 503; refresh failures retain
+  the last-known-good snapshot.
 
 ### Running Tests
 To run tests locally before committing changes, follow these steps:

@@ -73,7 +73,7 @@ class TestCombinedLifespan:
         with caplog.at_level(logging.INFO):
             async with api_module.combined_lifespan(app):
                 pass
-        assert "Data startup: 1/7 datasets usable" in caplog.text
+        assert f"Data startup: 1/{len(config.PREFETCH_ENDPOINTS)} datasets usable" in caplog.text
         caplog.text.encode("ascii")
 
     @pytest.mark.parametrize("startup_fails", [False, True])

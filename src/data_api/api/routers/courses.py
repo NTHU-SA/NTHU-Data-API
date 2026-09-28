@@ -91,26 +91,29 @@ async def search_courses_by_field_and_value(
     operation_id="searchCoursesByCondition",
 )
 async def search_courses_by_condition(
-    query_condition: schemas.CourseQueryCondition | schemas.CourseCondition = Body(
-        openapi_examples={
-            "normal_1": {
-                "summary": "單一搜尋條件",
-                "value": {
-                    "row_field": "chinese_title",
-                    "matcher": "數統導論",
-                    "regex_match": True,
+    query_condition: Annotated[
+        schemas.CourseQueryCondition | schemas.CourseCondition,
+        Body(
+            openapi_examples={
+                "normal_1": {
+                    "summary": "單一搜尋條件",
+                    "value": {
+                        "row_field": "chinese_title",
+                        "matcher": "數統導論",
+                        "regex_match": True,
+                    },
                 },
-            },
-            "normal_2": {
-                "summary": "兩個搜尋條件",
-                "value": [
-                    {"row_field": "teacher", "matcher": "黃", "regex_match": True},
-                    "or",
-                    {"row_field": "teacher", "matcher": "孫", "regex_match": True},
-                ],
-            },
-        }
-    ),
+                "normal_2": {
+                    "summary": "兩個搜尋條件",
+                    "value": [
+                        {"row_field": "teacher", "matcher": "黃", "regex_match": True},
+                        "or",
+                        {"row_field": "teacher", "matcher": "孫", "regex_match": True},
+                    ],
+                },
+            }
+        ),
+    ],
 ):
     """
     進階搜尋，根據條件取得課程。可以使用巢狀條件。
