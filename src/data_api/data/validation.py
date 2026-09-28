@@ -7,6 +7,7 @@ from functools import lru_cache
 from pydantic import BaseModel, TypeAdapter
 
 from data_api.api.schemas.announcements import AnnouncementDetail
+from data_api.api.schemas.calendars import Calendar, CalendarEvent
 from data_api.api.schemas.departments import Department
 from data_api.api.schemas.dining import DiningBuilding
 from data_api.api.schemas.libraries import LibraryCalendar, LibraryCalendarEvent, LibraryRssItem
@@ -30,6 +31,10 @@ class CalendarPayload(LibraryCalendar):
     events: list[LibraryCalendarEvent]
 
 
+class CampusCalendarPayload(Calendar):
+    events: list[CalendarEvent]
+
+
 class LibraryPayload(BaseModel):
     name: str
 
@@ -46,6 +51,7 @@ def _adapters() -> dict[str, TypeAdapter]:
         "/libraries.json": TypeAdapter(list[LibraryPayload]),
         "/libraries/rss.json": TypeAdapter(dict[str, list[LibraryRssItem]]),
         "/libraries/calendars.json": TypeAdapter(list[CalendarPayload]),
+        "/calendars.json": TypeAdapter(list[CampusCalendarPayload]),
     }
 
 
@@ -57,7 +63,7 @@ def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
             raise FetchFailure("payload_type")
         # JSON strict mode accepts enum/URL strings without coercing booleans or numbers.
         parsed = adapter.validate_json(json.dumps(raw), strict=True)
-        if endpoint == "/libraries/calendars.json":
+        if endpoint in {"/libraries/calendars.json", "/calendars.json"}:
             for calendar in parsed:
                 for event in calendar.events:
                     try:

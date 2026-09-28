@@ -117,6 +117,7 @@ def create_app() -> FastAPI:
     from data_api.api.routers import (
         announcements,
         buses,
+        calendars,
         courses,
         departments,
         dining,
@@ -128,6 +129,7 @@ def create_app() -> FastAPI:
 
     app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
+    app.include_router(calendars.router, prefix="/calendars", tags=["Calendars"])
     app.include_router(courses.router, prefix="/courses", tags=["Courses"])
     app.include_router(departments.router, prefix="/departments", tags=["Departments"])
     app.include_router(dining.router, prefix="/dining", tags=["Dining"])
