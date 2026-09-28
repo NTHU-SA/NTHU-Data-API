@@ -1,5 +1,7 @@
 """Tests for MCP tools."""
 
+import pytest
+
 from data_api.mcp.tools.announcements import _get_announcements
 from data_api.mcp.tools.buses import _get_bus_stops, _get_next_buses
 from data_api.mcp.tools.campus import _search_campus
@@ -8,6 +10,8 @@ from data_api.mcp.tools.dining import _find_dining
 from data_api.mcp.tools.energy import _get_energy_usage
 from data_api.mcp.tools.library import _get_library_info
 from data_api.mcp.tools.newsletters import _get_newsletters
+
+pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
 
 class TestMCPTools:

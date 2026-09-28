@@ -7,6 +7,8 @@ from data_api.api import schemas
 from data_api.api.api import app
 from data_api.domain.buses.services import BusesService
 
+pytestmark = pytest.mark.usefixtures("dataset_runtime")
+
 
 def test_missing_route_metadata_is_not_registered():
     service = BusesService()

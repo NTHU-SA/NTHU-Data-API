@@ -6,6 +6,7 @@ test exercises the real manager and HTTP transport through the exported app.
 """
 
 import json
+import logging
 from contextlib import asynccontextmanager
 from types import SimpleNamespace
 
@@ -55,8 +56,8 @@ class TestCombinedLifespan:
         assert [name for name, _ in calls] == ["prefetch", "buses", "courses"]
         assert calls[0][1] == config.PREFETCH_ENDPOINTS
 
-    async def test_reports_failed_endpoints_as_ascii(self, monkeypatch, capsys):
-        """Test the startup report stays ASCII so non-UTF-8 consoles do not fail."""
+    async def test_reports_failed_endpoints_as_ascii(self, monkeypatch, caplog):
+        """Lifecycle logs stay ASCII and summarize partial availability."""
 
         async def fake_prefetch(endpoints):
             return {endpoint: index == 0 for index, endpoint in enumerate(endpoints)}
@@ -69,13 +70,11 @@ class TestCombinedLifespan:
         monkeypatch.setattr(buses_services.buses_service, "update_data", noop)
         monkeypatch.setattr(courses_services.courses_service, "update_data", noop)
 
-        async with api_module.combined_lifespan(app):
-            pass
-
-        output = capsys.readouterr().out
-        assert "[OK]" in output
-        assert "[FAIL]" in output
-        output.encode("ascii")
+        with caplog.at_level(logging.INFO):
+            async with api_module.combined_lifespan(app):
+                pass
+        assert "Data startup: 1/7 datasets usable" in caplog.text
+        caplog.text.encode("ascii")
 
     @pytest.mark.parametrize("startup_fails", [False, True])
     async def test_exported_lifespan_orders_and_unwinds_contexts(self, monkeypatch, startup_fails):
@@ -138,11 +137,22 @@ FAKE_COURSE = {
 }
 
 
-async def _fake_get(endpoint_name: str):
+async def _fake_fetch(url: str, sha256=None):
     """Serve in-memory data in place of a request to data.nthusa.tw."""
-    if endpoint_name.endswith("courses.json"):
-        return ("testcommithash", [FAKE_COURSE])
-    return ("testcommithash", {})
+    if url.endswith("file_details.json"):
+        return {
+            "file_details": {
+                "/": [
+                    {"name": name, "last_commit": "testcommithash"}
+                    for name in config.PREFETCH_ENDPOINTS
+                ]
+            }
+        }
+    if url.endswith("courses.json"):
+        return [FAKE_COURSE]
+    if url.endswith("buses.json"):
+        return {}
+    return []
 
 
 class TestCoursesAfterStartup:
@@ -151,14 +161,10 @@ class TestCoursesAfterStartup:
     async def test_courses_endpoint_returns_data_after_startup(self, monkeypatch):
         """Test /courses/ is populated once the app's own lifespan has run.
 
-        ``courses_service`` is only filled during startup and no route refreshes
-        it, so a lifespan that is not wired up makes this endpoint return an
-        empty list with a 200 status code. The data layer is stubbed so that the
-        real ``update_data`` runs against fixed data: this test then fails only
-        when the lifespan wiring itself is broken.
+        Exercise actual validation and conversion against a fixed upstream response.
         """
         monkeypatch.setattr(api_module, "mcp_app", SimpleNamespace(lifespan=_noop_lifespan))
-        monkeypatch.setattr(nthudata, "get", _fake_get)
+        monkeypatch.setattr(nthudata.fetcher, "fetch_json", _fake_fetch)
         monkeypatch.setattr(courses_services.courses_service, "course_data", [])
 
         async with app.router.lifespan_context(app):
@@ -184,7 +190,7 @@ def test_exported_app_serves_rest_and_mcp_with_middleware(monkeypatch):
         return None
 
     monkeypatch.setattr(nthudata, "prefetch", fake_prefetch)
-    monkeypatch.setattr(nthudata, "get", _fake_get)
+    monkeypatch.setattr(nthudata.fetcher, "fetch_json", _fake_fetch)
     monkeypatch.setattr(buses_services.buses_service, "update_data", noop)
     monkeypatch.setattr(courses_services.courses_service, "course_data", [])
     monkeypatch.setattr(courses_services.courses_service, "last_commit_hash", None)

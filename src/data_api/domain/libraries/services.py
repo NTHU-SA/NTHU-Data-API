@@ -10,6 +10,7 @@ from typing import Optional
 
 from thefuzz import fuzz
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 
 JSON_PATH = "libraries.json"
@@ -67,14 +68,14 @@ class LibrariesService:
         """Get all libraries."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
         return result
 
     async def get_library_by_name(self, name: str) -> tuple[Optional[str], Optional[dict]]:
         """Get library by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, None
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, libraries_data = result
         for library in libraries_data:
@@ -86,7 +87,7 @@ class LibrariesService:
         """Fuzzy search libraries by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, libraries_data = result
         results_with_score = []
@@ -102,7 +103,7 @@ class LibrariesService:
         """Get the items of one library RSS feed."""
         result = await nthudata.get(RSS_JSON_PATH)
         if result is None:
-            return None, None
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, rss_data = result
         return commit_hash, rss_data.get(rss_type)
@@ -111,7 +112,7 @@ class LibrariesService:
         """Get calendar metadata without events."""
         result = await nthudata.get(CALENDARS_JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, calendars = result
         return commit_hash, [
@@ -123,7 +124,7 @@ class LibrariesService:
         """Get one calendar, including its events."""
         result = await nthudata.get(CALENDARS_JSON_PATH)
         if result is None:
-            return None, None
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, calendars = result
         for calendar in calendars:

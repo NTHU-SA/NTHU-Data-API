@@ -129,12 +129,11 @@ async def get_library_rss_data(
     資料來源：[圖書館官網 RSS](https://www.lib.nthu.edu.tw/bulletin/RSS/index.html)
     """
     commit_hash, items = await libraries_service.get_rss_items(rss_type.value)
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail=SERVICE_UNAVAILABLE)
     if items is None:
         raise HTTPException(status_code=404, detail="找不到 RSS 資料")
 
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return items
 
 
@@ -152,10 +151,8 @@ async def get_all_library_calendars(response: Response):
     資料來源：[圖書館開放時間](https://www.lib.nthu.edu.tw/use/hours.html)
     """
     commit_hash, calendars = await libraries_service.get_all_calendars()
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail=SERVICE_UNAVAILABLE)
-
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return calendars
 
 
@@ -170,12 +167,11 @@ async def get_library_calendar(
 ):
     """取得指定行事曆的資訊（不含事件）。"""
     commit_hash, calendar = await libraries_service.get_calendar(calendar_id.value)
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail=SERVICE_UNAVAILABLE)
     if calendar is None:
         raise HTTPException(status_code=404, detail="找不到行事曆")
 
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return calendar
 
 
@@ -209,12 +205,11 @@ async def search_library_calendar_events(
     commit_hash, events = await libraries_service.search_calendar_events(
         calendar_id.value, start=start, end=end, keyword=keyword
     )
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail=SERVICE_UNAVAILABLE)
     if events is None:
         raise HTTPException(status_code=404, detail="找不到行事曆")
 
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     response.headers["X-Total-Count"] = str(len(events))
     return events[offset : offset + limit]
 
@@ -231,10 +226,9 @@ async def get_library_calendar_event(
 ):
     """取得指定行事曆中的單一事件。"""
     commit_hash, event = await libraries_service.get_calendar_event(calendar_id.value, event_id)
-    if commit_hash is None:
-        raise HTTPException(status_code=503, detail=SERVICE_UNAVAILABLE)
     if event is None:
         raise HTTPException(status_code=404, detail="找不到事件")
 
-    response.headers["X-Data-Commit-Hash"] = commit_hash
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
     return event

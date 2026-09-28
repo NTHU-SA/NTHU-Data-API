@@ -11,6 +11,19 @@ These tools are designed to answer common questions about NTHU campus life.
 """
 
 from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
+from fastmcp.server.middleware import Middleware, MiddlewareContext
+
+from data_api.core.exceptions import DataNotAvailableException
+
+
+class DatasetErrors(Middleware):
+    async def on_call_tool(self, context: MiddlewareContext, call_next):
+        try:
+            return await call_next(context)
+        except DataNotAvailableException as exc:
+            raise ToolError("Dataset temporarily unavailable. Please try again later.") from exc
+
 
 # Create curated MCP server
 mcp = FastMCP(
@@ -29,6 +42,7 @@ You can help with:
 Always respond in the user's language (Traditional Chinese or English).
 """,
 )
+mcp.add_middleware(DatasetErrors())
 
 # Import tools after mcp is created to avoid circular imports
 # Tools register themselves with the mcp instance when imported

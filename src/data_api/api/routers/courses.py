@@ -9,9 +9,11 @@ from data_api.domain.courses import models, services
 router = APIRouter()
 
 
-def add_custom_header(response: Response):
+async def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    response.headers["X-Data-Commit-Hash"] = str(services.courses_service.last_commit_hash)
+    await services.courses_service.update_data()
+    if services.courses_service.last_commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = services.courses_service.last_commit_hash
 
 
 @router.get(
@@ -27,7 +29,6 @@ async def get_all_courses(response: Response):
     """
     result = services.courses_service.course_data
     response.headers["X-Total-Count"] = str(len(result))
-    response.headers["X-Data-Commit-Hash"] = str(services.courses_service.last_commit_hash)
     return result
 
 

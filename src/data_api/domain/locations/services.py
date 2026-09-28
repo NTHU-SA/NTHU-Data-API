@@ -8,6 +8,7 @@ from typing import Optional
 
 from thefuzz import fuzz
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 
 JSON_PATH = "maps.json"
@@ -21,7 +22,7 @@ class LocationsService:
         """Get all locations."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, map_data = result
         locations = [
@@ -39,7 +40,7 @@ class LocationsService:
         """Fuzzy search locations by name."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
-            return None, []
+            raise DataNotAvailableException("Dataset temporarily unavailable")
 
         commit_hash, map_data = result
         tmp_results = []

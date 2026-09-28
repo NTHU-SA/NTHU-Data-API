@@ -1,5 +1,7 @@
 """Tests for courses endpoints."""
 
+from unittest.mock import AsyncMock
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -7,6 +9,14 @@ from data_api.api import schemas
 from data_api.api.api import app
 from data_api.domain.courses.models import CourseData
 from data_api.domain.courses.services import courses_service
+
+
+@pytest.fixture(autouse=True)
+def fixed_courses(monkeypatch):
+    """These query tests supply their own snapshots; lifecycle tests use real refresh."""
+    monkeypatch.setattr(courses_service, "course_data", [])
+    monkeypatch.setattr(courses_service, "update_data", AsyncMock())
+
 
 INVALID_REGEX_PATTERNS = [
     "[",
