@@ -134,7 +134,8 @@ async def test_real_data_lifespan_client_cleanup(monkeypatch, upstream_available
     monkeypatch.setattr(httpx.AsyncHTTPTransport, "handle_async_request", handler)
     async with api_module.lifespan(api_module.app):
         client = nthudata.fetcher.client
-        assert client is not None and not client.is_closed
+        assert client is not None
+        assert not client.is_closed
         assert api_module.app.state.datasets is nthudata
         assert courses_service.state.usable is upstream_available
         if upstream_available:
@@ -159,6 +160,7 @@ async def test_app_startup_exception_closes_client(monkeypatch):
     monkeypatch.setattr(nthudata, "prefetch", fail)
     with pytest.raises(RuntimeError, match="startup bug"):
         async with api_module.lifespan(api_module.app):
-            pytest.fail("Startup should fail")
-    assert client is not None and client.is_closed
+            pass
+    assert client is not None
+    assert client.is_closed
     assert nthudata.fetcher.client is None

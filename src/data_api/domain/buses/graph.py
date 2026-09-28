@@ -106,31 +106,19 @@ class RouteResolver:
         dep_stop: '台積館' or '校門' or '綜二'
         is_from_gen2: Special flag if inferred from schedule gap.
         """
-        # Normalize inputs
-        line = line.lower()
-
-        # 1. Determine Direction & Variant
+        routes = {
+            "red": (red_M5_M1, red_M5_M2, red_M1_M5, red_M2_M5),
+            "green": (green_M5_M1, green_M5_M2, green_M1_M5, green_M2_M5),
+        }.get(line.lower())
+        if routes is None:
+            return None
+        downhill, downhill_gen2, uphill, uphill_gen2 = routes
         if "台積" in dep_stop:
-            # Downhill (TSMC -> Gate)
-            if line == "red":
-                return red_M5_M2 if is_from_gen2 else red_M5_M1
-            elif line == "green":
-                return green_M5_M2 if is_from_gen2 else green_M5_M1
-
-        elif "校門" in dep_stop or "北校" in dep_stop:
-            # Uphill (Gate -> TSMC)
-            if line == "red":
-                return red_M1_M5
-            elif line == "green":
-                return green_M1_M5
-
-        elif "綜二" in dep_stop:
-            # Starting from middle
-            if line == "red":
-                return red_M2_M5
-            elif line == "green":
-                return green_M2_M5
-
+            return downhill_gen2 if is_from_gen2 else downhill
+        if "校門" in dep_stop or "北校" in dep_stop:
+            return uphill
+        if "綜二" in dep_stop:
+            return uphill_gen2
         return None
 
     @staticmethod

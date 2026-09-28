@@ -199,20 +199,24 @@ class BusesService:
         for key in info_keys.intersection(raw):
             BusInfo.model_validate(raw[key])
         for key in schedule_keys.intersection(raw):
-            rows = TypeAdapter(list[dict[str, str]]).validate_python(raw[key], strict=True)
-            for row in rows:
-                if "time" not in row or "description" not in row:
-                    raise FetchFailure("validation")
-                try:
-                    datetime.strptime(row["time"], "%H:%M")
-                except ValueError as exc:
-                    raise FetchFailure("validation") from exc
+            candidate._validate_schedule_rows(raw[key])
         candidate._res_json = raw
         candidate._process_all_data()
         for schedules in candidate.raw_schedule_data.values():
             for schedule in schedules:
                 BusSchedule.model_validate(schedule)
         return candidate
+
+    @staticmethod
+    def _validate_schedule_rows(raw: object) -> None:
+        rows = TypeAdapter(list[dict[str, str]]).validate_python(raw, strict=True)
+        for row in rows:
+            if "time" not in row or "description" not in row:
+                raise FetchFailure("validation")
+            try:
+                datetime.strptime(row["time"], "%H:%M")
+            except ValueError as exc:
+                raise FetchFailure("validation") from exc
 
     def _process_all_data(self) -> None:
         """

@@ -87,6 +87,35 @@ We follow certain guidelines for contributing. Here are the types of commits we 
   exposes `X-Total-Count`, `X-Data-Commit-Hash`, and `X-Process-Time` to browser
   clients from configured origins.
 
+### Response schemas
+
+Nullable metadata in announcements, newsletters, department contacts, dining
+images, and library feeds/calendars may be omitted by publishers. These fields
+default to `null` in REST responses; supplied values still undergo validation.
+Required identifiers, titles not declared nullable, event boundaries, and dataset
+structure remain required. Course GET search retains the same flat optional query
+parameters, with validation errors documented in OpenAPI.
+
+### CI dependency safety
+
+The coverage uploader installs from `.github/smokeshow-requirements.txt` with
+SHA-256 verification and wheels only, including all transitive dependencies.
+To update it, review the version in `.github/smokeshow.in` and regenerate the lock:
+
+```sh
+uv pip compile .github/smokeshow.in --python-version 3.14 --universal --only-binary :all: --generate-hashes -o .github/smokeshow-requirements.txt
+```
+
+Review dependency and hash changes before merging. The uploader checks out its
+trusted workflow revision, downloads artifacts from the exact successful push
+run, and uses a commit-pinned artifact Action. Only the upload job receives
+`statuses: write`; the 85% coverage threshold remains unchanged.
+
+The test workflows and Docker builder still need source builds for the
+hash-locked `jieba` source distribution and the local project. Their existing
+Sonar build-script warnings remain accepted risks, not eliminated vulnerabilities;
+disabling all builds would break installation.
+
 ### Running Tests
 To run tests locally before committing changes, follow these steps:
 1. Install the required dependencies:

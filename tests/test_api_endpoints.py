@@ -180,3 +180,26 @@ class TestDepartmentsEndpoints:
             params = {"query": query}
             response = await client.get("/departments/search/", params=params)
             assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "path,statuses",
+    [
+        ("/buses/routes", {"500"}),
+        ("/buses/info/stops", {"500"}),
+        ("/buses/schedules", {"500"}),
+        ("/energy/electricity_usage", {"500"}),
+        ("/courses/search", {"422"}),
+        ("/locations/search", {"404"}),
+        ("/newsletters/{newsletter_name}", {"404"}),
+        ("/libraries/space", {"404", "500"}),
+        ("/libraries/lost_and_found", {"500"}),
+        ("/libraries/rss/{rss_type}", {"404"}),
+        ("/libraries/calendars/{calendar_id}", {"404"}),
+        ("/libraries/calendars/{calendar_id}/events", {"400", "404"}),
+        ("/libraries/calendars/{calendar_id}/events/{event_id}", {"404"}),
+    ],
+)
+def test_openapi_documents_route_errors(path, statuses):
+    responses = app.openapi()["paths"][path]["get"]["responses"]
+    assert statuses <= responses.keys()

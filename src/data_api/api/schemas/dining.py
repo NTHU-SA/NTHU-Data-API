@@ -24,7 +24,7 @@ class DiningRestaurant(BaseModel):
 
     area: str = Field(..., description="餐廳所在建築")
     image: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        ..., description="餐廳圖片"
+        None, description="餐廳圖片"
     )
     name: str = Field(..., description="餐廳名稱")
     note: str = Field(..., description="餐廳備註")

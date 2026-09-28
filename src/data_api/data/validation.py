@@ -49,6 +49,17 @@ def _adapters() -> dict[str, TypeAdapter]:
     }
 
 
+def _validate_calendar_events(calendars: list[CalendarPayload]) -> None:
+    for calendar in calendars:
+        for event in calendar.events:
+            try:
+                parse = date.fromisoformat if event.all_day else datetime.fromisoformat
+                if parse(event.end) < parse(event.start):
+                    raise ValueError("End precedes start")
+            except (ValueError, TypeError) as exc:
+                raise FetchFailure("validation") from exc
+
+
 def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
     adapter = _adapters().get(endpoint)
     if adapter is not None:
@@ -58,13 +69,6 @@ def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
         # JSON strict mode accepts enum/URL strings without coercing booleans or numbers.
         parsed = adapter.validate_json(json.dumps(raw), strict=True)
         if endpoint == "/libraries/calendars.json":
-            for calendar in parsed:
-                for event in calendar.events:
-                    try:
-                        parse = date.fromisoformat if event.all_day else datetime.fromisoformat
-                        if parse(event.end) < parse(event.start):
-                            raise ValueError("End precedes start")
-                    except (ValueError, TypeError) as exc:
-                        raise FetchFailure("validation") from exc
+            _validate_calendar_events(parsed)
     # Preserve upstream fields and representation; response serialization stays unchanged.
     return raw

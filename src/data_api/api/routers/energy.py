@@ -12,6 +12,7 @@ router = APIRouter()
     "/electricity_usage",
     response_model=list[schemas.EnergyElectricityInfo],
     operation_id="getRealtimeElectricityUsage",
+    responses={500: {"description": "Unable to retrieve electricity usage"}},
 )
 async def get_realtime_electricity_usage():
     """

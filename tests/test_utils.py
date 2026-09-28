@@ -1,6 +1,11 @@
 """Tests for utils module."""
 
+from copy import deepcopy
+
+import pytest
+
 from data_api.utils.schema import url_corrector
+from data_api.utils.search import fuzzy_matches
 
 
 class TestUrlCorrector:
@@ -43,3 +48,20 @@ class TestUrlCorrector:
         url = "example.com/path"
         result = url_corrector(url)
         assert result == url
+
+
+@pytest.mark.parametrize("threshold", [60, 80])
+def test_fuzzy_matches_rank_stably_without_mutating_input(monkeypatch, threshold):
+    items = [
+        {"title": "below"},
+        {"title": "threshold"},
+        {"title": "best", "id": 1},
+        {"title": "best", "id": 2},
+    ]
+    original = deepcopy(items)
+    scores = {"below": threshold - 1, "threshold": threshold, "best": 100}
+    monkeypatch.setattr(
+        "data_api.utils.search.fuzz.partial_ratio", lambda query, value: scores[value]
+    )
+    assert fuzzy_matches(items, "query", "title", threshold) == [items[2], items[3], items[1]]
+    assert items == original

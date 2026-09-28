@@ -10,11 +10,13 @@ from thefuzz import fuzz
 
 from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.utils.search import fuzzy_matches
 
 # Constants
 ANNOUNCEMENTS_JSON = "announcements.json"
 ANNOUNCEMENTS_LIST_JSON = "announcements_list.json"
 FUZZY_SEARCH_THRESHOLD = 80
+DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
 
 
 class AnnouncementsService:
@@ -34,7 +36,7 @@ class AnnouncementsService:
         """
         result = await nthudata.get(ANNOUNCEMENTS_JSON)
         if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
+            raise DataNotAvailableException(DATASET_UNAVAILABLE)
 
         commit_hash, announcements_data = result
 
@@ -65,7 +67,7 @@ class AnnouncementsService:
         """Get announcements list (without article content)."""
         result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
         if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
+            raise DataNotAvailableException(DATASET_UNAVAILABLE)
 
         commit_hash, announcements_list = result
 
@@ -91,7 +93,7 @@ class AnnouncementsService:
         # 1. 取得原始資料
         result = await nthudata.get(ANNOUNCEMENTS_JSON)
         if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
+            raise DataNotAvailableException(DATASET_UNAVAILABLE)
 
         commit_hash, raw_data = result
 
@@ -113,33 +115,18 @@ class AnnouncementsService:
             # 取出該處室的所有文章
             original_articles = source.get("articles", [])
 
-            # 若沒有搜尋關鍵字 (title)，則不進行模糊過濾，直接保留該處室所有文章
-            if not title:
-                matched_articles_with_score = [(100, art) for art in original_articles]
-            else:
-                # --- Level 2: 針對文章進行模糊篩選 ---
-                matched_articles_with_score = []
-                for article in original_articles:
-                    article_title = article.get("title", "")
-
-                    # 計算分數
-                    score = fuzz.partial_ratio(title, article_title)
-
-                    # 只有分數高於門檻的才保留
-                    if score >= FUZZY_SEARCH_THRESHOLD:
-                        matched_articles_with_score.append((score, article))
-
-                # 如果這個處室在過濾後沒有任何一篇文章符合，這整個處室就不需要回傳了
-                if not matched_articles_with_score:
+            matched_articles = list(original_articles)
+            if title:
+                matched_articles = fuzzy_matches(
+                    original_articles, title, "title", FUZZY_SEARCH_THRESHOLD
+                )
+                if not matched_articles:
                     continue
-
-                # 將該處室內的文章依照分數由高到低排序 (搜尋體驗較好)
-                matched_articles_with_score.sort(key=lambda x: x[0], reverse=True)
 
             # 3. 重組資料結構
             # 複製一份處室資訊 (避免修改到原始快取)，並替換 articles
             new_source = source.copy()
-            new_source["articles"] = [item[1] for item in matched_articles_with_score]
+            new_source["articles"] = matched_articles
 
             filtered_results.append(new_source)
 
@@ -149,7 +136,7 @@ class AnnouncementsService:
         """Get list of all departments with announcements."""
         result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
         if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
+            raise DataNotAvailableException(DATASET_UNAVAILABLE)
 
         commit_hash, announcements_list = result
 

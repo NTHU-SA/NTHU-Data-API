@@ -106,7 +106,7 @@ class TestCombinedLifespan:
         if startup_fails:
             with pytest.raises(RuntimeError, match="startup failed"):
                 async with app.router.lifespan_context(app):
-                    pytest.fail("Application should not start")
+                    pass
             assert calls == ["mcp startup", "data startup", "mcp shutdown"]
         else:
             async with app.router.lifespan_context(app):

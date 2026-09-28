@@ -41,6 +41,7 @@ def get_current_time_state():
     response_model=list[schemas.BusInfo],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusRouteData",
+    responses={500: {"description": "Unable to retrieve bus metadata"}},
 )
 async def get_bus_route_metadata(
     bus_type: Literal["main", "nanda"] = Query(None, description="車種選擇"),
@@ -62,6 +63,7 @@ async def get_bus_route_metadata(
     response_model=list[schemas.BusStopsInfo],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusStopsInformation",
+    responses={500: {"description": "Unable to retrieve bus stops"}},
 )
 async def get_bus_stops_information():
     """取得所有公車站牌的經緯度與資訊。"""
@@ -76,6 +78,7 @@ async def get_bus_stops_information():
     response_model=list[Union[schemas.BusDetailedSchedule, schemas.BusSchedule, None]],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusSchedules",
+    responses={500: {"description": "Unable to retrieve bus schedules"}},
     response_description="取得公車時刻表信息。",
 )
 async def get_bus_schedules(

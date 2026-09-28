@@ -28,10 +28,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Set timezone to Taipei
 ENV TZ=Asia/Taipei
-RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
-
-# Create a non-root user
-RUN groupadd -g 1000 appuser && \
+RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && \
+    echo "$TZ" > /etc/timezone && \
+    groupadd -g 1000 appuser && \
     useradd -r -u 1000 -g appuser appuser
 
 # Copy the virtual environment and application code

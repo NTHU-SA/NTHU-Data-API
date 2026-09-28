@@ -62,6 +62,27 @@ class TestCoursesEndpoints:
         response = await client.get(f"/courses/search?{field_name}=中")
         assert response.status_code == 200
 
+    async def test_invalid_language_is_still_rejected(self, client: AsyncClient):
+        response = await client.get("/courses/search", params={"language": "invalid"})
+        assert response.status_code == 422
+
+    @pytest.mark.parametrize("params", [{}, {"unknown": "ignored"}, {"teacher": ""}])
+    async def test_absent_filters_return_empty_results(self, client: AsyncClient, params):
+        response = await client.get("/courses/search", params=params)
+        assert response.status_code == 200
+        assert response.json() == []
+        assert response.headers["X-Total-Count"] == "0"
+
+
+def test_course_search_query_model_keeps_flat_optional_parameters():
+    operation = app.openapi()["paths"]["/courses/search"]["get"]
+    assert "requestBody" not in operation
+    parameters = {parameter["name"]: parameter for parameter in operation["parameters"]}
+    assert set(parameters) == {field.value for field in schemas.courses.CourseFieldName}
+    for parameter in parameters.values():
+        assert parameter["in"] == "query"
+        assert not parameter["required"]
+
 
 class TestCoursesSearchPost:
     """Tests for courses POST search with conditions."""

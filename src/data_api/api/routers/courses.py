@@ -1,6 +1,8 @@
 """Courses router."""
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
+from typing import Annotated
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 from pydantic import ValidationError
 
 from data_api.api.schemas import courses as schemas
@@ -37,29 +39,11 @@ async def get_all_courses(response: Response):
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
     operation_id="searchCoursesByFieldAndValue",
+    responses={422: {"description": "Invalid query parameter or regular expression"}},
 )
 async def search_courses_by_field_and_value(
-    request: Request,
     response: Response,
-    id: str = Query(None, description="課號"),
-    chinese_title: str = Query(None, description="課程中文名稱"),
-    english_title: str = Query(None, description="課程英文名稱"),
-    credit: str = Query(None, description="學分數"),
-    size_limit: str = Query(None, description="人限"),
-    freshman_reservation: str = Query(None, description="新生保留人數"),
-    object: str = Query(None, description="通識對象"),
-    ge_type: str = Query(None, description="通識類別"),
-    language: schemas.CourseLanguage = Query(None, description="授課語言"),
-    note: str = Query(None, description="備註"),
-    suspend: str = Query(None, description="停開註記"),
-    class_room_and_time: str = Query(None, description="教室與上課時間"),
-    teacher: str = Query(None, description="授課教師"),
-    prerequisite: str = Query(None, description="擋修說明"),
-    limit_note: str = Query(None, description="課程限制說明"),
-    expertise: str = Query(None, description="第一二專長對應"),
-    program: str = Query(None, description="學分學程對應"),
-    no_extra_selection: str = Query(None, description="不可加簽說明"),
-    required_optional_note: str = Query(None, description="必選修說明"),
+    filters: Annotated[schemas.CourseSearchParams, Query()],
 ):
     """
     根據提供的欄位和值搜尋課程。
@@ -68,7 +52,7 @@ async def search_courses_by_field_and_value(
     - 例如：/search?chinese_title=產業.+&english_title=...
     """
     conditions = {}
-    query_params = request.query_params
+    query_params = filters.model_dump(mode="json", exclude_none=True)
 
     for field_name in schemas.CourseFieldName:
         field_value = query_params.get(field_name.value)
@@ -146,7 +130,6 @@ async def search_courses_by_condition(
 
 @router.get(
     "/lists/{list_name}",
-    response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
     operation_id="listCoursesByType",
 )
