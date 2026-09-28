@@ -65,3 +65,18 @@ def test_fuzzy_matches_rank_stably_without_mutating_input(monkeypatch, threshold
     )
     assert fuzzy_matches(items, "query", "title", threshold) == [items[2], items[3], items[1]]
     assert items == original
+
+
+@pytest.mark.parametrize("metadata", [{}, {"title": None}, {"title": ""}])
+def test_fuzzy_matches_normalizes_absent_titles(monkeypatch, metadata):
+    calls = []
+
+    def score(query, value):
+        assert isinstance(value, str)
+        calls.append(value)
+        return 100 if value == query else 0
+
+    monkeypatch.setattr("data_api.utils.search.fuzz.partial_ratio", score)
+    match = {"title": "Notice"}
+    assert fuzzy_matches([metadata, match], "Notice", "title", 80) == [match]
+    assert calls == ["", "Notice"]

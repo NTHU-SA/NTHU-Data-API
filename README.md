@@ -108,7 +108,7 @@ uv pip compile .github/smokeshow.in --python-version 3.14 --universal --only-bin
 
 Review dependency and hash changes before merging. The uploader checks out its
 trusted default-branch revision, downloads artifacts from the exact successful push
-run, and uses a commit-pinned artifact Action. Only the upload job receives
+run, and pins checkout, Python setup, and artifact Actions to commit SHAs. Only the upload job receives
 `statuses: write`; the 85% coverage threshold remains unchanged.
 
 The test workflows and Docker builder still need source builds for the

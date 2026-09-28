@@ -37,9 +37,12 @@ class TestDepartmentsEndpoints:
         assert response.status_code == 200
 
 
-async def test_search_handles_missing_optional_person_title(monkeypatch):
+@pytest.mark.parametrize("metadata", [{}, {"title": None}, {"title": ""}])
+async def test_search_handles_missing_optional_person_title(monkeypatch, metadata):
     async def get_directory(endpoint):
-        return "test", [{"name": "Directory", "details": {"people": [{"name": "Alice"}]}}]
+        return "test", [
+            {"name": "Directory", "details": {"people": [{"name": "Alice", **metadata}]}}
+        ]
 
     monkeypatch.setattr(nthudata, "get", get_directory)
     commit, result = await departments_service.fuzzy_search_departments_and_people("ZZZ")
