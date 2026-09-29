@@ -177,9 +177,11 @@ REST and MCP share these services, including transformed courses and bus indexes
 Multiple workers in one container are also independent processes.
 
 Requests drive refresh; there is no permanent background refresh loop, disk cache,
-distributed lock, or cross-instance cache synchronization. Startup prefetch is an
-optimization, not a requirement for serving requests. An unavailable dataset does
-not prevent the application or other datasets from starting.
+distributed lock, or cross-instance cache synchronization. Startup attempts to
+prefetch all published datasets, including maps and library data, so readiness
+can succeed before user traffic. Successful prefetch is not a requirement for
+serving requests. An unavailable dataset does not prevent the application or
+other datasets from starting.
 
 - `FILE_DETAILS_CACHE_EXPIRY` (positive seconds, default **300**) controls freshness
   checks. Within the TTL, requests use the active snapshot without upstream access.
@@ -254,9 +256,8 @@ No publishing pipeline change is required.
 Snapshots separately retain load time and optional published time. TTL scheduling
 uses a monotonic clock; diagnostic timestamps use UTC.
 
-These distinguish liveness from dataset readiness without adding a new health
-endpoint: stale/unverified data with `usable=True` is still available and should
-not make the container unhealthy. A cold unavailable dataset has `usable=False`.
+These distinguish liveness from dataset readiness: stale/unverified data with
+`usable=True` is still available. A cold unavailable dataset has `usable=False`.
 Logs record loads and failures without payloads or exception URLs; ordinary hits
 are not logged at INFO. Set the Python application's logging configuration to
 enable `data_api.data.nthudata` INFO/DEBUG events when needed.
@@ -264,8 +265,38 @@ enable `data_api.data.nthudata` INFO/DEBUG events when needed.
 Live electricity, library space, and lost-and-found integrations are not published
 datasets and retain their existing on-demand behavior and separate HTTP clients.
 They are not covered by snapshot freshness or last-known-good guarantees.
-Public per-object freshness/provenance metadata, a health endpoint, and product
+Public per-object freshness/provenance metadata and product
 changes to dining/bus semantics are deferred.
+
+#### Readiness endpoint
+
+`GET /ping` reports the current process's cached dataset health. It is excluded
+from Swagger UI and `/openapi.json`. It never fetches upstream data, refreshes a
+snapshot, or calls other API endpoints; responses have `Cache-Control: no-store`.
+
+- HTTP **200** with `ready: true` means every dataset has a usable snapshot.
+  `status` is `ok` when all recorded freshness values are `current` and no check
+  is due, or `degraded` when usable data is stale, unverified, or due for a check.
+- HTTP **503** with `ready: false` and `status: "unavailable"` means at least one
+  dataset has no usable snapshot, including datasets not loaded yet. Valid empty
+  snapshots count as usable.
+- `checked_at` is the UTC report time, not an upstream verification time.
+  `datasets` is keyed by published JSON path and includes `usable`, `freshness`,
+  `check_due`, `version`, `loaded_at`, `published_at`, `last_checked_at`,
+  `last_refresh_attempt_at`, `last_refresh_success_at`, and `last_error`.
+  Errors expose only category, upstream HTTP status (when known), and UTC time;
+  payloads, exception messages, and upstream URLs are not returned.
+- `freshness` is the last recorded refresh result; `check_due` separately indicates
+  that its TTL has expired or it has never been checked. Unknown metadata is `null`.
+  The report includes all configured datasets, even before their first request,
+  plus any additional datasets registered in the manager.
+
+This is a **readiness**, not a liveness, check. Do not use it as a Cloud Run
+startup/liveness probe. Failed startup loads are retried by normal dataset
+requests after the TTL, not by `/ping`; a traffic gate that only calls `/ping`
+cannot recover a missing snapshot by itself. Live energy, library space,
+lost-and-found, and MCP transport health are not probed or certified by this
+report. Multiple instances may report different cached states.
 
 Tests use mock transports and injected clocks; the default suite blocks real
 HTTPX network traffic. Lifecycle coverage is in `tests/test_data_manager.py` and
