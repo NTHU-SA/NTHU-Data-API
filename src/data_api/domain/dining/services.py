@@ -6,6 +6,7 @@ Handles business logic for dining data fetching and filtering.
 
 from datetime import datetime
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 from thefuzz import fuzz
 
@@ -37,13 +38,37 @@ def is_restaurant_open(restaurant: dict, day: str) -> bool:
     return True
 
 
+def _filter_by_schedule(dining_data: list[dict], schedule: Optional[str]) -> list[dict]:
+    if schedule is None:
+        return dining_data
+
+    day = schedule
+    if schedule == "today":
+        weekday = datetime.now(ZoneInfo("Asia/Taipei")).weekday()
+        day = "saturday" if weekday == 5 else "sunday" if weekday == 6 else "weekday"
+
+    filtered = []
+    for building in dining_data:
+        restaurants = [
+            restaurant
+            for restaurant in building["restaurants"]
+            if is_restaurant_open(restaurant, day)
+        ]
+        if restaurants:
+            filtered.append({**building, "restaurants": restaurants})
+    return filtered
+
+
 class DiningService:
     """Service for dining data operations."""
 
     async def get_dining_data(
-        self, building_name: Optional[str] = None, restaurant_name: Optional[str] = None
+        self,
+        building_name: Optional[str] = None,
+        restaurant_name: Optional[str] = None,
+        schedule: Optional[str] = None,
     ) -> tuple[Optional[str], list[dict]]:
-        """Get dining data with optional building filter."""
+        """Get grouped dining data with building, name, and opening-day filters."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
             raise DataNotAvailableException("Dataset temporarily unavailable")
@@ -70,9 +95,7 @@ class DiningService:
                     }
                 )
 
-        dining_data = filtered
-
-        return commit_hash, dining_data
+        return commit_hash, _filter_by_schedule(filtered, schedule)
 
     async def get_open_restaurants(
         self,
@@ -82,25 +105,18 @@ class DiningService:
     ) -> tuple[Optional[str], list[dict]]:
         """Get possibly open restaurants after fuzzy building and name filtering."""
         commit_hash, dining_data = await self.fuzzy_search_dining_data(
-            building_name=building_name, restaurant_name=restaurant_name
+            building_name=building_name, restaurant_name=restaurant_name, schedule=schedule
         )
 
-        if schedule == "today":
-            current_day = datetime.now().strftime("%A").lower()
-            day = current_day if current_day in ["saturday", "sunday"] else "weekday"
-        else:
-            day = schedule
-
-        open_restaurants = []
-        for building in dining_data:
-            for restaurant in building["restaurants"]:
-                if is_restaurant_open(restaurant, day):
-                    open_restaurants.append(restaurant)
-
-        return commit_hash, open_restaurants
+        return commit_hash, [
+            restaurant for building in dining_data for restaurant in building["restaurants"]
+        ]
 
     async def fuzzy_search_dining_data(
-        self, building_name: Optional[str] = None, restaurant_name: Optional[str] = None
+        self,
+        building_name: Optional[str] = None,
+        restaurant_name: Optional[str] = None,
+        schedule: Optional[str] = None,
     ) -> tuple[Optional[str], list[dict]]:
         """
         Fuzzy search dining data while maintaining the nested structure.
@@ -150,7 +166,7 @@ class DiningService:
 
             filtered_results.append(new_building)
 
-        return commit_hash, filtered_results
+        return commit_hash, _filter_by_schedule(filtered_results, schedule)
 
 
 # Global service instance

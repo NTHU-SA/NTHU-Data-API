@@ -96,6 +96,37 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+### Dining queries
+
+`GET /dining/` supports optional `building_name`, `restaurant_name`, `fuzzy`
+(default `true`), and `schedule` parameters. All supplied filters are combined
+with AND. `schedule` accepts `today`, `weekday`, `saturday`, or `sunday`; omitting
+it applies no opening-day filter. Invalid or empty schedule values return 422.
+
+For example, find potentially open restaurants in a building today:
+
+```text
+/dining/?building_name=小吃部&schedule=today
+```
+
+The response is always a list of buildings with nested `restaurants`, regardless
+of whether `schedule` is supplied. With a schedule filter, buildings with no
+matching restaurants are omitted; no matches return `[]`. Without it, existing
+search behavior is unchanged. With `fuzzy=false`, building names use exact
+matching and restaurant names use case-sensitive literal substring matching.
+
+`today` uses the **Asia/Taipei** date: Monday-Friday maps to `weekday`, with
+separate Saturday and Sunday categories. Filtering only excludes restaurants
+whose notes indicate a closure on that day. It does not check current opening
+hours, holidays, or live availability. MCP `find_dining(check_open="today")`
+uses the same Taiwan-date interpretation and retains its existing response
+format and limits.
+
+**Breaking change:** `/dining/open` has been removed, without a redirect or
+compatibility alias. Replace `/dining/open?schedule=today` with
+`/dining/?schedule=today`. The old endpoint returned a flat restaurant list;
+clients must now read each building's `restaurants` (or flatten them locally).
+
 ### CI dependency safety
 
 The coverage uploader installs from `.github/smokeshow-requirements.txt` with

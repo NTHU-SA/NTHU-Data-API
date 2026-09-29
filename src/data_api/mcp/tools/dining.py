@@ -17,7 +17,9 @@ async def _find_dining(
     Args:
         restaurant_name: Search for restaurant by name.
         building: Filter by building name (e.g., '小吃部', '水木').
-        check_open: Check which restaurants are open - 'today', 'weekday', 'saturday', or 'sunday'.
+        check_open: Filter potentially open restaurants by schedule notes: 'today',
+            'weekday', 'saturday', or 'sunday'. 'today' uses the Asia/Taipei date,
+            not the current opening hours.
 
     Returns:
         Dictionary with restaurant information.
@@ -76,6 +78,7 @@ async def _find_dining(
 @mcp.tool(
     description="Find restaurants and dining options on campus. "
     "Use this to find where to eat, check which restaurants are open, or search for specific food. "
+    "Open-status uses schedule notes, not live opening hours; today uses the Asia/Taipei date. "
     "Building, restaurant name, and open-status filters apply together."
 )
 async def find_dining(

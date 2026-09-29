@@ -87,6 +87,20 @@ async def test_cold_start_empty_is_not_unavailable(empty):
     "endpoint,path,payload,tool,args",
     [
         ("dining.json", "/dining/", [], "find_dining", {}),
+        (
+            "dining.json",
+            "/dining/?schedule=today",
+            [],
+            "find_dining",
+            {"check_open": "today"},
+        ),
+        (
+            "dining.json",
+            "/dining/?schedule=today&fuzzy=false",
+            [],
+            "find_dining",
+            {"check_open": "today"},
+        ),
         ("announcements.json", "/announcements/", [], "get_announcements", {}),
         ("newsletters.json", "/newsletters/", [], "get_newsletters", {}),
         ("buses.json", "/buses/routes", {}, "get_next_buses", {}),

@@ -151,8 +151,8 @@ def dining_candidates(monkeypatch):
 
     class Saturday(datetime):
         @classmethod
-        def now(cls):
-            return cls(2026, 9, 26)
+        def now(cls, tz=None):
+            return cls(2026, 9, 26, tzinfo=tz)
 
     monkeypatch.setattr(nthudata, "get", fake_get)
     monkeypatch.setattr(dining_services, "datetime", Saturday)
