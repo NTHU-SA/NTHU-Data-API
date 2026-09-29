@@ -125,8 +125,10 @@ def create_app() -> FastAPI:
         libraries,
         locations,
         newsletters,
+        ping,
     )
 
+    app.include_router(ping.router)
     app.include_router(announcements.router, prefix="/announcements", tags=["Announcements"])
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
     app.include_router(calendars.router, prefix="/calendars", tags=["Calendars"])
