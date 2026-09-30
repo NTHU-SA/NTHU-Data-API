@@ -209,10 +209,11 @@ Multiple workers in one container are also independent processes.
 
 Requests drive refresh; there is no permanent background refresh loop, disk cache,
 distributed lock, or cross-instance cache synchronization. Startup attempts to
-prefetch all published datasets, including maps and library data, so readiness
-can succeed before user traffic. Successful prefetch is not a requirement for
-serving requests. An unavailable dataset does not prevent the application or
-other datasets from starting.
+prefetch published datasets used by REST/MCP, including maps, library RSS, and
+library calendars, so readiness can succeed before user traffic. The unpublished
+root `libraries.json` is not a required dataset. Successful prefetch is not a
+requirement for serving requests. An unavailable dataset does not prevent the
+application or other datasets from starting.
 
 - `FILE_DETAILS_CACHE_EXPIRY` (positive seconds, default **300**) controls freshness
   checks. Within the TTL, requests use the active snapshot without upstream access.
