@@ -104,6 +104,21 @@ async def test_cold_start_empty_is_not_unavailable(empty):
         ("announcements.json", "/announcements/", [], "get_announcements", {}),
         ("newsletters.json", "/newsletters/", [], "get_newsletters", {}),
         ("buses.json", "/buses/routes", {}, "get_next_buses", {}),
+        ("buses.json", "/buses/info/stops", {}, "get_next_buses", {}),
+        (
+            "buses.json",
+            "/buses/schedules?bus_type=main&day=weekday&direction=up",
+            {},
+            "get_next_buses",
+            {},
+        ),
+        (
+            "buses.json",
+            "/buses/stops/北校門口?bus_type=main&day=weekday&direction=up",
+            {},
+            "get_next_buses",
+            {},
+        ),
     ],
 )
 async def test_other_datasets_empty_unversioned_and_unavailable(

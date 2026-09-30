@@ -1,6 +1,7 @@
 """Energy usage MCP tool."""
 
 from data_api.domain.energy import services as energy_services
+from data_api.mcp.errors import live_tool_errors
 from data_api.mcp.server import mcp
 
 
@@ -11,7 +12,7 @@ async def _get_energy_usage() -> dict:
     Returns:
         Dictionary with current electricity usage by zone.
     """
-    try:
+    with live_tool_errors():
         data = await energy_services.energy_service.get_realtime_electricity_usage()
         zones = []
         for item in data:
@@ -27,8 +28,6 @@ async def _get_energy_usage() -> dict:
                 }
             )
         return {"zones": zones}
-    except Exception as e:
-        return {"error": f"Failed to fetch energy data: {str(e)}"}
 
 
 @mcp.tool(

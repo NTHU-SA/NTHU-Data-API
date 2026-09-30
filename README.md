@@ -297,6 +297,15 @@ enable `data_api.data.nthudata` INFO/DEBUG events when needed.
 Live electricity, library space, and lost-and-found integrations are not published
 datasets and retain their existing on-demand behavior and separate HTTP clients.
 They are not covered by snapshot freshness or last-known-good guarantees.
+Their REST endpoints return **502** for upstream connection/HTTP failures or
+invalid JSON/HTML/data, and **504** for upstream timeouts. Unexpected internal
+errors return **500**. Error bodies retain a `detail` field with fixed, safe
+messages; upstream URLs and exception details stay in server logs. These responses
+and their JSON schema are documented in OpenAPI. MCP live tools report failures
+as tool errors (`isError: true`), not successful `{"error": ...}` results.
+Valid empty space lists and lost-item results still succeed. Lost-item pages must
+contain the expected table columns or the library's explicit empty-result message
+on its lost-and-found page; missing or malformed tables are upstream errors.
 Public per-object freshness/provenance metadata and product
 changes to dining/bus semantics are deferred.
 

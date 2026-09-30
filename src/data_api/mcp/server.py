@@ -23,11 +23,17 @@ class DatasetErrors(Middleware):
             return await call_next(context)
         except DataNotAvailableException as exc:
             raise ToolError("Dataset temporarily unavailable. Please try again later.") from exc
+        except ToolError as exc:
+            # FastMCP wraps execution failures before middleware sees them.
+            if isinstance(exc.__cause__, DataNotAvailableException):
+                raise ToolError("Dataset temporarily unavailable. Please try again later.") from exc
+            raise
 
 
 # Create curated MCP server
 mcp = FastMCP(
     name="NTHU Campus Assistant",
+    mask_error_details=True,
     instructions="""You are an assistant for National Tsing Hua University (NTHU) in Taiwan.
 You can help with:
 - Finding campus locations and directions

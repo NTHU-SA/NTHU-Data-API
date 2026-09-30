@@ -16,6 +16,54 @@ def no_external_network(monkeypatch):
 
 
 @pytest.fixture
+def mock_upstream(monkeypatch, no_external_network):
+    def install(handler):
+        transport = httpx.MockTransport(handler)
+
+        async def handle_request(self, request):
+            return await transport.handle_async_request(request)
+
+        monkeypatch.setattr(httpx.AsyncHTTPTransport, "handle_async_request", handle_request)
+
+    return install
+
+
+@pytest.fixture
+def library_space_payload():
+    return {
+        "resmsg": "成功",
+        "rows": [
+            {
+                "spacetype": "1",
+                "spacetypename": "Study room",
+                "zoneid": "main",
+                "zonename": "Main library",
+                "count": "12",
+            }
+        ],
+    }
+
+
+@pytest.fixture
+def lost_items_html():
+    def make(count=12):
+        header = "<tr><td>序號</td><td>拾獲時間</td><td>拾獲地點</td><td>描述</td></tr>"
+        rows = "".join(
+            f"<tr><td>{index}</td><td>2026-09-30</td><td>Main library</td>"
+            "<td> Book\n  title </td></tr>"
+            for index in range(count)
+        )
+        return f"<table>{header}{rows}</table>"
+
+    return make
+
+
+@pytest.fixture
+def lost_items_empty_page():
+    return '<div id="content"><h1>失物招領系統 Lost and Found System</h1>' "<br>目前無資料 !!</div>"
+
+
+@pytest.fixture
 async def dataset_runtime():
     data = {
         "/courses.json": [

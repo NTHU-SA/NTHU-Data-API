@@ -8,9 +8,11 @@ Delegates business logic to domain services.
 from datetime import datetime
 from typing import Literal, Union
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, Query, Response
 
+from data_api.api.errors import service_errors
 from data_api.api.schemas import buses as schemas
+from data_api.api.schemas.errors import ErrorResponse
 from data_api.domain.buses import services
 
 # Constants
@@ -41,7 +43,7 @@ def get_current_time_state():
     response_model=list[schemas.BusInfo],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusRouteData",
-    responses={500: {"description": "Unable to retrieve bus metadata"}},
+    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus metadata"}},
 )
 async def get_bus_route_metadata(
     bus_type: Literal["main", "nanda"] = Query(None, description="車種選擇"),
@@ -52,10 +54,8 @@ async def get_bus_route_metadata(
     - 校本部來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20978.php?Lang=zh-tw)
     - 南大來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
     """
-    try:
+    with service_errors():
         return services.buses_service.get_route_info(bus_type, direction)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve bus metadata: {e}")
 
 
 @router.get(
@@ -63,14 +63,12 @@ async def get_bus_route_metadata(
     response_model=list[schemas.BusStopsInfo],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusStopsInformation",
-    responses={500: {"description": "Unable to retrieve bus stops"}},
+    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus stops"}},
 )
 async def get_bus_stops_information():
     """取得所有公車站牌的經緯度與資訊。"""
-    try:
+    with service_errors():
         return services.buses_service.gen_bus_stops_info()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve bus stops info: {e}")
 
 
 @router.get(
@@ -78,7 +76,7 @@ async def get_bus_stops_information():
     response_model=list[Union[schemas.BusDetailedSchedule, schemas.BusSchedule, None]],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusSchedules",
-    responses={500: {"description": "Unable to retrieve bus schedules"}},
+    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
     response_description="取得公車時刻表信息。",
 )
 async def get_bus_schedules(
@@ -96,7 +94,7 @@ async def get_bus_schedules(
     # 1. 計算要查詢的時間點與模式
     find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
 
-    try:
+    with service_errors():
         time_path = ["dep_info", "time"] if details else ["time"]
         raw_data = services.buses_service.get_schedule(
             route_type=bus_type,
@@ -113,9 +111,6 @@ async def get_bus_schedules(
 
         limit = query.limits
         return res[:limit]
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve bus schedule: {e}")
 
 
 @router.get(

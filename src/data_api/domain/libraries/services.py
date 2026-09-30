@@ -5,12 +5,24 @@ Handles library data fetching and search, plus the library RSS feeds and
 opening-hours calendars crawled by NTHU-Data-Scraper.
 """
 
-from datetime import date
+import re
+import ssl
+from datetime import date, datetime, timedelta
 from typing import Optional
 
+import httpx
+import truststore
+from bs4 import BeautifulSoup
+from pydantic import TypeAdapter
 from thefuzz import fuzz
 
-from data_api.core.exceptions import DataNotAvailableException
+from data_api.api.schemas.libraries import LibraryLostAndFound, LibrarySpace
+from data_api.core.exceptions import (
+    DataNotAvailableException,
+    UpstreamException,
+    UpstreamResponseException,
+)
+from data_api.core.upstream import upstream_errors
 from data_api.data.manager import nthudata
 from data_api.utils.calendars import filter_calendar_events, get_event_date_range
 
@@ -19,10 +31,93 @@ RSS_JSON_PATH = "libraries/rss.json"
 CALENDARS_JSON_PATH = "libraries/calendars.json"
 FUZZY_SEARCH_THRESHOLD = 70
 DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+}
+SPACE_ADAPTER = TypeAdapter(list[LibrarySpace])
+ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
+
+def parse_lost_items(html: str) -> list[dict[str, str]]:
+    """Parse complete results, distinguishing an empty page from a broken one."""
+    soup = BeautifulSoup(html, "html.parser")
+    table = soup.find("table")
+    if table is None:
+        content = soup.find(id="content")
+        heading = content.find("h1") if content is not None else None
+        if (
+            heading is not None
+            and "Lost and Found System" in heading.get_text()
+            and re.search(r"\u76ee\u524d\u7121\u8cc7\u6599\s*!!", content.get_text())
+        ):
+            return []
+        raise UpstreamResponseException("Lost-and-found results table is missing")
+
+    rows = table.find_all("tr")
+    if not rows:
+        raise UpstreamResponseException("Lost-and-found table has no header")
+    titles = [cell.get_text(strip=True) for cell in rows[0].find_all(["td", "th"])]
+    if not LibraryLostAndFound.model_fields.keys() <= set(titles) or len(titles) != len(
+        set(titles)
+    ):
+        raise UpstreamResponseException("Lost-and-found table has invalid columns")
+
+    items = []
+    for row in rows[1:]:
+        cells = [
+            re.sub(r"\s+", " ", cell.get_text().strip()) for cell in row.find_all(["td", "th"])
+        ]
+        if len(cells) != len(titles):
+            raise UpstreamResponseException("Lost-and-found row has invalid cells")
+        items.append(dict(zip(titles, cells)))
+    return items
 
 
 class LibrariesService:
     """Service for library data operations."""
+
+    async def get_space_availability(self) -> list[dict]:
+        """Get validated live library space data."""
+        with upstream_errors():
+            async with httpx.AsyncClient(verify=ctx) as client:
+                response = await client.get(
+                    "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx",
+                    headers=DEFAULT_HEADERS,
+                )
+                response.raise_for_status()
+                data = response.json()
+
+            if not isinstance(data, dict) or not isinstance(data.get("resmsg"), str):
+                raise UpstreamResponseException("Library space response has no result message")
+            if data["resmsg"] != "\u6210\u529f":
+                raise UpstreamException("Library space service reported a failure")
+            rows = data.get("rows")
+            if not isinstance(rows, list):
+                raise UpstreamResponseException("Library space response has no rows list")
+            SPACE_ADAPTER.validate_python(rows)
+            return rows
+
+    async def get_lost_and_found_items(self) -> list[dict[str, str]]:
+        """Get all live lost items from the last six months."""
+        date_end = datetime.now()
+        date_start = date_end - timedelta(days=6 * 30)
+        post_data = {
+            "place": "0",
+            "date_start": date_start.strftime("%Y-%m-%d"),
+            "date_end": date_end.strftime("%Y-%m-%d"),
+            "catalog": "ALL",
+            "keyword": "",
+            "SUMIT": "\u9001\u51fa",
+        }
+        with upstream_errors():
+            async with httpx.AsyncClient(verify=ctx) as client:
+                response = await client.post(
+                    "https://adage.lib.nthu.edu.tw/find/search_it.php",
+                    data=post_data,
+                    headers=DEFAULT_HEADERS,
+                )
+                response.raise_for_status()
+            return parse_lost_items(response.text)
 
     async def get_all_libraries(self) -> tuple[Optional[str], list[dict]]:
         """Get all libraries."""

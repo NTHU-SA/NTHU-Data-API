@@ -1,11 +1,13 @@
 """Tests for buses endpoints."""
 
 import pytest
+from fastmcp import Client
 from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
 from data_api.api.api import app
-from data_api.domain.buses.services import BusesService
+from data_api.domain.buses.services import BusesService, buses_service
+from data_api.mcp.server import mcp
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
@@ -18,6 +20,46 @@ def test_missing_route_metadata_is_not_registered():
 
     assert service.get_route_info("nanda", "up") == []
     assert service.get_route_info("nanda", "down") == [{"direction": "down"}]
+
+
+@pytest.mark.parametrize(
+    "path,method",
+    [
+        ("/buses/routes", "get_route_info"),
+        ("/buses/info/stops", "gen_bus_stops_info"),
+        (
+            "/buses/schedules?bus_type=main&day=weekday&direction=up",
+            "get_schedule",
+        ),
+    ],
+)
+async def test_internal_bus_errors_are_safe(monkeypatch, caplog, path, method):
+    def fail(*args, **kwargs):
+        raise RuntimeError("Private bus failure at https://upstream.example")
+
+    monkeypatch.setattr(buses_service, method, fail)
+    async with AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=False), base_url="http://test"
+    ) as client:
+        response = await client.get(path, headers={"Origin": "https://example.com"})
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Internal server error"}
+    assert response.headers["Access-Control-Allow-Origin"] == "*"
+    assert float(response.headers["X-Process-Time"]) >= 0
+    assert "Private bus failure" in caplog.text
+
+
+async def test_unexpected_bus_tool_errors_are_masked(monkeypatch, caplog):
+    async def fail():
+        raise RuntimeError("Private bus failure at https://upstream.example")
+
+    monkeypatch.setattr(buses_service, "update_data", fail)
+    async with Client(mcp) as client:
+        result = await client.call_tool("get_next_buses", {}, raise_on_error=False)
+    assert result.is_error
+    assert "Private" not in result.content[0].text
+    assert "http" not in result.content[0].text
+    assert "Private bus failure" in caplog.text
 
 
 class TestBusesRoutes:

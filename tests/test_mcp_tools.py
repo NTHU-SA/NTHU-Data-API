@@ -1,6 +1,7 @@
 """Tests for MCP tools."""
 
 import pytest
+from httpx import Response
 
 from data_api.mcp.tools.announcements import _get_announcements
 from data_api.mcp.tools.buses import _get_bus_stops, _get_next_buses
@@ -8,23 +9,10 @@ from data_api.mcp.tools.campus import _search_campus
 from data_api.mcp.tools.courses import _search_courses
 from data_api.mcp.tools.dining import _find_dining
 from data_api.mcp.tools.energy import _get_energy_usage
-from data_api.mcp.tools.library import _get_library_info, _parse_lost_items
+from data_api.mcp.tools.library import _get_library_info
 from data_api.mcp.tools.newsletters import _get_newsletters
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
-
-
-@pytest.mark.parametrize("html", ["", "<table></table>", "<table><tr><td>ID</td></tr></table>"])
-def test_lost_items_empty_tables(html):
-    assert _parse_lost_items(html) == []
-
-
-def test_lost_items_limits_rows_and_skips_malformed_cells():
-    header = "<tr><td> ID </td><td> Item </td></tr>"
-    invalid = "<tr><td>incomplete</td></tr>"
-    rows = "".join(f"<tr><td>{i}</td><td> Book\n  title </td></tr>" for i in range(12))
-    html = f"<table>{header}{invalid}{rows}</table>"
-    assert _parse_lost_items(html) == [{"ID": str(i), "Item": "Book title"} for i in range(9)]
 
 
 class TestMCPTools:
@@ -121,17 +109,33 @@ class TestMCPTools:
         assert "open_restaurants" in result
         assert isinstance(result["open_restaurants"], list)
 
-    async def test_get_library_info_space(self):
-        """Test get library space info."""
+    @pytest.mark.parametrize("empty", [False, True])
+    async def test_get_library_info_space(self, mock_upstream, library_space_payload, empty):
+        if empty:
+            library_space_payload["rows"] = []
+        mock_upstream(lambda request: Response(200, json=library_space_payload))
         result = await _get_library_info(info_type="space")
-        # Can either succeed or fail depending on external service
-        assert "spaces" in result or "error" in result
+        assert result == {
+            "spaces": (
+                [] if empty else [{"zone": "Main library", "type": "Study room", "available": "12"}]
+            )
+        }
 
-    async def test_get_library_info_lost_and_found(self):
-        """Test get library lost and found info."""
+    @pytest.mark.parametrize("count", [0, 12])
+    async def test_get_library_info_lost_and_found(self, mock_upstream, lost_items_html, count):
+        mock_upstream(lambda request: Response(200, text=lost_items_html(count)))
         result = await _get_library_info(info_type="lost_and_found")
-        # Can either succeed or fail depending on external service
-        assert "items" in result or "error" in result
+        assert result == {
+            "items": [
+                {
+                    "序號": str(index),
+                    "拾獲時間": "2026-09-30",
+                    "拾獲地點": "Main library",
+                    "描述": "Book title",
+                }
+                for index in range(min(count, 10))
+            ]
+        }
 
     async def test_get_newsletters(self):
         """Test get newsletters."""
@@ -147,11 +151,20 @@ class TestMCPTools:
         assert "newsletters" in result
         assert isinstance(result["newsletters"], list)
 
-    async def test_get_energy_usage(self):
-        """Test get energy usage."""
+    async def test_get_energy_usage(self, mock_upstream):
+        mock_upstream(lambda request: Response(200, text='<img alt="kW: 0">'))
         result = await _get_energy_usage()
-        # Can either succeed or fail depending on external service
-        assert "zones" in result or "error" in result
+        assert len(result["zones"]) == 3
+        for zone in result["zones"]:
+            assert set(zone) == {
+                "name",
+                "usage_kw",
+                "capacity_kw",
+                "usage_percent",
+                "last_updated",
+            }
+            assert zone["usage_kw"] == 0
+            assert zone["usage_percent"] == 0
 
     async def test_get_bus_stops(self):
         """Test get bus stops with specific stop_name to get upcoming buses."""

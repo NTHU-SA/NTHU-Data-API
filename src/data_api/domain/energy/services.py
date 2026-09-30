@@ -10,6 +10,9 @@ import re
 
 import httpx
 
+from data_api.core.exceptions import UpstreamResponseException
+from data_api.core.upstream import upstream_errors
+
 # Electricity system data
 ELECTRICITY_USAGE_DATA = [
     {"id": 1, "name": "北區一號", "capacity": 5200},
@@ -23,20 +26,19 @@ URL_POSTFIX = ".aspx"
 async def fetch_electricity_data(item: dict) -> dict:
     """Async fetch electricity data for one system."""
     url = f"{URL_PREFIX}{item['id']}{URL_POSTFIX}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        if response.status_code != 200:
-            raise httpx.HTTPStatusError(
-                "Failed to fetch electricity data.",
-                request=response.request,
-                response=response,
-            )
+    with upstream_errors():
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()
 
         data_match = re.search(r"alt=\"kW: ([\d,-]+?)\"", response.text, re.S)
         if not data_match:
-            raise ValueError("Failed to parse electricity data.")
+            raise UpstreamResponseException("Electricity usage field is missing")
 
-        usage_value = int(data_match.group(1).replace(",", ""))
+        try:
+            usage_value = int(data_match.group(1).replace(",", ""))
+        except ValueError as exc:
+            raise UpstreamResponseException("Electricity usage is not a number") from exc
         return {
             **item,
             "data": usage_value,
