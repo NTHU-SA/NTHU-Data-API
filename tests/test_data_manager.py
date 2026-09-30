@@ -3,16 +3,19 @@
 import asyncio
 import hashlib
 import socket
+from copy import deepcopy
 from dataclasses import replace
 
 import httpx
 import pytest
 from pydantic import TypeAdapter
 
+from data_api.api.api import app
 from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.nthudata import FetchFailure, Freshness, NTHUDataManager
 from data_api.domain.buses.services import BusesService
 from data_api.domain.courses.services import CoursesService
+from data_api.domain.libraries import services as libraries_services
 
 
 class Clock:
@@ -645,6 +648,103 @@ async def test_dataset_schemas_validate_nested_records_before_install(endpoint, 
         publisher.payload = {} if isinstance(valid, dict) else []
         clock.advance()
         assert await manager.get(endpoint) == ("b", publisher.payload)
+
+
+@pytest.mark.parametrize("refresh", [False, True])
+async def test_library_rss_published_urls_are_installed_and_serialized(
+    monkeypatch, published_library_rss, refresh
+):
+    endpoint = libraries_services.RSS_JSON_PATH
+    clock, publisher = Clock(), Publisher(published_library_rss, endpoint)
+    manager = NTHUDataManager(clock=clock)
+    monkeypatch.setattr(libraries_services, "nthudata", manager)
+    expected = deepcopy(published_library_rss)
+    for items in expected.values():
+        for item in items:
+            if item.get("image"):
+                item["image"]["url"] = item["image"]["url"].replace(" ", "%20")
+
+    async with manager.lifespan(publisher.client()):
+        if refresh:
+            publisher.payload = {feed: [] for feed in published_library_rss}
+        assert await manager.prefetch([endpoint]) == {endpoint: True}
+        old = manager.state_for(endpoint).snapshot
+        if refresh:
+            publisher.version, publisher.payload = "b", published_library_rss
+            clock.advance()
+
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            for feed, articles in expected.items():
+                response = await client.get(f"/libraries/rss/{feed}")
+                assert response.status_code == 200
+                assert response.headers["X-Data-Commit-Hash"] == publisher.version
+                items = response.json()
+                assert len(items) == len(articles)
+                for item, article in zip(items, articles, strict=True):
+                    assert item["title"] == article["title"]
+                    assert item["description"] == article["description"]
+                    assert item["link"] == article["link"]
+                    if article.get("image"):
+                        assert item["image"]["url"] == article["image"]["url"]
+                    else:
+                        assert item["image"] is None
+
+        state = manager.state_for(endpoint)
+        assert state.snapshot.raw == expected
+        assert state.snapshot.data == expected
+        assert state.freshness == Freshness.CURRENT
+        assert state.last_error is None
+        if refresh:
+            assert state.snapshot is not old
+
+
+@pytest.mark.parametrize("initial_loaded", [False, True])
+@pytest.mark.parametrize("invalid_field", ["image_url", "link", "title"])
+async def test_invalid_library_rss_candidate_preserves_availability(
+    monkeypatch, published_library_rss, initial_loaded, invalid_field
+):
+    endpoint = libraries_services.RSS_JSON_PATH
+    clock, publisher = Clock(), Publisher(published_library_rss, endpoint)
+    manager = NTHUDataManager(clock=clock)
+    monkeypatch.setattr(libraries_services, "nthudata", manager)
+
+    async with manager.lifespan(publisher.client()):
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            previous_responses = {}
+            if initial_loaded:
+                for feed in published_library_rss:
+                    response = await client.get(f"/libraries/rss/{feed}")
+                    assert response.status_code == 200
+                    previous_responses[feed] = response.json()
+            state = manager.state_for(endpoint)
+            old = state.snapshot
+            publisher.version, publisher.payload = "b", deepcopy(published_library_rss)
+            article = publisher.payload["news"][0]
+            if invalid_field == "image_url":
+                article["image"] = {"url": "https://invalid host.test/cover image.jpg"}
+            elif invalid_field == "link":
+                article["link"] = 42
+            else:
+                del article["title"]
+            clock.advance()
+
+            for feed in published_library_rss:
+                response = await client.get(f"/libraries/rss/{feed}")
+                if initial_loaded:
+                    assert response.status_code == 200
+                    assert response.headers["X-Data-Commit-Hash"] == "a"
+                    assert response.json() == previous_responses[feed]
+                else:
+                    assert response.status_code == 503
+
+        assert state.snapshot is old
+        assert state.last_error.category == "validation"
+        assert state.freshness == (Freshness.STALE if initial_loaded else Freshness.UNAVAILABLE)
+        assert publisher.calls.count("/libraries/rss.json") == (2 if initial_loaded else 1)
 
 
 async def test_concurrent_cold_failure_is_one_attempt_then_recover():

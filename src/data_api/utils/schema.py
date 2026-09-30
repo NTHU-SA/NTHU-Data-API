@@ -1,3 +1,6 @@
+from urllib.parse import urlsplit, urlunsplit
+
+
 def url_corrector(url: str) -> str:
     """
     Fix the URL under different conditions:
@@ -22,3 +25,17 @@ def url_corrector(url: str) -> str:
             return "https://" + split_url[1]
 
     return url
+
+
+def rss_image_url_corrector(url: object) -> object:
+    """Encode library RSS image path spaces without re-encoding existing escapes."""
+    if not isinstance(url, str):
+        return url
+
+    url = url_corrector(url)
+    # Let HttpUrl reject controls rather than allowing urlsplit to strip them.
+    if any(ord(character) < 32 for character in url):
+        return url
+
+    parts = urlsplit(url)
+    return urlunsplit(parts._replace(path=parts.path.replace(" ", "%20")))

@@ -3,13 +3,12 @@ from typing import Annotated, Optional
 
 from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
 
-from data_api.utils.schema import url_corrector
+from data_api.utils.schema import rss_image_url_corrector, url_corrector
 
 
 class LibraryRssImage(BaseModel):
-    # url 使用 str 而非 HttpUrl，因為有些圖片的 url 並非合法的 url，例如: //www.lib.nthu.edu.tw/image/news/8/20230912.jpg
-    url: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        None, description="圖片網址"
+    url: Optional[Annotated[HttpUrl, BeforeValidator(rss_image_url_corrector)]] = Field(
+        None, description="圖片網址（路徑空白會編碼為 %20）"
     )
     title: Optional[str] = Field(None, description="圖片標題")
     link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
@@ -21,9 +20,7 @@ class LibraryRssItem(BaseModel):
     guid: Optional[str] = Field(None, description="文章 id")
     category: Optional[str] = Field(None, description="文章分類")
     title: str = Field(..., description="文章標題")
-    link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        None, description="文章連結"
-    )
+    link: Optional[str] = Field(None, description="文章連結原文（單一網址或逗號分隔的多個網址）")
     pubDate: Optional[str] = Field(None, description="文章發布日期")
     description: str = Field(..., description="文章內容")
     author: Optional[str] = Field(None, description="文章作者")

@@ -1,11 +1,16 @@
 """Tests for libraries endpoints."""
 
+import json
+from copy import deepcopy
 from datetime import date
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from pydantic import ValidationError
 
 from data_api.api.api import app
+from data_api.api.schemas.libraries import LibraryRssImage, LibraryRssItem
+from data_api.data.validation import validate_dataset
 from data_api.domain.libraries import services
 from data_api.domain.libraries.services import filter_calendar_events, get_event_date_range
 
@@ -145,6 +150,81 @@ class TestEventFiltering:
 
 class TestLibraryRss:
     """Tests for the RSS endpoint backed by the scraper JSON."""
+
+    def test_published_urls_are_normalized_without_losing_article_data(self, published_library_rss):
+        expected = deepcopy(published_library_rss)
+        for items in expected.values():
+            for item in items:
+                if item.get("image"):
+                    item["image"]["url"] = item["image"]["url"].replace(" ", "%20")
+
+        normalized = validate_dataset("/libraries/rss.json", deepcopy(published_library_rss))
+        assert normalized == expected
+        assert validate_dataset("/libraries/rss.json", deepcopy(normalized)) == expected
+
+    @pytest.mark.parametrize(
+        "link",
+        [
+            None,
+            "https://www.lib.nthu.edu.tw/",
+            "//www.lib.nthu.edu.tw/",
+            " https://example.com/one, https://example.com/two ",
+        ],
+    )
+    def test_article_link_preserves_original_text(self, link):
+        item = LibraryRssItem(title="News", description="", link=link)
+        assert item.link == link
+
+    @pytest.mark.parametrize(
+        "url,expected",
+        [
+            (None, None),
+            (
+                "https://www.lib.nthu.edu.tw/image/news/19/20260921_LRS_CNKI Trial.jpg",
+                "https://www.lib.nthu.edu.tw/image/news/19/20260921_LRS_CNKI%20Trial.jpg",
+            ),
+            (
+                "https://www.lib.nthu.edu.tw/image/news/19/20260921_LRS_CNKI%20Trial.jpg",
+                "https://www.lib.nthu.edu.tw/image/news/19/20260921_LRS_CNKI%20Trial.jpg",
+            ),
+            (
+                "//www.lib.nthu.edu.tw/image/cover image.jpg",
+                "https://www.lib.nthu.edu.tw/image/cover%20image.jpg",
+            ),
+            (
+                "https://example.com/cover%2Fone image.jpg?name=a%20b#cover",
+                "https://example.com/cover%2Fone%20image.jpg?name=a%20b#cover",
+            ),
+            (
+                "https://www.lib.nthu.edu.tw/image/news/2/"
+                "20260930_\u9031\u4e09\u97ff\u6642\u5149.jpg",
+                "https://www.lib.nthu.edu.tw/image/news/2/"
+                "20260930_%E9%80%B1%E4%B8%89%E9%9F%BF%E6%99%82%E5%85%89.jpg",
+            ),
+        ],
+    )
+    def test_image_path_spaces_are_encoded_once(self, url, expected):
+        image = LibraryRssImage.model_validate_json(json.dumps({"url": url}), strict=True)
+        assert image.model_dump(mode="json")["url"] == expected
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "not a URL",
+            "https://",
+            "https://invalid host.test/cover image.jpg",
+            "https://example.com/cover image.jpg?name=a b",
+            "https://example.com/co\tver image.jpg",
+            42,
+        ],
+    )
+    def test_invalid_image_urls_are_still_rejected(self, url):
+        with pytest.raises(ValidationError):
+            LibraryRssImage.model_validate_json(json.dumps({"url": url}), strict=True)
+
+    def test_image_links_remain_validated_urls(self):
+        with pytest.raises(ValidationError):
+            LibraryRssImage(link="not a URL")
 
     async def test_get_rss(self, client: AsyncClient, fake_data):
         response = await client.get("/libraries/rss/news")

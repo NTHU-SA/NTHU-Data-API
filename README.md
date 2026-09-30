@@ -96,6 +96,12 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+Library RSS article `link` is nullable text: a single URL or comma-separated list
+of complete URLs is retained verbatim. Image `url` remains a validated HTTP(S)
+URL; spaces in its path are encoded as `%20` before the candidate snapshot is
+installed, without double-encoding existing escapes. This normalization is
+RSS-specific and preserves every article and other upstream fields.
+
 ### Dining queries
 
 `GET /dining/` supports optional `building_name`, `restaurant_name`, `fuzzy`

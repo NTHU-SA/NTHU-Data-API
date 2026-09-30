@@ -1,4 +1,4 @@
-"""Validate published payloads before any reader can observe them."""
+"""Validate published payloads and normalize RSS image URLs before installation."""
 
 import json
 from collections.abc import Sequence
@@ -79,5 +79,11 @@ def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
         parsed = adapter.validate_json(json.dumps(raw), strict=True)
         if endpoint in {"/libraries/calendars.json", "/calendars.json"}:
             _validate_calendar_events(parsed)
-    # Preserve upstream fields and representation; response serialization stays unchanged.
+        if endpoint == "/libraries/rss.json" and isinstance(raw, dict):
+            # The manager serves snapshot.raw, so normalize the validated candidate in place.
+            for feed, items in parsed.items():
+                for raw_item, item in zip(raw[feed], items, strict=True):
+                    if item.image is not None and item.image.url is not None:
+                        raw_item["image"]["url"] = str(item.image.url)
+    # Preserve all other upstream fields and representation.
     return raw
