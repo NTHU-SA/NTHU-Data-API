@@ -38,6 +38,12 @@ LIVE_CALLS = [
     ),
 ]
 CALL_PARAMETERS = "path,tool,arguments,service,method"
+LOST_ITEM_HEADERS = (
+    "\u5e8f\u865f",
+    "\u62fe\u7372\u6642\u9593",
+    "\u62fe\u7372\u5730\u9ede",
+    "\u63cf\u8ff0",
+)
 
 
 @pytest.fixture
@@ -187,6 +193,92 @@ async def test_malformed_lost_rows_are_not_skipped(
         f"<td>{invalid_row_position}</td>", "<td>incomplete</td><td>extra cell</td>"
     )
     mock_upstream(lambda request: httpx.Response(200, text=html))
+    response = await rest.get("/libraries/lost_and_found")
+    assert response.status_code == 502
+    assert response.json() == {"detail": "Invalid response from upstream service"}
+    async with Client(mcp) as client:
+        result = await client.call_tool(
+            "get_library_info", {"info_type": "lost_and_found"}, raise_on_error=False
+        )
+    assert result.is_error
+    assert result.content[0].text == "Invalid response from upstream service"
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        pytest.param((*LOST_ITEM_HEADERS, "Internal note"), id="extra"),
+        pytest.param((*LOST_ITEM_HEADERS, LOST_ITEM_HEADERS[-1]), id="duplicate"),
+        pytest.param(LOST_ITEM_HEADERS[:-1], id="missing"),
+    ],
+)
+async def test_lost_items_reject_invalid_headers(rest, mock_upstream, headers):
+    header = "".join(f"<th>{title}</th>" for title in headers)
+    cells = "".join(f"<td>{index}</td>" for index in range(len(headers)))
+    html = f"<table><tr>{header}</tr><tr>{cells}</tr></table>"
+    mock_upstream(lambda request: httpx.Response(200, text=html))
+
+    response = await rest.get("/libraries/lost_and_found")
+    assert response.status_code == 502
+    assert response.json() == {"detail": "Invalid response from upstream service"}
+    async with Client(mcp) as client:
+        result = await client.call_tool(
+            "get_library_info", {"info_type": "lost_and_found"}, raise_on_error=False
+        )
+    assert result.is_error
+    assert result.content[0].text == "Invalid response from upstream service"
+
+
+@pytest.mark.parametrize("count", [0, 12])
+async def test_lost_items_accept_reordered_headers(rest, mock_upstream, count):
+    serial, found_at, location, description = LOST_ITEM_HEADERS
+    headers = (description, location, serial, found_at)
+    html = "<table><tr>" + "".join(f"<th> {title} </th>" for title in headers) + "</tr>"
+    items = []
+    for index in range(count):
+        values = {
+            serial: str(index),
+            found_at: "2026-09-30",
+            location: "Main library",
+            description: " Book\n  title ",
+        }
+        items.append({**values, description: "Book title"})
+        html += "<tr>" + "".join(f"<td>{values[title]}</td>" for title in headers) + "</tr>"
+    html += "</table>"
+    mock_upstream(lambda request: httpx.Response(200, text=html))
+
+    response = await rest.get("/libraries/lost_and_found")
+    assert response.status_code == 200
+    assert response.json() == items
+    async with Client(mcp) as client:
+        result = await client.call_tool("get_library_info", {"info_type": "lost_and_found"})
+    assert not result.is_error
+    assert result.data == {"items": items[:10]}
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        pytest.param(
+            "<h1>Lost and Found System</h1>\u76ee\u524d\u7121\u8cc7\u6599 !!",
+            id="missing-content",
+        ),
+        pytest.param(
+            '<div id="content">\u76ee\u524d\u7121\u8cc7\u6599 !!</div>', id="missing-heading"
+        ),
+        pytest.param(
+            '<div id="content"><h1>Library News</h1>\u76ee\u524d\u7121\u8cc7\u6599 !!</div>',
+            id="wrong-heading",
+        ),
+        pytest.param(
+            '<div id="content"><h1>Lost and Found System</h1>Results pending</div>',
+            id="missing-empty-marker",
+        ),
+    ],
+)
+async def test_lost_items_reject_invalid_empty_pages(rest, mock_upstream, html):
+    mock_upstream(lambda request: httpx.Response(200, text=html))
+
     response = await rest.get("/libraries/lost_and_found")
     assert response.status_code == 502
     assert response.json() == {"detail": "Invalid response from upstream service"}

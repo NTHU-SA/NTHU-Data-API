@@ -5,18 +5,26 @@ lifespan: its real session manager can only start once per app. One integration
 test exercises the real manager and HTTP transport through the exported app.
 """
 
+import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager
 from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
+from fastapi.exceptions import ResponseValidationError
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 from data_api.api import api as api_module
 from data_api.api.api import app
 from data_api.core import config
+from data_api.core.exceptions import (
+    DataNotAvailableException,
+    UpstreamResponseException,
+    UpstreamTimeoutException,
+)
 from data_api.data.manager import nthudata
 from data_api.domain.buses import services as buses_services
 from data_api.domain.courses import services as courses_services
@@ -178,6 +186,134 @@ class TestCoursesAfterStartup:
         assert response.status_code == 200
         assert len(response.json()) == 1
         assert response.json()[0]["chinese_title"] == "測試課程"
+
+
+@pytest.mark.parametrize("failure", ["dependency", "response_validation"])
+async def test_unexpected_pre_response_errors_keep_safe_body_and_headers(
+    monkeypatch, caplog, failure
+):
+    private = "Private bus failure at https://upstream.example/credentials"
+
+    async def update_data():
+        if failure == "dependency":
+            raise RuntimeError(private)
+
+    monkeypatch.setattr(buses_services.buses_service, "update_data", update_data)
+    if failure == "response_validation":
+        monkeypatch.setattr(
+            buses_services.buses_service,
+            "get_route_info",
+            lambda *_: [{"direction": private}],
+        )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=True), base_url="http://test"
+    ) as client:
+        response = await client.get("/buses/routes", headers={"Origin": "https://example.com"})
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Internal server error"}
+    assert "Private" not in response.text
+    assert "https://upstream.example" not in response.text
+    assert response.headers["Access-Control-Allow-Origin"] == "*"
+    assert float(response.headers["X-Process-Time"]) >= 0
+    assert "x-process-time" in response.headers["Access-Control-Expose-Headers"].lower()
+    assert private in caplog.text
+    assert any(
+        record.message == "Unexpected request failure" and record.exc_info
+        for record in caplog.records
+    )
+    if failure == "response_validation":
+        assert any(
+            isinstance(record.exc_info[1], ResponseValidationError)
+            for record in caplog.records
+            if record.exc_info
+        )
+
+
+@pytest.mark.parametrize(
+    "error,status,detail",
+    [
+        pytest.param(
+            DataNotAvailableException("Private dataset state"),
+            503,
+            "Service temporarily unavailable",
+            id="snapshot",
+        ),
+        pytest.param(
+            UpstreamTimeoutException("Private upstream timeout"),
+            504,
+            "Upstream request timed out",
+            id="upstream-timeout",
+        ),
+        pytest.param(
+            UpstreamResponseException("Private upstream response"),
+            502,
+            "Invalid response from upstream service",
+            id="upstream-response",
+        ),
+        pytest.param(
+            HTTPException(status_code=409, detail="Expected conflict"),
+            409,
+            "Expected conflict",
+            id="http-exception",
+        ),
+    ],
+)
+async def test_expected_dependency_errors_keep_status_and_headers(
+    monkeypatch, error, status, detail
+):
+    async def update_data():
+        raise error
+
+    monkeypatch.setattr(buses_services.buses_service, "update_data", update_data)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/buses/routes", headers={"Origin": "https://example.com"})
+
+    assert response.status_code == status
+    assert response.json() == {"detail": detail}
+    assert response.headers["Access-Control-Allow-Origin"] == "*"
+    assert float(response.headers["X-Process-Time"]) >= 0
+
+
+async def test_error_after_stream_starts_is_not_replaced():
+    sent = []
+
+    async def fail_after_start(scope, receive, send):
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        await send({"type": "http.response.body", "body": b"partial", "more_body": True})
+        raise RuntimeError("Late stream failure")
+
+    async def send(message):
+        sent.append(message)
+
+    async def receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    with pytest.raises(RuntimeError, match="Late stream failure"):
+        await api_module._SafeUnexpectedErrorsMiddleware(fail_after_start)(
+            {"type": "http"}, receive, send
+        )
+
+    assert [message["type"] for message in sent] == ["http.response.start", "http.response.body"]
+
+
+async def test_cancelled_request_is_not_formatted():
+    sent = []
+
+    async def cancel(scope, receive, send):
+        raise asyncio.CancelledError()
+
+    async def send(message):
+        sent.append(message)
+
+    async def receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    with pytest.raises(asyncio.CancelledError):
+        await api_module._SafeUnexpectedErrorsMiddleware(cancel)({"type": "http"}, receive, send)
+
+    assert not sent
 
 
 def test_exported_app_serves_rest_and_mcp_with_middleware(monkeypatch):

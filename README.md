@@ -85,7 +85,9 @@ We follow certain guidelines for contributing. Here are the types of commits we 
   existing schedule-note heuristic, not a guarantee that a restaurant is open.
 - The exported REST/MCP app applies CORS and returns `X-Process-Time`. CORS
   exposes `X-Total-Count`, `X-Data-Commit-Hash`, and `X-Process-Time` to browser
-  clients from configured origins.
+  clients from configured origins. Unexpected failures before a response starts,
+  including dependency and response validation errors, retain CORS and timing
+  headers.
 
 ### Response schemas
 
@@ -304,8 +306,9 @@ messages; upstream URLs and exception details stay in server logs. These respons
 and their JSON schema are documented in OpenAPI. MCP live tools report failures
 as tool errors (`isError: true`), not successful `{"error": ...}` results.
 Valid empty space lists and lost-item results still succeed. Lost-item pages must
-contain the expected table columns or the library's explicit empty-result message
-on its lost-and-found page; missing or malformed tables are upstream errors.
+contain exactly the expected table columns (in any order, without duplicates) or
+the library's explicit empty-result message on its lost-and-found page. Unexpected
+columns, missing tables, and malformed rows are upstream errors.
 Public per-object freshness/provenance metadata and product
 changes to dining/bus semantics are deferred.
 

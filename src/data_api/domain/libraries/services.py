@@ -44,11 +44,13 @@ def parse_lost_items(html: str) -> list[dict[str, str]]:
     table = soup.find("table")
     if table is None:
         content = soup.find(id="content")
-        heading = content.find("h1") if content is not None else None
-        if (
-            heading is not None
-            and "Lost and Found System" in heading.get_text()
-            and re.search(r"\u76ee\u524d\u7121\u8cc7\u6599\s*!!", content.get_text())
+        if content is None:
+            raise UpstreamResponseException("Lost-and-found results table is missing")
+        heading = content.find("h1")
+        if heading is None:
+            raise UpstreamResponseException("Lost-and-found results table is missing")
+        if "Lost and Found System" in heading.get_text() and re.search(
+            r"\u76ee\u524d\u7121\u8cc7\u6599\s*!!", content.get_text()
         ):
             return []
         raise UpstreamResponseException("Lost-and-found results table is missing")
@@ -57,9 +59,8 @@ def parse_lost_items(html: str) -> list[dict[str, str]]:
     if not rows:
         raise UpstreamResponseException("Lost-and-found table has no header")
     titles = [cell.get_text(strip=True) for cell in rows[0].find_all(["td", "th"])]
-    if not LibraryLostAndFound.model_fields.keys() <= set(titles) or len(titles) != len(
-        set(titles)
-    ):
+    column_names = set(titles)
+    if column_names != set(LibraryLostAndFound.model_fields) or len(titles) != len(column_names):
         raise UpstreamResponseException("Lost-and-found table has invalid columns")
 
     items = []
