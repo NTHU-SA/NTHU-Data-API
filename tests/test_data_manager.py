@@ -113,6 +113,7 @@ async def test_successful_replacement_including_empty(initial, new):
         (500, "http_status"),
         (503, "http_status"),
         (b"not json", "invalid_json"),
+        (b"<!doctype html><html><body>Index</body></html>", "invalid_json"),
         (b"null", "payload_type"),
         (b"42", "payload_type"),
     ],

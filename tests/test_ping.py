@@ -20,7 +20,6 @@ EXPECTED_DATASETS = {
     "/courses.json",
     "/dining.json",
     "/directory.json",
-    "/libraries.json",
     "/libraries/calendars.json",
     "/libraries/rss.json",
     "/maps.json",
@@ -52,6 +51,12 @@ async def ping_runtime(monkeypatch):
                     }
                 },
             )
+        if path == "/libraries.json":
+            return httpx.Response(
+                200,
+                content=b"<!doctype html><html><body>Index</body></html>",
+                headers={"Content-Type": "text/html"},
+            )
         return httpx.Response(200, json=payloads[path])
 
     monkeypatch.setattr(nthudata, "clock", clock)
@@ -65,6 +70,7 @@ async def ping_runtime(monkeypatch):
 
 async def test_ping_ready_after_startup_including_empty_datasets(ping_runtime):
     client, _, calls = ping_runtime
+    assert "/libraries.json" not in calls
     assert {f"/{path}" for path in PREFETCH_ENDPOINTS} == EXPECTED_DATASETS
     assert EXPECTED_DATASETS <= set(calls)
     calls_before = list(calls)
