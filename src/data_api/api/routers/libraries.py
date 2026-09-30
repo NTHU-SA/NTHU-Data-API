@@ -1,14 +1,10 @@
-import json
-import re
-import ssl
-from datetime import date, datetime, timedelta
+from datetime import date
 from typing import Optional
 
-import httpx
-import truststore
-from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException, Path, Query, Response
 
+from data_api.api.errors import service_errors
+from data_api.api.schemas.errors import LIVE_ERROR_RESPONSES
 from data_api.api.schemas.libraries import (
     LibraryCalendar,
     LibraryCalendarEvent,
@@ -20,101 +16,37 @@ from data_api.api.schemas.libraries import (
 )
 from data_api.domain.libraries.services import libraries_service
 
-DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-}
-SERVICE_UNAVAILABLE = "Service temporarily unavailable"
-
 router = APIRouter()
-
-ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
 @router.get(
     "/space",
     response_model=list[LibrarySpace],
     operation_id="getLibrarySpaceAvailability",
-    responses={
-        404: {"description": "Library space data not found"},
-        500: {"description": "Unable to parse library space data"},
-    },
+    responses=LIVE_ERROR_RESPONSES,
 )
 async def get_library_space_availability():
     """
     取得圖書館空間使用資訊。
     資料來源：[圖書館空間預約系統](https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx)
     """
-    url = "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx"
-    try:
-        async with httpx.AsyncClient(verify=ctx) as client:  # 圖書館的 RSS 使用了特別的憑證(TWCA)
-            response = await client.get(url, headers=DEFAULT_HEADERS)
-            response.raise_for_status()
-            data = response.json()
-
-            if data.get("resmsg") != "成功":
-                raise HTTPException(status_code=404, detail="找不到空間資料")
-            return data["rows"]
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取空間資料失敗: {e}")
-    except (json.JSONDecodeError, KeyError) as e:
-        raise HTTPException(status_code=500, detail=f"解析空間資料失敗: {e}")
+    with service_errors():
+        return await libraries_service.get_space_availability()
 
 
 @router.get(
     "/lost_and_found",
     response_model=list[LibraryLostAndFound],
     operation_id="getLibraryLostAndFoundItems",
-    responses={500: {"description": "Unable to parse lost-and-found data"}},
+    responses=LIVE_ERROR_RESPONSES,
 )
 async def get_library_lost_and_found_items():
     """
     取得圖書館失物招領資訊。
     資料來源：[圖書館失物招領系統](https://adage.lib.nthu.edu.tw/find)
     """
-    date_end = datetime.now()
-    date_start = date_end - timedelta(days=6 * 30)
-
-    post_data = {
-        "place": "0",
-        "date_start": date_start.strftime("%Y-%m-%d"),
-        "date_end": date_end.strftime("%Y-%m-%d"),
-        "catalog": "ALL",
-        "keyword": "",
-        "SUMIT": "送出",
-    }
-    url = "https://adage.lib.nthu.edu.tw/find/search_it.php"
-
-    try:
-        async with httpx.AsyncClient(verify=ctx) as client:
-            response = await client.post(url, data=post_data, headers=DEFAULT_HEADERS)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "html.parser")
-            table = soup.find("table")
-            if not table:
-                return []
-
-            table_rows = table.find_all("tr")
-            if not table_rows:
-                return []
-
-            # 提取表格標題
-            table_title = [td.text.strip() for td in table_rows[0].find_all("td")]
-
-            # 解析表格行
-            rows_data = []
-            for row in table_rows[1:]:
-                cells = [re.sub(r"\s+", " ", td.text.strip()) for td in row.find_all("td")]
-                if len(cells) == len(table_title):
-                    rows_data.append(dict(zip(table_title, cells)))
-
-            return rows_data
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"擷取失物招領資料失敗: {e}")
-    except AttributeError:
-        return []
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"解析失物招領資料失敗: {e}")
+    with service_errors():
+        return await libraries_service.get_lost_and_found_items()
 
 
 @router.get(

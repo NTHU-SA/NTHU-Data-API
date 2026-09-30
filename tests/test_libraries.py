@@ -3,7 +3,7 @@
 from datetime import date
 
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx import ASGITransport, AsyncClient, Response
 
 from data_api.api.api import app
 from data_api.domain.libraries import services
@@ -266,6 +266,55 @@ class TestLibrariesLiveEndpoints:
         ["/libraries/space", "/libraries/lost_and_found"],
     )
     async def test_libraries_endpoints(self, client: AsyncClient, url: str):
-        """Accept 200 or 500 since the library service may be unavailable."""
         response = await client.get(url)
-        assert response.status_code == 503
+        assert response.status_code == 502
+        assert response.json() == {"detail": "Upstream service unavailable"}
+
+    @pytest.mark.parametrize("empty", [False, True])
+    async def test_library_space(
+        self, client: AsyncClient, mock_upstream, library_space_payload, empty
+    ):
+        if empty:
+            library_space_payload["rows"] = []
+        mock_upstream(lambda request: Response(200, json=library_space_payload))
+        response = await client.get("/libraries/space")
+        assert response.status_code == 200
+        assert response.json() == (
+            []
+            if empty
+            else [
+                {
+                    **library_space_payload["rows"][0],
+                    "spacetype": 1,
+                    "count": 12,
+                }
+            ]
+        )
+
+    async def test_lost_items(self, client: AsyncClient, mock_upstream, lost_items_html):
+        def handler(request):
+            assert request.method == "POST"
+            return Response(200, text=lost_items_html())
+
+        mock_upstream(handler)
+        response = await client.get("/libraries/lost_and_found")
+        assert response.status_code == 200
+        assert response.json() == [
+            {
+                "序號": str(index),
+                "拾獲時間": "2026-09-30",
+                "拾獲地點": "Main library",
+                "描述": "Book title",
+            }
+            for index in range(12)
+        ]
+
+    @pytest.mark.parametrize("empty_page", ["table", "message"])
+    async def test_lost_items_empty(
+        self, client: AsyncClient, mock_upstream, lost_items_html, lost_items_empty_page, empty_page
+    ):
+        html = lost_items_html(0) if empty_page == "table" else lost_items_empty_page
+        mock_upstream(lambda request: Response(200, text=html))
+        response = await client.get("/libraries/lost_and_found")
+        assert response.status_code == 200
+        assert response.json() == []

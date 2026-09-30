@@ -85,7 +85,9 @@ We follow certain guidelines for contributing. Here are the types of commits we 
   existing schedule-note heuristic, not a guarantee that a restaurant is open.
 - The exported REST/MCP app applies CORS and returns `X-Process-Time`. CORS
   exposes `X-Total-Count`, `X-Data-Commit-Hash`, and `X-Process-Time` to browser
-  clients from configured origins.
+  clients from configured origins. Unexpected failures before a response starts,
+  including dependency and response validation errors, retain CORS and timing
+  headers.
 
 ### Response schemas
 
@@ -297,6 +299,16 @@ enable `data_api.data.nthudata` INFO/DEBUG events when needed.
 Live electricity, library space, and lost-and-found integrations are not published
 datasets and retain their existing on-demand behavior and separate HTTP clients.
 They are not covered by snapshot freshness or last-known-good guarantees.
+Their REST endpoints return **502** for upstream connection/HTTP failures or
+invalid JSON/HTML/data, and **504** for upstream timeouts. Unexpected internal
+errors return **500**. Error bodies retain a `detail` field with fixed, safe
+messages; upstream URLs and exception details stay in server logs. These responses
+and their JSON schema are documented in OpenAPI. MCP live tools report failures
+as tool errors (`isError: true`), not successful `{"error": ...}` results.
+Valid empty space lists and lost-item results still succeed. Lost-item pages must
+contain exactly the expected table columns (in any order, without duplicates) or
+the library's explicit empty-result message on its lost-and-found page. Unexpected
+columns, missing tables, and malformed rows are upstream errors.
 Public per-object freshness/provenance metadata and product
 changes to dining/bus semantics are deferred.
 

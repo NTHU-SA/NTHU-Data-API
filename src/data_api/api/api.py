@@ -12,13 +12,20 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from data_api.core import config
-from data_api.core.exceptions import DataNotAvailableException
+from data_api.core.exceptions import (
+    INTERNAL_ERROR_DETAIL,
+    DataNotAvailableException,
+    UpstreamException,
+)
 from data_api.core.settings import settings
 from data_api.data.manager import nthudata
 from data_api.domain.buses import services as buses_services
 from data_api.mcp import mcp
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -53,6 +60,34 @@ async def combined_lifespan(app: FastAPI):
             yield
 
 
+class _SafeUnexpectedErrorsMiddleware:
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        response_started = False
+
+        async def track_response(message: Message):
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, track_response)
+        except Exception as exc:
+            if response_started:
+                raise
+            logger.error("Unexpected request failure", exc_info=exc)
+            await JSONResponse(status_code=500, content={"detail": INTERNAL_ERROR_DETAIL})(
+                scope, receive, send
+            )
+
+
 def create_app() -> FastAPI:
     """
     Create and configure the FastAPI application.
@@ -71,6 +106,19 @@ def create_app() -> FastAPI:
     @app.exception_handler(DataNotAvailableException)
     async def dataset_unavailable(request: Request, exc: DataNotAvailableException):
         return JSONResponse(status_code=503, content={"detail": "Service temporarily unavailable"})
+
+    @app.exception_handler(UpstreamException)
+    async def upstream_failure(request: Request, exc: UpstreamException):
+        logger.warning("Live upstream request failed", exc_info=exc)
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(Exception)
+    async def internal_error(request: Request, exc: Exception):
+        logger.error("Unexpected request failure", exc_info=exc)
+        return JSONResponse(status_code=500, content={"detail": INTERNAL_ERROR_DETAIL})
+
+    # CORS and timing wrap this fallback so pre-response errors keep their headers.
+    app.add_middleware(_SafeUnexpectedErrorsMiddleware)
 
     # CORS configuration
     # Using explicit origins would be safer, but for a public API:

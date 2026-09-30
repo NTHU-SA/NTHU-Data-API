@@ -6,6 +6,9 @@ from data_api.core.exceptions import (
     DataAPIException,
     DataNotAvailableException,
     DataUpdateException,
+    UpstreamException,
+    UpstreamResponseException,
+    UpstreamTimeoutException,
 )
 
 
@@ -70,3 +73,20 @@ class TestExceptionHierarchy:
             raise DataUpdateException("Test")
         except DataAPIException as e:
             assert isinstance(e, DataUpdateException)
+
+
+@pytest.mark.parametrize(
+    "exception,status,detail",
+    [
+        (UpstreamException, 502, "Upstream service unavailable"),
+        (UpstreamTimeoutException, 504, "Upstream request timed out"),
+        (UpstreamResponseException, 502, "Invalid response from upstream service"),
+    ],
+)
+def test_upstream_exceptions_keep_public_details_safe(exception, status, detail):
+    exc = exception("Private diagnostic at https://upstream.example")
+    assert isinstance(exc, DataAPIException)
+    assert isinstance(exc, UpstreamException)
+    assert exc.status_code == status
+    assert exc.detail == detail
+    assert "Private diagnostic" in str(exc)

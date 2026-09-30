@@ -188,12 +188,12 @@ class TestDepartmentsEndpoints:
         ("/buses/routes", {"500"}),
         ("/buses/info/stops", {"500"}),
         ("/buses/schedules", {"500"}),
-        ("/energy/electricity_usage", {"500"}),
+        ("/energy/electricity_usage", {"500", "502", "504"}),
         ("/courses/search", {"422"}),
         ("/locations/search", {"404"}),
         ("/newsletters/{newsletter_name}", {"404"}),
-        ("/libraries/space", {"404", "500"}),
-        ("/libraries/lost_and_found", {"500"}),
+        ("/libraries/space", {"500", "502", "504"}),
+        ("/libraries/lost_and_found", {"500", "502", "504"}),
         ("/libraries/rss/{rss_type}", {"404"}),
         ("/libraries/calendars/{calendar_id}", {"404"}),
         ("/libraries/calendars/{calendar_id}/events", {"400", "404"}),
@@ -203,3 +203,20 @@ class TestDepartmentsEndpoints:
 def test_openapi_documents_route_errors(path, statuses):
     responses = app.openapi()["paths"][path]["get"]["responses"]
     assert statuses <= responses.keys()
+
+
+@pytest.mark.parametrize(
+    "path", ["/energy/electricity_usage", "/libraries/space", "/libraries/lost_and_found"]
+)
+def test_openapi_live_errors_have_detail_schema(path):
+    schema = app.openapi()
+    responses = schema["paths"][path]["get"]["responses"]
+    assert "403" not in responses
+    assert "404" not in responses
+    for status in ["500", "502", "504"]:
+        assert responses[status]["content"]["application/json"]["schema"] == {
+            "$ref": "#/components/schemas/ErrorResponse"
+        }
+    error_schema = schema["components"]["schemas"]["ErrorResponse"]
+    assert error_schema["required"] == ["detail"]
+    assert error_schema["properties"]["detail"]["type"] == "string"
