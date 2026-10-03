@@ -54,8 +54,10 @@ async def _get_announcements(
 
 
 @mcp.tool(
+    name="get_announcements",
+    title="搜尋校園公告",
     description="Get campus announcements from NTHU departments. "
-    "Use this to find news, notices, or updates from campus offices."
+    "Use this to find news, notices, or updates from campus offices.",
 )
 async def get_announcements(
     department: Optional[str] = None,

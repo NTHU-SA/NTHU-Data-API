@@ -31,8 +31,10 @@ async def _get_energy_usage() -> dict:
 
 
 @mcp.tool(
+    name="get_energy_usage",
+    title="查詢校園即時用電",
     description="Get real-time campus electricity usage. "
-    "Use this to check current power consumption on campus."
+    "Use this to check current power consumption on campus.",
 )
 async def get_energy_usage() -> dict:
     """Get real-time electricity usage for campus."""

@@ -67,9 +67,11 @@ async def _search_courses(
 
 
 @mcp.tool(
+    name="search_courses",
+    title="搜尋課程列表",
     description="Search for courses at NTHU by title, teacher, or course ID. "
     "Inputs are literal, case-sensitive substrings, not regular expressions. "
-    "All supplied filters must match. Limit must be 1-100 (default 20)."
+    "All supplied filters must match. Limit must be 1-100 (default 20).",
 )
 async def search_courses(
     keyword: Optional[str] = None,
