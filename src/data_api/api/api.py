@@ -130,6 +130,7 @@ def create_app() -> FastAPI:
         allow_credentials=False,  # False when using wildcard origins
         allow_methods=[
             "GET",
+            "HEAD",
             "POST",
             "PUT",
             "DELETE",

@@ -107,6 +107,110 @@ async def test_ping_ready_after_startup_including_empty_datasets(ping_runtime):
     assert calls == calls_before
 
 
+@pytest.mark.parametrize(
+    "condition,expected_status",
+    [
+        ("ready", 200),
+        ("stale", 200),
+        ("unverified", 200),
+        ("expired", 200),
+        ("missing", 503),
+        ("unregistered", 503),
+        ("cold", 503),
+    ],
+)
+async def test_ping_head_matches_readiness_without_refresh(
+    ping_runtime, monkeypatch, condition, expected_status
+):
+    client, clock, calls = ping_runtime
+    path = "/libraries/rss.json"
+    state = nthudata.states[path]
+    if condition in {"stale", "unverified"}:
+        state.freshness = Freshness(condition)
+    elif condition == "expired":
+        clock.advance(nthudata.ttl)
+    elif condition == "missing":
+        state.snapshot = None
+        state.freshness = Freshness.UNAVAILABLE
+    elif condition == "unregistered":
+        monkeypatch.delitem(nthudata.states, path)
+    elif condition == "cold":
+        monkeypatch.setattr(nthudata, "states", {})
+    calls_before = list(calls)
+    states_before = {
+        path: (state.snapshot, state.freshness, state.next_check)
+        for path, state in nthudata.states.items()
+    }
+
+    response = await client.head("/ping", headers={"Origin": "https://example.com"})
+    get_response = await client.get("/ping")
+
+    assert response.status_code == get_response.status_code == expected_status
+    assert response.content == b""
+    assert response.headers["Cache-Control"] == "no-store"
+    assert response.headers["Content-Type"] == get_response.headers["Content-Type"]
+    assert "Content-Length" not in response.headers
+    assert response.headers["Access-Control-Allow-Origin"] == "*"
+    assert float(response.headers["X-Process-Time"]) >= 0
+    assert calls == calls_before
+    assert {
+        path: (state.snapshot, state.freshness, state.next_check)
+        for path, state in nthudata.states.items()
+    } == states_before
+
+
+async def test_ping_head_sends_no_asgi_body(ping_runtime):
+    sent = []
+
+    async def receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    async def send(message):
+        sent.append(message)
+
+    await api_module.app(
+        {
+            "type": "http",
+            "asgi": {"version": "3.0"},
+            "http_version": "1.1",
+            "method": "HEAD",
+            "scheme": "http",
+            "path": "/ping",
+            "raw_path": b"/ping",
+            "query_string": b"",
+            "headers": [],
+            "server": ("test", 80),
+            "client": ("test", 123),
+        },
+        receive,
+        send,
+    )
+
+    assert sent[0]["type"] == "http.response.start"
+    assert sent[0]["status"] == 200
+    bodies = [message for message in sent if message["type"] == "http.response.body"]
+    assert bodies
+    assert all(message.get("body", b"") == b"" for message in bodies)
+
+
+async def test_ping_head_cors_preflight(ping_runtime):
+    client, _, calls = ping_runtime
+    calls_before = list(calls)
+
+    response = await client.options(
+        "/ping",
+        headers={
+            "Origin": "https://example.com",
+            "Access-Control-Request-Method": "HEAD",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "HEAD" in response.headers["Access-Control-Allow-Methods"]
+    assert response.headers["Access-Control-Allow-Origin"] == "*"
+    assert calls == calls_before
+
+
 @pytest.mark.parametrize("freshness", [Freshness.STALE, Freshness.UNVERIFIED])
 async def test_ping_keeps_usable_fallback_ready(ping_runtime, freshness):
     client, _, calls = ping_runtime
@@ -223,3 +327,4 @@ async def test_ping_hidden_from_openapi_and_swagger(ping_runtime):
     assert "/openapi.json" in docs.text
     assert "/ping" not in docs.text
     assert (await client.get("/ping")).status_code == 200
+    assert (await client.head("/ping")).status_code == 200
