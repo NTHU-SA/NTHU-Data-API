@@ -40,8 +40,10 @@ async def _get_library_info(
 
 
 @mcp.tool(
+    name="get_library_info",
+    title="查詢圖書館資訊",
     description="Get library information including space availability and lost items. "
-    "Use this to check if study spaces are available or to find lost items."
+    "Use this to check if study spaces are available or to find lost items.",
 )
 async def get_library_info(
     info_type: Literal["space", "lost_and_found"] = "space",

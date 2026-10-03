@@ -33,8 +33,10 @@ async def _search_campus(query: str) -> dict:
 
 
 @mcp.tool(
+    name="search_campus",
+    title="搜尋校園資訊",
     description="Search for campus locations, departments, or people at NTHU. "
-    "Use this to find where buildings are, contact info for departments, or look up staff members."
+    "Use this to find where buildings are, contact info for departments, or look up staff members.",
 )
 async def search_campus(query: str) -> dict:
     """Search for campus locations, departments, or people."""

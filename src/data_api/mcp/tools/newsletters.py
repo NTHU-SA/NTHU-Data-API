@@ -44,8 +44,10 @@ async def _get_newsletters(
 
 
 @mcp.tool(
+    name="get_newsletters",
+    title="搜尋電子報列表",
     description="Get campus newsletter information. "
-    "Use this to find electronic newsletters from various NTHU departments."
+    "Use this to find electronic newsletters from various NTHU departments.",
 )
 async def get_newsletters(
     search: Optional[str] = None,

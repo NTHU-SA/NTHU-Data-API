@@ -70,6 +70,26 @@ We follow certain guidelines for contributing. Here are the types of commits we 
 - `fix: Fix a bug`
 ... You can refer to the full list of commit types in the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
+### MCP tool names and display titles
+
+The MCP endpoint is `https://api.nthusa.tw/mcp` (local: `http://localhost:5000/mcp`).
+Each tool explicitly declares a stable English `name` for calls and a Traditional
+Chinese `title` for display. Clients that support tool titles can display these
+labels; other clients may continue to display the English names. Internal Python
+function renames must not change these public names.
+
+| Tool name | Display title |
+| --- | --- |
+| `search_campus` | 搜尋校園資訊 |
+| `get_next_buses` | 查詢接下來的公車班次 |
+| `get_bus_stops` | 查詢公車站點資訊 |
+| `search_courses` | 搜尋課程列表 |
+| `get_announcements` | 搜尋校園公告 |
+| `find_dining` | 搜尋餐廳列表 |
+| `get_library_info` | 查詢圖書館資訊 |
+| `get_newsletters` | 搜尋電子報列表 |
+| `get_energy_usage` | 查詢校園即時用電 |
+
 ### Search behavior
 - MCP `search_courses` matches case-sensitive literal substrings in course titles,
   teacher names, and course IDs. Supplied filters are combined with AND; a keyword

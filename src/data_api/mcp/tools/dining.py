@@ -76,10 +76,12 @@ async def _find_dining(
 
 
 @mcp.tool(
+    name="find_dining",
+    title="搜尋餐廳列表",
     description="Find restaurants and dining options on campus. "
     "Use this to find where to eat, check which restaurants are open, or search for specific food. "
     "Open-status uses schedule notes, not live opening hours; today uses the Asia/Taipei date. "
-    "Building, restaurant name, and open-status filters apply together."
+    "Building, restaurant name, and open-status filters apply together.",
 )
 async def find_dining(
     restaurant_name: Optional[str] = None,
