@@ -318,6 +318,11 @@ changes to dining/bus semantics are deferred.
 from Swagger UI and `/openapi.json`. It never fetches upstream data, refreshes a
 snapshot, or calls other API endpoints; responses have `Cache-Control: no-store`.
 
+`HEAD /ping` supports uptime monitors such as UptimeRobot. It uses the same
+readiness status codes as GET (200 or 503), returns no body, and retains
+`Cache-Control: no-store`. It is also excluded from the API schema and never
+fetches upstream data.
+
 - HTTP **200** with `ready: true` means every dataset has a usable snapshot.
   `status` is `ok` when all recorded freshness values are `current` and no check
   is due, or `degraded` when usable data is stale, unverified, or due for a check.

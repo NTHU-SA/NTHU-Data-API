@@ -54,3 +54,12 @@ async def ping(response: Response) -> PingResponse:
         checked_at=datetime.now(timezone.utc),
         datasets=datasets,
     )
+
+
+@router.head("/ping", include_in_schema=False)
+async def ping_head() -> Response:
+    response = Response(media_type="application/json")
+    await ping(response)
+    # An empty HEAD body must not advertise a zero-length GET representation.
+    del response.headers["Content-Length"]
+    return response
