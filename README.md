@@ -150,7 +150,7 @@ retains its existing all-courses behavior.
 
 ### Legacy directory endpoints
 
-The former `Departments` documentation group is named `directory 舊`. All its
+The legacy endpoints are grouped under `Departments` in the documentation. Both
 endpoints are deprecated: `GET /departments/` and `GET /departments/search`.
 The slashless `GET /departments` route has been removed; FastAPI's default
 trailing-slash redirect still forwards requests to `/departments/`. The retained
@@ -159,6 +159,7 @@ headers.
 
 ### Directory queries
 
+The documentation groups these endpoints under `Directory`.
 Use `GET /directory` to retrieve the directory, or `GET /directory?query=...`
 to fuzzy-match department names, people names, or titles. An omitted or empty
 `query` returns the entire directory; no matches returns an empty array.
