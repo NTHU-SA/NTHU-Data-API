@@ -15,6 +15,14 @@ router = APIRouter()
     response_model=list[schemas.EnergyElectricityInfo],
     operation_id="getRealtimeElectricityUsage",
     responses=LIVE_ERROR_RESPONSES,
+    deprecated=True,
+    description="已棄用，請改用 `GET /energy/electricity`。",
+)
+@router.get(
+    "/electricity",
+    response_model=list[schemas.EnergyElectricityInfo],
+    operation_id="getElectricity",
+    responses=LIVE_ERROR_RESPONSES,
 )
 async def get_realtime_electricity_usage():
     """

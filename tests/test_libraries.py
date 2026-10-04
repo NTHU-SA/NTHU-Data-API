@@ -281,7 +281,7 @@ class TestLibrariesLiveEndpoints:
 
     @pytest.mark.parametrize(
         "url",
-        ["/libraries/space", "/libraries/lost_and_found"],
+        ["/libraries/space", "/libraries/lost-and-found", "/libraries/lost_and_found"],
     )
     async def test_libraries_endpoints(self, client: AsyncClient, url: str):
         response = await client.get(url)
@@ -309,13 +309,14 @@ class TestLibrariesLiveEndpoints:
             ]
         )
 
-    async def test_lost_items(self, client: AsyncClient, mock_upstream, lost_items_html):
+    @pytest.mark.parametrize("path", ["/libraries/lost-and-found", "/libraries/lost_and_found"])
+    async def test_lost_items(self, client: AsyncClient, mock_upstream, lost_items_html, path):
         def handler(request):
             assert request.method == "POST"
             return Response(200, text=lost_items_html())
 
         mock_upstream(handler)
-        response = await client.get("/libraries/lost_and_found")
+        response = await client.get(path)
         assert response.status_code == 200
         assert response.json() == [
             {
@@ -328,11 +329,18 @@ class TestLibrariesLiveEndpoints:
         ]
 
     @pytest.mark.parametrize("empty_page", ["table", "message"])
+    @pytest.mark.parametrize("path", ["/libraries/lost-and-found", "/libraries/lost_and_found"])
     async def test_lost_items_empty(
-        self, client: AsyncClient, mock_upstream, lost_items_html, lost_items_empty_page, empty_page
+        self,
+        client: AsyncClient,
+        mock_upstream,
+        lost_items_html,
+        lost_items_empty_page,
+        empty_page,
+        path,
     ):
         html = lost_items_html(0) if empty_page == "table" else lost_items_empty_page
         mock_upstream(lambda request: Response(200, text=html))
-        response = await client.get("/libraries/lost_and_found")
+        response = await client.get(path)
         assert response.status_code == 200
         assert response.json() == []

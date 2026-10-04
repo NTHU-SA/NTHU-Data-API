@@ -13,6 +13,14 @@ from data_api.mcp.server import mcp
 
 LIVE_CALLS = [
     pytest.param(
+        "/energy/electricity",
+        "get_energy_usage",
+        {},
+        energy_service,
+        "get_realtime_electricity_usage",
+        id="energy-current",
+    ),
+    pytest.param(
         "/energy/electricity_usage",
         "get_energy_usage",
         {},
@@ -27,6 +35,14 @@ LIVE_CALLS = [
         libraries_service,
         "get_space_availability",
         id="space",
+    ),
+    pytest.param(
+        "/libraries/lost-and-found",
+        "get_library_info",
+        {"info_type": "lost_and_found"},
+        libraries_service,
+        "get_lost_and_found_items",
+        id="lost-items-current",
     ),
     pytest.param(
         "/libraries/lost_and_found",
