@@ -217,3 +217,32 @@ def test_openapi_deprecation_and_stop_parameter():
         legacy = paths[path]["get"]
         assert legacy["deprecated"]
         assert "/buses/schedule" in legacy["description"]
+
+
+@pytest.mark.parametrize("day", ["weekday", "weekend"])
+@pytest.mark.parametrize(
+    "time", ["25:00", "24:00", "08:60", "noon", "", "8:00", "08:0", " 08:00", "08:00\n"]
+)
+async def test_invalid_mcp_time_is_rejected_before_query(populated_buses, monkeypatch, day, time):
+    def unexpected_query(**kwargs):
+        pytest.fail("Invalid time must be rejected before querying schedules")
+
+    monkeypatch.setattr(populated_buses, "query_schedule", unexpected_query)
+    async with Client(mcp) as client:
+        result = await client.call_tool(
+            "get_bus_schedule", {"day": day, "time": time}, raise_on_error=False
+        )
+    assert result.is_error
+
+
+@pytest.mark.parametrize("day", ["weekday", "weekend"])
+@pytest.mark.parametrize("time", ["00:00", "08:10", "23:59", None])
+async def test_valid_mcp_time_filters(populated_buses, day, time):
+    async with Client(mcp) as client:
+        result = await client.call_tool(
+            "get_bus_schedule", {"day": day, "time": time, "limit": 100, "details": False}
+        )
+    expected = populated_buses.query_schedule(
+        route_type="all", day=day, direction="all", after_time=time or "", limit=100
+    )
+    assert result.data["buses"] == expected

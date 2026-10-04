@@ -77,7 +77,15 @@ async def get_bus_schedule(
     limit: Annotated[int, Field(ge=1)] = 5,
     stop: BusStopsName | None = None,
     day: BusDayWithCurrent = BusDayWithCurrent.current,
-    time: str | None = None,
+    time: (
+        Annotated[
+            str,
+            Field(
+                pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$", description="Departure time in HH:MM"
+            ),
+        ]
+        | None
+    ) = None,
     details: bool = True,
 ) -> dict:
     """Get bus schedules and optional stop metadata."""

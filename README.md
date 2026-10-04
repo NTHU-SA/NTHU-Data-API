@@ -145,6 +145,8 @@ compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,
 Its `buses` list uses the REST schedule format; `stop_name` and `stop_info`
 (including coordinates) are included when `stop` is supplied. MCP clients must
 refresh their tool list and use the new name and response format.
+If supplied, MCP `time` must be a zero-padded HH:MM value from `00:00` to `23:59`;
+malformed values are rejected during argument validation, even for `day=current`.
 
 ### Dining queries
 
