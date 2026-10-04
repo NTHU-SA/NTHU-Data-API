@@ -295,7 +295,7 @@ def test_openapi_calendar_contract():
     schema = app.openapi()
     assert not any(path.startswith("/libraries/calendars") for path in schema["paths"])
     assert not any(name.startswith("LibraryCalendar") for name in schema["components"]["schemas"])
-    assert schema["paths"]["/calendars/"]["get"]["operationId"] == "getAllCalendars"
+    assert schema["paths"]["/calendars"]["get"]["operationId"] == "getAllCalendars"
     search = schema["paths"][EVENTS_PATH.replace("academic", "{calendar_id}")]["get"]
     assert search["operationId"] == "searchCalendarEvents"
     assert {parameter["name"] for parameter in search["parameters"]} == {
@@ -306,6 +306,16 @@ def test_openapi_calendar_contract():
         "limit",
         "offset",
     }
+    for path, operations in schema["paths"].items():
+        if "{calendar_id}" not in path:
+            continue
+        parameter = next(
+            parameter
+            for parameter in operations["get"]["parameters"]
+            if parameter["name"] == "calendar_id"
+        )
+        assert "/calendars " in parameter["description"]
+        assert "/calendars/" not in parameter["description"]
 
 
 async def test_unified_list_and_all_library_branches(runtime, library_publisher):

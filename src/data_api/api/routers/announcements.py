@@ -13,9 +13,16 @@ router = APIRouter()
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[schemas.AnnouncementDetail],
     operation_id="getAnnouncements",
+)
+@router.get(
+    "/",
+    response_model=list[schemas.AnnouncementDetail],
+    operation_id="getAnnouncementsDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /announcements。查詢參數與回傳格式不變。",
 )
 async def get_announcements(
     response: Response,

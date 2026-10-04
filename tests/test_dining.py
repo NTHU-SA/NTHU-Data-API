@@ -207,7 +207,7 @@ class TestDiningEndpoints:
 def test_dining_openapi_contract():
     schema = app.openapi()
     assert "/dining/open" not in schema["paths"]
-    operation = schema["paths"]["/dining/"]["get"]
+    operation = schema["paths"]["/dining"]["get"]
     assert operation["operationId"] == "getDiningData"
     parameter = next(p for p in operation["parameters"] if p["name"] == "schedule")
     assert parameter["required"] is False

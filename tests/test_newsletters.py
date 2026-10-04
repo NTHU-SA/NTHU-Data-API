@@ -192,7 +192,7 @@ def test_openapi_newsletter_contract():
     legacy = paths["/newsletters/{newsletter_name}"]["get"]
     assert legacy["deprecated"] is True
     assert legacy["operationId"] == "getNewsletterByName"
-    query = paths["/newsletters/"]["get"]
+    query = paths["/newsletters"]["get"]
     assert query["operationId"] == "getAllNewsletters"
     parameters = {parameter["name"]: parameter for parameter in query["parameters"]}
     assert set(parameters) == {"name", "title", "fuzzy"}

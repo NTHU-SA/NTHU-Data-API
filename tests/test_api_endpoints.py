@@ -1,11 +1,66 @@
 """Tests for API endpoints."""
 
+from copy import deepcopy
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from data_api.api.api import app
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
+
+
+ROOT_ENDPOINTS = [
+    ("/announcements", "getAnnouncements", {"title": "Notice", "fuzzy": "false"}),
+    ("/calendars", "getAllCalendars", {}),
+    ("/departments", "getAllDepartments", {}),
+    ("/dining", "getDiningData", {"restaurant_name": "Test", "fuzzy": "false"}),
+    ("/locations", "getLocations", {"name": "台積", "fuzzy": "false"}),
+    ("/newsletters", "getAllNewsletters", {"name": "Test", "fuzzy": "false"}),
+]
+
+
+@pytest.mark.parametrize("path,operation_id,params", ROOT_ENDPOINTS)
+async def test_root_endpoints_preserve_legacy_responses(path, operation_id, params):
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test", follow_redirects=False
+    ) as client:
+        response = await client.get(path, params=params)
+        legacy = await client.get(f"{path}/", params=params)
+
+    assert response.status_code == legacy.status_code == 200
+    assert "location" not in response.headers
+    assert "location" not in legacy.headers
+    assert response.json() == legacy.json()
+    assert response.headers["X-Data-Commit-Hash"] == legacy.headers["X-Data-Commit-Hash"]
+
+
+@pytest.mark.parametrize("path,operation_id,params", ROOT_ENDPOINTS)
+def test_root_endpoints_openapi_migration(path, operation_id, params):
+    paths = app.openapi()["paths"]
+    operation = paths[path]["get"]
+    legacy = paths[f"{path}/"]["get"]
+    assert operation["operationId"] == operation_id
+    assert not operation.get("deprecated", False)
+    assert legacy["deprecated"] is True
+    assert legacy["operationId"] == f"{operation_id}Deprecated"
+    assert f"GET {path}" in legacy["description"]
+    assert operation.get("parameters", []) == legacy.get("parameters", [])
+    responses = deepcopy(operation["responses"])
+    legacy_responses = deepcopy(legacy["responses"])
+    for documented in [responses, legacy_responses]:
+        documented["200"]["content"]["application/json"]["schema"].pop("title", None)
+    assert responses == legacy_responses
+
+
+def test_openapi_operation_ids_are_unique():
+    operations = [
+        operation["operationId"]
+        for path in app.openapi()["paths"].values()
+        for method, operation in path.items()
+        if method in {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
+    ]
+    assert len(operations) == len(set(operations))
 
 
 class TestAnnouncementsEndpoints:

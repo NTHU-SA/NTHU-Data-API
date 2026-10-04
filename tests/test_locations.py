@@ -96,12 +96,11 @@ class TestLocationsEndpoints:
         assert response.status_code == 422
         assert response.json()["detail"][0]["loc"] == ["query", "fuzzy"]
 
-    async def test_slashless_redirect_preserves_query(self, client: AsyncClient):
+    async def test_slashless_endpoint_preserves_query(self, client: AsyncClient):
         response = await client.get("/locations", params={"name": "台積", "fuzzy": "false"})
-        assert response.status_code == 307
-        redirected = await client.get(response.headers["location"])
-        assert redirected.status_code == 200
-        assert redirected.json() == [{"name": "台積", "latitude": "24.79", "longitude": "120.99"}]
+        assert response.status_code == 200
+        assert "location" not in response.headers
+        assert response.json() == [{"name": "台積", "latitude": "24.79", "longitude": "120.99"}]
 
     async def test_legacy_search_locations(self, client: AsyncClient):
         response = await client.get("/locations/search", params={"query": "台積"})
@@ -123,8 +122,8 @@ class TestLocationsEndpoints:
 
 def test_locations_openapi():
     paths = app.openapi()["paths"]
-    assert "/locations" not in paths
-    operation = paths["/locations/"]["get"]
+    assert paths["/locations/"]["get"]["deprecated"] is True
+    operation = paths["/locations"]["get"]
     assert operation["operationId"] == "getLocations"
     assert not operation.get("deprecated", False)
     assert "404" not in operation["responses"]

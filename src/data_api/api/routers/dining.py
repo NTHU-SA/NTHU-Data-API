@@ -12,7 +12,13 @@ from data_api.domain.dining import services
 router = APIRouter()
 
 
-@router.get("/", operation_id="getDiningData")
+@router.get("", operation_id="getDiningData")
+@router.get(
+    "/",
+    operation_id="getDiningDataDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /dining。查詢參數與回傳格式不變。",
+)
 async def get_dining_data(
     response: Response,
     building_name: schemas.DiningBuildingName = Query(None, description="餐廳建築名稱（可選）"),

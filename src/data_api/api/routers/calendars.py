@@ -11,11 +11,18 @@ from data_api.domain.calendars.services import calendars_service
 router = APIRouter()
 
 CALENDAR_ID_PATH = Path(
-    ..., description="行事曆 id，可由 /calendars/ 取得，例如 academic、library-main"
+    ..., description="行事曆 id，可由 /calendars 取得，例如 academic、library-main"
 )
 
 
-@router.get("/", response_model=list[Calendar], operation_id="getAllCalendars")
+@router.get("", response_model=list[Calendar], operation_id="getAllCalendars")
+@router.get(
+    "/",
+    response_model=list[Calendar],
+    operation_id="getAllCalendarsDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /calendars。回傳格式不變。",
+)
 async def get_all_calendars(response: Response):
     """
     取得所有校園行事曆的資訊（不含事件）。
