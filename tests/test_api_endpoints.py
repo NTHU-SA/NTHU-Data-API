@@ -239,11 +239,13 @@ class TestDepartmentsEndpoints:
         ("/buses/stops", {"500"}),
         ("/buses/info/stops", {"500"}),
         ("/buses/schedules", {"500"}),
+        ("/energy/electricity", {"500", "502", "504"}),
         ("/energy/electricity_usage", {"500", "502", "504"}),
         ("/courses/search", {"422"}),
         ("/locations/search", {"404"}),
         ("/newsletters/{newsletter_name}", {"404"}),
         ("/libraries/space", {"500", "502", "504"}),
+        ("/libraries/lost-and-found", {"500", "502", "504"}),
         ("/libraries/lost_and_found", {"500", "502", "504"}),
         ("/libraries/rss/{rss_type}", {"404"}),
         ("/calendars/{calendar_id}", {"404"}),
@@ -257,7 +259,14 @@ def test_openapi_documents_route_errors(path, statuses):
 
 
 @pytest.mark.parametrize(
-    "path", ["/energy/electricity_usage", "/libraries/space", "/libraries/lost_and_found"]
+    "path",
+    [
+        "/energy/electricity",
+        "/energy/electricity_usage",
+        "/libraries/space",
+        "/libraries/lost-and-found",
+        "/libraries/lost_and_found",
+    ],
 )
 def test_openapi_live_errors_have_detail_schema(path):
     schema = app.openapi()
@@ -271,3 +280,48 @@ def test_openapi_live_errors_have_detail_schema(path):
     error_schema = schema["components"]["schemas"]["ErrorResponse"]
     assert error_schema["required"] == ["detail"]
     assert error_schema["properties"]["detail"]["type"] == "string"
+
+
+@pytest.mark.parametrize(
+    "legacy_path,path,legacy_operation_id,operation_id",
+    [
+        (
+            "/energy/electricity_usage",
+            "/energy/electricity",
+            "getRealtimeElectricityUsage",
+            "getElectricity",
+        ),
+        (
+            "/libraries/lost_and_found",
+            "/libraries/lost-and-found",
+            "getLibraryLostAndFoundItems",
+            "getLibraryLostAndFound",
+        ),
+    ],
+)
+def test_openapi_live_route_migration(legacy_path, path, legacy_operation_id, operation_id):
+    paths = app.openapi()["paths"]
+    legacy = paths[legacy_path]["get"]
+    current = paths[path]["get"]
+    assert legacy["deprecated"] is True
+    assert path in legacy["description"]
+    assert not current.get("deprecated", False)
+    assert legacy["operationId"] == legacy_operation_id
+    assert current["operationId"] == operation_id
+    assert legacy["responses"].keys() == current["responses"].keys()
+    for status in legacy["responses"]:
+        if status == "200":
+            legacy_schema = legacy["responses"][status]["content"]["application/json"]["schema"]
+            current_schema = current["responses"][status]["content"]["application/json"]["schema"]
+            assert {key: value for key, value in legacy_schema.items() if key != "title"} == {
+                key: value for key, value in current_schema.items() if key != "title"
+            }
+        else:
+            assert legacy["responses"][status] == current["responses"][status]
+    operation_ids = [
+        operation["operationId"]
+        for path_item in paths.values()
+        for operation in path_item.values()
+        if isinstance(operation, dict) and "operationId" in operation
+    ]
+    assert len(operation_ids) == len(set(operation_ids))

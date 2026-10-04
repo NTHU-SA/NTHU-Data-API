@@ -18,7 +18,8 @@ class TestEnergyEndpoints:
         ) as client:
             yield client
 
-    async def test_get_electricity_usage(self, client: AsyncClient, mock_upstream):
+    @pytest.mark.parametrize("path", ["/energy/electricity", "/energy/electricity_usage"])
+    async def test_get_electricity_usage(self, client: AsyncClient, mock_upstream, path):
         values = {1: 1234, 2: 0, 3: -1}
 
         def handler(request):
@@ -26,7 +27,7 @@ class TestEnergyEndpoints:
             return Response(200, text=f'<img alt="kW: {values[system_id]:,}">')
 
         mock_upstream(handler)
-        response = await client.get("/energy/electricity_usage")
+        response = await client.get(path)
         assert response.status_code == 200
         for item, system in zip(response.json(), ELECTRICITY_USAGE_DATA, strict=True):
             assert item == {
@@ -38,7 +39,8 @@ class TestEnergyEndpoints:
             }
             assert item["last_updated"]
 
-    async def test_upstream_unavailable(self, client: AsyncClient):
-        response = await client.get("/energy/electricity_usage")
+    @pytest.mark.parametrize("path", ["/energy/electricity", "/energy/electricity_usage"])
+    async def test_upstream_unavailable(self, client: AsyncClient, path):
+        response = await client.get(path)
         assert response.status_code == 502
         assert response.json() == {"detail": "Upstream service unavailable"}

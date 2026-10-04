@@ -33,6 +33,14 @@ async def get_library_space_availability():
     response_model=list[LibraryLostAndFound],
     operation_id="getLibraryLostAndFoundItems",
     responses=LIVE_ERROR_RESPONSES,
+    deprecated=True,
+    description="已棄用，請改用 `GET /libraries/lost-and-found`。",
+)
+@router.get(
+    "/lost-and-found",
+    response_model=list[LibraryLostAndFound],
+    operation_id="getLibraryLostAndFound",
+    responses=LIVE_ERROR_RESPONSES,
 )
 async def get_library_lost_and_found_items():
     """

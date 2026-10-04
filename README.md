@@ -152,6 +152,20 @@ GET /announcements?language=zh-tw
 Announcement filters and the optional `department` filter on `/announcements/sources`
 are unchanged.
 
+### Live library and energy endpoints
+
+Use `GET /libraries/lost-and-found` for library lost items and
+`GET /energy/electricity` for realtime campus electricity usage.
+The old paths remain available with the same response formats and error behavior,
+but are marked **deprecated** in OpenAPI:
+
+| Deprecated endpoint | Replacement |
+| --- | --- |
+| `GET /libraries/lost_and_found` | `GET /libraries/lost-and-found` |
+| `GET /energy/electricity_usage` | `GET /energy/electricity` |
+
+MCP tool names and arguments are unchanged.
+
 ### Course queries
 
 The supported course endpoints are `GET /courses` for ordinary queries and
