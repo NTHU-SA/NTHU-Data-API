@@ -86,7 +86,7 @@ class TestBusesRoutes:
     @pytest.mark.parametrize("direction", ["up", "down"])
     async def test_get_bus_routes(self, client: AsyncClient, campus: str, direction: str):
         """Test getting bus routes by campus and direction."""
-        response = await client.get(f"/buses/routes/?bus_type={campus}&direction={direction}")
+        response = await client.get(f"/buses/routes/?route={campus}&direction={direction}")
         assert response.status_code == 200
 
 

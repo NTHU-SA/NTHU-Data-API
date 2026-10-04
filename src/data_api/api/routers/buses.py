@@ -55,7 +55,7 @@ def _query_bus_schedule(
             detailed=details,
             stop=stop,
             after_time=after_time or "",
-            limit=query.limits,
+            limit=query.limit,
         )
 
 
@@ -67,7 +67,7 @@ def _query_bus_schedule(
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus metadata"}},
 )
 async def get_bus_route_metadata(
-    bus_type: Literal["main", "nanda"] = Query(None, description="車種選擇"),
+    route: Literal["main", "nanda"] = Query(None, description="路線選擇"),
     direction: Literal["up", "down"] = Query(None, description="方向選擇"),
 ):
     """
@@ -76,7 +76,7 @@ async def get_bus_route_metadata(
     - 南大來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
     """
     with service_errors():
-        return services.buses_service.get_route_info(bus_type, direction)
+        return services.buses_service.get_route_info(route, direction)
 
 
 @router.get(
@@ -185,4 +185,4 @@ async def get_stop_bus_information_by_stop(
             stop_name, bus_type, find_day, direction
         )
         res = services.after_specific_time(raw_data, after_time or "", ["arrive_time"])
-        return res[: query.limits]
+        return res[: query.limit]

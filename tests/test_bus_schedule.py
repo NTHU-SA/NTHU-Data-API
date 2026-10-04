@@ -21,6 +21,30 @@ pytestmark = pytest.mark.usefixtures("dataset_runtime")
 def populated_buses(monkeypatch):
     service = services.BusesService.prepare(
         {
+            "towardTSMCBuildingInfo": {
+                "direction": "up",
+                "duration": "2026",
+                "route": "main-up",
+                "routeEN": "Main up",
+            },
+            "towardMainGateInfo": {
+                "direction": "down",
+                "duration": "2026",
+                "route": "main-down",
+                "routeEN": "Main down",
+            },
+            "towardNandaInfo": {
+                "direction": "up",
+                "duration": "2026",
+                "route": "nanda-up",
+                "routeEN": "Nanda up",
+            },
+            "towardMainCampusInfo": {
+                "direction": "down",
+                "duration": "2026",
+                "route": "nanda-down",
+                "routeEN": "Nanda down",
+            },
             "weekdayBusScheduleTowardTSMCBuilding": [
                 {"time": "08:00", "description": "", "dep_stop": "校門", "line": "red"},
                 {"time": "08:10", "description": "", "dep_stop": "校門", "line": "green"},
@@ -76,12 +100,63 @@ async def get_schedule(client, path="/buses/schedule", **params):
     )
 
 
+@pytest.mark.parametrize("route", [None, "main", "nanda"])
+@pytest.mark.parametrize("direction", [None, "up", "down"])
+async def test_route_metadata_filters(populated_buses, route, direction):
+    params = {}
+    if route is not None:
+        params["route"] = route
+    if direction is not None:
+        params["direction"] = direction
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/buses/routes", params=params)
+    assert response.status_code == 200
+    expected_routes = [
+        f"{campus}-{bound}"
+        for campus in ["main", "nanda"]
+        for bound in ["up", "down"]
+        if (route is None or route == campus) and (direction is None or direction == bound)
+    ]
+    assert [info["route"] for info in response.json()] == expected_routes
+    assert response.headers["X-Data-Commit-Hash"] == "bus-fixture"
+
+
+@pytest.mark.parametrize("route", ["unknown", "", "all"])
+async def test_invalid_route_metadata_filter(populated_buses, route):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/buses/routes", params={"route": route})
+    assert response.status_code == 422
+    assert any(error["loc"] == ["query", "route"] for error in response.json()["detail"])
+
+
+@pytest.mark.parametrize(
+    "path", ["/buses/schedule", "/buses/schedules", f"/buses/stops/{BusStopsName.M5.value}"]
+)
+@pytest.mark.parametrize("limit", [1, 2])
+async def test_shared_limit_caps_bus_results(populated_buses, path, limit):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await get_schedule(client, path, limit=limit)
+    assert response.status_code == 200
+    assert len(response.json()) == limit
+
+
+@pytest.mark.parametrize(
+    "path", ["/buses/schedule", "/buses/schedules", f"/buses/stops/{BusStopsName.M5.value}"]
+)
+@pytest.mark.parametrize("limit", [0, -1, "invalid"])
+async def test_invalid_shared_limit_is_rejected(populated_buses, path, limit):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await get_schedule(client, path, limit=limit)
+    assert response.status_code == 422
+    assert any(error["loc"] == ["query", "limit"] for error in response.json()["detail"])
+
+
 @pytest.mark.parametrize("details", [False, True])
 async def test_rest_filters_before_limit_and_preserves_shape(populated_buses, details):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        unfiltered = await get_schedule(client, details=details, limits=100)
+        unfiltered = await get_schedule(client, details=details, limit=100)
         filtered = await get_schedule(
-            client, details=details, stop=BusStopsName.M3.value, time="08:05", limits=1
+            client, details=details, stop=BusStopsName.M3.value, time="08:05", limit=1
         )
         legacy = await get_schedule(
             client,
@@ -89,7 +164,7 @@ async def test_rest_filters_before_limit_and_preserves_shape(populated_buses, de
             details=details,
             stop=BusStopsName.M3.value,
             time="08:05",
-            limits=1,
+            limit=1,
         )
     assert filtered.status_code == 200
     expected = populated_buses.query_schedule(
@@ -115,9 +190,9 @@ async def test_rest_filters_before_limit_and_preserves_shape(populated_buses, de
 
 async def test_departure_filter_differs_from_legacy_arrival_filter(populated_buses):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await get_schedule(client, stop=BusStopsName.M5.value, time="08:01", limits=100)
+        response = await get_schedule(client, stop=BusStopsName.M5.value, time="08:01", limit=100)
         legacy = await get_schedule(
-            client, f"/buses/stops/{BusStopsName.M5.value}", time="08:01", limits=100
+            client, f"/buses/stops/{BusStopsName.M5.value}", time="08:01", limit=100
         )
     assert response.status_code == legacy.status_code == 200
     assert all(bus["time"] >= "08:01" for bus in response.json())
@@ -183,8 +258,8 @@ async def test_no_matching_stop_returns_empty(populated_buses):
 @pytest.mark.parametrize("details", [False, True])
 async def test_without_stop_preserves_existing_schedule(populated_buses, details):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await get_schedule(client, details=details, limits=100)
-        legacy = await get_schedule(client, "/buses/schedules", details=details, limits=100)
+        response = await get_schedule(client, details=details, limit=100)
+        legacy = await get_schedule(client, "/buses/schedules", details=details, limit=100)
     assert response.status_code == legacy.status_code == 200
     assert response.json() == legacy.json()
     assert len(response.json()) == 5
@@ -196,7 +271,7 @@ async def test_without_stop_preserves_existing_schedule(populated_buses, details
 
 @pytest.mark.parametrize(
     "params",
-    [{"stop": "unknown"}, {"stop": ""}, {"limits": 0}, {"route": "unknown"}, {"route": ""}],
+    [{"stop": "unknown"}, {"stop": ""}, {"limit": 0}, {"route": "unknown"}, {"route": ""}],
 )
 async def test_invalid_rest_filters_are_rejected(populated_buses, params):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -243,7 +318,16 @@ def test_openapi_deprecation_and_stop_parameter():
     assert new["operationId"] == "getBusSchedule"
     assert "stop" in {parameter["name"] for parameter in new["parameters"]}
     parameters = {parameter["name"]: parameter for parameter in new["parameters"]}
-    assert "bus_type" not in parameters
+    assert set(parameters) == {"route", "direction", "day", "time", "stop", "limit", "details"}
+    assert not parameters["limit"]["required"]
+    assert parameters["limit"]["schema"]["default"] == 5
+    assert {"type": "integer", "minimum": 1} in parameters["limit"]["schema"]["anyOf"]
+    route_parameters = {
+        parameter["name"]: parameter for parameter in paths["/buses/routes"]["get"]["parameters"]
+    }
+    assert set(route_parameters) == {"route", "direction"}
+    assert not route_parameters["route"]["required"]
+    assert route_parameters["route"]["schema"]["enum"] == ["main", "nanda"]
     for name, default in [("route", "all"), ("day", "current"), ("direction", "all")]:
         assert not parameters[name]["required"]
         assert parameters[name]["schema"]["default"] == default
@@ -257,6 +341,9 @@ def test_openapi_deprecation_and_stop_parameter():
         assert legacy["deprecated"]
         assert "/buses/schedule" in legacy["description"]
         assert "下一個 major 版本移除" in legacy["description"]
+        legacy_names = {parameter["name"] for parameter in legacy["parameters"]}
+        assert "limit" in legacy_names
+        assert "limits" not in legacy_names
 
 
 @pytest.mark.parametrize("day", ["weekday", "weekend"])
@@ -297,7 +384,7 @@ async def test_valid_mcp_time_filters(populated_buses, day, time):
         ({"route": "nanda"}, ["08:15"]),
         ({"time": "23:59"}, ["08:10", "08:15", "08:20", "08:30"]),
         ({"direction": "down"}, []),
-        ({"limits": 2}, ["08:10", "08:15"]),
+        ({"limit": 2}, ["08:10", "08:15"]),
     ],
 )
 async def test_canonical_defaults_query_upcoming_departures(
