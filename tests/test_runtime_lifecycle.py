@@ -104,6 +104,7 @@ async def test_cold_start_empty_is_not_unavailable(empty):
         ("announcements.json", "/announcements/", [], "get_announcements", {}),
         ("newsletters.json", "/newsletters/", [], "get_newsletters", {}),
         ("buses.json", "/buses/routes", {}, "get_bus_schedule", {}),
+        ("buses.json", "/buses/stops", {}, "get_bus_schedule", {}),
         ("buses.json", "/buses/info/stops", {}, "get_bus_schedule", {}),
         (
             "buses.json",

@@ -117,6 +117,28 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+### Announcement queries
+
+The supported announcement endpoints are `GET /announcements` for announcement
+content and `GET /announcements/sources` for source metadata without articles.
+Use the `department` fields in `/announcements/sources` to discover department
+names; clients needing a unique department list can deduplicate those values.
+The redundant `GET /announcements/lists/departments` endpoint is deprecated in
+OpenAPI but remains available for compatibility. It still returns HTTP 200 with
+a sorted, unique list of department names and the `X-Data-Commit-Hash` header
+when available.
+
+```text
+GET /announcements
+GET /announcements/sources
+GET /announcements?department=教務處
+GET /announcements?title=停電
+GET /announcements?language=zh-tw
+```
+
+Announcement filters and the optional `department` filter on `/announcements/sources`
+are unchanged.
+
 ### Course queries
 
 The supported course endpoints are `GET /courses` for ordinary queries and
@@ -190,7 +212,47 @@ single-object response, and 404 behavior, but is **deprecated** in OpenAPI.
 Migrate to `/newsletters/?name={newsletter_name}&fuzzy=false`, which returns
 a list (or `[]` if no source matches). No removal date has been set.
 
-### Bus schedules
+### Location queries
+
+Use `GET /locations/` to list all campus locations, or supply `name` to search
+by name. `fuzzy` defaults to `true`; set `fuzzy=false` to require an exact
+name match. Omitting `name` or passing an empty value returns all locations
+regardless of `fuzzy`.
+
+```text
+GET /locations/
+GET /locations/?name=台積館
+GET /locations/?name=台積館&fuzzy=false
+```
+
+Responses are arrays of locations with `name`, `latitude`, and `longitude`,
+and include `X-Data-Commit-Hash` when available. No matches return HTTP 200
+with `[]`.
+
+Requests to `/locations` redirect to `/locations/`, preserving query parameters.
+The old search endpoint remains available but is marked **deprecated** in OpenAPI:
+
+| Deprecated endpoint | Replacement |
+| --- | --- |
+| `GET /locations/search?query=...` | `GET /locations/?name=...` |
+
+Legacy search behavior is preserved: `/locations/search` requires `query` and
+returns HTTP 404 when no locations match.
+
+### Bus routes, stops, and schedules
+
+The bus API exposes three resources:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /buses/routes` | Campus route metadata |
+| `GET /buses/stops` | All bus stops with names and coordinates |
+| `GET /buses/schedule` | Timetable query, optionally filtered by stop |
+
+`GET /buses/stops` replaces `/buses/info/stops`. The old path remains available
+with the same response format, is deprecated in OpenAPI, and will be removed
+in the next major release. Stop-specific timetable queries use
+`GET /buses/schedule?stop=台積館`, not a stop resource path.
 
 Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
 `day` (`weekday`, `weekend`, `current`), and `direction` (`up`, `down`, `all`).
@@ -213,12 +275,12 @@ Stop and time filters are applied before the limit; no matches return `[]`.
 ```
 
 `GET /buses/schedules` and `GET /buses/stops/{stop_name}` remain available but are
-deprecated in OpenAPI. Migrate to `/buses/schedule` and
+deprecated in OpenAPI and will be removed in the next major release. Migrate to `/buses/schedule` and
 `/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
 `bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
 `day`, and `direction` parameters. The old stop endpoint
 retains its arrival-based response and time filtering; the new endpoint always
-filters by departure time. No removal date has been set.
+filters by departure time.
 
 MCP `get_bus_schedule` replaces `get_next_buses` and `get_bus_stops` without
 compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,

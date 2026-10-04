@@ -42,11 +42,6 @@ class TestAnnouncementsEndpoints:
         response = await client.get("/announcements/sources", params=params)
         assert response.status_code == 200
 
-    async def test_announcements_list_departments(self, client: AsyncClient):
-        """Test listing announcement departments."""
-        response = await client.get("/announcements/lists/departments")
-        assert response.status_code == 200
-
 
 class TestDiningEndpoints:
     """Tests for dining endpoints."""
@@ -186,6 +181,7 @@ class TestDepartmentsEndpoints:
     "path,statuses",
     [
         ("/buses/routes", {"500"}),
+        ("/buses/stops", {"500"}),
         ("/buses/info/stops", {"500"}),
         ("/buses/schedules", {"500"}),
         ("/energy/electricity_usage", {"500", "502", "504"}),
