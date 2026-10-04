@@ -163,6 +163,33 @@ Legacy behavior is preserved: `GET /courses/` returns all courses, while
 `GET /courses/search` without non-empty field filters returns `[]`. Migrating
 the latter to an unfiltered `GET /courses` instead returns all courses.
 
+### Newsletter queries
+
+`GET /newsletters/` supports optional `name`, `title`, and `fuzzy` (default
+`true`) parameters. Name and article-title filters are combined with AND.
+Fuzzy matching uses partial similarity with a threshold of 80, like announcements.
+With `fuzzy=false`, names must match exactly and titles use case-sensitive literal
+substring matching. Empty filters apply no filtering.
+
+Responses retain source metadata and nested `articles`; a title filter removes
+non-matching articles and sources with no matching articles. Without a title
+filter, sources with empty article lists are retained. No matches return `[]`.
+
+`GET /newsletters/sources` lists `name`, `link`, and `details` without articles.
+Its optional `name` filter matches exactly. Both endpoints return the dataset's
+`X-Data-Commit-Hash` when available.
+
+```text
+/newsletters/sources
+/newsletters/?name=教務處
+/newsletters/?name=教務處綜合教務組電子報&title=選課&fuzzy=false
+```
+
+`GET /newsletters/{newsletter_name}` remains available with its existing enum,
+single-object response, and 404 behavior, but is **deprecated** in OpenAPI.
+Migrate to `/newsletters/?name={newsletter_name}&fuzzy=false`, which returns
+a list (or `[]` if no source matches). No removal date has been set.
+
 ### Bus schedules
 
 Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
