@@ -26,6 +26,7 @@ def test_missing_route_metadata_is_not_registered():
     "path,method",
     [
         ("/buses/routes", "get_route_info"),
+        ("/buses/stops", "gen_bus_stops_info"),
         ("/buses/info/stops", "gen_bus_stops_info"),
         (
             "/buses/schedules?bus_type=main&day=weekday&direction=up",
@@ -89,8 +90,8 @@ class TestBusesRoutes:
         assert response.status_code == 200
 
 
-class TestBusesInfo:
-    """Tests for bus information endpoints."""
+class TestBusesStopMetadata:
+    """Tests for the bus stop collection endpoint."""
 
     @pytest.fixture
     async def client(self):
@@ -102,8 +103,22 @@ class TestBusesInfo:
 
     async def test_get_bus_stops_info(self, client: AsyncClient):
         """Test getting bus stops information."""
-        response = await client.get("/buses/info/stops")
+        response = await client.get("/buses/stops")
         assert response.status_code == 200
+        expected = [
+            schemas.buses.BusStopsInfo.model_validate(stop).model_dump()
+            for stop in buses_service.gen_bus_stops_info()
+        ]
+        assert expected
+        assert response.json() == expected
+        assert response.headers["X-Data-Commit-Hash"] == buses_service.last_commit_hash
+
+    async def test_legacy_info_stops_matches_collection(self, client: AsyncClient):
+        response = await client.get("/buses/info/stops")
+        canonical = await client.get("/buses/stops")
+        assert response.status_code == canonical.status_code == 200
+        assert response.json() == canonical.json()
+        assert response.headers["X-Data-Commit-Hash"] == canonical.headers["X-Data-Commit-Hash"]
 
 
 class TestBusesSchedules:

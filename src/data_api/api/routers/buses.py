@@ -80,10 +80,19 @@ async def get_bus_route_metadata(
 
 
 @router.get(
+    "/stops",
+    response_model=list[schemas.BusStopsInfo],
+    dependencies=[Depends(add_custom_header)],
+    operation_id="getBusStops",
+    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus stops"}},
+)
+@router.get(
     "/info/stops",
     response_model=list[schemas.BusStopsInfo],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusStopsInformation",
+    deprecated=True,
+    description="已棄用，將於下一個 major 版本移除。請改用 GET /buses/stops，回應格式不變。",
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus stops"}},
 )
 async def get_bus_stops_information():
@@ -101,7 +110,7 @@ async def get_bus_stops_information():
     response_description="取得公車時刻表信息。",
     deprecated=True,
     description=(
-        "即將棄用，請改用 GET /buses/schedule，並將 bus_type 改為 route。"
+        "已棄用，將於下一個 major 版本移除。請改用 GET /buses/schedule，並將 bus_type 改為 route。"
         "新版預設 route=all、day=current、direction=all，亦支援 stop 篩選。"
     ),
 )
@@ -156,7 +165,7 @@ async def get_bus_schedule(
     operation_id="getStopBusInformationByStop",
     deprecated=True,
     description=(
-        "即將棄用，請改用 GET /buses/schedule?stop={stop_name}&details=true。"
+        "已棄用，將於下一個 major 版本移除。請改用 GET /buses/schedule?stop={stop_name}&details=true。"
         "新 API 回傳時刻表格式，並以發車時間篩選；此舊 API 保留到站資訊與到站時間篩選。"
     ),
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},

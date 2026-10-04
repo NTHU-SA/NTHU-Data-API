@@ -213,6 +213,31 @@ async def test_invalid_mcp_filters_are_rejected(populated_buses, params):
 
 def test_openapi_deprecation_and_stop_parameter():
     paths = app.openapi()["paths"]
+    bus_paths = {path for path in paths if path.startswith("/buses")}
+    canonical_paths = {
+        path for path in bus_paths if not paths[path]["get"].get("deprecated", False)
+    }
+    assert canonical_paths == {"/buses/routes", "/buses/stops", "/buses/schedule"}
+    assert bus_paths - canonical_paths == {
+        "/buses/info/stops",
+        "/buses/schedules",
+        "/buses/stops/{stop_name}",
+    }
+    stops = paths["/buses/stops"]["get"]
+    assert stops["operationId"] == "getBusStops"
+    assert not stops.get("parameters")
+    stop_schema = stops["responses"]["200"]["content"]["application/json"]["schema"]
+    assert stop_schema["type"] == "array"
+    assert stop_schema["items"] == {"$ref": "#/components/schemas/BusStopsInfo"}
+    legacy_stops = paths["/buses/info/stops"]["get"]
+    assert legacy_stops["deprecated"]
+    assert legacy_stops["operationId"] == "getBusStopsInformation"
+    assert "/buses/stops" in legacy_stops["description"]
+    assert "下一個 major 版本移除" in legacy_stops["description"]
+    assert not legacy_stops.get("parameters")
+    assert legacy_stops["responses"]["200"]["content"]["application/json"]["schema"]["items"] == (
+        stop_schema["items"]
+    )
     new = paths["/buses/schedule"]["get"]
     assert not new.get("deprecated", False)
     assert new["operationId"] == "getBusSchedule"
@@ -231,6 +256,7 @@ def test_openapi_deprecation_and_stop_parameter():
         legacy = paths[path]["get"]
         assert legacy["deprecated"]
         assert "/buses/schedule" in legacy["description"]
+        assert "下一個 major 版本移除" in legacy["description"]
 
 
 @pytest.mark.parametrize("day", ["weekday", "weekend"])
