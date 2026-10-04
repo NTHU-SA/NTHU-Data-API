@@ -186,6 +186,7 @@ class TestDepartmentsEndpoints:
     "path,statuses",
     [
         ("/buses/routes", {"500"}),
+        ("/buses/stops", {"500"}),
         ("/buses/info/stops", {"500"}),
         ("/buses/schedules", {"500"}),
         ("/energy/electricity_usage", {"500", "502", "504"}),

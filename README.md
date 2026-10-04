@@ -163,7 +163,20 @@ Legacy behavior is preserved: `GET /courses/` returns all courses, while
 `GET /courses/search` without non-empty field filters returns `[]`. Migrating
 the latter to an unfiltered `GET /courses` instead returns all courses.
 
-### Bus schedules
+### Bus routes, stops, and schedules
+
+The bus API exposes three resources:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /buses/routes` | Campus route metadata |
+| `GET /buses/stops` | All bus stops with names and coordinates |
+| `GET /buses/schedule` | Timetable query, optionally filtered by stop |
+
+`GET /buses/stops` replaces `/buses/info/stops`. The old path remains available
+with the same response format, is deprecated in OpenAPI, and will be removed
+in the next major release. Stop-specific timetable queries use
+`GET /buses/schedule?stop=台積館`, not a stop resource path.
 
 Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
 `day` (`weekday`, `weekend`, `current`), and `direction` (`up`, `down`, `all`).
@@ -186,12 +199,12 @@ Stop and time filters are applied before the limit; no matches return `[]`.
 ```
 
 `GET /buses/schedules` and `GET /buses/stops/{stop_name}` remain available but are
-deprecated in OpenAPI. Migrate to `/buses/schedule` and
+deprecated in OpenAPI and will be removed in the next major release. Migrate to `/buses/schedule` and
 `/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
 `bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
 `day`, and `direction` parameters. The old stop endpoint
 retains its arrival-based response and time filtering; the new endpoint always
-filters by departure time. No removal date has been set.
+filters by departure time.
 
 MCP `get_bus_schedule` replaces `get_next_buses` and `get_bus_stops` without
 compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,
