@@ -203,12 +203,12 @@ class TestBusesEndpoints:
 
     async def test_buses_routes_with_params(self, client: AsyncClient):
         """Test bus routes with parameters."""
-        response = await client.get("/buses/routes/?bus_type=main&direction=up")
+        response = await client.get("/buses/routes/?route=main&direction=up")
         assert response.status_code == 200
 
     async def test_buses_routes_nanda(self, client: AsyncClient):
         """Test Nanda bus routes."""
-        response = await client.get("/buses/routes/?bus_type=nanda&direction=up")
+        response = await client.get("/buses/routes/?route=nanda&direction=up")
         assert response.status_code == 200
 
 

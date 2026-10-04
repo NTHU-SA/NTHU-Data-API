@@ -45,7 +45,7 @@ class BusQuery(BaseModel):
         Query(None, description="時間。若搜尋 day 選擇 current 時失效。"),
         description="時間",
     )
-    limits: Optional[int] = Field(
+    limit: Optional[int] = Field(
         Query(
             5,
             ge=1,

@@ -300,6 +300,10 @@ with the same response format, is deprecated in OpenAPI, and will be removed
 in the next major release. Stop-specific timetable queries use
 `GET /buses/schedule?stop=台積館`, not a stop resource path.
 
+Use `GET /buses/routes?route=main` to select campus route metadata. Its optional
+`route` (`main`, `nanda`) and `direction` (`up`, `down`) filters return all routes
+and directions when omitted. The query parameter `bus_type` is replaced by `route`.
+
 Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
 `day` (`weekday`, `weekend`, `current`), and `direction` (`up`, `down`, `all`).
 Defaults are `route=all`, `day=current`, and `direction=all`, so a request without
@@ -310,13 +314,16 @@ Optional `stop` filters to buses serving that stop, without changing the respons
 format. `details=false` (default) returns departure schedules; `details=true`
 includes `dep_info` and all `stops_time` entries. `time` filters by departure time
 in HH:MM format, even when `stop` is supplied. `day=current` uses the current day
-and time and ignores `time`. `limits` defaults to 5 and must be at least 1.
+and time and ignores `time`. `limit` defaults to 5 and must be at least 1.
+The shared `BusQuery` parameter is now `limit`, not `limits`, including on
+deprecated bus endpoints; update clients to use the singular spelling.
 Stop and time filters are applied before the limit; no matches return `[]`.
 
 ```text
 /buses/schedule
 /buses/schedule?stop=台積館
 /buses/schedule?route=main&direction=up
+/buses/schedule?route=main&limit=5
 /buses/schedule?route=all&day=weekday&direction=up&stop=台積館&details=true
 ```
 
