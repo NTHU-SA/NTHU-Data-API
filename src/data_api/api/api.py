@@ -170,6 +170,7 @@ def create_app() -> FastAPI:
         courses,
         departments,
         dining,
+        directory,
         energy,
         libraries,
         locations,
@@ -183,6 +184,7 @@ def create_app() -> FastAPI:
     app.include_router(calendars.router, prefix="/calendars", tags=["Calendars"])
     app.include_router(courses.router, prefix="/courses", tags=["Courses"])
     app.include_router(departments.router, prefix="/departments", tags=["directory 舊"])
+    app.include_router(directory.router, prefix="/directory", tags=["directory"])
     app.include_router(dining.router, prefix="/dining", tags=["Dining"])
     app.include_router(energy.router, prefix="/energy", tags=["Energy"])
     app.include_router(libraries.router, prefix="/libraries", tags=["Libraries"])

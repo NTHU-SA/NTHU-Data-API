@@ -139,6 +139,21 @@ trailing-slash redirect still forwards requests to `/departments/`. The retained
 endpoints keep their existing response schemas, operation IDs, and data-version
 headers.
 
+### Directory queries
+
+Use `GET /directory` to retrieve the directory, or `GET /directory?query=...`
+to fuzzy-match department names, people names, or titles. An omitted or empty
+`query` returns the entire directory; no matches returns an empty array.
+The response is always a list of the existing `Department` model. A department
+name match returns that department in full. When only its people match, the
+department metadata is retained and `details.people` contains only matching
+people. Results are sorted by match score, while people retain their dataset
+order. Filtering does not modify the cached dataset.
+
+There is no new `/directory/search` endpoint. The deprecated
+`/departments/search` retains its separate `departments` and `people` response
+for existing clients, including MCP campus search.
+
 ### Announcement queries
 
 The supported announcement endpoints are `GET /announcements` for announcement

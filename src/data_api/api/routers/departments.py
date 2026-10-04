@@ -15,7 +15,7 @@ router = APIRouter(deprecated=True)
     response_model=list[schemas.Department],
     operation_id="getAllDepartmentsDeprecated",
     deprecated=True,
-    description="舊版通訊錄端點，已棄用。",
+    description="舊版通訊錄端點，已棄用，請改用 GET /directory。",
 )
 async def get_all_departments(response: Response):
     """
@@ -32,6 +32,7 @@ async def get_all_departments(response: Response):
     "/search",
     response_model=dict[str, Union[list[schemas.Department], list[schemas.DepartmentPerson]]],
     operation_id="searchDepartmentsAndPeople",
+    description="已棄用，請改用 GET /directory?query=...。新版以部門為單位回傳符合的人員。",
 )
 async def fuzzy_search_departments_and_people(
     response: Response, query: Annotated[str, Query(description="要查詢的部門或人員名稱")]
