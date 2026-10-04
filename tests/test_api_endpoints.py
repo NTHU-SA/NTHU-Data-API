@@ -13,7 +13,6 @@ pytestmark = pytest.mark.usefixtures("dataset_runtime")
 ROOT_ENDPOINTS = [
     ("/announcements", "getAnnouncements", {"title": "Notice", "fuzzy": "false"}),
     ("/calendars", "getAllCalendars", {}),
-    ("/departments", "getAllDepartments", {}),
     ("/dining", "getDiningData", {"restaurant_name": "Test", "fuzzy": "false"}),
     ("/locations", "getLocations", {"name": "台積", "fuzzy": "false"}),
     ("/newsletters", "getAllNewsletters", {"name": "Test", "fuzzy": "false"}),

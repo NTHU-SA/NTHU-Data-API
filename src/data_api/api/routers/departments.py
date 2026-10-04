@@ -7,16 +7,15 @@ from fastapi import APIRouter, Query, Response
 from data_api.api.schemas import departments as schemas
 from data_api.domain.departments import services
 
-router = APIRouter()
+router = APIRouter(deprecated=True)
 
 
-@router.get("", response_model=list[schemas.Department], operation_id="getAllDepartments")
 @router.get(
     "/",
     response_model=list[schemas.Department],
     operation_id="getAllDepartmentsDeprecated",
     deprecated=True,
-    description="已棄用，請改用 GET /departments。回傳格式不變。",
+    description="舊版通訊錄端點，已棄用。",
 )
 async def get_all_departments(response: Response):
     """

@@ -182,7 +182,7 @@ def create_app() -> FastAPI:
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
     app.include_router(calendars.router, prefix="/calendars", tags=["Calendars"])
     app.include_router(courses.router, prefix="/courses", tags=["Courses"])
-    app.include_router(departments.router, prefix="/departments", tags=["Departments"])
+    app.include_router(departments.router, prefix="/departments", tags=["directory 舊"])
     app.include_router(dining.router, prefix="/dining", tags=["Dining"])
     app.include_router(energy.router, prefix="/energy", tags=["Energy"])
     app.include_router(libraries.router, prefix="/libraries", tags=["Libraries"])
