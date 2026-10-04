@@ -150,7 +150,7 @@ retains its existing all-courses behavior.
 
 ### Legacy directory endpoints
 
-The legacy endpoints are grouped under `Departments` in the documentation. All its
+The legacy endpoints are grouped under `Departments` in the documentation. Both
 endpoints are deprecated: `GET /departments/` and `GET /departments/search`.
 The slashless `GET /departments` route has been removed; FastAPI's default
 trailing-slash redirect still forwards requests to `/departments/`. The retained
