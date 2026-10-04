@@ -81,8 +81,7 @@ function renames must not change these public names.
 | Tool name | Display title |
 | --- | --- |
 | `search_campus` | 搜尋校園資訊 |
-| `get_next_buses` | 查詢接下來的公車班次 |
-| `get_bus_stops` | 查詢公車站點資訊 |
+| `get_bus_schedule` | 查詢公車時刻表 |
 | `search_courses` | 搜尋課程列表 |
 | `get_announcements` | 搜尋校園公告 |
 | `find_dining` | 搜尋餐廳列表 |
@@ -163,6 +162,46 @@ The old endpoints remain available but are marked **deprecated** in OpenAPI:
 Legacy behavior is preserved: `GET /courses/` returns all courses, while
 `GET /courses/search` without non-empty field filters returns `[]`. Migrating
 the latter to an unfiltered `GET /courses` instead returns all courses.
+
+### Bus schedules
+
+Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
+`day` (`weekday`, `weekend`, `current`), and `direction` (`up`, `down`, `all`).
+Defaults are `route=all`, `day=current`, and `direction=all`, so a request without
+parameters returns the next departures across all routes and directions.
+`route` selects a campus route; response `bus_type` identifies the vehicle type
+(for example, `large-sized_bus`), not the campus route.
+Optional `stop` filters to buses serving that stop, without changing the response
+format. `details=false` (default) returns departure schedules; `details=true`
+includes `dep_info` and all `stops_time` entries. `time` filters by departure time
+in HH:MM format, even when `stop` is supplied. `day=current` uses the current day
+and time and ignores `time`. `limits` defaults to 5 and must be at least 1.
+Stop and time filters are applied before the limit; no matches return `[]`.
+
+```text
+/buses/schedule
+/buses/schedule?stop=台積館
+/buses/schedule?route=main&direction=up
+/buses/schedule?route=all&day=weekday&direction=up&stop=台積館&details=true
+```
+
+`GET /buses/schedules` and `GET /buses/stops/{stop_name}` remain available but are
+deprecated in OpenAPI. Migrate to `/buses/schedule` and
+`/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
+`bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
+`day`, and `direction` parameters. The old stop endpoint
+retains its arrival-based response and time filtering; the new endpoint always
+filters by departure time. No removal date has been set.
+
+MCP `get_bus_schedule` replaces `get_next_buses` and `get_bus_stops` without
+compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,
+`time`, and `details`, using the same schedule filters as REST. Defaults are
+`route=all`, `direction=all`, `day=current`, `limit=5`, and `details=true`.
+Its `buses` list uses the REST schedule format; `stop_name` and `stop_info`
+(including coordinates) are included when `stop` is supplied. MCP clients must
+refresh their tool list and use the new name and response format.
+If supplied, MCP `time` must be a zero-padded HH:MM value from `00:00` to `23:59`;
+malformed values are rejected during argument validation, even for `day=current`.
 
 ### Dining queries
 
