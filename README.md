@@ -63,6 +63,24 @@ uv run pre-commit install
 uv run python main.py
 ```
 
+### API metadata
+
+`GET /` returns a small discovery response without reading datasets or making
+upstream requests. The name and version match the FastAPI application metadata.
+
+```json
+{
+  "name": "NTHU Data API",
+  "version": "2.0.0",
+  "docs": "/docs",
+  "openapi": "/openapi.json",
+  "mcp": "/mcp"
+}
+```
+
+The endpoint is documented in OpenAPI. Use `/ping` for dataset readiness checks;
+the metadata endpoint does not indicate dataset readiness.
+
 ## Contributing
 We follow certain guidelines for contributing. Here are the types of commits we accept:
 
