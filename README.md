@@ -138,7 +138,7 @@ parameters, with validation errors documented in OpenAPI.
 ### Root endpoint paths
 
 Use root GET endpoints without a trailing slash: `/announcements`, `/calendars`,
-`/departments`, `/dining`, `/locations`, and `/newsletters`. Both forms respond
+`/dining`, `/locations`, and `/newsletters`. Both forms respond
 directly without a redirect and retain the same query parameters, response schemas,
 and data-version headers. The trailing-slash endpoints remain available for
 compatibility but are marked **deprecated** in OpenAPI, with descriptions pointing
@@ -147,6 +147,30 @@ the deprecated aliases use a `Deprecated` suffix to keep operation IDs unique.
 
 `GET /courses` already uses this convention; its deprecated `/courses/` endpoint
 retains its existing all-courses behavior.
+
+### Legacy directory endpoints
+
+The former `Departments` documentation group is named `directory 舊`. All its
+endpoints are deprecated: `GET /departments/` and `GET /departments/search`.
+The slashless `GET /departments` route has been removed; FastAPI's default
+trailing-slash redirect still forwards requests to `/departments/`. The retained
+endpoints keep their existing response schemas, operation IDs, and data-version
+headers.
+
+### Directory queries
+
+Use `GET /directory` to retrieve the directory, or `GET /directory?query=...`
+to fuzzy-match department names, people names, or titles. An omitted or empty
+`query` returns the entire directory; no matches returns an empty array.
+The response is always a list of the existing `Department` model. A department
+name match returns that department in full. When only its people match, the
+department metadata is retained and `details.people` contains only matching
+people. Results are sorted by match score, while people retain their dataset
+order. Filtering does not modify the cached dataset.
+
+There is no new `/directory/search` endpoint. The deprecated
+`/departments/search` retains its separate `departments` and `people` response
+for existing clients, including MCP campus search.
 
 ### Announcement queries
 
