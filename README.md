@@ -117,6 +117,28 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+### Announcement queries
+
+The supported announcement endpoints are `GET /announcements` for announcement
+content and `GET /announcements/sources` for source metadata without articles.
+Use the `department` fields in `/announcements/sources` to discover department
+names; clients needing a unique department list can deduplicate those values.
+The redundant `GET /announcements/lists/departments` endpoint is deprecated in
+OpenAPI but remains available for compatibility. It still returns HTTP 200 with
+a sorted, unique list of department names and the `X-Data-Commit-Hash` header
+when available.
+
+```text
+GET /announcements
+GET /announcements/sources
+GET /announcements?department=教務處
+GET /announcements?title=停電
+GET /announcements?language=zh-tw
+```
+
+Announcement filters and the optional `department` filter on `/announcements/sources`
+are unchanged.
+
 ### Course queries
 
 The supported course endpoints are `GET /courses` for ordinary queries and
@@ -162,6 +184,33 @@ The old endpoints remain available but are marked **deprecated** in OpenAPI:
 Legacy behavior is preserved: `GET /courses/` returns all courses, while
 `GET /courses/search` without non-empty field filters returns `[]`. Migrating
 the latter to an unfiltered `GET /courses` instead returns all courses.
+
+### Location queries
+
+Use `GET /locations/` to list all campus locations, or supply `name` to search
+by name. `fuzzy` defaults to `true`; set `fuzzy=false` to require an exact
+name match. Omitting `name` or passing an empty value returns all locations
+regardless of `fuzzy`.
+
+```text
+GET /locations/
+GET /locations/?name=台積館
+GET /locations/?name=台積館&fuzzy=false
+```
+
+Responses are arrays of locations with `name`, `latitude`, and `longitude`,
+and include `X-Data-Commit-Hash` when available. No matches return HTTP 200
+with `[]`.
+
+Requests to `/locations` redirect to `/locations/`, preserving query parameters.
+The old search endpoint remains available but is marked **deprecated** in OpenAPI:
+
+| Deprecated endpoint | Replacement |
+| --- | --- |
+| `GET /locations/search?query=...` | `GET /locations/?name=...` |
+
+Legacy search behavior is preserved: `/locations/search` requires `query` and
+returns HTTP 404 when no locations match.
 
 ### Bus routes, stops, and schedules
 

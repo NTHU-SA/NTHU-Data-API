@@ -39,15 +39,78 @@ class TestAnnouncementsEndpoints:
         response = await client.get("/announcements", params=params)
         assert response.status_code == 200
 
-    async def test_get_announcements_sources(self, client: AsyncClient):
+    @pytest.mark.parametrize("department", [None, "教務處"])
+    async def test_get_announcements_sources(self, client: AsyncClient, monkeypatch, department):
         """Test getting announcement sources."""
-        response = await client.get("/announcements/sources")
-        assert response.status_code == 200
+        sources = [
+            {"department": "教務處", "language": "zh-tw"},
+            {"department": "學生事務處", "language": "zh-tw"},
+        ]
 
-    async def test_get_announcements_list_departments(self, client: AsyncClient):
-        """Test listing announcement departments."""
+        async def get_sources(endpoint):
+            assert endpoint == "announcements_list.json"
+            return "test-commit", sources
+
+        monkeypatch.setattr(nthudata, "get", get_sources)
+        params = {"department": department} if department else {}
+        response = await client.get("/announcements/sources", params=params)
+        assert response.status_code == 200
+        assert response.json() == (sources[:1] if department else sources)
+        assert response.headers["X-Data-Commit-Hash"] == "test-commit"
+
+    @pytest.mark.parametrize(
+        "sources, expected",
+        [
+            ([], []),
+            (
+                [
+                    {"department": "Beta"},
+                    {"department": "Alpha"},
+                    {"department": "Beta"},
+                ],
+                ["Alpha", "Beta"],
+            ),
+        ],
+    )
+    async def test_deprecated_departments_endpoint(
+        self, client: AsyncClient, monkeypatch, sources, expected
+    ):
+        """The deprecated endpoint preserves its sorted, unique response."""
+
+        async def get_sources(endpoint):
+            assert endpoint == "announcements_list.json"
+            return "test-commit", sources
+
+        monkeypatch.setattr(nthudata, "get", get_sources)
         response = await client.get("/announcements/lists/departments")
         assert response.status_code == 200
+        assert response.json() == expected
+        assert response.headers["X-Data-Commit-Hash"] == "test-commit"
+
+
+def test_announcements_openapi_contract():
+    paths = app.openapi()["paths"]
+    announcement_paths = {path for path in paths if path.startswith("/announcements")}
+    assert announcement_paths == {
+        "/announcements/",
+        "/announcements/sources",
+        "/announcements/lists/departments",
+    }
+    assert paths["/announcements/"]["get"]["operationId"] == "getAnnouncements"
+    assert paths["/announcements/sources"]["get"]["operationId"] == "getAnnouncementsList"
+    assert not paths["/announcements/"]["get"].get("deprecated", False)
+    assert not paths["/announcements/sources"]["get"].get("deprecated", False)
+    legacy = paths["/announcements/lists/departments"]["get"]
+    assert legacy["operationId"] == "listAnnouncementDepartments"
+    assert legacy["deprecated"] is True
+    assert "/announcements/sources" in legacy["description"]
+    parameters = {
+        parameter["name"]: parameter for parameter in paths["/announcements/"]["get"]["parameters"]
+    }
+    assert {"department", "title", "language", "fuzzy"} <= parameters.keys()
+    description = parameters["department"]["description"]
+    assert "/announcements/sources" in description
+    assert "/announcements/lists/departments" not in description
 
 
 @pytest.mark.parametrize("selected", list(product([False, True], repeat=3)))

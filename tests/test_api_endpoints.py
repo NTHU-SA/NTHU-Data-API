@@ -42,11 +42,6 @@ class TestAnnouncementsEndpoints:
         response = await client.get("/announcements/sources", params=params)
         assert response.status_code == 200
 
-    async def test_announcements_list_departments(self, client: AsyncClient):
-        """Test listing announcement departments."""
-        response = await client.get("/announcements/lists/departments")
-        assert response.status_code == 200
-
 
 class TestDiningEndpoints:
     """Tests for dining endpoints."""
