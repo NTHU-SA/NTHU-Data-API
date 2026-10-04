@@ -195,9 +195,9 @@ class TestDepartmentsEndpoints:
         ("/libraries/space", {"500", "502", "504"}),
         ("/libraries/lost_and_found", {"500", "502", "504"}),
         ("/libraries/rss/{rss_type}", {"404"}),
-        ("/libraries/calendars/{calendar_id}", {"404"}),
-        ("/libraries/calendars/{calendar_id}/events", {"400", "404"}),
-        ("/libraries/calendars/{calendar_id}/events/{event_id}", {"404"}),
+        ("/calendars/{calendar_id}", {"404"}),
+        ("/calendars/{calendar_id}/events", {"400", "404"}),
+        ("/calendars/{calendar_id}/events/{event_id}", {"404"}),
     ],
 )
 def test_openapi_documents_route_errors(path, statuses):

@@ -71,6 +71,7 @@ async def dataset_runtime():
         ],
         "/buses.json": {},
         "/calendars.json": [],
+        "/libraries/calendars.json": [],
         "/announcements.json": [],
         "/announcements_list.json": [],
         "/dining.json": [],
