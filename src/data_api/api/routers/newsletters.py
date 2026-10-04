@@ -10,7 +10,14 @@ from data_api.domain.newsletters import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.NewsletterInfo], operation_id="getAllNewsletters")
+@router.get("", response_model=list[schemas.NewsletterInfo], operation_id="getAllNewsletters")
+@router.get(
+    "/",
+    response_model=list[schemas.NewsletterInfo],
+    operation_id="getAllNewslettersDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /newsletters。查詢參數與回傳格式不變。",
+)
 async def get_all_newsletters(
     response: Response,
     name: str = Query(None, description="電子報名稱。請透過 `/newsletters/sources` 取得來源列表。"),
@@ -59,7 +66,7 @@ async def get_newsletter_by_name(
     response: Response,
     newsletter_name: Annotated[schemas.NewsletterName, Path()],
 ):
-    """取得指定電子報的資訊。已棄用，請改用 `/newsletters/?name=...&fuzzy=false`。"""
+    """取得指定電子報的資訊。已棄用，請改用 `/newsletters?name=...&fuzzy=false`。"""
     commit_hash, data = await services.newsletters_service.get_newsletter_by_name(
         name=newsletter_name
     )

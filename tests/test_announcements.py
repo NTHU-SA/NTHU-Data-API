@@ -92,20 +92,22 @@ def test_announcements_openapi_contract():
     paths = app.openapi()["paths"]
     announcement_paths = {path for path in paths if path.startswith("/announcements")}
     assert announcement_paths == {
+        "/announcements",
         "/announcements/",
         "/announcements/sources",
         "/announcements/lists/departments",
     }
-    assert paths["/announcements/"]["get"]["operationId"] == "getAnnouncements"
+    assert paths["/announcements"]["get"]["operationId"] == "getAnnouncements"
     assert paths["/announcements/sources"]["get"]["operationId"] == "getAnnouncementsList"
-    assert not paths["/announcements/"]["get"].get("deprecated", False)
+    assert not paths["/announcements"]["get"].get("deprecated", False)
+    assert paths["/announcements/"]["get"]["deprecated"] is True
     assert not paths["/announcements/sources"]["get"].get("deprecated", False)
     legacy = paths["/announcements/lists/departments"]["get"]
     assert legacy["operationId"] == "listAnnouncementDepartments"
     assert legacy["deprecated"] is True
     assert "/announcements/sources" in legacy["description"]
     parameters = {
-        parameter["name"]: parameter for parameter in paths["/announcements/"]["get"]["parameters"]
+        parameter["name"]: parameter for parameter in paths["/announcements"]["get"]["parameters"]
     }
     assert {"department", "title", "language", "fuzzy"} <= parameters.keys()
     description = parameters["department"]["description"]

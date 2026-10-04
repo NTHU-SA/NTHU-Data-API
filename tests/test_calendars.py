@@ -295,7 +295,7 @@ def test_openapi_calendar_contract():
     schema = app.openapi()
     assert not any(path.startswith("/libraries/calendars") for path in schema["paths"])
     assert not any(name.startswith("LibraryCalendar") for name in schema["components"]["schemas"])
-    assert schema["paths"]["/calendars/"]["get"]["operationId"] == "getAllCalendars"
+    assert schema["paths"]["/calendars"]["get"]["operationId"] == "getAllCalendars"
     search = schema["paths"][EVENTS_PATH.replace("academic", "{calendar_id}")]["get"]
     assert search["operationId"] == "searchCalendarEvents"
     assert {parameter["name"] for parameter in search["parameters"]} == {

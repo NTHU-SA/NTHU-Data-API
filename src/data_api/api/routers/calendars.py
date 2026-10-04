@@ -15,7 +15,14 @@ CALENDAR_ID_PATH = Path(
 )
 
 
-@router.get("/", response_model=list[Calendar], operation_id="getAllCalendars")
+@router.get("", response_model=list[Calendar], operation_id="getAllCalendars")
+@router.get(
+    "/",
+    response_model=list[Calendar],
+    operation_id="getAllCalendarsDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /calendars。回傳格式不變。",
+)
 async def get_all_calendars(response: Response):
     """
     取得所有校園行事曆的資訊（不含事件）。

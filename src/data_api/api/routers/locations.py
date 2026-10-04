@@ -10,7 +10,14 @@ from data_api.domain.locations import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.LocationDetail], operation_id="getLocations")
+@router.get("", response_model=list[schemas.LocationDetail], operation_id="getLocations")
+@router.get(
+    "/",
+    response_model=list[schemas.LocationDetail],
+    operation_id="getLocationsDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /locations。查詢參數與回傳格式不變。",
+)
 async def get_locations(
     response: Response,
     name: Annotated[str | None, Query(description="地點名稱；未提供或為空時回傳所有地點")] = None,
@@ -43,7 +50,7 @@ async def fuzzy_search_locations(
     response: Response,
     query: Annotated[str, Query(description="要查詢的地點")],
 ):
-    """已棄用，請改用 GET /locations/?name=...。此端點無結果時仍回傳 HTTP 404。"""
+    """已棄用，請改用 GET /locations?name=...。此端點無結果時仍回傳 HTTP 404。"""
     commit_hash, data = await services.locations_service.fuzzy_search_locations(query=query)
     if not data:
         raise HTTPException(status_code=404, detail="Not found")

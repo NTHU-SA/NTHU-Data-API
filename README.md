@@ -117,6 +117,19 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+### Root endpoint paths
+
+Use root GET endpoints without a trailing slash: `/announcements`, `/calendars`,
+`/departments`, `/dining`, `/locations`, and `/newsletters`. Both forms respond
+directly without a redirect and retain the same query parameters, response schemas,
+and data-version headers. The trailing-slash endpoints remain available for
+compatibility but are marked **deprecated** in OpenAPI, with descriptions pointing
+to their replacements. Existing operation IDs identify the slashless endpoints;
+the deprecated aliases use a `Deprecated` suffix to keep operation IDs unique.
+
+`GET /courses` already uses this convention; its deprecated `/courses/` endpoint
+retains its existing all-courses behavior.
+
 ### Announcement queries
 
 The supported announcement endpoints are `GET /announcements` for announcement
@@ -187,7 +200,7 @@ the latter to an unfiltered `GET /courses` instead returns all courses.
 
 ### Newsletter queries
 
-`GET /newsletters/` supports optional `name`, `title`, and `fuzzy` (default
+`GET /newsletters` supports optional `name`, `title`, and `fuzzy` (default
 `true`) parameters. Name and article-title filters are combined with AND.
 Fuzzy matching uses partial similarity with a threshold of 80, like announcements.
 With `fuzzy=false`, names must match exactly and titles use case-sensitive literal
@@ -203,38 +216,37 @@ Its optional `name` filter matches exactly. Both endpoints return the dataset's
 
 ```text
 /newsletters/sources
-/newsletters/?name=教務處
-/newsletters/?name=教務處綜合教務組電子報&title=選課&fuzzy=false
+/newsletters?name=教務處
+/newsletters?name=教務處綜合教務組電子報&title=選課&fuzzy=false
 ```
 
 `GET /newsletters/{newsletter_name}` remains available with its existing enum,
 single-object response, and 404 behavior, but is **deprecated** in OpenAPI.
-Migrate to `/newsletters/?name={newsletter_name}&fuzzy=false`, which returns
+Migrate to `/newsletters?name={newsletter_name}&fuzzy=false`, which returns
 a list (or `[]` if no source matches). No removal date has been set.
 
 ### Location queries
 
-Use `GET /locations/` to list all campus locations, or supply `name` to search
+Use `GET /locations` to list all campus locations, or supply `name` to search
 by name. `fuzzy` defaults to `true`; set `fuzzy=false` to require an exact
 name match. Omitting `name` or passing an empty value returns all locations
 regardless of `fuzzy`.
 
 ```text
-GET /locations/
-GET /locations/?name=台積館
-GET /locations/?name=台積館&fuzzy=false
+GET /locations
+GET /locations?name=台積館
+GET /locations?name=台積館&fuzzy=false
 ```
 
 Responses are arrays of locations with `name`, `latitude`, and `longitude`,
 and include `X-Data-Commit-Hash` when available. No matches return HTTP 200
 with `[]`.
 
-Requests to `/locations` redirect to `/locations/`, preserving query parameters.
 The old search endpoint remains available but is marked **deprecated** in OpenAPI:
 
 | Deprecated endpoint | Replacement |
 | --- | --- |
-| `GET /locations/search?query=...` | `GET /locations/?name=...` |
+| `GET /locations/search?query=...` | `GET /locations?name=...` |
 
 Legacy search behavior is preserved: `/locations/search` requires `query` and
 returns HTTP 404 when no locations match.
@@ -294,7 +306,7 @@ malformed values are rejected during argument validation, even for `day=current`
 
 ### Dining queries
 
-`GET /dining/` supports optional `building_name`, `restaurant_name`, `fuzzy`
+`GET /dining` supports optional `building_name`, `restaurant_name`, `fuzzy`
 (default `true`), and `schedule` parameters. All supplied filters are combined
 with AND. `schedule` accepts `today`, `weekday`, `saturday`, or `sunday`; omitting
 it applies no opening-day filter. Invalid or empty schedule values return 422.
@@ -302,7 +314,7 @@ it applies no opening-day filter. Invalid or empty schedule values return 422.
 For example, find potentially open restaurants in a building today:
 
 ```text
-/dining/?building_name=小吃部&schedule=today
+/dining?building_name=小吃部&schedule=today
 ```
 
 The response is always a list of buildings with nested `restaurants`, regardless
@@ -320,7 +332,7 @@ format and limits.
 
 **Breaking change:** `/dining/open` has been removed, without a redirect or
 compatibility alias. Replace `/dining/open?schedule=today` with
-`/dining/?schedule=today`. The old endpoint returned a flat restaurant list;
+`/dining?schedule=today`. The old endpoint returned a flat restaurant list;
 clients must now read each building's `restaurants` (or flatten them locally).
 
 ### CI dependency safety
@@ -361,7 +373,7 @@ for library calendars; duplicate ids within a dataset are rejected.
 
 | Endpoint | Response |
 | --- | --- |
-| `GET /calendars/` | All calendar metadata, without events |
+| `GET /calendars` | All calendar metadata, without events |
 | `GET /calendars/{calendar_id}` | One calendar's metadata, without events |
 | `GET /calendars/{calendar_id}/events` | Filtered, paginated events |
 | `GET /calendars/{calendar_id}/events/{event_id}` | One event |
@@ -380,7 +392,7 @@ Library opening hours use the same query parameters:
 
 **Breaking change:** All four `/libraries/calendars` endpoints have been removed,
 without deprecated routes, redirects, or compatibility aliases. Migrate to
-`/calendars/` and `/calendars/library-{main,hss,nanda}` with the same event paths.
+`/calendars` and `/calendars/library-{main,hss,nanda}` with the same event paths.
 
 - `start` and `end` are optional inclusive dates (`YYYY-MM-DD`), interpreted using
   the local dates in the source calendar (`Asia/Taipei` for `academic`). Events

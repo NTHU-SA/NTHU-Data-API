@@ -10,7 +10,14 @@ from data_api.domain.departments import services
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.Department], operation_id="getAllDepartments")
+@router.get("", response_model=list[schemas.Department], operation_id="getAllDepartments")
+@router.get(
+    "/",
+    response_model=list[schemas.Department],
+    operation_id="getAllDepartmentsDeprecated",
+    deprecated=True,
+    description="已棄用，請改用 GET /departments。回傳格式不變。",
+)
 async def get_all_departments(response: Response):
     """
     取得所有部門與人員資料。
