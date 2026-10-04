@@ -32,7 +32,7 @@ def test_missing_route_metadata_is_not_registered():
             "get_schedule",
         ),
         (
-            "/buses/schedule?bus_type=main&day=weekday&direction=up&stop=台積館",
+            "/buses/schedule?route=main&day=weekday&direction=up&stop=台積館",
             "get_schedule",
         ),
         (
@@ -134,7 +134,10 @@ class TestBusesSchedules:
         self, client: AsyncClient, bus_type: str, day: str, direction: str, path: str
     ):
         """Test getting bus schedules by type, day and direction."""
-        response = await client.get(f"{path}?bus_type={bus_type}&day={day}&direction={direction}")
+        route_parameter = "route" if path == "/buses/schedule" else "bus_type"
+        response = await client.get(
+            f"{path}?{route_parameter}={bus_type}&day={day}&direction={direction}"
+        )
         assert response.status_code == 200
 
 

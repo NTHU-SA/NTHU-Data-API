@@ -38,6 +38,27 @@ def get_current_time_state():
     return current_day, current_time
 
 
+def _query_bus_schedule(
+    route: schemas.BusRouteType,
+    day: schemas.BusDayWithCurrent,
+    direction: schemas.BusDirection,
+    details: bool,
+    stop: schemas.BusStopsName | None,
+    query: schemas.BusQuery,
+):
+    find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
+    with service_errors():
+        return services.buses_service.query_schedule(
+            route_type=route,
+            day=find_day,
+            direction=direction,
+            detailed=details,
+            stop=stop,
+            after_time=after_time or "",
+            limit=query.limits,
+        )
+
+
 @router.get(
     "/routes",
     response_model=list[schemas.BusInfo],
@@ -79,15 +100,10 @@ async def get_bus_stops_information():
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
     response_description="取得公車時刻表信息。",
     deprecated=True,
-    description="即將棄用，請改用 GET /buses/schedule；支援相同參數與 stop 篩選。",
-)
-@router.get(
-    "/schedule",
-    response_model=list[schemas.BusDetailedSchedule | schemas.BusSchedule],
-    dependencies=[Depends(add_custom_header)],
-    operation_id="getBusSchedule",
-    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
-    response_description="取得公車時刻表資訊。",
+    description=(
+        "即將棄用，請改用 GET /buses/schedule，並將 bus_type 改為 route。"
+        "新版預設 route=all、day=current、direction=all，亦支援 stop 篩選。"
+    ),
 )
 async def get_bus_schedules(
     bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
@@ -99,25 +115,38 @@ async def get_bus_schedules(
     ),
     query: schemas.BusQuery = Depends(),
 ):
+    """取得指定條件的公車時刻表，保留舊版必填參數與回應格式。"""
+    return _query_bus_schedule(bus_type, day, direction, details, stop, query)
+
+
+@router.get(
+    "/schedule",
+    response_model=list[schemas.BusDetailedSchedule | schemas.BusSchedule],
+    dependencies=[Depends(add_custom_header)],
+    operation_id="getBusSchedule",
+    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
+    response_description="取得公車時刻表資訊。",
+)
+async def get_bus_schedule(
+    route: schemas.BusRouteType = Query(schemas.BusRouteType.all, description="路線選擇"),
+    day: schemas.BusDayWithCurrent = Query(
+        schemas.BusDayWithCurrent.current, description="平日、假日或目前時刻"
+    ),
+    direction: schemas.BusDirection = Query(schemas.BusDirection.all, description="上山或下山"),
+    details: bool = Query(False, description="是否包含詳細站點時間資訊"),
+    stop: schemas.BusStopsName | None = Query(
+        None, description="僅回傳停靠此站的班次；不影響回應格式，時間仍以發車時間篩選"
+    ),
+    query: schemas.BusQuery = Depends(),
+):
     """
     取得指定條件的公車時刻表。
+    - 不指定條件時，回傳現在開始的全部路線與方向班次，預設最多 5 筆。
     - **details=False**: 回傳簡易時刻表（僅發車時間）。
     - **details=True**: 回傳詳細時刻表（包含每站預估到達時間）。
     - **stop**: 僅篩選會停靠指定站牌的班次；time 與 current 仍以發車時間篩選。
     """
-    # 1. 計算要查詢的時間點與模式
-    find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
-
-    with service_errors():
-        return services.buses_service.query_schedule(
-            route_type=bus_type,
-            day=find_day,
-            direction=direction,
-            detailed=details,
-            stop=stop,
-            after_time=after_time or "",
-            limit=query.limits,
-        )
+    return _query_bus_schedule(route, day, direction, details, stop, query)
 
 
 @router.get(

@@ -119,8 +119,12 @@ parameters, with validation errors documented in OpenAPI.
 
 ### Bus schedules
 
-Use `GET /buses/schedule` with required `bus_type` (`main`, `nanda`, `all`),
+Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
 `day` (`weekday`, `weekend`, `current`), and `direction` (`up`, `down`, `all`).
+Defaults are `route=all`, `day=current`, and `direction=all`, so a request without
+parameters returns the next departures across all routes and directions.
+`route` selects a campus route; response `bus_type` identifies the vehicle type
+(for example, `large-sized_bus`), not the campus route.
 Optional `stop` filters to buses serving that stop, without changing the response
 format. `details=false` (default) returns departure schedules; `details=true`
 includes `dep_info` and all `stops_time` entries. `time` filters by departure time
@@ -129,12 +133,17 @@ and time and ignores `time`. `limits` defaults to 5 and must be at least 1.
 Stop and time filters are applied before the limit; no matches return `[]`.
 
 ```text
-/buses/schedule?bus_type=all&day=weekday&direction=up&stop=台積館&details=true
+/buses/schedule
+/buses/schedule?stop=台積館
+/buses/schedule?route=main&direction=up
+/buses/schedule?route=all&day=weekday&direction=up&stop=台積館&details=true
 ```
 
 `GET /buses/schedules` and `GET /buses/stops/{stop_name}` remain available but are
 deprecated in OpenAPI. Migrate to `/buses/schedule` and
-`/buses/schedule?stop={stop_name}&details=true`, respectively. The old stop endpoint
+`/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
+`bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
+`day`, and `direction` parameters. The old stop endpoint
 retains its arrival-based response and time filtering; the new endpoint always
 filters by departure time. No removal date has been set.
 

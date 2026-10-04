@@ -121,7 +121,7 @@ async def test_cold_start_empty_is_not_unavailable(empty):
         ),
         (
             "buses.json",
-            "/buses/schedule?bus_type=all&day=current&direction=all&stop=台積館",
+            "/buses/schedule?stop=台積館",
             {},
             "get_bus_schedule",
             {"stop": "台積館"},
