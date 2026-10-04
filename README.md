@@ -185,6 +185,33 @@ Legacy behavior is preserved: `GET /courses/` returns all courses, while
 `GET /courses/search` without non-empty field filters returns `[]`. Migrating
 the latter to an unfiltered `GET /courses` instead returns all courses.
 
+### Location queries
+
+Use `GET /locations/` to list all campus locations, or supply `name` to search
+by name. `fuzzy` defaults to `true`; set `fuzzy=false` to require an exact
+name match. Omitting `name` or passing an empty value returns all locations
+regardless of `fuzzy`.
+
+```text
+GET /locations/
+GET /locations/?name=台積館
+GET /locations/?name=台積館&fuzzy=false
+```
+
+Responses are arrays of locations with `name`, `latitude`, and `longitude`,
+and include `X-Data-Commit-Hash` when available. No matches return HTTP 200
+with `[]`.
+
+Requests to `/locations` redirect to `/locations/`, preserving query parameters.
+The old search endpoint remains available but is marked **deprecated** in OpenAPI:
+
+| Deprecated endpoint | Replacement |
+| --- | --- |
+| `GET /locations/search?query=...` | `GET /locations/?name=...` |
+
+Legacy search behavior is preserved: `/locations/search` requires `query` and
+returns HTTP 404 when no locations match.
+
 ### Bus schedules
 
 Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),

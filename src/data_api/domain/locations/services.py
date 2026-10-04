@@ -20,6 +20,10 @@ class LocationsService:
 
     async def get_all_locations(self) -> tuple[Optional[str], list[dict]]:
         """Get all locations."""
+        return await self.get_locations()
+
+    async def get_locations(self, name: str | None = None) -> tuple[Optional[str], list[dict]]:
+        """Get locations with an optional exact name filter."""
         result = await nthudata.get(JSON_PATH)
         if result is None:
             raise DataNotAvailableException("Dataset temporarily unavailable")
@@ -33,6 +37,7 @@ class LocationsService:
             }
             for campus_locations in map_data.values()
             for location_name, coordinates in campus_locations.items()
+            if not name or location_name == name
         ]
         return commit_hash, locations
 
