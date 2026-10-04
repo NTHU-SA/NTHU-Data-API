@@ -7,7 +7,7 @@ from httpx import ASGITransport, AsyncClient, Response
 
 from data_api.api.api import app
 from data_api.domain.libraries import services
-from data_api.domain.libraries.services import filter_calendar_events, get_event_date_range
+from data_api.utils.calendars import filter_calendar_events, get_event_date_range
 
 RSS_DATA = {
     "news": [
@@ -83,7 +83,8 @@ CALENDARS_DATA = [
 
 FAKE_DATA = {
     services.RSS_JSON_PATH: RSS_DATA,
-    services.CALENDARS_JSON_PATH: CALENDARS_DATA,
+    "libraries/calendars.json": CALENDARS_DATA,
+    "calendars.json": [],
 }
 
 
@@ -176,73 +177,89 @@ class TestLibraryCalendars:
     """Tests for the calendar endpoints."""
 
     async def test_list_calendars_without_events(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars")
+        response = await client.get("/calendars/")
         assert response.status_code == 200
         data = response.json()
-        assert [c["id"] for c in data] == ["main", "hss"]
+        assert [c["id"] for c in data] == ["library-main", "library-hss"]
+        assert all(c["category"] == "library" and c["source"] == "NTHU Library" for c in data)
         assert all("events" not in c for c in data)
 
     async def test_get_calendar(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/main")
+        response = await client.get("/calendars/library-main")
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "總圖書館開館時間"
+        assert data["url"] == CALENDARS_DATA[0]["url"]
+        assert response.headers["X-Data-Commit-Hash"] == "fakehash"
         assert "events" not in data
 
     async def test_calendar_missing_from_data(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/nanda")
+        response = await client.get("/calendars/library-nanda")
         assert response.status_code == 404
 
     async def test_invalid_calendar_id(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/unknown")
-        assert response.status_code == 422
+        response = await client.get("/calendars/library-unknown")
+        assert response.status_code == 404
 
     async def test_list_events(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/main/events")
+        response = await client.get("/calendars/library-main/events")
         assert response.status_code == 200
         assert response.headers["X-Total-Count"] == "4"
         assert [e["id"] for e in response.json()] == ["a1", "a2", "a3", "a4"]
 
     async def test_events_on_a_single_day(self, client: AsyncClient, fake_data):
         response = await client.get(
-            "/libraries/calendars/main/events", params={"start": "2025-09-25", "end": "2025-09-25"}
+            "/calendars/library-main/events", params={"start": "2025-09-25", "end": "2025-09-25"}
         )
         assert response.status_code == 200
         assert [e["id"] for e in response.json()] == ["a2"]
 
     async def test_events_by_keyword(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/main/events", params={"keyword": "閉館"})
+        response = await client.get("/calendars/library-main/events", params={"keyword": "閉館"})
         assert [e["id"] for e in response.json()] == ["a3"]
 
     async def test_events_pagination(self, client: AsyncClient, fake_data):
         response = await client.get(
-            "/libraries/calendars/main/events", params={"limit": 2, "offset": 1}
+            "/calendars/library-main/events", params={"limit": 2, "offset": 1}
         )
         assert response.headers["X-Total-Count"] == "4"
         assert [e["id"] for e in response.json()] == ["a2", "a3"]
 
     async def test_events_invalid_range(self, client: AsyncClient, fake_data):
         response = await client.get(
-            "/libraries/calendars/main/events", params={"start": "2025-10-01", "end": "2025-09-01"}
+            "/calendars/library-main/events", params={"start": "2025-10-01", "end": "2025-09-01"}
         )
         assert response.status_code == 400
 
     async def test_events_invalid_date(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/main/events", params={"start": "soon"})
+        response = await client.get("/calendars/library-main/events", params={"start": "soon"})
         assert response.status_code == 422
 
     async def test_events_of_missing_calendar(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/nanda/events")
+        response = await client.get("/calendars/library-nanda/events")
         assert response.status_code == 404
 
     async def test_get_event(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/main/events/a2")
+        response = await client.get("/calendars/library-main/events/a2")
         assert response.status_code == 200
         assert response.json()["title"] == "休館"
 
     async def test_get_missing_event(self, client: AsyncClient, fake_data):
-        response = await client.get("/libraries/calendars/main/events/nope")
+        response = await client.get("/calendars/library-main/events/nope")
         assert response.status_code == 404
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "/calendars/",
+            "/calendars/library-main",
+            "/calendars/library-main/events",
+            "/calendars/library-main/events/a1",
+        ],
+    )
+    async def test_data_unavailable(self, client: AsyncClient, no_data, url: str):
+        response = await client.get(url)
+        assert response.status_code == 503
 
     @pytest.mark.parametrize(
         "url",
@@ -253,9 +270,10 @@ class TestLibraryCalendars:
             "/libraries/calendars/main/events/a1",
         ],
     )
-    async def test_data_unavailable(self, client: AsyncClient, no_data, url: str):
+    async def test_old_endpoints_removed(self, client, url):
         response = await client.get(url)
-        assert response.status_code == 503
+        assert response.status_code == 404
+        assert "location" not in response.headers
 
 
 class TestLibrariesLiveEndpoints:

@@ -43,33 +43,6 @@ class LibraryRssType(str, Enum):
     branches = "branches"
 
 
-class LibraryCalendarId(str, Enum):
-    main = "main"
-    hss = "hss"
-    nanda = "nanda"
-
-
-class LibraryCalendar(BaseModel):
-    id: LibraryCalendarId = Field(
-        ..., description="行事曆 id：總圖(main)、人社分館(hss)、南大分館(nanda)"
-    )
-    name: Optional[str] = Field(None, description="行事曆名稱")
-    description: Optional[str] = Field(None, description="行事曆說明")
-    timezone: Optional[str] = Field(None, description="時區")
-    url: HttpUrl = Field(..., description="Google 行事曆網址")
-
-
-class LibraryCalendarEvent(BaseModel):
-    id: str = Field(..., description="事件 id")
-    title: str = Field(..., description="事件標題，例如開館時間或休館")
-    description: Optional[str] = Field(None, description="事件說明")
-    start: str = Field(
-        ..., description="開始時間；全天事件為日期 (YYYY-MM-DD)，否則為 ISO 8601 時間"
-    )
-    end: str = Field(..., description="結束時間；全天事件的結束日期不包含在內 (iCal 慣例)")
-    all_day: bool = Field(..., description="是否為全天事件")
-
-
 class LibrarySpace(BaseModel):
     spacetype: int = Field(..., description="空間類型")
     spacetypename: str = Field(..., description="空間類型名稱")

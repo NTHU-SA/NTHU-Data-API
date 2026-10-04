@@ -4,11 +4,10 @@ import pytest
 from pydantic import ValidationError
 
 from data_api.api.schemas.announcements import AnnouncementArticle
+from data_api.api.schemas.calendars import Calendar, CalendarEvent
 from data_api.api.schemas.departments import DepartmentPerson
 from data_api.api.schemas.dining import DiningRestaurant
 from data_api.api.schemas.libraries import (
-    LibraryCalendar,
-    LibraryCalendarEvent,
     LibraryRssData,
     LibraryRssImage,
     LibraryRssItem,
@@ -35,12 +34,12 @@ from data_api.api.schemas.newsletters import NewsletterArticle
         ),
         (LibraryRssData, {"link": "https://example.com"}, {"title", "date"}),
         (
-            LibraryCalendar,
-            {"id": "main", "url": "https://example.com"},
-            {"name", "description", "timezone"},
+            Calendar,
+            {"id": "library-main"},
+            {"name", "description", "timezone", "url", "category", "source"},
         ),
         (
-            LibraryCalendarEvent,
+            CalendarEvent,
             {
                 "id": "event",
                 "title": "Test",
@@ -70,3 +69,5 @@ def test_optional_metadata_can_be_omitted_or_null(model, payload, optional_field
 def test_optional_urls_still_validate_supplied_values(invalid_link):
     with pytest.raises(ValidationError):
         AnnouncementArticle(link=invalid_link)
+    with pytest.raises(ValidationError):
+        Calendar(id="library-main", url=invalid_link)

@@ -5,13 +5,13 @@ from collections.abc import Sequence
 from datetime import date, datetime
 from functools import lru_cache
 
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, HttpUrl, TypeAdapter
 
 from data_api.api.schemas.announcements import AnnouncementDetail
 from data_api.api.schemas.calendars import Calendar, CalendarEvent
 from data_api.api.schemas.departments import Department
 from data_api.api.schemas.dining import DiningBuilding
-from data_api.api.schemas.libraries import LibraryCalendar, LibraryCalendarEvent, LibraryRssItem
+from data_api.api.schemas.libraries import LibraryRssItem
 from data_api.api.schemas.newsletters import NewsletterInfo
 from data_api.data.nthudata import FetchFailure, JsonData
 
@@ -28,12 +28,12 @@ class Coordinates(BaseModel):
     longitude: str
 
 
-class CalendarPayload(LibraryCalendar):
-    events: list[LibraryCalendarEvent]
-
-
-class CampusCalendarPayload(Calendar):
+class CalendarPayload(Calendar):
     events: list[CalendarEvent]
+
+
+class LibraryCalendarPayload(CalendarPayload):
+    url: HttpUrl
 
 
 class LibraryPayload(BaseModel):
@@ -51,13 +51,13 @@ def _adapters() -> dict[str, TypeAdapter]:
         "/maps.json": TypeAdapter(dict[str, dict[str, Coordinates]]),
         "/libraries.json": TypeAdapter(list[LibraryPayload]),
         "/libraries/rss.json": TypeAdapter(dict[str, list[LibraryRssItem]]),
-        "/libraries/calendars.json": TypeAdapter(list[CalendarPayload]),
-        "/calendars.json": TypeAdapter(list[CampusCalendarPayload]),
+        "/libraries/calendars.json": TypeAdapter(list[LibraryCalendarPayload]),
+        "/calendars.json": TypeAdapter(list[CalendarPayload]),
     }
 
 
 def _validate_calendar_events(
-    calendars: Sequence[CalendarPayload | CampusCalendarPayload],
+    calendars: Sequence[CalendarPayload],
 ) -> None:
     for calendar in calendars:
         for event in calendar.events:
@@ -78,6 +78,12 @@ def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
         # JSON strict mode accepts enum/URL strings without coercing booleans or numbers.
         parsed = adapter.validate_json(json.dumps(raw), strict=True)
         if endpoint in {"/libraries/calendars.json", "/calendars.json"}:
+            ids = [calendar.id for calendar in parsed]
+            if len(ids) != len(set(ids)) or (
+                endpoint == "/calendars.json"
+                and any(calendar_id.startswith("library-") for calendar_id in ids)
+            ):
+                raise FetchFailure("validation")
             _validate_calendar_events(parsed)
     # Preserve upstream fields and representation; response serialization stays unchanged.
     return raw

@@ -1,13 +1,13 @@
 """
 Libraries domain service.
 
-Handles library data fetching and search, plus the library RSS feeds and
-opening-hours calendars crawled by NTHU-Data-Scraper.
+Handles library data fetching and search, plus the library RSS feeds
+crawled by NTHU-Data-Scraper.
 """
 
 import re
 import ssl
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 
 import httpx
@@ -24,11 +24,9 @@ from data_api.core.exceptions import (
 )
 from data_api.core.upstream import upstream_errors
 from data_api.data.manager import nthudata
-from data_api.utils.calendars import filter_calendar_events, get_event_date_range
 
 JSON_PATH = "libraries.json"
 RSS_JSON_PATH = "libraries/rss.json"
-CALENDARS_JSON_PATH = "libraries/calendars.json"
 FUZZY_SEARCH_THRESHOLD = 70
 DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
 DEFAULT_HEADERS = {
@@ -163,55 +161,6 @@ class LibrariesService:
 
         commit_hash, rss_data = result
         return commit_hash, rss_data.get(rss_type)
-
-    async def get_all_calendars(self) -> tuple[Optional[str], list[dict]]:
-        """Get calendar metadata without events."""
-        result = await nthudata.get(CALENDARS_JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, calendars = result
-        return commit_hash, [
-            {key: value for key, value in calendar.items() if key != "events"}
-            for calendar in calendars
-        ]
-
-    async def get_calendar(self, calendar_id: str) -> tuple[Optional[str], Optional[dict]]:
-        """Get one calendar, including its events."""
-        result = await nthudata.get(CALENDARS_JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, calendars = result
-        for calendar in calendars:
-            if calendar["id"] == calendar_id:
-                return commit_hash, calendar
-        return commit_hash, None
-
-    async def search_calendar_events(
-        self,
-        calendar_id: str,
-        start: Optional[date] = None,
-        end: Optional[date] = None,
-        keyword: Optional[str] = None,
-    ) -> tuple[Optional[str], Optional[list[dict]]]:
-        """Get the events of a calendar filtered by date range and keyword."""
-        commit_hash, calendar = await self.get_calendar(calendar_id)
-        if calendar is None:
-            return commit_hash, None
-        return commit_hash, filter_calendar_events(calendar["events"], start, end, keyword)
-
-    async def get_calendar_event(
-        self, calendar_id: str, event_id: str
-    ) -> tuple[Optional[str], Optional[dict]]:
-        """Get a single event by id."""
-        commit_hash, calendar = await self.get_calendar(calendar_id)
-        if calendar is None:
-            return commit_hash, None
-        for event in calendar["events"]:
-            if event["id"] == event_id:
-                return commit_hash, event
-        return commit_hash, None
 
 
 # Global service instance

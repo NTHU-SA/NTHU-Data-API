@@ -171,9 +171,19 @@ disabling all builds would break installation.
 
 ### Campus calendars
 
-Campus calendars are loaded from `https://data.nthusa.tw/calendars.json` through
-the shared dataset cache. The current calendar id is `academic`; use the list
-endpoint to discover additional calendars as they are published.
+Campus and library calendars share the same endpoints and response schemas.
+The API combines `https://data.nthusa.tw/calendars.json` and
+`https://data.nthusa.tw/libraries/calendars.json` through the shared dataset cache;
+no publisher changes are required. Campus ids such as `academic` are unchanged.
+Library source ids `main`, `hss`, and `nanda` become `library-main`, `library-hss`,
+and `library-nanda`. Use the list endpoint to discover available calendars.
+
+Calendar metadata includes optional `category`, `source`, and `url` fields.
+Library calendars have `category: "library"` and `source: "NTHU Library"`, and
+retain their source calendar URL. Other calendars preserve publisher-supplied
+metadata; missing optional metadata is `null`. Future campus calendars can add
+categories and sources without new routers. The `library-` namespace is reserved
+for library calendars; duplicate ids within a dataset are rejected.
 
 | Endpoint | Response |
 | --- | --- |
@@ -188,6 +198,16 @@ For example, get academic events overlapping October 2026:
 /calendars/academic/events?start=2026-10-01&end=2026-10-31&limit=100&offset=0
 ```
 
+Library opening hours use the same query parameters:
+
+```text
+/calendars/library-main/events?start=2026-10-01&end=2026-10-31
+```
+
+**Breaking change:** All four `/libraries/calendars` endpoints have been removed,
+without deprecated routes, redirects, or compatibility aliases. Migrate to
+`/calendars/` and `/calendars/library-{main,hss,nanda}` with the same event paths.
+
 - `start` and `end` are optional inclusive dates (`YYYY-MM-DD`), interpreted using
   the local dates in the source calendar (`Asia/Taipei` for `academic`). Events
   overlapping any part of the range are included, not just events starting in it.
@@ -198,11 +218,17 @@ For example, get academic events overlapping October 2026:
   supplied filters are combined with AND.
 - Events are sorted by `start`, then `id`. `limit` defaults to 100 (1-1000);
   `offset` defaults to 0 (nonnegative). `X-Total-Count` reports the filtered count
-  before pagination; `X-Data-Commit-Hash` identifies the snapshot when known.
+  before pagination. For individual calendars/events, `X-Data-Commit-Hash` is
+  the source dataset's version. For the combined list, it is the SHA-256 of the
+  JSON-encoded `[campus_version, library_version]` array, and is omitted if either
+  version is unknown.
 - Missing calendars/events return 404, reversed date ranges return 400, and
   malformed dates or invalid pagination return 422. No matches return `[]`.
   Unavailable data without a usable snapshot returns 503; refresh failures retain
   the last-known-good snapshot.
+- The list requires usable snapshots for both datasets and returns 503 rather
+  than a partial list if either is unavailable. Individual calendar/event requests
+  only load their own source, so an outage in the other source does not block them.
 
 ### Running Tests
 To run tests locally before committing changes, follow these steps:
