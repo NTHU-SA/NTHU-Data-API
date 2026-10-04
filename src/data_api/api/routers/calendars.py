@@ -11,7 +11,7 @@ from data_api.domain.calendars.services import calendars_service
 router = APIRouter()
 
 CALENDAR_ID_PATH = Path(
-    ..., description="行事曆 id，可由 /calendars/ 取得，例如 academic、library-main"
+    ..., description="行事曆 id，可由 /calendars 取得，例如 academic、library-main"
 )
 
 
