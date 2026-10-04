@@ -245,6 +245,7 @@ class TestDepartmentsEndpoints:
         ("/locations/search", {"404"}),
         ("/newsletters/{newsletter_name}", {"404"}),
         ("/libraries/space", {"500", "502", "504"}),
+        ("/libraries/spaces", {"500", "502", "504"}),
         ("/libraries/lost-and-found", {"500", "502", "504"}),
         ("/libraries/lost_and_found", {"500", "502", "504"}),
         ("/libraries/rss/{rss_type}", {"404"}),
@@ -264,6 +265,7 @@ def test_openapi_documents_route_errors(path, statuses):
         "/energy/electricity",
         "/energy/electricity_usage",
         "/libraries/space",
+        "/libraries/spaces",
         "/libraries/lost-and-found",
         "/libraries/lost_and_found",
     ],
@@ -285,6 +287,12 @@ def test_openapi_live_errors_have_detail_schema(path):
 @pytest.mark.parametrize(
     "legacy_path,path,legacy_operation_id,operation_id",
     [
+        (
+            "/libraries/space",
+            "/libraries/spaces",
+            "getLibrarySpaceAvailability",
+            "getLibrarySpaces",
+        ),
         (
             "/energy/electricity_usage",
             "/energy/electricity",

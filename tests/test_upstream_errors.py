@@ -29,6 +29,14 @@ LIVE_CALLS = [
         id="energy",
     ),
     pytest.param(
+        "/libraries/spaces",
+        "get_library_info",
+        {"info_type": "space"},
+        libraries_service,
+        "get_space_availability",
+        id="spaces-current",
+    ),
+    pytest.param(
         "/libraries/space",
         "get_library_info",
         {"info_type": "space"},

@@ -18,6 +18,14 @@ router = APIRouter()
     response_model=list[LibrarySpace],
     operation_id="getLibrarySpaceAvailability",
     responses=LIVE_ERROR_RESPONSES,
+    deprecated=True,
+    description="已棄用，請改用 `GET /libraries/spaces`。",
+)
+@router.get(
+    "/spaces",
+    response_model=list[LibrarySpace],
+    operation_id="getLibrarySpaces",
+    responses=LIVE_ERROR_RESPONSES,
 )
 async def get_library_space_availability():
     """

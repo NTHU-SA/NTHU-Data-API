@@ -154,13 +154,15 @@ are unchanged.
 
 ### Live library and energy endpoints
 
-Use `GET /libraries/lost-and-found` for library lost items and
+Use `GET /libraries/spaces` for the library space availability collection
+(`list[LibrarySpace]`), `GET /libraries/lost-and-found` for library lost items, and
 `GET /energy/electricity` for realtime campus electricity usage.
 The old paths remain available with the same response formats and error behavior,
 but are marked **deprecated** in OpenAPI:
 
 | Deprecated endpoint | Replacement |
 | --- | --- |
+| `GET /libraries/space` | `GET /libraries/spaces` |
 | `GET /libraries/lost_and_found` | `GET /libraries/lost-and-found` |
 | `GET /energy/electricity_usage` | `GET /energy/electricity` |
 
