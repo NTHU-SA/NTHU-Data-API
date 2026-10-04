@@ -96,8 +96,8 @@ function renames must not change these public names.
   can match either the Chinese or English title. Regex characters such as `C++`
   and `[AI]` are treated literally. `limit` defaults to 20 and must be 1-100;
   zero, negative, and larger values are rejected.
-- REST `GET /courses/search` retains regular-expression matching and ANDs the
-  supplied fields. `POST /courses/search` retains nested AND/OR conditions and
+- REST `GET /courses` uses regular-expression matching and ANDs the
+  supplied fields. `POST /courses/query` supports nested AND/OR conditions and
   exact matching unless `regex_match` is true. Invalid regex syntax returns HTTP
   422, including when the course dataset is empty.
 - MCP `find_dining` applies building and restaurant-name fuzzy filters together
@@ -117,6 +117,52 @@ default to `null` in REST responses; supplied values still undergo validation.
 Required identifiers, titles not declared nullable, event boundaries, and dataset
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
+
+### Course queries
+
+The supported course endpoints are `GET /courses` for ordinary queries and
+`POST /courses/query` for the complex query DSL. GET without filters returns
+all courses; empty field values apply no filter. All supplied field filters and
+the optional `type` filter are combined with AND.
+
+```text
+GET /courses
+GET /courses?teacher=林福仁
+GET /courses?chinese_title=服務
+GET /courses?type=microcredits
+GET /courses?type=xclass&teacher=林福仁
+```
+
+`type` accepts `microcredits` and `xclass`, using the same predefined conditions
+as the legacy lists. Unknown or empty types return HTTP 422.
+
+For nested AND/OR queries, send a condition object or a condition array to
+`POST /courses/query`:
+
+```json
+[
+  {"row_field": "teacher", "matcher": "黃", "regex_match": true},
+  "or",
+  {"row_field": "teacher", "matcher": "孫", "regex_match": true}
+]
+```
+
+`regex_match` defaults to `false` (exact matching); set it to `true` for
+substring or regular-expression matching. Responses remain arrays of courses,
+with `X-Total-Count` and `X-Data-Commit-Hash` headers.
+
+The old endpoints remain available but are marked **deprecated** in OpenAPI:
+
+| Deprecated endpoint | Replacement |
+| --- | --- |
+| `GET /courses/` | `GET /courses` |
+| `GET /courses/search` | `GET /courses` with the same field filters |
+| `POST /courses/search` | `POST /courses/query` with the same body |
+| `GET /courses/lists/{list_name}` | `GET /courses?type={list_name}` |
+
+Legacy behavior is preserved: `GET /courses/` returns all courses, while
+`GET /courses/search` without non-empty field filters returns `[]`. Migrating
+the latter to an unfiltered `GET /courses` instead returns all courses.
 
 ### Dining queries
 

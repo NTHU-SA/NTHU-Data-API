@@ -144,3 +144,9 @@ class CourseListName(str, Enum):
 
     microcredits = "microcredits"
     xclass = "xclass"
+
+
+class CourseGetParams(CourseSearchParams):
+    """Course collection filters, including a predefined course type."""
+
+    type: CourseListName | None = Field(None, description="課程類型")
