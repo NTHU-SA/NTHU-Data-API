@@ -21,7 +21,7 @@ async def get_announcements(
     response: Response,
     department: str = Query(
         None,
-        description="部門名稱。請透過 `/announcements/lists/departments` 取得完整列表。",
+        description="部門名稱。請透過 `/announcements/sources` 的 department 欄位取得部門名稱。",
     ),
     title: str = Query(None, description="公告標題關鍵字"),
     language: schemas.AnnouncementLanguageOption = Query(None, description="語言篩選"),
@@ -44,6 +44,21 @@ async def get_announcements(
     return data
 
 
+@router.get(
+    "/lists/departments",
+    response_model=list[str],
+    operation_id="listAnnouncementDepartments",
+    deprecated=True,
+    description="已棄用，請改從 GET /announcements/sources 的 department 欄位取得部門名稱並去除重複值。",
+)
+async def list_announcement_departments(response: Response):
+    """取得所有有公告的部門列表，保留舊版回應格式。"""
+    commit_hash, data = await services.announcements_service.list_departments()
+    if commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = commit_hash
+    return data
+
+
 @router.get("/sources", response_model=list[dict], operation_id="getAnnouncementsList")
 async def get_announcements_list(
     response: Response,
@@ -56,19 +71,6 @@ async def get_announcements_list(
     commit_hash, data = await services.announcements_service.get_announcements_list(
         department=department
     )
-    if commit_hash is not None:
-        response.headers["X-Data-Commit-Hash"] = commit_hash
-    return data
-
-
-@router.get(
-    "/lists/departments",
-    response_model=list[str],
-    operation_id="listAnnouncementDepartments",
-)
-async def list_announcement_departments(response: Response):
-    """取得所有有公告的部門列表。"""
-    commit_hash, data = await services.announcements_service.list_departments()
     if commit_hash is not None:
         response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

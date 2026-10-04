@@ -117,6 +117,28 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+### Announcement queries
+
+The supported announcement endpoints are `GET /announcements` for announcement
+content and `GET /announcements/sources` for source metadata without articles.
+Use the `department` fields in `/announcements/sources` to discover department
+names; clients needing a unique department list can deduplicate those values.
+The redundant `GET /announcements/lists/departments` endpoint is deprecated in
+OpenAPI but remains available for compatibility. It still returns HTTP 200 with
+a sorted, unique list of department names and the `X-Data-Commit-Hash` header
+when available.
+
+```text
+GET /announcements
+GET /announcements/sources
+GET /announcements?department=教務處
+GET /announcements?title=停電
+GET /announcements?language=zh-tw
+```
+
+Announcement filters and the optional `department` filter on `/announcements/sources`
+are unchanged.
+
 ### Course queries
 
 The supported course endpoints are `GET /courses` for ordinary queries and

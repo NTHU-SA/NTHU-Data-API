@@ -134,12 +134,7 @@ class AnnouncementsService:
 
     async def list_departments(self) -> tuple[Optional[str], list[str]]:
         """Get list of all departments with announcements."""
-        result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, announcements_list = result
-
+        commit_hash, announcements_list = await self.get_announcements_list()
         departments = {announcement["department"] for announcement in announcements_list}
         return commit_hash, sorted(departments)
 
