@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from data_api.api.schemas.meta import MetaResponse
 from data_api.core import config
 from data_api.core.exceptions import (
     INTERNAL_ERROR_DETAIL,
@@ -153,6 +154,17 @@ def create_app() -> FastAPI:
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)
         return response
+
+    @app.get("/", response_model=MetaResponse, operation_id="getApiMetadata", tags=["Metadata"])
+    async def metadata() -> MetaResponse:
+        """Discover the API name, version, documentation, and MCP endpoint."""
+        return MetaResponse(
+            name=app.title,
+            version=app.version,
+            docs="/docs",
+            openapi="/openapi.json",
+            mcp="/mcp",
+        )
 
     # Add favicon route
     @app.get("/favicon.ico", include_in_schema=False)
