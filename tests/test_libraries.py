@@ -281,7 +281,12 @@ class TestLibrariesLiveEndpoints:
 
     @pytest.mark.parametrize(
         "url",
-        ["/libraries/space", "/libraries/lost-and-found", "/libraries/lost_and_found"],
+        [
+            "/libraries/spaces",
+            "/libraries/space",
+            "/libraries/lost-and-found",
+            "/libraries/lost_and_found",
+        ],
     )
     async def test_libraries_endpoints(self, client: AsyncClient, url: str):
         response = await client.get(url)
@@ -289,14 +294,17 @@ class TestLibrariesLiveEndpoints:
         assert response.json() == {"detail": "Upstream service unavailable"}
 
     @pytest.mark.parametrize("empty", [False, True])
+    @pytest.mark.parametrize("path", ["/libraries/spaces", "/libraries/space"])
     async def test_library_space(
-        self, client: AsyncClient, mock_upstream, library_space_payload, empty
+        self, client: AsyncClient, mock_upstream, library_space_payload, empty, path
     ):
         if empty:
             library_space_payload["rows"] = []
         mock_upstream(lambda request: Response(200, json=library_space_payload))
-        response = await client.get("/libraries/space")
+        response = await client.get(path)
         assert response.status_code == 200
+        assert not response.history
+        assert "location" not in response.headers
         assert response.json() == (
             []
             if empty
