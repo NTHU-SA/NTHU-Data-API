@@ -4,7 +4,7 @@ import pytest
 from httpx import Response
 
 from data_api.mcp.tools.announcements import _get_announcements
-from data_api.mcp.tools.buses import _get_bus_stops, _get_next_buses
+from data_api.mcp.tools.buses import _get_bus_schedule
 from data_api.mcp.tools.campus import _search_campus
 from data_api.mcp.tools.courses import _search_courses
 from data_api.mcp.tools.dining import _find_dining
@@ -34,24 +34,24 @@ class TestMCPTools:
         assert "locations" in result
         assert isinstance(result["locations"], list)
 
-    async def test_get_next_buses_default(self):
-        """Test get next buses with default parameters."""
-        result = await _get_next_buses()
+    async def test_get_bus_schedule_default(self):
+        """Test bus schedules with default parameters."""
+        result = await _get_bus_schedule()
         assert "current_time" in result
         assert "day_type" in result
         assert "buses" in result
         assert "route_info" in result
         assert isinstance(result["buses"], list)
 
-    async def test_get_next_buses_main_route(self):
-        """Test get next buses for main campus route."""
-        result = await _get_next_buses(route="main", direction="up", limit=3)
+    async def test_get_bus_schedule_main_route(self):
+        """Test schedules for the main campus route."""
+        result = await _get_bus_schedule(route="main", direction="up", limit=3)
         assert "buses" in result
         assert isinstance(result["buses"], list)
 
-    async def test_get_next_buses_nanda_route(self):
-        """Test get next buses for Nanda route."""
-        result = await _get_next_buses(route="nanda", direction="down", limit=3)
+    async def test_get_bus_schedule_nanda_route(self):
+        """Test schedules for the Nanda route."""
+        result = await _get_bus_schedule(route="nanda", direction="down", limit=3)
         assert "buses" in result
         assert isinstance(result["buses"], list)
 
@@ -166,26 +166,32 @@ class TestMCPTools:
             assert zone["usage_kw"] == 0
             assert zone["usage_percent"] == 0
 
-    async def test_get_bus_stops(self):
-        """Test get bus stops with specific stop_name to get upcoming buses."""
+    async def test_get_bus_schedule_with_stop(self):
+        """Test schedule queries include the selected stop's metadata."""
         from data_api.domain.buses.enums import BusStopsName
 
-        result = await _get_bus_stops(stop_name=BusStopsName.M1)
+        result = await _get_bus_schedule(stop=BusStopsName.M1)
         assert "stop_info" in result
         assert "stop_name" in result
         assert result["stop_name"] == "北校門口"
         assert "current_time" in result
         assert "day_type" in result
-        assert "upcoming_buses" in result
-        assert isinstance(result["upcoming_buses"], list)
+        assert "buses" in result
+        assert isinstance(result["buses"], list)
 
-    async def test_get_bus_stops_with_stop_name_string(self):
-        """Test get bus stops with stop_name as string."""
-        result = await _get_bus_stops(stop_name="台積館")
+    async def test_get_bus_schedule_with_stop_name_string(self):
+        """Test MCP converts a stop name string to its enum."""
+        from fastmcp import Client
+
+        from data_api.mcp.server import mcp
+
+        async with Client(mcp) as client:
+            response = await client.call_tool("get_bus_schedule", {"stop": "台積館"})
+        result = response.data
         assert "stop_info" in result
         assert "stop_name" in result
-        assert "upcoming_buses" in result
-        assert isinstance(result["upcoming_buses"], list)
+        assert "buses" in result
+        assert isinstance(result["buses"], list)
 
 
 class TestMCPToolIntegration:
@@ -199,9 +205,9 @@ class TestMCPToolIntegration:
         assert len(result["departments"]) <= 5
         assert len(result["people"]) <= 10
 
-    async def test_get_next_buses_respects_limit(self):
+    async def test_get_bus_schedule_respects_limit(self):
         """Test that bus results respect limit parameter."""
-        result = await _get_next_buses(limit=3)
+        result = await _get_bus_schedule(limit=3)
         assert len(result["buses"]) <= 3
 
     async def test_search_courses_respects_limit(self):
@@ -238,9 +244,9 @@ class TestMCPToolIntegration:
                 assert "title" in article
                 assert "link" in article
 
-    async def test_get_bus_stops_upcoming_buses_respects_limit(self):
-        """Test that bus stops upcoming buses respects limit parameter."""
+    async def test_get_bus_schedule_with_stop_respects_limit(self):
+        """Test that stop-filtered schedules respect the limit."""
         from data_api.domain.buses.enums import BusStopsName
 
-        result = await _get_bus_stops(stop_name=BusStopsName.M1, limit=2)
-        assert len(result.get("upcoming_buses", [])) <= 2
+        result = await _get_bus_schedule(stop=BusStopsName.M1, limit=2)
+        assert len(result["buses"]) <= 2
