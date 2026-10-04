@@ -539,10 +539,42 @@ class BusesService:
         return results
 
     def get_schedule(
-        self, *, route_type: str, day: str, direction: str, detailed: bool = False
+        self,
+        *,
+        route_type: str,
+        day: str,
+        direction: str,
+        detailed: bool = False,
+        stop: enums.BusStopsName | None = None,
     ) -> list[dict]:
+        if stop is not None:
+            schedules = self.detailed_schedule_data.get((route_type, day, direction), [])
+            matching = [
+                entry
+                for entry in schedules
+                if any(arrival["stop"] == stop.value for arrival in entry["stops_time"])
+            ]
+            return matching if detailed else [entry["dep_info"] for entry in matching]
         store = self.detailed_schedule_data if detailed else self.raw_schedule_data
         return store.get((route_type, day, direction), [])
+
+    def query_schedule(
+        self,
+        *,
+        route_type: str,
+        day: str,
+        direction: str,
+        detailed: bool = False,
+        stop: enums.BusStopsName | None = None,
+        after_time: str = "",
+        limit: int | None = 5,
+    ) -> list[dict]:
+        """Filter by stop and departure time before applying the result limit."""
+        schedules = self.get_schedule(
+            route_type=route_type, day=day, direction=direction, detailed=detailed, stop=stop
+        )
+        time_path = ["dep_info", "time"] if detailed else ["time"]
+        return after_specific_time(schedules, after_time, time_path)[:limit]
 
     def gen_bus_stops_info(self) -> list[dict]:
         return [

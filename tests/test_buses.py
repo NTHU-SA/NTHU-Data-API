@@ -31,6 +31,14 @@ def test_missing_route_metadata_is_not_registered():
             "/buses/schedules?bus_type=main&day=weekday&direction=up",
             "get_schedule",
         ),
+        (
+            "/buses/schedule?route=main&day=weekday&direction=up&stop=台積館",
+            "get_schedule",
+        ),
+        (
+            "/buses/stops/台積館?bus_type=main&day=weekday&direction=up",
+            "get_stop_schedule",
+        ),
     ],
 )
 async def test_internal_bus_errors_are_safe(monkeypatch, caplog, path, method):
@@ -55,7 +63,7 @@ async def test_unexpected_bus_tool_errors_are_masked(monkeypatch, caplog):
 
     monkeypatch.setattr(buses_service, "update_data", fail)
     async with Client(mcp) as client:
-        result = await client.call_tool("get_next_buses", {}, raise_on_error=False)
+        result = await client.call_tool("get_bus_schedule", {}, raise_on_error=False)
     assert result.is_error
     assert "Private" not in result.content[0].text
     assert "http" not in result.content[0].text
@@ -109,6 +117,7 @@ class TestBusesSchedules:
         ) as client:
             yield client
 
+    @pytest.mark.parametrize("path", ["/buses/schedule", "/buses/schedules"])
     @pytest.mark.parametrize(
         "bus_type",
         [_.value for _ in schemas.buses.BusRouteType],
@@ -122,11 +131,12 @@ class TestBusesSchedules:
         [_.value for _ in schemas.buses.BusDirection],
     )
     async def test_get_bus_schedules(
-        self, client: AsyncClient, bus_type: str, day: str, direction: str
+        self, client: AsyncClient, bus_type: str, day: str, direction: str, path: str
     ):
         """Test getting bus schedules by type, day and direction."""
+        route_parameter = "route" if path == "/buses/schedule" else "bus_type"
         response = await client.get(
-            f"/buses/schedules/?bus_type={bus_type}&day={day}&direction={direction}"
+            f"{path}?{route_parameter}={bus_type}&day={day}&direction={direction}"
         )
         assert response.status_code == 200
 
