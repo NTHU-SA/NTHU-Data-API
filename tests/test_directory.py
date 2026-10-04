@@ -144,7 +144,7 @@ def test_directory_openapi():
     paths = schema["paths"]
     assert "/directory/search" not in paths
     operation = paths["/directory"]["get"]
-    assert operation["tags"] == ["directory"]
+    assert operation["tags"] == ["Directory"]
     assert operation["operationId"] == "getDirectory"
     assert not operation.get("deprecated", False)
     assert operation["parameters"][0]["name"] == "query"

@@ -18,7 +18,7 @@ def test_legacy_directory_openapi():
     }
     assert operations.keys() == {"/departments/", "/departments/search"}
     for operation in operations.values():
-        assert operation["tags"] == ["directory 舊"]
+        assert operation["tags"] == ["Departments"]
         assert operation["deprecated"] is True
     assert operations["/departments/"]["operationId"] == "getAllDepartmentsDeprecated"
     assert operations["/departments/search"]["operationId"] == "searchDepartmentsAndPeople"
