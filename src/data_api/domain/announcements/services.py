@@ -4,6 +4,7 @@ Announcements domain service.
 Simple data fetching and filtering service for announcements.
 """
 
+import re
 from typing import Optional
 
 from thefuzz import fuzz
@@ -20,9 +21,20 @@ DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
 
 
 def _matches_source_url(link: str, url: str) -> bool:
-    normalized_link = link.removeprefix("https://").removeprefix("http://")
-    normalized_url = url.removeprefix("https://").removeprefix("http://")
-    return normalized_url in normalized_link
+    def split_url(value: str) -> tuple[bool, str, str]:
+        scheme = re.match(r"https?://", value, re.IGNORECASE)
+        without_scheme = value[scheme.end() :] if scheme else value
+        parts = re.split(r"([/?#])", without_scheme, maxsplit=1)
+        return bool(scheme), parts[0], "".join(parts[1:])
+
+    _, link_host, link_tail = split_url(link)
+    has_scheme, query_host, query_tail = split_url(url)
+    normalized_link = link_host.casefold() + link_tail
+    if has_scheme or (
+        query_host.casefold() in link_host.casefold() and (not query_tail or "." in query_host)
+    ):
+        url = query_host.casefold() + query_tail
+    return url in normalized_link
 
 
 class AnnouncementsService:

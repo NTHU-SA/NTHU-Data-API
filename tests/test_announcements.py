@@ -31,7 +31,7 @@ def announcement_sources(monkeypatch):
         },
         {
             "title": "Notice",
-            "link": "http://academic.site.nthu.edu.tw/p/403-1007-1505-1.php",
+            "link": "hTtP://Academic.Site.Nthu.Edu.Tw/p/403-1007-1505-1.php",
             "department": "Academic",
             "language": "zh-tw",
             "articles": [],
@@ -48,6 +48,13 @@ def announcement_sources(monkeypatch):
                     "date": "2026-10-05",
                 }
             ],
+        },
+        {
+            "title": "Notice",
+            "link": "HtTpS://Events.Site.Nthu.Edu.Tw/P/Case?Token=AbC#Frag",
+            "department": "Events",
+            "language": "en",
+            "articles": [],
         },
     ]
     original = deepcopy(sources)
@@ -94,11 +101,26 @@ class TestAnnouncementsEndpoints:
         [
             ("academic.site.nthu.edu.tw", [0, 1]),
             ("academic.site.nthu.edu.tw/p/403-1007-1504-1.php", [0]),
+            ("403-1007-1504-1.php", [0]),
+            ("403-1007-1504-1.PHP", []),
             ("https://academic.site.nthu.edu.tw", [0, 1]),
             ("http://academic.site.nthu.edu.tw", [0, 1]),
+            ("HTTPS://Academic.Site.Nthu.Edu.Tw", [0, 1]),
+            ("hTtPs://aCaDeMiC.sItE.nThU.eDu.Tw/p/403-1007-1504-1.php", [0]),
+            ("HTTPS://events.site.nthu.edu.tw/P/Case?Token=AbC#Frag", [3]),
+            ("events.site.nthu.edu.tw/P/Case", [3]),
+            ("P/Case", [3]),
+            ("p/Case", []),
+            ("EVENTS.SITE.NTHU.EDU.TW/p/Case", []),
+            ("HTTPS://events.site.nthu.edu.tw/P/case", []),
+            ("events.site.nthu.edu.tw/P/Case?token=AbC", []),
+            ("events.site.nthu.edu.tw/P/Case?Token=abc", []),
+            ("events.site.nthu.edu.tw/P/Case?Token=AbC#frag", []),
+            ("/P/Case?Token=AbC#Frag", [3]),
+            ("/p/Case?Token=AbC#Frag", []),
             ("nonexistent.site.nthu.edu.tw", []),
             ("academic.site.nthu.edu.tx", []),
-            ("", [0, 1, 2]),
+            ("", [0, 1, 2, 3]),
         ],
     )
     async def test_filter_by_source_url(
@@ -106,7 +128,12 @@ class TestAnnouncementsEndpoints:
     ):
         response = await client.get(path, params={"url": url, "fuzzy": fuzzy})
         assert response.status_code == 200
-        expected = [announcement_sources[index] for index in indices]
+        expected = [deepcopy(announcement_sources[index]) for index in indices]
+        for source in expected:
+            if source["department"] == "Events":
+                source["link"] = "https://events.site.nthu.edu.tw/P/Case?Token=AbC#Frag"
+            elif source["language"] == "zh-tw":
+                source["link"] = "https://academic.site.nthu.edu.tw/p/403-1007-1505-1.php"
         assert response.json() == expected
         assert response.headers["X-Data-Commit-Hash"] == "test-commit"
 
