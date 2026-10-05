@@ -45,6 +45,8 @@ def _query_bus_schedule(
     details: bool,
     stop: schemas.BusStopsName | None,
     query: schemas.BusQuery,
+    *,
+    use_stop_arrival_time: bool = True,
 ):
     find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
     with service_errors():
@@ -56,6 +58,7 @@ def _query_bus_schedule(
             stop=stop,
             after_time=after_time or "",
             limit=query.limit,
+            use_stop_arrival_time=use_stop_arrival_time,
         )
 
 
@@ -125,7 +128,9 @@ async def get_bus_schedules(
     query: schemas.BusQuery = Depends(),
 ):
     """取得指定條件的公車時刻表，保留舊版必填參數與回應格式。"""
-    return _query_bus_schedule(bus_type, day, direction, details, stop, query)
+    return _query_bus_schedule(
+        bus_type, day, direction, details, stop, query, use_stop_arrival_time=False
+    )
 
 
 @router.get(
@@ -144,7 +149,7 @@ async def get_bus_schedule(
     direction: schemas.BusDirection = Query(schemas.BusDirection.all, description="上山或下山"),
     details: bool = Query(False, description="是否包含詳細站點時間資訊"),
     stop: schemas.BusStopsName | None = Query(
-        None, description="僅回傳停靠此站的班次；不影響回應格式，時間仍以發車時間篩選"
+        None, description="僅回傳停靠此站的班次；以此站預估到站時間篩選，包含已發車但尚未到站的班次"
     ),
     query: schemas.BusQuery = Depends(),
 ):
@@ -153,7 +158,7 @@ async def get_bus_schedule(
     - 不指定條件時，回傳現在開始的全部路線與方向班次，預設最多 5 筆。
     - **details=False**: 回傳簡易時刻表（僅發車時間）。
     - **details=True**: 回傳詳細時刻表（包含每站預估到達時間）。
-    - **stop**: 僅篩選會停靠指定站牌的班次；time 與 current 仍以發車時間篩選。
+    - **stop**: 以指定站牌的預估到站時間篩選，包含已發車但尚未到站的班次；未指定時以發車時間篩選。
     """
     return _query_bus_schedule(route, day, direction, details, stop, query)
 
@@ -166,7 +171,7 @@ async def get_bus_schedule(
     deprecated=True,
     description=(
         "已棄用，將於下一個 major 版本移除。請改用 GET /buses/schedule?stop={stop_name}&details=true。"
-        "新 API 回傳時刻表格式，並以發車時間篩選；此舊 API 保留到站資訊與到站時間篩選。"
+        "新 API 回傳時刻表格式，並以指定站牌的預估到站時間篩選；此舊 API 保留到站資訊與到站時間篩選。"
     ),
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
 )
