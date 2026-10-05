@@ -1,16 +1,16 @@
-def url_corrector(url: str) -> str:
+def url_corrector(url: object) -> object:
     """
     Fix the URL under different conditions:
         If the URL starts with "//", prepend "https:" to it.
         If the URL contains "://" but does not start with "http" or "https", prepend "https://" to it.
 
     Args:
-        url (str): The URL to be fixed.
+        url (object): The value to validate, corrected only when it is a string.
 
     Returns:
-        str: The fixed URL.
+        object: The fixed URL or the original non-string value for downstream validation.
     """
-    if url is None:
+    if not isinstance(url, str):
         return url
 
     url = url.strip()

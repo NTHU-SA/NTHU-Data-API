@@ -177,6 +177,8 @@ for existing clients, including MCP campus search.
 
 The supported announcement endpoints are `GET /announcements` for announcement
 content and `GET /announcements/sources` for source metadata without articles.
+The sources response is a `list[AnnouncementSource]` with required `title`, `link`
+(HTTP/HTTPS URL), `language`, and `department` fields, documented in OpenAPI.
 Use the `department` fields in `/announcements/sources` to discover department
 names; clients needing a unique department list can deduplicate those values.
 The redundant `GET /announcements/lists/departments` endpoint is deprecated in

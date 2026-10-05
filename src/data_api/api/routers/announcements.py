@@ -66,7 +66,11 @@ async def list_announcement_departments(response: Response):
     return data
 
 
-@router.get("/sources", response_model=list[dict], operation_id="getAnnouncementsList")
+@router.get(
+    "/sources",
+    response_model=list[schemas.AnnouncementSource],
+    operation_id="getAnnouncementsList",
+)
 async def get_announcements_list(
     response: Response,
     department: str = Query(None, description="部門名稱"),

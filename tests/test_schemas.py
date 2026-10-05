@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from data_api.api.schemas.announcements import AnnouncementArticle
+from data_api.api.schemas.announcements import AnnouncementArticle, AnnouncementSource
 from data_api.api.schemas.calendars import Calendar, CalendarEvent
 from data_api.api.schemas.departments import DepartmentPerson
 from data_api.api.schemas.dining import DiningRestaurant
@@ -71,3 +71,32 @@ def test_optional_urls_still_validate_supplied_values(invalid_link):
         AnnouncementArticle(link=invalid_link)
     with pytest.raises(ValidationError):
         Calendar(id="library-main", url=invalid_link)
+
+
+@pytest.mark.parametrize("field", ["title", "link", "language", "department"])
+def test_announcement_source_requires_metadata(field):
+    payload = {
+        "title": "News",
+        "link": "https://example.com/news",
+        "language": "en",
+        "department": "Office",
+    }
+    with pytest.raises(ValidationError):
+        AnnouncementSource.model_validate(
+            {key: value for key, value in payload.items() if key != field}
+        )
+    with pytest.raises(ValidationError):
+        AnnouncementSource.model_validate({**payload, field: None})
+
+
+@pytest.mark.parametrize("link", ["https://", "not a url", "/news", 42, True, [], {}])
+def test_announcement_source_rejects_invalid_http_urls(link):
+    with pytest.raises(ValidationError):
+        AnnouncementSource(title="News", link=link, language="en", department="Office")
+
+
+def test_announcement_source_corrects_protocol_relative_urls():
+    source = AnnouncementSource(
+        title="News", link="//example.com/news", language="en", department="Office"
+    )
+    assert source.model_dump(mode="json")["link"] == "https://example.com/news"

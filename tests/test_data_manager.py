@@ -563,6 +563,25 @@ async def test_initial_course_schema_validation(payload):
             [{"title": "News"}],
         ),
         (
+            "announcements_list.json",
+            [
+                {
+                    "title": "News",
+                    "department": "Office",
+                    "language": "en",
+                    "link": "https://example.com",
+                }
+            ],
+            [
+                {
+                    "title": "News",
+                    "department": "Office",
+                    "language": "en",
+                    "link": 42,
+                }
+            ],
+        ),
+        (
             "dining.json",
             [
                 {
