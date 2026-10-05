@@ -306,8 +306,12 @@ including when `description` is empty. Only records without a line use the legac
 description heuristic. The same selection determines stop membership and arrival times.
 Optional `stop` filters to buses serving that stop, without changing the response
 format. `details=false` (default) returns departure schedules; `details=true`
-includes `dep_info` and all `stops_time` entries. `time` filters by departure time
-in HH:MM format, even when `stop` is supplied. `day=current` uses the current day
+includes `dep_info` and all `stops_time` entries. `time` is in HH:MM format and
+filters by estimated arrival time at the selected `stop`, including buses that
+have departed but have not arrived at that stop yet. Arrivals exactly at the
+requested time are included; buses that have already passed the stop are excluded.
+Without `stop`, filtering still uses departure time. Both detail modes use the
+same time filter and retain departure-time ordering. `day=current` uses the current day
 and time and ignores `time`. `limit` defaults to 5 and must be at least 1.
 The shared `BusQuery` parameter is now `limit`, not `limits`, including on
 deprecated bus endpoints; update clients to use the singular spelling.
@@ -326,11 +330,11 @@ deprecated in OpenAPI and will be removed in the next major release. Migrate to 
 `/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
 `bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
 `day`, and `direction` parameters. Both deprecated endpoints retain their response
-formats; `/buses/schedules`
-keeps unqualified `line` values (`red`, `green`, `route_1`, `route_2`).
-The old stop endpoint
-retains its arrival-based response and time filtering; the new endpoint always
-filters by departure time.
+formats; `/buses/schedules` keeps unqualified `line` values (`red`, `green`,
+`route_1`, `route_2`) and departure-time filtering, even with `stop`.
+The old stop endpoint retains its arrival-based
+response and time filtering; the new endpoint uses the selected stop's estimated
+arrival time while retaining the schedule response format.
 
 MCP `get_bus_schedule` replaces `get_next_buses` and `get_bus_stops` without
 compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,
