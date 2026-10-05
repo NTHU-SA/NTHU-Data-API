@@ -1,0 +1,4393 @@
+{
+  "operations": {
+    "GET /announcements": {
+      "deprecated": false,
+      "operationId": "getAnnouncements",
+      "parameters": {
+        "query:department": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:language": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/AnnouncementLanguageOption"
+          }
+        },
+        "query:title": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:url": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/AnnouncementDetail"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /announcements/": {
+      "deprecated": true,
+      "operationId": "getAnnouncementsDeprecated",
+      "parameters": {
+        "query:department": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:language": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/AnnouncementLanguageOption"
+          }
+        },
+        "query:title": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:url": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/AnnouncementDetail"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /announcements/lists/departments": {
+      "deprecated": true,
+      "operationId": "listAnnouncementDepartments",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /announcements/sources": {
+      "deprecated": false,
+      "operationId": "getAnnouncementsList",
+      "parameters": {
+        "query:department": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/AnnouncementSource"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /buses/info/stops": {
+      "deprecated": true,
+      "operationId": "getBusStopsInformation",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/BusStopsInfo"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /buses/routes": {
+      "deprecated": false,
+      "operationId": "getBusRouteData",
+      "parameters": {
+        "query:direction": {
+          "required": false,
+          "schema": {
+            "enum": [
+              "up",
+              "down"
+            ],
+            "type": "string"
+          }
+        },
+        "query:route": {
+          "required": false,
+          "schema": {
+            "enum": [
+              "main",
+              "nanda"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/BusInfo"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /buses/schedule": {
+      "deprecated": false,
+      "operationId": "getBusSchedule",
+      "parameters": {
+        "query:day": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/BusDayWithCurrent",
+            "default": "current"
+          }
+        },
+        "query:details": {
+          "required": false,
+          "schema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "query:direction": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/BusDirection",
+            "default": "all"
+          }
+        },
+        "query:limit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 5
+          }
+        },
+        "query:route": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/BusRouteType",
+            "default": "all"
+          }
+        },
+        "query:stop": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BusStopsName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BusCanonicalDetailedSchedule"
+                    },
+                    {
+                      "$ref": "#/components/schemas/BusCanonicalSchedule"
+                    }
+                  ]
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /buses/schedules": {
+      "deprecated": true,
+      "operationId": "getBusSchedules",
+      "parameters": {
+        "query:bus_type": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusRouteType"
+          }
+        },
+        "query:day": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusDayWithCurrent"
+          }
+        },
+        "query:details": {
+          "required": false,
+          "schema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "query:direction": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusDirection"
+          }
+        },
+        "query:limit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 5
+          }
+        },
+        "query:stop": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BusStopsName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BusDetailedSchedule"
+                    },
+                    {
+                      "$ref": "#/components/schemas/BusSchedule"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /buses/stops": {
+      "deprecated": false,
+      "operationId": "getBusStops",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/BusStopsInfo"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /buses/stops/{stop_name}": {
+      "deprecated": true,
+      "operationId": "getStopBusInformationByStop",
+      "parameters": {
+        "path:stop_name": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusStopsName"
+          }
+        },
+        "query:bus_type": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusRouteType"
+          }
+        },
+        "query:day": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusDayWithCurrent"
+          }
+        },
+        "query:direction": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BusDirection"
+          }
+        },
+        "query:limit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 5
+          }
+        },
+        "query:time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BusStopsQueryResult"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /calendars": {
+      "deprecated": false,
+      "operationId": "getAllCalendars",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Calendar"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /calendars/": {
+      "deprecated": true,
+      "operationId": "getAllCalendarsDeprecated",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Calendar"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /calendars/{calendar_id}": {
+      "deprecated": false,
+      "operationId": "getCalendar",
+      "parameters": {
+        "path:calendar_id": {
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Calendar"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /calendars/{calendar_id}/events": {
+      "deprecated": false,
+      "operationId": "searchCalendarEvents",
+      "parameters": {
+        "path:calendar_id": {
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:end": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:keyword": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:limit": {
+          "required": false,
+          "schema": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "query:offset": {
+          "required": false,
+          "schema": {
+            "default": 0,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "query:start": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CalendarEvent"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "400": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /calendars/{calendar_id}/events/{event_id}": {
+      "deprecated": false,
+      "operationId": "getCalendarEvent",
+      "parameters": {
+        "path:calendar_id": {
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "path:event_id": {
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEvent"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /courses": {
+      "deprecated": false,
+      "operationId": "getCourses",
+      "parameters": {
+        "query:chinese_title": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:class_room_and_time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:credit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:english_title": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:expertise": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:freshman_reservation": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:ge_type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:id": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:language": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseLanguage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:limit_note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:no_extra_selection": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:object": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:prerequisite": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:program": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:required_optional_note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:size_limit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:suspend": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:teacher": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseListName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /courses/": {
+      "deprecated": true,
+      "operationId": "getAllCourses",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /courses/lists/{list_name}": {
+      "deprecated": true,
+      "operationId": "listCoursesByType",
+      "parameters": {
+        "path:list_name": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/CourseListName"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /courses/search": {
+      "deprecated": true,
+      "operationId": "searchCoursesByFieldAndValue",
+      "parameters": {
+        "query:chinese_title": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:class_room_and_time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:credit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:english_title": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:expertise": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:freshman_reservation": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:ge_type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:id": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:language": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseLanguage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:limit_note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:no_extra_selection": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:object": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:prerequisite": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:program": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:required_optional_note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:size_limit": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:suspend": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:teacher": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /departments/": {
+      "deprecated": true,
+      "operationId": "getAllDepartmentsDeprecated",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Department"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /departments/search": {
+      "deprecated": true,
+      "operationId": "searchDepartmentsAndPeople",
+      "parameters": {
+        "query:query": {
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "$ref": "#/components/schemas/Department"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "$ref": "#/components/schemas/DepartmentPerson"
+                      },
+                      "type": "array"
+                    }
+                  ]
+                },
+                "type": "object"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /dining": {
+      "deprecated": false,
+      "operationId": "getDiningData",
+      "parameters": {
+        "query:building_name": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/DiningBuildingName"
+          }
+        },
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:restaurant_name": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:schedule": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DiningScheduleName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/DiningBuilding"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /dining/": {
+      "deprecated": true,
+      "operationId": "getDiningDataDeprecated",
+      "parameters": {
+        "query:building_name": {
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/DiningBuildingName"
+          }
+        },
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:restaurant_name": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:schedule": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DiningScheduleName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/DiningBuilding"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /directory": {
+      "deprecated": false,
+      "operationId": "getDirectory",
+      "parameters": {
+        "query:query": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Department"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /energy/electricity": {
+      "deprecated": false,
+      "operationId": "getElectricity",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/EnergyElectricityInfo"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "502": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "504": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /energy/electricity_usage": {
+      "deprecated": true,
+      "operationId": "getRealtimeElectricityUsage",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/EnergyElectricityInfo"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "502": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "504": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /libraries/lost-and-found": {
+      "deprecated": false,
+      "operationId": "getLibraryLostAndFound",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LibraryLostAndFound"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "502": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "504": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /libraries/lost_and_found": {
+      "deprecated": true,
+      "operationId": "getLibraryLostAndFoundItems",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LibraryLostAndFound"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "502": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "504": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /libraries/rss/{rss_type}": {
+      "deprecated": false,
+      "operationId": "getLibraryRssData",
+      "parameters": {
+        "path:rss_type": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/LibraryRssType"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LibraryRssItem"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /libraries/space": {
+      "deprecated": true,
+      "operationId": "getLibrarySpaceAvailability",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LibrarySpace"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "502": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "504": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /libraries/spaces": {
+      "deprecated": false,
+      "operationId": "getLibrarySpaces",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LibrarySpace"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "500": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "502": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "504": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /locations": {
+      "deprecated": false,
+      "operationId": "getLocations",
+      "parameters": {
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:name": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LocationDetail"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /locations/": {
+      "deprecated": true,
+      "operationId": "getLocationsDeprecated",
+      "parameters": {
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:name": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LocationDetail"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /locations/search": {
+      "deprecated": true,
+      "operationId": "fuzzySearchLocations",
+      "parameters": {
+        "query:query": {
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/LocationDetail"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /newsletters": {
+      "deprecated": false,
+      "operationId": "getAllNewsletters",
+      "parameters": {
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:name": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:title": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/NewsletterInfo"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /newsletters/": {
+      "deprecated": true,
+      "operationId": "getAllNewslettersDeprecated",
+      "parameters": {
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "query:name": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "query:title": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/NewsletterInfo"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /newsletters/sources": {
+      "deprecated": false,
+      "operationId": "getNewsletterSources",
+      "parameters": {
+        "query:name": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/NewsletterSource"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /newsletters/{newsletter_name}": {
+      "deprecated": true,
+      "operationId": "getNewsletterByName",
+      "parameters": {
+        "path:newsletter_name": {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/NewsletterName"
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsletterInfo"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "POST /courses/query": {
+      "deprecated": false,
+      "operationId": "queryCourses",
+      "parameters": {},
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CourseQueryCondition"
+                },
+                {
+                  "$ref": "#/components/schemas/CourseCondition"
+                }
+              ]
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "POST /courses/search": {
+      "deprecated": true,
+      "operationId": "searchCoursesByCondition",
+      "parameters": {},
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CourseQueryCondition"
+                },
+                {
+                  "$ref": "#/components/schemas/CourseCondition"
+                }
+              ]
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "schemas": {
+    "AnnouncementArticle": {
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "link": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "AnnouncementDetail": {
+      "properties": {
+        "articles": {
+          "items": {
+            "$ref": "#/components/schemas/AnnouncementArticle"
+          },
+          "type": "array"
+        },
+        "department": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "link": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "link",
+        "language",
+        "department",
+        "articles"
+      ],
+      "type": "object"
+    },
+    "AnnouncementLanguageOption": {
+      "enum": [
+        "zh-tw",
+        "en"
+      ],
+      "type": "string"
+    },
+    "AnnouncementSource": {
+      "properties": {
+        "department": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "link": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "link",
+        "language",
+        "department"
+      ],
+      "type": "object"
+    },
+    "BusArriveTime": {
+      "properties": {
+        "arrive_time": {
+          "type": "string"
+        },
+        "stop": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "stop",
+        "arrive_time"
+      ],
+      "type": "object"
+    },
+    "BusCanonicalDetailedSchedule": {
+      "properties": {
+        "dep_info": {
+          "$ref": "#/components/schemas/BusCanonicalSchedule"
+        },
+        "stops_time": {
+          "items": {
+            "$ref": "#/components/schemas/BusArriveTime"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dep_info",
+        "stops_time"
+      ],
+      "type": "object"
+    },
+    "BusCanonicalSchedule": {
+      "properties": {
+        "bus_type": {
+          "$ref": "#/components/schemas/BusType"
+        },
+        "dep_stop": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "line": {
+          "default": "",
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "time",
+        "description",
+        "dep_stop",
+        "bus_type"
+      ],
+      "type": "object"
+    },
+    "BusDayWithCurrent": {
+      "enum": [
+        "weekday",
+        "weekend",
+        "current"
+      ],
+      "type": "string"
+    },
+    "BusDetailedSchedule": {
+      "properties": {
+        "dep_info": {
+          "$ref": "#/components/schemas/BusSchedule"
+        },
+        "stops_time": {
+          "items": {
+            "$ref": "#/components/schemas/BusArriveTime"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dep_info",
+        "stops_time"
+      ],
+      "type": "object"
+    },
+    "BusDirection": {
+      "enum": [
+        "all",
+        "up",
+        "down"
+      ],
+      "type": "string"
+    },
+    "BusInfo": {
+      "properties": {
+        "direction": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "route": {
+          "type": "string"
+        },
+        "routeEN": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "direction",
+        "duration",
+        "route",
+        "routeEN"
+      ],
+      "type": "object"
+    },
+    "BusRouteType": {
+      "enum": [
+        "all",
+        "main",
+        "nanda"
+      ],
+      "type": "string"
+    },
+    "BusSchedule": {
+      "properties": {
+        "bus_type": {
+          "$ref": "#/components/schemas/BusType"
+        },
+        "dep_stop": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "line": {
+          "default": "",
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "time",
+        "description",
+        "dep_stop",
+        "bus_type"
+      ],
+      "type": "object"
+    },
+    "BusStopsInfo": {
+      "properties": {
+        "latitude": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "name_en": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "name_en",
+        "latitude",
+        "longitude"
+      ],
+      "type": "object"
+    },
+    "BusStopsName": {
+      "enum": [
+        "北校門口",
+        "綜二館",
+        "楓林小徑",
+        "人社院&生科館",
+        "台積館",
+        "奕園停車場",
+        "教育學院大樓&南門停車場",
+        "南大校區校門口右側(食品路校牆邊)"
+      ],
+      "type": "string"
+    },
+    "BusStopsQueryResult": {
+      "properties": {
+        "arrive_time": {
+          "type": "string"
+        },
+        "bus_type": {
+          "$ref": "#/components/schemas/BusType"
+        },
+        "dep_stop": {
+          "type": "string"
+        },
+        "dep_time": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "arrive_time",
+        "dep_time",
+        "dep_stop",
+        "description",
+        "bus_type"
+      ],
+      "type": "object"
+    },
+    "BusType": {
+      "enum": [
+        "route_83",
+        "large-sized_bus",
+        "middle-sized_bus"
+      ],
+      "type": "string"
+    },
+    "Calendar": {
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "CalendarEvent": {
+      "properties": {
+        "all_day": {
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "start",
+        "end",
+        "all_day"
+      ],
+      "type": "object"
+    },
+    "CourseCondition": {
+      "properties": {
+        "matcher": {
+          "type": "string"
+        },
+        "regex_match": {
+          "default": false,
+          "type": "boolean"
+        },
+        "row_field": {
+          "$ref": "#/components/schemas/CourseFieldName"
+        }
+      },
+      "required": [
+        "row_field",
+        "matcher"
+      ],
+      "type": "object"
+    },
+    "CourseData": {
+      "properties": {
+        "chinese_title": {
+          "type": "string"
+        },
+        "class_room_and_time": {
+          "type": "string"
+        },
+        "credit": {
+          "type": "string"
+        },
+        "english_title": {
+          "type": "string"
+        },
+        "expertise": {
+          "type": "string"
+        },
+        "freshman_reservation": {
+          "type": "string"
+        },
+        "ge_type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "language": {
+          "$ref": "#/components/schemas/CourseLanguage"
+        },
+        "limit_note": {
+          "type": "string"
+        },
+        "no_extra_selection": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "object": {
+          "type": "string"
+        },
+        "prerequisite": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "required_optional_note": {
+          "type": "string"
+        },
+        "size_limit": {
+          "type": "string"
+        },
+        "suspend": {
+          "type": "string"
+        },
+        "teacher": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "chinese_title",
+        "english_title",
+        "credit",
+        "size_limit",
+        "freshman_reservation",
+        "object",
+        "ge_type",
+        "language",
+        "note",
+        "suspend",
+        "class_room_and_time",
+        "teacher",
+        "prerequisite",
+        "limit_note",
+        "expertise",
+        "program",
+        "no_extra_selection",
+        "required_optional_note"
+      ],
+      "type": "object"
+    },
+    "CourseFieldName": {
+      "enum": [
+        "id",
+        "chinese_title",
+        "english_title",
+        "credit",
+        "size_limit",
+        "freshman_reservation",
+        "object",
+        "ge_type",
+        "language",
+        "note",
+        "suspend",
+        "class_room_and_time",
+        "teacher",
+        "prerequisite",
+        "limit_note",
+        "expertise",
+        "program",
+        "no_extra_selection",
+        "required_optional_note"
+      ],
+      "type": "string"
+    },
+    "CourseLanguage": {
+      "enum": [
+        "中",
+        "英"
+      ],
+      "type": "string"
+    },
+    "CourseListName": {
+      "enum": [
+        "microcredits",
+        "xclass"
+      ],
+      "type": "string"
+    },
+    "CourseQueryCondition": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/CourseQueryCondition"
+          },
+          {
+            "$ref": "#/components/schemas/CourseCondition"
+          },
+          {
+            "$ref": "#/components/schemas/CourseQueryOperation"
+          }
+        ]
+      },
+      "type": "array"
+    },
+    "CourseQueryOperation": {
+      "enum": [
+        "and",
+        "or"
+      ],
+      "type": "string"
+    },
+    "Department": {
+      "properties": {
+        "details": {
+          "$ref": "#/components/schemas/DepartmentDetails"
+        },
+        "index": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parent_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "index",
+        "name"
+      ],
+      "type": "object"
+    },
+    "DepartmentContact": {
+      "properties": {
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extension": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fax": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "website": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "DepartmentDetails": {
+      "properties": {
+        "contact": {
+          "$ref": "#/components/schemas/DepartmentContact"
+        },
+        "departments": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "people": {
+          "items": {
+            "$ref": "#/components/schemas/DepartmentPerson"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "DepartmentPerson": {
+      "properties": {
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extension": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "DiningBuilding": {
+      "properties": {
+        "building": {
+          "type": "string"
+        },
+        "restaurants": {
+          "items": {
+            "$ref": "#/components/schemas/DiningRestaurant"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "building",
+        "restaurants"
+      ],
+      "type": "object"
+    },
+    "DiningBuildingName": {
+      "enum": [
+        "小吃部",
+        "水木生活中心",
+        "風雲樓",
+        "綜合教學大樓(南大校區)",
+        "其他餐廳"
+      ],
+      "type": "string"
+    },
+    "DiningRestaurant": {
+      "properties": {
+        "area": {
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "schedule": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "area",
+        "name",
+        "note",
+        "phone",
+        "schedule"
+      ],
+      "type": "object"
+    },
+    "DiningScheduleName": {
+      "enum": [
+        "today",
+        "weekday",
+        "saturday",
+        "sunday"
+      ],
+      "type": "string"
+    },
+    "EnergyElectricityInfo": {
+      "properties": {
+        "capacity": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "integer"
+        },
+        "last_updated": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "data",
+        "capacity",
+        "unit",
+        "last_updated"
+      ],
+      "type": "object"
+    },
+    "ErrorResponse": {
+      "properties": {
+        "detail": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "detail"
+      ],
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LibraryLostAndFound": {
+      "properties": {
+        "序號": {
+          "type": "string"
+        },
+        "拾獲地點": {
+          "type": "string"
+        },
+        "拾獲時間": {
+          "type": "string"
+        },
+        "描述": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "序號",
+        "拾獲時間",
+        "拾獲地點",
+        "描述"
+      ],
+      "type": "object"
+    },
+    "LibraryRssImage": {
+      "properties": {
+        "link": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "LibraryRssItem": {
+      "properties": {
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "guid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/LibraryRssImage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "link": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pubDate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description"
+      ],
+      "type": "object"
+    },
+    "LibraryRssType": {
+      "enum": [
+        "news",
+        "eresources",
+        "exhibit",
+        "branches"
+      ],
+      "type": "string"
+    },
+    "LibrarySpace": {
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "spacetype": {
+          "type": "integer"
+        },
+        "spacetypename": {
+          "type": "string"
+        },
+        "zoneid": {
+          "type": "string"
+        },
+        "zonename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacetype",
+        "spacetypename",
+        "zoneid",
+        "zonename",
+        "count"
+      ],
+      "type": "object"
+    },
+    "LocationDetail": {
+      "properties": {
+        "latitude": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "latitude",
+        "longitude"
+      ],
+      "type": "object"
+    },
+    "NewsletterArticle": {
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "link": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "NewsletterInfo": {
+      "properties": {
+        "articles": {
+          "items": {
+            "$ref": "#/components/schemas/NewsletterArticle"
+          },
+          "type": "array"
+        },
+        "details": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "link": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "link",
+        "details",
+        "articles"
+      ],
+      "type": "object"
+    },
+    "NewsletterName": {
+      "enum": [
+        "藝術文化總中心電子報",
+        "域報 Field Cast",
+        "校長同意權人投票事務委員會",
+        "國立清華大學校長遴選委員會",
+        "清華校友總會會務訊息",
+        "築思脈動(Pulse of Education)",
+        "心諮系雙週例講座",
+        "愛慾電子報報",
+        "教學發展中心電子報-教師",
+        "清華校友電子報",
+        "清華大學化學系電子報",
+        "國立清華大學核工暨工科系友會電子報",
+        "國立清華大學動機系系友電子報",
+        "清華大學化工系友電子報",
+        "國立清華大學學生會電子報",
+        "台灣語言學通訊",
+        "教務處綜合教務組電子報",
+        "課務電子報",
+        "清華大學工工系電子報",
+        "語文中心電子報",
+        "eecs-students",
+        "科管院職涯電子報",
+        "人事室電子報",
+        "研發處電子報-教職",
+        "學生事務報-學生",
+        "數學系電子報",
+        "電機工程學系電子報(學生)",
+        "秘書處-全校教職員",
+        "住宿書院電子報",
+        "主計室電子報",
+        "國立清華大學圖書館-學生",
+        "諮商中心-心窩報報",
+        "NTHU-Newsletter",
+        "NTHU-Division of Health Service",
+        "人社院學士班電子報",
+        "人文社會學院電子報",
+        "新聞剪輯電子報",
+        "清華簡訊",
+        "計中-教育訓練"
+      ],
+      "type": "string"
+    },
+    "NewsletterSource": {
+      "properties": {
+        "details": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "link": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "link",
+        "details"
+      ],
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "type": "object"
+        },
+        "input": {},
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ValidationErrorResponse": {
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "$ref": "#/components/schemas/ValidationIssue"
+              },
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "required": [
+        "detail"
+      ],
+      "type": "object"
+    },
+    "ValidationIssue": {
+      "properties": {
+        "ctx": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input": {},
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "type": "object"
+    }
+  }
+}

@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, Path, Response
 
 from data_api.api.errors import service_errors
-from data_api.api.schemas.errors import LIVE_ERROR_RESPONSES
+from data_api.api.schemas.errors import LIVE_ERROR_RESPONSES, ErrorResponse
 from data_api.api.schemas.libraries import (
     LibraryLostAndFound,
     LibraryRssItem,
     LibraryRssType,
     LibrarySpace,
 )
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.libraries.services import libraries_service
 
 router = APIRouter()
@@ -63,7 +64,10 @@ async def get_library_lost_and_found_items():
     "/rss/{rss_type}",
     response_model=list[LibraryRssItem],
     operation_id="getLibraryRssData",
-    responses={404: {"description": "RSS feed not found"}},
+    responses={
+        **SNAPSHOT_RESPONSES,
+        404: {"model": ErrorResponse, "description": "RSS feed not found"},
+    },
 )
 async def get_library_rss_data(
     response: Response,

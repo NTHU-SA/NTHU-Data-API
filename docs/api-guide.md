@@ -89,6 +89,13 @@ Required identifiers, titles not declared nullable, event boundaries, and datase
 structure remain required. Course GET search retains the same flat optional query
 parameters, with validation errors documented in OpenAPI.
 
+Snapshot-backed endpoints document HTTP 503 with `{"detail": "..."}` when no
+usable snapshot exists. Manual 400/404 errors use the same string-detail schema.
+Course 422 responses allow either FastAPI's validation-error array in `detail`
+or a string for invalid GET regular expressions. OpenAPI success responses declare
+`X-Data-Commit-Hash` where supplied (omitted for unknown versions), and
+`X-Total-Count` on course responses and paginated calendar event lists.
+
 ### Root endpoint paths
 
 Use root GET endpoints without a trailing slash: `/announcements`, `/calendars`,
@@ -173,6 +180,21 @@ but are marked **deprecated** in OpenAPI:
 | `GET /energy/electricity_usage` | `GET /energy/electricity` |
 
 MCP tool names and arguments are unchanged.
+
+### Library RSS
+
+`GET /libraries/rss/{rss_type}` accepts `news`, `eresources`, `exhibit`, or
+`branches`. Each response is an article array. Article `link` is nullable **text**,
+not a single URI: publishers may supply multiple comma-separated URLs, and the
+API preserves the complete text. Consumers must not assume that the value can be
+opened as one URL.
+
+Image `url` and `link` remain nullable HTTP(S) URLs. RSS image URL path spaces are
+encoded as `%20` before validation, without double-encoding existing escapes;
+protocol-relative images use HTTPS. This normalization applies to the complete
+installed RSS candidate and does not weaken URL validation for other datasets.
+An invalid candidate retains the last-known-good snapshot; with no usable snapshot,
+requests return 503. A missing feed returns 404 and an invalid `rss_type` returns 422.
 
 ## Course queries
 

@@ -6,9 +6,11 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 from pydantic import ValidationError
 
 from data_api.api.schemas import courses as schemas
+from data_api.api.schemas.errors import VALIDATION_ERROR_RESPONSES
+from data_api.api.schemas.responses import COUNTED_SNAPSHOT_RESPONSES
 from data_api.domain.courses import models, services
 
-router = APIRouter()
+router = APIRouter(responses={**COUNTED_SNAPSHOT_RESPONSES, **VALIDATION_ERROR_RESPONSES})
 
 
 async def add_custom_header(response: Response):
@@ -74,7 +76,6 @@ def _filter_courses(
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
     operation_id="getCourses",
-    responses={422: {"description": "Invalid query parameter or regular expression"}},
 )
 async def get_courses(
     response: Response,
@@ -112,7 +113,6 @@ async def get_all_courses(response: Response):
     dependencies=[Depends(add_custom_header)],
     operation_id="searchCoursesByFieldAndValue",
     deprecated=True,
-    responses={422: {"description": "Invalid query parameter or regular expression"}},
 )
 async def search_courses_by_field_and_value(
     response: Response,

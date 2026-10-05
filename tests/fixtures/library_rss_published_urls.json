@@ -1,0 +1,38 @@
+{
+  "news": [
+    {
+      "guid": "published-multiple-links",
+      "title": "Published link-text regression",
+      "description": "",
+      "link": "https://oversea.cnki.net/tra,https://book.oversea.cnki.net/tra,https://thinker.oversea.cnki.net/tra",
+      "image": {
+        "url": "https://www.lib.nthu.edu.tw/image/news/19/20260921_LRS_CNKI Trial.jpg",
+        "link": "//www.lib.nthu.edu.tw/",
+        "publisher_image_field": "retained"
+      },
+      "publisher_item_field": "retained"
+    },
+    {
+      "title": "ProQuest trial",
+      "description": "",
+      "link": "https://www.proquest.com/centralpremium/index, https://ebookcentral.proquest.com/lib/nthutw/home.action, https://www.proquest.com/pq1entertainmentpopularculture, https://www.proquest.com/pq1history, https://forms.gle/65YaF7R1z52VU9S19"
+    },
+    {
+      "title": "HyRead trial",
+      "description": "",
+      "link": "https://hyread.cc/2026Ericdata, https://nthu.primo.exlibrisgroup.com/permalink/886UST_NTHU/1ij8ggp/alma990057064270206774"
+    }
+  ],
+  "eresources": [
+    {
+      "title": "Already encoded image",
+      "description": "",
+      "link": null,
+      "image": {
+        "url": "//www.lib.nthu.edu.tw/image/news/19/20260921_LRS_CNKI%20Trial.jpg"
+      }
+    }
+  ],
+  "exhibit": [],
+  "branches": []
+}

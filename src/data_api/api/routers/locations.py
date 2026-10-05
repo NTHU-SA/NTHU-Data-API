@@ -5,9 +5,11 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Response
 
 from data_api.api.schemas import locations as schemas
+from data_api.api.schemas.errors import ErrorResponse
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.locations import services
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 @router.get("", response_model=list[schemas.LocationDetail], operation_id="getLocations")
@@ -44,7 +46,7 @@ async def get_locations(
     response_model=list[schemas.LocationDetail],
     operation_id="fuzzySearchLocations",
     deprecated=True,
-    responses={404: {"description": "No matching locations"}},
+    responses={404: {"model": ErrorResponse, "description": "No matching locations"}},
 )
 async def fuzzy_search_locations(
     response: Response,

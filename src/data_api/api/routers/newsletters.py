@@ -5,9 +5,11 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Path, Query, Response
 
 from data_api.api.schemas import newsletters as schemas
+from data_api.api.schemas.errors import ErrorResponse
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.newsletters import services
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 @router.get("", response_model=list[schemas.NewsletterInfo], operation_id="getAllNewsletters")
@@ -59,7 +61,7 @@ async def get_newsletter_sources(
     "/{newsletter_name}",
     response_model=schemas.NewsletterInfo,
     operation_id="getNewsletterByName",
-    responses={404: {"description": "Newsletter not found"}},
+    responses={404: {"model": ErrorResponse, "description": "Newsletter not found"}},
     deprecated=True,
 )
 async def get_newsletter_by_name(

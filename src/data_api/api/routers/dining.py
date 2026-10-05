@@ -7,9 +7,10 @@ Handles HTTP endpoints for dining information.
 from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import dining as schemas
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.dining import services
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 @router.get("", operation_id="getDiningData")

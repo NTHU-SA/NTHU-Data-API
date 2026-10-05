@@ -6,9 +6,11 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Path, Query, Response
 
 from data_api.api.schemas.calendars import Calendar, CalendarEvent
+from data_api.api.schemas.errors import ErrorResponse
+from data_api.api.schemas.responses import COUNT_HEADERS, SNAPSHOT_RESPONSES
 from data_api.domain.calendars.services import calendars_service
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 CALENDAR_ID_PATH = Path(
     ..., description="行事曆 id，可由 /calendars 取得，例如 academic、library-main"
@@ -40,7 +42,7 @@ async def get_all_calendars(response: Response):
     "/{calendar_id}",
     response_model=Calendar,
     operation_id="getCalendar",
-    responses={404: {"description": "Calendar not found"}},
+    responses={404: {"model": ErrorResponse, "description": "Calendar not found"}},
 )
 async def get_calendar(response: Response, calendar_id: str = CALENDAR_ID_PATH):
     """取得指定行事曆的資訊（不含事件）。"""
@@ -57,8 +59,9 @@ async def get_calendar(response: Response, calendar_id: str = CALENDAR_ID_PATH):
     response_model=list[CalendarEvent],
     operation_id="searchCalendarEvents",
     responses={
-        400: {"description": "Start date must not follow end date"},
-        404: {"description": "Calendar not found"},
+        200: {"headers": COUNT_HEADERS},
+        400: {"model": ErrorResponse, "description": "Start date must not follow end date"},
+        404: {"model": ErrorResponse, "description": "Calendar not found"},
     },
 )
 async def search_calendar_events(
@@ -102,7 +105,7 @@ async def search_calendar_events(
     "/{calendar_id}/events/{event_id}",
     response_model=CalendarEvent,
     operation_id="getCalendarEvent",
-    responses={404: {"description": "Calendar event not found"}},
+    responses={404: {"model": ErrorResponse, "description": "Calendar event not found"}},
 )
 async def get_calendar_event(
     response: Response,
