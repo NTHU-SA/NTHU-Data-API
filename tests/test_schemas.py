@@ -89,7 +89,7 @@ def test_announcement_source_requires_metadata(field):
         AnnouncementSource.model_validate({**payload, field: None})
 
 
-@pytest.mark.parametrize("link", ["https://", "not a url", "/news"])
+@pytest.mark.parametrize("link", ["https://", "not a url", "/news", 42, True, [], {}])
 def test_announcement_source_rejects_invalid_http_urls(link):
     with pytest.raises(ValidationError):
         AnnouncementSource(title="News", link=link, language="en", department="Office")
