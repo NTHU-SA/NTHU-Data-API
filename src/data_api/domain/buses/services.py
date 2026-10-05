@@ -299,7 +299,7 @@ class BusesService:
     def _enhance_nanda_schedule(self, bus: dict, rdir: str) -> None:
         """Add Nanda-specific fields to schedule item."""
         bus["dep_stop"] = "校門" if rdir == "up" else "南大"
-        bus["line"] = graph.resolver.get_nanda_line(bus.get("description", ""))
+        bus["line"] = graph.resolver.get_nanda_line(bus.get("description", ""), bus.get("line", ""))
 
     def _track_gen2_departures_if_needed(self, bus: dict) -> None:
         """Track Gen2 (綜二) departures for main campus route calculation."""
@@ -432,9 +432,11 @@ class BusesService:
         return graph.resolver.resolve_main_campus_route(line, dep_stop, is_from_gen2)
 
     def _resolve_nanda_route(self, bus: dict, rdir: str) -> Optional[models.Route]:
-        """Resolve Nanda route based on description and direction."""
+        """Resolve Nanda route using the same line as the departure schedule."""
         direction = cast(Literal["up", "down"], rdir)
-        return graph.resolver.resolve_nanda_route(direction, bus.get("description", ""))
+        return graph.resolver.resolve_nanda_route(
+            direction, bus.get("description", ""), bus.get("line", "")
+        )
 
     def _add_to_stop_registry(
         self, stop_id: str, rtype: str, day: str, rdir: str, data: dict

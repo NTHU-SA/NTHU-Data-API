@@ -298,6 +298,12 @@ Defaults are `route=all`, `day=current`, and `direction=all`, so a request witho
 parameters returns the next departures across all routes and directions.
 `route` selects a campus route; response `bus_type` identifies the vehicle type
 (for example, `large-sized_bus`), not the campus route.
+The current REST endpoint and MCP use campus-qualified `line` identifiers:
+`main_red`, `main_green`, `nanda_route_1`, and `nanda_route_2`. With `details=true`,
+the identifier is in `dep_info.line`; otherwise it is in `line`.
+Nanda route selection uses the publisher's explicit `line` (`route1`/`route2`),
+including when `description` is empty. Only records without a line use the legacy
+description heuristic. The same selection determines stop membership and arrival times.
 Optional `stop` filters to buses serving that stop, without changing the response
 format. `details=false` (default) returns departure schedules; `details=true`
 includes `dep_info` and all `stops_time` entries. `time` is in HH:MM format and
@@ -323,8 +329,10 @@ Stop and time filters are applied before the limit; no matches return `[]`.
 deprecated in OpenAPI and will be removed in the next major release. Migrate to `/buses/schedule` and
 `/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
 `bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
-`day`, and `direction` parameters. `/buses/schedules` retains departure-time
-filtering, even with `stop`. The old stop endpoint retains its arrival-based
+`day`, and `direction` parameters. Both deprecated endpoints retain their response
+formats; `/buses/schedules` keeps unqualified `line` values (`red`, `green`,
+`route_1`, `route_2`) and departure-time filtering, even with `stop`.
+The old stop endpoint retains its arrival-based
 response and time filtering; the new endpoint uses the selected stop's estimated
 arrival time while retaining the schedule response format.
 

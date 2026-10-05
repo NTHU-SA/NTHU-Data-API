@@ -135,7 +135,7 @@ async def get_bus_schedules(
 
 @router.get(
     "/schedule",
-    response_model=list[schemas.BusDetailedSchedule | schemas.BusSchedule],
+    response_model=list[schemas.BusCanonicalDetailedSchedule | schemas.BusCanonicalSchedule],
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusSchedule",
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
