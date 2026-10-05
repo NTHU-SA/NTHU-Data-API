@@ -70,6 +70,20 @@ def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
             raise FetchFailure("payload_type")
         # JSON strict mode accepts enum/URL strings without coercing booleans or numbers.
         parsed = adapter.validate_json(json.dumps(raw), strict=True)
+        if endpoint == "/libraries/rss.json":
+            normalized = {}
+            for feed, items in raw.items():
+                normalized[feed] = []
+                for item, model in zip(items, parsed[feed], strict=True):
+                    result = dict(item)
+                    if model.image is not None:
+                        result["image"] = {
+                            **item["image"],
+                            "url": str(model.image.url) if model.image.url is not None else None,
+                            "link": str(model.image.link) if model.image.link is not None else None,
+                        }
+                    normalized[feed].append(result)
+            return normalized
         if endpoint in {"/libraries/calendars.json", "/calendars.json"}:
             ids = [calendar.id for calendar in parsed]
             if len(ids) != len(set(ids)) or (
@@ -78,5 +92,5 @@ def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
             ):
                 raise FetchFailure("validation")
             _validate_calendar_events(parsed)
-    # Preserve upstream fields and representation; response serialization stays unchanged.
+    # Other datasets preserve their upstream fields and representation.
     return raw

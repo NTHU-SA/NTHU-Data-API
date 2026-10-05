@@ -5,9 +5,10 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas.departments import Department
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.departments.services import departments_service
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 @router.get("", response_model=list[Department], operation_id="getDirectory")

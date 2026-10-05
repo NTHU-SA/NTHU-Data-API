@@ -1,14 +1,22 @@
 from enum import Enum
 from typing import Annotated, Optional
+from urllib.parse import urlsplit, urlunsplit
 
 from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
 
 from data_api.utils.schema import url_corrector
 
 
+def rss_image_url_corrector(value: object) -> object:
+    value = url_corrector(value)
+    if isinstance(value, str):
+        parts = urlsplit(value)
+        return urlunsplit(parts._replace(path=parts.path.replace(" ", "%20")))
+    return value
+
+
 class LibraryRssImage(BaseModel):
-    # url 使用 str 而非 HttpUrl，因為有些圖片的 url 並非合法的 url，例如: //www.lib.nthu.edu.tw/image/news/8/20230912.jpg
-    url: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
+    url: Optional[Annotated[HttpUrl, BeforeValidator(rss_image_url_corrector)]] = Field(
         None, description="圖片網址"
     )
     title: Optional[str] = Field(None, description="圖片標題")
@@ -21,9 +29,7 @@ class LibraryRssItem(BaseModel):
     guid: Optional[str] = Field(None, description="文章 id")
     category: Optional[str] = Field(None, description="文章分類")
     title: str = Field(..., description="文章標題")
-    link: Optional[Annotated[HttpUrl, BeforeValidator(url_corrector)]] = Field(
-        None, description="文章連結"
-    )
+    link: Optional[str] = Field(None, description="文章連結文字，可能包含多個網址")
     pubDate: Optional[str] = Field(None, description="文章發布日期")
     description: str = Field(..., description="文章內容")
     author: Optional[str] = Field(None, description="文章作者")

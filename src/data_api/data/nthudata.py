@@ -59,6 +59,7 @@ class Snapshot(Generic[T]):
 @dataclass
 class DatasetState(Generic[T]):
     prepare: Callable[[JsonData], T]
+    install_prepared_json: bool = False
     snapshot: Snapshot[T] | None = None
     last_checked_at: datetime | None = None
     last_refresh_attempt_at: datetime | None = None
@@ -131,6 +132,21 @@ class PublishedManifest(BaseModel):
     file_details: dict[str, list[ManifestEntry]]
 
 
+def parse_manifest(raw: JsonData) -> dict[str, ManifestEntry]:
+    try:
+        manifest = PublishedManifest.model_validate(raw)
+    except ValidationError as exc:
+        raise FetchFailure("manifest_parsing") from exc
+    entries = {}
+    for section, files in manifest.file_details.items():
+        for entry in files:
+            path = "/" + "/".join(part for part in (section.strip("/"), entry.name) if part)
+            if path in entries:
+                raise FetchFailure("manifest_parsing")
+            entries[path] = entry
+    return entries
+
+
 class FileDetailsManager:
     """Cache successful checks AND failures, without presenting old metadata as fresh."""
 
@@ -159,19 +175,7 @@ class FileDetailsManager:
                 return
             try:
                 raw = await self.fetcher.fetch_json(self.file_details_url)
-                try:
-                    manifest = PublishedManifest.model_validate(raw)
-                    entries = {}
-                    for section, files in manifest.file_details.items():
-                        for entry in files:
-                            path = "/" + "/".join(
-                                part for part in (section.strip("/"), entry.name) if part
-                            )
-                            if path in entries:
-                                raise FetchFailure("manifest_parsing")
-                            entries[path] = entry
-                except ValidationError as exc:
-                    raise FetchFailure("manifest_parsing") from exc
+                entries = parse_manifest(raw)
             except FetchFailure as exc:
                 category = (
                     "manifest_parsing"
@@ -262,7 +266,8 @@ class NTHUDataManager:
         if key not in self.states:
             from data_api.data.validation import validate_dataset
 
-            self.register(key, lambda raw: validate_dataset(key, raw))
+            state = self.register(key, lambda raw: validate_dataset(key, raw))
+            state.install_prepared_json = True
         return self.states[key]
 
     async def get_snapshot(self, endpoint: str, state: DatasetState[T]) -> Snapshot[T]:
@@ -355,7 +360,12 @@ class NTHUDataManager:
             f"{self.base_url}{endpoint}", entry.sha256 if entry else None
         )
         try:
-            return raw, state.prepare(raw)
+            candidate = state.prepare(raw)
+            if state.install_prepared_json:
+                if not isinstance(candidate, (dict, list)):
+                    raise FetchFailure("payload_type")
+                raw = candidate
+            return raw, candidate
         except ValidationError as exc:
             raise FetchFailure("validation") from exc
         except ValueError as exc:

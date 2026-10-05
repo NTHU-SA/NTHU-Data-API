@@ -5,9 +5,10 @@ from typing import Annotated, Union
 from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import departments as schemas
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.departments import services
 
-router = APIRouter(deprecated=True)
+router = APIRouter(deprecated=True, responses=SNAPSHOT_RESPONSES)
 
 
 @router.get(

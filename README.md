@@ -98,6 +98,51 @@ such as `feat: add a feature` or `fix: fix a bug`.
 Development workflow, architecture, compatibility rules, and CI maintenance
 details are in [Copilot instructions](.github/copilot-instructions.md).
 
+### Published data and deployment checks
+
+The default pytest suite is offline. **External Data Contracts** is a separate
+workflow, scheduled daily at 00:00 UTC and runnable from Actions with mode
+`published`, `smoke`, or `all`. These jobs report external publication/deployment
+failures separately from the ordinary **Test** workflow.
+
+Run the same checks locally with the locked runtime dependencies:
+
+```sh
+uv run --locked python -m data_api.checks.published --data-url https://data.nthusa.tw
+uv run --locked python -m data_api.checks.smoke --api-url https://api.nthusa.tw
+```
+
+The publisher check requires every configured dataset in the manifest, checks
+HTTP status, JSON content type, JSON structure and optional SHA-256, and validates
+complete candidates and course/bus transformations. It then exercises local REST
+serialization using only those downloaded bytes, with no live-integration calls.
+Missing checksums and versions remain compatible with legacy manifests.
+All four RSS feeds must be present; each may contain zero articles. No historical
+record count is required.
+
+The smoke check reads `/ping` and representative snapshot GETs, including all four
+RSS feeds, and verifies response schemas and timing/count headers. After deployment,
+dispatch mode `smoke` with the deployment's `api_url`; it is not a liveness probe
+or a guarantee about on-demand library/electricity services or every instance.
+
+Failures print the dataset/endpoint, `stage` and safe `reason`, then exit nonzero:
+`http`/`content-type`/`json` identify delivery failures; `checksum` identifies
+manifest/data inconsistency; `candidate`/`transformation`/`serialization` identify
+contract drift; `readiness`/`response-schema`/`headers` identify deployment defects.
+Fix the indicated publisher or deployment problem and rerun the matching command,
+or use **Re-run failed jobs** in Actions. There are no automatic HTTP retries.
+
+The offline suite also compares a structured OpenAPI baseline:
+
+```sh
+uv run --locked python -m data_api.checks.openapi
+```
+
+For an intentional, reviewed API change, regenerate with
+`uv run --locked python -m data_api.checks.openapi --write` and inspect the fixture
+diff. Do not regenerate to hide unexpected removed routes/parameters or changed
+operation IDs, defaults, schemas or headers. Documentation-only wording is ignored.
+
 ## Credits and license
 
 Maintained by NTHUSA 32nd. Licensed under the [MIT License](LICENSE).

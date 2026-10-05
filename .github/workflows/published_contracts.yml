@@ -1,0 +1,72 @@
+name: External Data Contracts
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Check published data, deployed API, or both
+        type: choice
+        options:
+          - all
+          - published
+          - smoke
+        default: all
+      data_url:
+        description: Published dataset base URL
+        type: string
+        default: https://data.nthusa.tw
+      api_url:
+        description: Deployed API base URL (use smoke after deployment)
+        type: string
+        default: https://api.nthusa.tw
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  published:
+    if: ${{ github.event_name == 'schedule' || inputs.mode != 'smoke' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install locked runtime dependencies
+        # Builds remain enabled for jieba and the local project.
+        run: uv sync --locked --no-dev
+      - name: Check published manifest, candidates and serialization
+        env:
+          DATA_URL: ${{ inputs.data_url || 'https://data.nthusa.tw' }}
+        run: uv run --no-sync --no-build python -m data_api.checks.published --data-url "$DATA_URL"
+
+  smoke:
+    if: ${{ github.event_name == 'schedule' || inputs.mode != 'published' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install locked runtime dependencies
+        run: uv sync --locked --no-dev
+      - name: Check deployed readiness and snapshot endpoints
+        env:
+          API_URL: ${{ inputs.api_url || 'https://api.nthusa.tw' }}
+        run: uv run --no-sync --no-build python -m data_api.checks.smoke --api-url "$API_URL"

@@ -7,9 +7,10 @@ Handles HTTP endpoints for announcements.
 from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import announcements as schemas
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.announcements import services
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 @router.get(

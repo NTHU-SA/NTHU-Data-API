@@ -13,12 +13,13 @@ from fastapi import APIRouter, Depends, Query, Response
 from data_api.api.errors import service_errors
 from data_api.api.schemas import buses as schemas
 from data_api.api.schemas.errors import ErrorResponse
+from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.buses import services
 
 # Constants
 DEFAULT_LIMIT_DAY_CURRENT = 5
 
-router = APIRouter()
+router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 async def add_custom_header(response: Response):
