@@ -13,6 +13,54 @@ from data_api.domain.announcements.services import announcements_service
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
 
+@pytest.fixture
+def announcement_sources(monkeypatch):
+    sources = [
+        {
+            "title": "Notice",
+            "link": "https://academic.site.nthu.edu.tw/p/403-1007-1504-1.php",
+            "department": "Academic",
+            "language": "en",
+            "articles": [
+                {
+                    "title": "Notice",
+                    "link": "https://example.com/article",
+                    "date": "2026-10-05",
+                }
+            ],
+        },
+        {
+            "title": "Notice",
+            "link": "http://academic.site.nthu.edu.tw/p/403-1007-1505-1.php",
+            "department": "Academic",
+            "language": "zh-tw",
+            "articles": [],
+        },
+        {
+            "title": "Notice",
+            "link": "https://student.site.nthu.edu.tw/",
+            "department": "Student",
+            "language": "en",
+            "articles": [
+                {
+                    "title": "Notice",
+                    "link": "https://academic.site.nthu.edu.tw/article",
+                    "date": "2026-10-05",
+                }
+            ],
+        },
+    ]
+    original = deepcopy(sources)
+
+    async def get_announcements(endpoint):
+        assert endpoint == "announcements.json"
+        return "test-commit", sources
+
+    monkeypatch.setattr(nthudata, "get", get_announcements)
+    yield sources
+    assert sources == original
+
+
 class TestAnnouncementsEndpoints:
     """Tests for announcements endpoints."""
 
@@ -38,6 +86,46 @@ class TestAnnouncementsEndpoints:
         params = {"department": department}
         response = await client.get("/announcements", params=params)
         assert response.status_code == 200
+
+    @pytest.mark.parametrize("path", ["/announcements", "/announcements/"])
+    @pytest.mark.parametrize("fuzzy", [False, True])
+    @pytest.mark.parametrize(
+        "url, indices",
+        [
+            ("academic.site.nthu.edu.tw", [0, 1]),
+            ("academic.site.nthu.edu.tw/p/403-1007-1504-1.php", [0]),
+            ("https://academic.site.nthu.edu.tw", [0, 1]),
+            ("http://academic.site.nthu.edu.tw", [0, 1]),
+            ("nonexistent.site.nthu.edu.tw", []),
+            ("academic.site.nthu.edu.tx", []),
+            ("", [0, 1, 2]),
+        ],
+    )
+    async def test_filter_by_source_url(
+        self, client: AsyncClient, announcement_sources, path, fuzzy, url, indices
+    ):
+        response = await client.get(path, params={"url": url, "fuzzy": fuzzy})
+        assert response.status_code == 200
+        expected = [announcement_sources[index] for index in indices]
+        assert response.json() == expected
+        assert response.headers["X-Data-Commit-Hash"] == "test-commit"
+
+    @pytest.mark.parametrize("fuzzy", [False, True])
+    async def test_url_combines_with_other_filters(
+        self, client: AsyncClient, announcement_sources, fuzzy
+    ):
+        response = await client.get(
+            "/announcements",
+            params={
+                "url": "academic.site.nthu.edu.tw",
+                "department": "Academic",
+                "title": "Notice",
+                "language": "en",
+                "fuzzy": fuzzy,
+            },
+        )
+        assert response.status_code == 200
+        assert response.json() == announcement_sources[:1]
 
     @pytest.mark.parametrize("department", [None, "教務處", "不存在的部門"])
     async def test_get_announcements_sources(self, client: AsyncClient, monkeypatch, department):
@@ -123,7 +211,13 @@ def test_announcements_openapi_contract():
     parameters = {
         parameter["name"]: parameter for parameter in paths["/announcements"]["get"]["parameters"]
     }
-    assert {"department", "title", "language", "fuzzy"} <= parameters.keys()
+    assert {"department", "title", "language", "fuzzy", "url"} <= parameters.keys()
+    assert parameters["url"]["required"] is False
+    assert parameters["url"]["schema"]["type"] == "string"
+    legacy_parameters = {
+        parameter["name"] for parameter in paths["/announcements/"]["get"]["parameters"]
+    }
+    assert "url" in legacy_parameters
     description = parameters["department"]["description"]
     assert "/announcements/sources" in description
     assert "/announcements/lists/departments" not in description

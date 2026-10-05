@@ -19,6 +19,12 @@ FUZZY_SEARCH_THRESHOLD = 80
 DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
 
 
+def _matches_source_url(link: str, url: str) -> bool:
+    normalized_link = link.removeprefix("https://").removeprefix("http://")
+    normalized_url = url.removeprefix("https://").removeprefix("http://")
+    return normalized_url in normalized_link
+
+
 class AnnouncementsService:
     """Service for fetching and filtering announcements."""
 
@@ -27,6 +33,7 @@ class AnnouncementsService:
         department: Optional[str] = None,
         title: Optional[str] = None,
         language: Optional[str] = None,
+        url: Optional[str] = None,
     ) -> tuple[Optional[str], list[dict]]:
         """
         Get announcements with optional filtering.
@@ -40,6 +47,12 @@ class AnnouncementsService:
 
         commit_hash, announcements_data = result
 
+        if url:
+            announcements_data = [
+                announcement
+                for announcement in announcements_data
+                if _matches_source_url(announcement["link"], url)
+            ]
         if department:
             announcements_data = [
                 announcement
@@ -85,6 +98,7 @@ class AnnouncementsService:
         department: Optional[str] = None,
         title: Optional[str] = None,
         language: Optional[str] = None,
+        url: Optional[str] = None,
     ) -> tuple[Optional[str], list[dict]]:
         """
         Fuzzy search within the nested structure.
@@ -101,6 +115,9 @@ class AnnouncementsService:
 
         # 2. 遍歷每一個處室/來源
         for source in raw_data:
+            if url and not _matches_source_url(source["link"], url):
+                continue
+
             # 如果使用者指定了語言，不符合的整包直接跳過
             if language and source.get("language") != language:
                 continue
