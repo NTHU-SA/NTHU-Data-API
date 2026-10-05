@@ -2,9 +2,14 @@
 
 import re
 from enum import Enum
-from typing import Self, Union
+from typing import Any, Self, Union
 
 from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
+
+from data_api.domain.courses.models import validate_condition_sequence
+
+COURSE_QUERY_MAX_DEPTH = 32
+COURSE_QUERY_MAX_NODES = 1024
 
 
 class CourseFieldName(str, Enum):
@@ -121,22 +126,40 @@ class CourseQueryOperation(str, Enum):
 
 
 class CourseQueryCondition(RootModel):
-    """Complex course query condition."""
+    """Complex course query condition.
+
+    Alternate conditions and 'and'/'or', evaluated left to right; empty arrays match all courses.
+    Maximum 32 array levels and 1024 nodes (arrays, condition objects and operators).
+    """
 
     root: list[Union[Union["CourseQueryCondition", CourseCondition], CourseQueryOperation]]
 
-    @field_validator("root")
-    def check_query(cls, v):
-        POST_ERROR_INFO = " Structure: [(nested) Condition, Operation, (nested) Condition]."
-        for i in range(len(v)):
-            if type(v[i]) is CourseQueryOperation:
-                if i == 0 or i == len(v) - 1:
-                    raise ValueError("First/last elements must be Condition." + POST_ERROR_INFO)
-                elif type(v[i - 1]) not in [CourseQueryCondition, CourseCondition]:
-                    raise TypeError("Before Operation must be Condition." + POST_ERROR_INFO)
-                elif type(v[i + 1]) not in [CourseQueryCondition, CourseCondition]:
-                    raise TypeError("After Operation must be Condition." + POST_ERROR_INFO)
-        return v
+    @field_validator("root", mode="before")
+    @classmethod
+    def check_query(cls, value: Any) -> Any:
+        """Bound and validate the whole tree before recursive model validation."""
+        if not isinstance(value, list):
+            return value
+        pending = [(value, 1)]
+        nodes = 0
+        while pending:
+            item, depth = pending.pop()
+            nodes += 1
+            if isinstance(item, CourseQueryCondition):
+                item = item.root
+            if not isinstance(item, list):
+                continue
+            if depth > COURSE_QUERY_MAX_DEPTH:
+                raise ValueError(
+                    f"Course queries cannot exceed {COURSE_QUERY_MAX_DEPTH} array levels."
+                )
+            if nodes + len(pending) + len(item) > COURSE_QUERY_MAX_NODES:
+                raise ValueError(f"Course queries cannot exceed {COURSE_QUERY_MAX_NODES} nodes.")
+            validate_condition_sequence(
+                item, operand_types=(list, dict, CourseCondition, CourseQueryCondition)
+            )
+            pending.extend((child, depth + 1) for child in item)
+        return value
 
 
 class CourseListName(str, Enum):

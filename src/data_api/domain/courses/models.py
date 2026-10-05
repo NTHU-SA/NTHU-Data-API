@@ -118,6 +118,22 @@ class Condition:
 ConditionType = Union[Condition, bool, dict, list]
 
 
+def validate_condition_sequence(
+    sequence: list[Any],
+    *,
+    operand_types: tuple[type, ...] = (Condition, bool, dict, list),
+) -> None:
+    """Validate alternating operands and operators without evaluating conditions."""
+    if sequence and len(sequence) % 2 == 0:
+        raise ValueError("Condition arrays must have an odd number of elements.")
+    for index, item in enumerate(sequence):
+        if index % 2 == 0:
+            if not isinstance(item, operand_types):
+                raise ValueError("Expected a condition object or nested array at even positions.")
+        elif not isinstance(item, str) or item not in ("and", "or"):
+            raise ValueError("Unknown operator; expected 'and' or 'or' at odd positions.")
+
+
 @dataclass
 class Conditions:
     """Complex condition tree for filtering courses."""
@@ -156,6 +172,7 @@ class Conditions:
         if not isinstance(data, list):
             return self._check_condition(data)
 
+        validate_condition_sequence(data)
         if len(data) < 3:
             if not data:
                 return True

@@ -185,8 +185,32 @@ class TestConditions:
             conds.accept(course)
 
     async def test_conditions_invalid_item_type_raises(self):
-        """Test that invalid condition item type raises TypeError."""
+        """Test that invalid operands raise a grammar validation error."""
         course = CourseData.from_dict({"科號": "MATH1001"})
         conds = Conditions(list_build_target=["invalid_string", "and", True])
-        with pytest.raises(TypeError, match="Cannot handle condition item"):
+        with pytest.raises(ValueError, match="Expected a condition"):
             conds.accept(course)
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            [{"row_field": "id", "matcher": "MATH1001"}] * 2,
+            [{"row_field": "id", "matcher": "MATH1001"}] * 3,
+            [{"row_field": "id", "matcher": "MATH1001"}, "and"],
+            [
+                {"row_field": "id", "matcher": "MATH1001"},
+                "and",
+                "or",
+                {"row_field": "id", "matcher": "MATH1001"},
+            ],
+            [
+                {"row_field": "id", "matcher": "MATH1001"},
+                "and",
+                [{"row_field": "id", "matcher": "MATH1001"}] * 2,
+            ],
+        ],
+    )
+    def test_conditions_reject_malformed_sequences(self, body):
+        course = CourseData.from_dict({"id": "MATH1001"})
+        with pytest.raises(ValueError):
+            Conditions(list_build_target=body).accept(course)

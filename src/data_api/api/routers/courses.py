@@ -11,6 +11,12 @@ from data_api.api.schemas.responses import COUNTED_SNAPSHOT_RESPONSES
 from data_api.domain.courses import models, services
 
 router = APIRouter(responses={**COUNTED_SNAPSHOT_RESPONSES, **VALIDATION_ERROR_RESPONSES})
+COURSE_QUERY_ERROR_RESPONSES = {
+    422: {
+        **VALIDATION_ERROR_RESPONSES[422],
+        "description": "Invalid condition grammar, query limits or regular expression",
+    }
+}
 
 
 async def add_custom_header(response: Response):
@@ -133,6 +139,7 @@ async def search_courses_by_field_and_value(
     response_model=list[schemas.CourseData],
     dependencies=[Depends(add_custom_header)],
     operation_id="queryCourses",
+    responses=COURSE_QUERY_ERROR_RESPONSES,
 )
 @router.post(
     "/search",
@@ -141,6 +148,7 @@ async def search_courses_by_field_and_value(
     operation_id="searchCoursesByCondition",
     deprecated=True,
     description="已棄用，請改用 POST /courses/query。支援相同的單一與巢狀 AND/OR 條件。",
+    responses=COURSE_QUERY_ERROR_RESPONSES,
 )
 async def search_courses_by_condition(
     response: Response,
@@ -170,6 +178,8 @@ async def search_courses_by_condition(
 ):
     """
     進階搜尋，根據條件取得課程。可以使用巢狀條件。
+    非空陣列必須依條件、and/or 運算子、條件交替排列，並由左至右計算；空陣列符合全部課程。
+    最多 32 層陣列及 1024 個節點（陣列、條件物件、運算子）；無效文法或超過上限回傳 HTTP 422。
     regex_match 啟用時使用正則表達式，格式無效時回傳 HTTP 422；否則使用完全符合。
     """
     if type(query_condition) is schemas.CourseCondition:
