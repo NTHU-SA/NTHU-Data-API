@@ -56,15 +56,16 @@ async def test_metadata_matches_application_configuration(monkeypatch):
     assert metadata["version"] == openapi.json()["info"]["version"]
 
 
-def test_metadata_openapi_schema():
-    schema = app.openapi()
-    operation = schema["paths"]["/"]["get"]
-    assert operation["operationId"] == "getApiMetadata"
-    assert operation["responses"]["200"]["content"]["application/json"]["schema"] == {
-        "$ref": "#/components/schemas/MetaResponse"
-    }
-    metadata_schema = schema["components"]["schemas"]["MetaResponse"]
-    fields = {"name", "version", "docs", "openapi", "mcp"}
-    assert set(metadata_schema["required"]) == fields
-    assert set(metadata_schema["properties"]) == fields
-    assert all(field["type"] == "string" for field in metadata_schema["properties"].values())
+async def test_metadata_hidden_from_openapi_and_swagger():
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        schema = await client.get("/openapi.json")
+        assert schema.status_code == 200
+        assert "/" not in schema.json()["paths"]
+        assert "/courses/" in schema.json()["paths"]
+        assert "MetaResponse" not in schema.json()["components"]["schemas"]
+        docs = await client.get("/docs")
+        assert docs.status_code == 200
+        assert "/openapi.json" in docs.text
+        assert (await client.get("/")).status_code == 200

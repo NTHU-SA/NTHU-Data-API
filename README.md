@@ -78,7 +78,7 @@ upstream requests. The name and version match the FastAPI application metadata.
 }
 ```
 
-The endpoint is documented in OpenAPI. Use `/ping` for dataset readiness checks;
+The endpoint is hidden from OpenAPI and Swagger UI. Use `/ping` for dataset readiness checks;
 the metadata endpoint does not indicate dataset readiness.
 
 ## Contributing
