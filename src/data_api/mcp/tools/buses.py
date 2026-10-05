@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
-from data_api.api.schemas.buses import BusDetailedSchedule, BusSchedule
+from data_api.api.schemas.buses import BusCanonicalDetailedSchedule, BusCanonicalSchedule
 from data_api.domain.buses import services as buses_services
 from data_api.domain.buses.enums import BusDayWithCurrent, BusStopsName
 from data_api.mcp.server import mcp
@@ -37,7 +37,7 @@ async def _get_bus_schedule(
         after_time=after_time,
         limit=limit,
     )
-    schedule_model = BusDetailedSchedule if details else BusSchedule
+    schedule_model = BusCanonicalDetailedSchedule if details else BusCanonicalSchedule
     result = {
         "current_time": current_time,
         "day_type": find_day,
@@ -65,6 +65,7 @@ async def _get_bus_schedule(
     "All time filtering uses departure time, not arrival time at the selected stop. "
     "Use details=true for departure information and arrival times at all stops; "
     "details=false returns simple departure schedules. "
+    "Line identifiers are main_red, main_green, nanda_route_1, and nanda_route_2. "
     "day=current uses the current day and time and ignores time. "
     "For a selected stop, stop_info includes its location. "
     "If going TO Nanda Campus, query direction=up; TO Main Campus, direction=down. "

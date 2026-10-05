@@ -1,5 +1,7 @@
 """Tests for bus graph module."""
 
+import pytest
+
 from data_api.domain.buses import graph, models
 
 
@@ -145,6 +147,32 @@ class TestRouteResolver:
         """Test get_nanda_line handles None description."""
         line = graph.RouteResolver.get_nanda_line(None)
         assert line == "route_1"
+
+
+@pytest.mark.parametrize(
+    "line,description,expected",
+    [
+        ("route1", "路線二", "route_1"),
+        ("route2", "", "route_2"),
+        ("route_1", "教育學院", "route_1"),
+        ("route_2", "", "route_2"),
+        ("nanda_route_1", "路線二", "route_1"),
+        ("nanda_route_2", "", "route_2"),
+        ("", "路線二", "route_2"),
+        ("", "", "route_1"),
+    ],
+)
+@pytest.mark.parametrize("direction", ["up", "down"])
+def test_published_nanda_line_selects_matching_graph(line, description, expected, direction):
+    assert graph.RouteResolver.get_nanda_line(description, line) == expected
+    route = graph.RouteResolver.resolve_nanda_route(direction, description, line)
+    assert ("M7" in [stop.id for stop in route.stops]) == (expected == "route_2")
+    assert route.stops[0].id == ("M1" if direction == "up" else "S1")
+
+
+def test_unknown_published_nanda_line_is_rejected():
+    with pytest.raises(ValueError, match="Invalid Nanda bus line"):
+        graph.RouteResolver.get_nanda_line("", "route3")
 
 
 class TestModels:

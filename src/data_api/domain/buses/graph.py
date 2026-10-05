@@ -122,13 +122,14 @@ class RouteResolver:
         return None
 
     @staticmethod
-    def resolve_nanda_route(direction: Literal["up", "down"], description: str) -> models.Route:
+    def resolve_nanda_route(
+        direction: Literal["up", "down"], description: str, line: str = ""
+    ) -> models.Route:
         """
-        Resolves Nanda routes based on description logic.
+        Resolves Nanda routes using the published line, with a legacy description fallback.
         direction: 'up' (Main -> Nanda) or 'down' (Nanda -> Main)
         """
-        description = description or ""
-        is_route_2 = "路線二" in description or "教育學院" in description
+        is_route_2 = RouteResolver.get_nanda_line(description, line) == "route_2"
 
         if direction == "down":
             # Going back to Main Campus
@@ -138,16 +139,18 @@ class RouteResolver:
             return nanda_M1_S1_r2 if is_route_2 else nanda_M1_S1_r1
 
     @staticmethod
-    def get_nanda_line(description: str) -> str:
+    def get_nanda_line(description: str, line: str = "") -> str:
         """
-        Determines the Nanda route line from the description.
+        Determines the Nanda route line from publisher data.
 
         Route detection logic:
-        - Route 2: If description contains "路線二" or "教育學院"
-        - Route 1: All other cases (default)
+        - A supplied line takes precedence over description.
+        - Missing lines use "路線二" or "教育學院" to detect route 2.
+        - Other legacy descriptions default to route 1.
 
         Args:
             description: Bus schedule description text
+            line: Published route1/route2 or normalized route identifier
 
         Returns:
             'route_1' or 'route_2'
@@ -158,6 +161,18 @@ class RouteResolver:
             >>> get_nanda_line("一般路線")
             'route_1'
         """
+        if line:
+            lines = {
+                "route1": "route_1",
+                "route2": "route_2",
+                "route_1": "route_1",
+                "route_2": "route_2",
+                "nanda_route_1": "route_1",
+                "nanda_route_2": "route_2",
+            }
+            if line not in lines:
+                raise ValueError("Invalid Nanda bus line")
+            return lines[line]
         description = description or ""
         is_route_2 = "路線二" in description or "教育學院" in description
         return "route_2" if is_route_2 else "route_1"

@@ -8,7 +8,7 @@ Enums are imported from domain layer to avoid duplication.
 from typing import Optional
 
 from fastapi import Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from data_api.domain.buses.enums import (
     BusDay,
@@ -33,6 +33,8 @@ __all__ = [
     "BusStopsQueryResult",
     "BusArriveTime",
     "BusDetailedSchedule",
+    "BusCanonicalSchedule",
+    "BusCanonicalDetailedSchedule",
     "BusMainData",
     "BusNandaData",
 ]
@@ -105,6 +107,28 @@ class BusDetailedSchedule(BaseModel):
 
     dep_info: BusSchedule = Field(..., description="發車資訊")
     stops_time: list[BusArriveTime] = Field(..., description="各站發車時間")
+
+
+class BusCanonicalSchedule(BusSchedule):
+    """Schedule with campus-qualified line identifiers for the current API."""
+
+    line: str = Field("", description="路線 (main_red/main_green/nanda_route_1/nanda_route_2)")
+
+    @field_validator("line")
+    @classmethod
+    def qualify_line(cls, line: str) -> str:
+        return {
+            "red": "main_red",
+            "green": "main_green",
+            "route_1": "nanda_route_1",
+            "route_2": "nanda_route_2",
+        }.get(line, line)
+
+
+class BusCanonicalDetailedSchedule(BusDetailedSchedule):
+    """Detailed schedule with campus-qualified departure line identifiers."""
+
+    dep_info: BusCanonicalSchedule = Field(..., description="發車資訊")
 
 
 class BusMainData(BaseModel):
