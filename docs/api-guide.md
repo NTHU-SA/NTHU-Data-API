@@ -107,7 +107,7 @@ retains its existing all-courses behavior.
 The documentation groups these endpoints under `Directory`.
 Use `GET /directory` to retrieve the directory, or `GET /directory?query=...`
 to fuzzy-match department names, people names, or titles. An omitted or empty
-`query` returns the entire directory; no matches returns an empty array.
+`query` returns the entire directory; no matches return an empty array.
 The response is always a list of the existing `Department` model. A department
 name match returns that department in full. When only its people match, the
 department metadata is retained and `details.people` contains only matching
