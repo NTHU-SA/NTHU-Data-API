@@ -146,10 +146,17 @@ GET /announcements/sources
 GET /announcements?department=教務處
 GET /announcements?title=停電
 GET /announcements?language=zh-tw
+GET /announcements?url=academic.site.nthu.edu.tw
+GET /announcements?url=academic.site.nthu.edu.tw/p/403-1007-1504-1.php
 ```
 
-Announcement filters and the optional `department` filter on `/announcements/sources`
-are unchanged.
+The optional `url` query parameter filters announcement sources by a substring of
+their `link`, ignoring `http://` and `https://` in both the query and source link.
+HTTP(S) schemes and hostnames match case-insensitively; paths, queries, and
+fragments remain case-sensitive. It accepts a domain or a URL with a path,
+combines with the other filters, and does not use fuzzy matching regardless of
+the `fuzzy` setting. It does not filter individual article links. Existing filters
+and the optional `department` filter on `/announcements/sources` are unchanged.
 
 ## Live library and energy endpoints
 
