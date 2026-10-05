@@ -207,6 +207,20 @@ For nested AND/OR queries, send a condition object or a condition array to
 substring or regular-expression matching. Responses remain arrays of courses,
 with `X-Total-Count` and `X-Data-Commit-Hash` headers.
 
+A condition object may also be wrapped in a single-element array. Every non-empty
+array, including nested arrays, must have an odd number of elements alternating
+between conditions (objects or arrays) and the lowercase operators `"and"` or
+`"or"`. Operators are evaluated left to right with no implicit AND precedence;
+use nested arrays to group expressions. An empty array `[]` matches all courses,
+including when used as a nested operand.
+
+Queries allow at most **32 array levels** (the outermost array is level 1) and
+**1,024 nodes** across the whole tree. Each array, condition object and operator
+counts as one node; fields inside condition objects do not count separately.
+Malformed grammar, exceeded limits and invalid regex syntax return HTTP 422,
+even when the course dataset is empty. These rules also apply to the deprecated
+`POST /courses/search` alias.
+
 The old endpoints remain available but are marked **deprecated** in OpenAPI:
 
 | Deprecated endpoint | Replacement |
