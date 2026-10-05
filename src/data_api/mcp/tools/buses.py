@@ -20,7 +20,7 @@ async def _get_bus_schedule(
     time: str | None = None,
     details: bool = True,
 ) -> dict:
-    """Query schedules using the same stop and departure-time filters as REST."""
+    """Query schedules using the same stop and time filters as REST."""
     await buses_services.buses_service.update_data()
 
     current = datetime.now()
@@ -62,7 +62,8 @@ async def _get_bus_schedule(
     title="查詢公車時刻表",
     description="Get campus bus schedules, optionally filtered to buses serving a specific stop. "
     "Replaces get_next_buses and get_bus_stops. "
-    "All time filtering uses departure time, not arrival time at the selected stop. "
+    "With stop, time filtering uses estimated arrival time at that stop, including buses "
+    "that have departed but have not arrived yet. Without stop, it uses departure time. "
     "Use details=true for departure information and arrival times at all stops; "
     "details=false returns simple departure schedules. "
     "day=current uses the current day and time and ignores time. "
@@ -81,7 +82,8 @@ async def get_bus_schedule(
         Annotated[
             str,
             Field(
-                pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$", description="Departure time in HH:MM"
+                pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                description="Time in HH:MM: arrival at the selected stop, otherwise departure",
             ),
         ]
         | None

@@ -568,8 +568,23 @@ class BusesService:
         stop: enums.BusStopsName | None = None,
         after_time: str = "",
         limit: int | None = 5,
+        use_stop_arrival_time: bool = True,
     ) -> list[dict]:
-        """Filter by stop and departure time before applying the result limit."""
+        """Filter by the selected stop's arrival time, or departure time without a stop."""
+        if stop is not None and use_stop_arrival_time:
+            schedules = self.get_schedule(
+                route_type=route_type, day=day, direction=direction, detailed=True, stop=stop
+            )
+            arrivals = [
+                {"schedule": entry, "arrive_time": arrival["arrive_time"]}
+                for entry in schedules
+                for arrival in entry["stops_time"]
+                if arrival["stop"] == stop.value
+            ]
+            matching = after_specific_time(arrivals, after_time, ["arrive_time"])[:limit]
+            return [
+                item["schedule"] if detailed else item["schedule"]["dep_info"] for item in matching
+            ]
         schedules = self.get_schedule(
             route_type=route_type, day=day, direction=direction, detailed=detailed, stop=stop
         )
