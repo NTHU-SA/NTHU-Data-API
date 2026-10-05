@@ -25,6 +25,10 @@ VALIDATION_ERROR_RESPONSES = {
     422: {
         "model": ValidationErrorResponse,
         "description": "Invalid request parameter, body, or regular expression",
+        # FastAPI can omit the model-derived content on some platforms.
+        "content": {
+            "application/json": {"schema": {"$ref": "#/components/schemas/ValidationErrorResponse"}}
+        },
     },
 }
 

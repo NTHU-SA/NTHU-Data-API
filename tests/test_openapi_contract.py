@@ -91,6 +91,15 @@ def test_manual_errors_and_course_validation_have_body_schemas():
         {"type": "string"},
         {"type": "null"},
     ]
+    for path, method in [
+        ("/courses", "get"),
+        ("/courses/search", "get"),
+        ("/courses/query", "post"),
+        ("/courses/search", "post"),
+    ]:
+        assert schema["paths"][path][method]["responses"]["422"]["content"]["application/json"][
+            "schema"
+        ] == {"$ref": "#/components/schemas/ValidationErrorResponse"}
 
 
 def assert_error_matches_schema(response, schema_path, status, method="get"):

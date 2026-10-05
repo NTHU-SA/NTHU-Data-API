@@ -7,6 +7,7 @@ from typing import Any
 
 HTTP_METHODS = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
 DOCUMENTATION_KEYS = {"title", "description", "summary", "examples", "example", "externalDocs"}
+BASELINE = Path("tests") / "fixtures" / "openapi_contract.json"
 
 
 def contract_projection(schema: dict[str, Any]) -> dict[str, Any]:
@@ -67,21 +68,18 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--baseline", type=Path, default=Path("tests") / "fixtures" / "openapi_contract.json"
-    )
-    parser.add_argument(
         "--write", action="store_true", help="Regenerate only for reviewed API changes"
     )
     args = parser.parse_args()
     actual = contract_projection(app.openapi())
     if args.write:
-        args.baseline.write_text(
+        BASELINE.write_text(
             json.dumps(actual, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-        print(f"Wrote {args.baseline}")
+        print(f"Wrote {BASELINE}")
         return 0
-    expected = json.loads(args.baseline.read_text(encoding="utf-8"))
+    expected = json.loads(BASELINE.read_text(encoding="utf-8"))
     changes = contract_differences(expected, actual)
     for change in changes:
         print(change)
