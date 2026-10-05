@@ -155,7 +155,7 @@ def create_app() -> FastAPI:
         response.headers["X-Process-Time"] = str(process_time)
         return response
 
-    @app.get("/", response_model=MetaResponse, operation_id="getApiMetadata", tags=["Metadata"])
+    @app.get("/", response_model=MetaResponse, include_in_schema=False)
     async def metadata() -> MetaResponse:
         """Discover the API name, version, documentation, and MCP endpoint."""
         return MetaResponse(
