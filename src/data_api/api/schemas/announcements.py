@@ -22,13 +22,18 @@ class AnnouncementArticle(BaseModel):
     date: Optional[str] = Field(None, description="公告日期 (YYYY-MM-DD)")
 
 
-class AnnouncementDetail(BaseModel):
-    """Announcement detail with articles list."""
+class AnnouncementSource(BaseModel):
+    """Announcement source metadata without articles."""
 
     title: str = Field(..., description="佈告欄標題")
     link: Annotated[HttpUrl, BeforeValidator(url_corrector)] = Field(..., description="佈告欄連結")
     language: str = Field(..., description="佈告欄語言")
     department: str = Field(..., description="發布部門")
+
+
+class AnnouncementDetail(AnnouncementSource):
+    """Announcement detail with articles list."""
+
     articles: list[AnnouncementArticle] = Field(..., description="公告列表")
 
 

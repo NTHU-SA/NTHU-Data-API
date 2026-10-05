@@ -39,12 +39,22 @@ class TestAnnouncementsEndpoints:
         response = await client.get("/announcements", params=params)
         assert response.status_code == 200
 
-    @pytest.mark.parametrize("department", [None, "教務處"])
+    @pytest.mark.parametrize("department", [None, "教務處", "不存在的部門"])
     async def test_get_announcements_sources(self, client: AsyncClient, monkeypatch, department):
         """Test getting announcement sources."""
         sources = [
-            {"department": "教務處", "language": "zh-tw"},
-            {"department": "學生事務處", "language": "zh-tw"},
+            {
+                "title": "教務處公告",
+                "link": "https://example.com/academic",
+                "department": "教務處",
+                "language": "zh-tw",
+            },
+            {
+                "title": "學生事務處公告",
+                "link": "https://example.com/student",
+                "department": "學生事務處",
+                "language": "zh-tw",
+            },
         ]
 
         async def get_sources(endpoint):
@@ -55,7 +65,10 @@ class TestAnnouncementsEndpoints:
         params = {"department": department} if department else {}
         response = await client.get("/announcements/sources", params=params)
         assert response.status_code == 200
-        assert response.json() == (sources[:1] if department else sources)
+        expected = [
+            source for source in sources if not department or source["department"] == department
+        ]
+        assert response.json() == expected
         assert response.headers["X-Data-Commit-Hash"] == "test-commit"
 
     @pytest.mark.parametrize(
@@ -89,7 +102,8 @@ class TestAnnouncementsEndpoints:
 
 
 def test_announcements_openapi_contract():
-    paths = app.openapi()["paths"]
+    schema = app.openapi()
+    paths = schema["paths"]
     announcement_paths = {path for path in paths if path.startswith("/announcements")}
     assert announcement_paths == {
         "/announcements",
@@ -113,6 +127,17 @@ def test_announcements_openapi_contract():
     description = parameters["department"]["description"]
     assert "/announcements/sources" in description
     assert "/announcements/lists/departments" not in description
+    response_schema = paths["/announcements/sources"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+    assert response_schema["type"] == "array"
+    assert response_schema["items"] == {"$ref": "#/components/schemas/AnnouncementSource"}
+    source_schema = schema["components"]["schemas"]["AnnouncementSource"]
+    fields = {"title", "link", "language", "department"}
+    assert set(source_schema["required"]) == fields
+    assert set(source_schema["properties"]) == fields
+    assert all(field["type"] == "string" for field in source_schema["properties"].values())
+    assert source_schema["properties"]["link"]["format"] == "uri"
 
 
 @pytest.mark.parametrize("selected", list(product([False, True], repeat=3)))
