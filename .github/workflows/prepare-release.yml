@@ -41,7 +41,7 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
           uv sync --locked --all-groups
-          uv run --no-sync python -m data_api.checks.release --next-version "$RELEASE_VERSION"
+          uv run --no-sync --no-build python -m data_api.checks.release --next-version "$RELEASE_VERSION"
           if git ls-remote --exit-code --tags origin "refs/tags/v$RELEASE_VERSION"; then
             echo "Release tag already exists" >&2
             exit 1
@@ -53,15 +53,16 @@ jobs:
         env:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
-          uv version "$RELEASE_VERSION"
+          uv version --no-sync "$RELEASE_VERSION"
           uv lock --check
+          uv sync --locked --all-groups
       - name: Validate prepared source
         run: |
-          uv run --locked pre-commit run --all-files
-          uv run --locked --group test pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85
-          uv run --locked python -m data_api.checks.openapi
-          uv run --locked python -m data_api.checks.mcp
-          uv run --locked python -m data_api.checks.release
+          uv run --no-sync --no-build pre-commit run --all-files
+          uv run --no-sync --no-build pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85
+          uv run --no-sync --no-build python -m data_api.checks.openapi
+          uv run --no-sync --no-build python -m data_api.checks.mcp
+          uv run --no-sync --no-build python -m data_api.checks.release
       - name: Fill repository PR template
         env:
           RELEASE_VERSION: ${{ inputs.version }}
@@ -76,11 +77,11 @@ jobs:
               "N/A",
               f"Prepare {os.environ['RELEASE_VERSION']}; update pyproject.toml and uv.lock.",
               "See docs/releasing.md for tag-only Cloud Build deployment.",
-              "Passed: uv run --locked pre-commit run --all-files; "
-              "uv run --locked --group test pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85; "
-              "uv run --locked python -m data_api.checks.openapi; "
-              "uv run --locked python -m data_api.checks.mcp; "
-              "uv run --locked python -m data_api.checks.release. "
+              "Passed: uv run --no-sync --no-build pre-commit run --all-files; "
+              "uv run --no-sync --no-build pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85; "
+              "uv run --no-sync --no-build python -m data_api.checks.openapi; "
+              "uv run --no-sync --no-build python -m data_api.checks.mcp; "
+              "uv run --no-sync --no-build python -m data_api.checks.release. "
               "This PR does not create a tag or deploy. Checks run here because GITHUB_TOKEN-created PRs do not trigger PR workflows.",
           ]
           for note in notes:
