@@ -2,6 +2,11 @@
 
 [Back to README](../README.md)
 
+This guide is for REST and MCP consumers. Start with discovery and shared query
+conventions, then use the resource sections for examples. Existing clients should
+read the 3.0 migration section before upgrading. For local setup and validation,
+see the [development guide](development.md).
+
 The examples below use paths relative to `https://api.nthusa.tw` (local:
 `http://localhost:5000`). See [Swagger UI](https://api.nthusa.tw/docs) for
 complete request and response schemas.
@@ -13,7 +18,7 @@ complete request and response schemas.
 - [Query conventions](#query-conventions)
 - [Directory](#directory-queries)
 - [Announcements](#announcement-queries)
-- [Library and energy](#live-library-and-energy-endpoints)
+- [Library and energy](#library-and-energy)
 - [Courses](#course-queries)
 - [Newsletters](#newsletter-queries)
 - [Locations](#location-queries)
@@ -204,7 +209,9 @@ combines with the other filters, and does not use fuzzy matching regardless of
 the `fuzzy` setting. It does not filter individual article links. Existing filters
 and the optional `department` filter on `/announcements/sources` are unchanged.
 
-## Live library and energy endpoints
+## Library and energy
+
+### Live library and energy endpoints
 
 Use `GET /libraries/spaces` for the library space availability collection
 (`list[LibrarySpace]`), `GET /libraries/lost-and-found` for library lost items, and
@@ -627,6 +634,7 @@ Valid empty space lists and lost-item results still succeed. Lost-item pages mus
 contain exactly the expected table columns (in any order, without duplicates) or
 the library's explicit empty-result message on its lost-and-found page. Unexpected
 columns, missing tables, and malformed rows are upstream errors.
+
 ### Readiness endpoint
 
 `GET /ping` reports the current process's cached dataset health. It is excluded

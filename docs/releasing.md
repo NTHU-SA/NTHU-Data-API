@@ -2,11 +2,22 @@
 
 [Back to README](../README.md)
 
+For local setup, tests and external data checks, see the
+[development guide](development.md). For consumer-facing changes, see the
+[API guide](api-guide.md#version-policy-and-30-migration).
+
 The API maintains one live version. GitHub Actions checks pull requests and main.
 `cloudbuild.yaml` validates release tags, builds and publishes container images,
 then updates the existing Cloud Run service using the supplied GCP configuration.
 Trigger filters are managed in GCP. Preparing a version, merging a PR, publishing
 an image, creating a GitHub Release, and deploying are separate operations.
+
+## Contents
+
+- [Version source and compatibility](#version-source-and-compatibility)
+- [Prepare a version](#prepare-a-version)
+- [Configure the Cloud Build trigger in GCP](#configure-the-cloud-build-trigger-in-gcp)
+- [Publish the initial 3.0.0](#publish-the-initial-300)
 
 ## Version source and compatibility
 
