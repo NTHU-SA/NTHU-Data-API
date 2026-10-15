@@ -1,6 +1,6 @@
 """Internal payload shapes for MCP tool helpers (not public tool schemas)."""
 
-from typing import Literal, NotRequired, TypedDict
+from typing import NotRequired, TypedDict
 
 
 class LocationResult(TypedDict):
@@ -114,18 +114,6 @@ class DiningBuildingResult(TypedDict):
 
 class DiningBuildingsResult(TypedDict):
     buildings: list[DiningBuildingResult]
-
-
-class OpenRestaurantResult(TypedDict):
-    name: str | None
-    area: str | None
-    phone: str | None
-    schedule: dict[str, object] | None
-
-
-class OpenDiningResult(TypedDict):
-    schedule: Literal["today", "weekday", "saturday", "sunday"]
-    open_restaurants: list[OpenRestaurantResult]
 
 
 class LibrarySpaceResult(TypedDict):

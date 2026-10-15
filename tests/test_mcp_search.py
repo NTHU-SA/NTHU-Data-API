@@ -175,11 +175,8 @@ async def test_dining_filters_all_contribute(dining_candidates, selected, schedu
         arguments["check_open"] = schedule
 
     result = await _find_dining(**arguments)
-    if check_open:
-        assert result["schedule"] == schedule
-        restaurants = result["open_restaurants"]
-    else:
-        restaurants = [r for b in result["buildings"] for r in b["restaurants"]]
+    assert set(result) == {"buildings"}
+    restaurants = [r for b in result["buildings"] for r in b["restaurants"]]
 
     expected_names = [
         r["name"]
@@ -211,10 +208,116 @@ async def test_dining_filters_before_limiting(monkeypatch):
 
     monkeypatch.setattr(nthudata, "get", fake_get)
     result = await _find_dining(building="水木", restaurant_name="Sushi", check_open="today")
-    assert [r["name"] for r in result["open_restaurants"]] == ["Sushi match"]
+    assert [b["building"] for b in result["buildings"]] == ["水木生活中心"]
+    assert [r["name"] for r in result["buildings"][0]["restaurants"]] == ["Sushi match"]
 
 
 @pytest.mark.parametrize("arguments", [{"building": "ZZZZZZ"}, {"restaurant_name": "ZZZZZZ"}])
 async def test_dining_impossible_filter_with_open_status(dining_candidates, arguments):
     result = await _find_dining(**arguments, check_open="today")
-    assert result == {"schedule": "today", "open_restaurants": []}
+    assert result == {"buildings": []}
+
+
+@pytest.mark.parametrize("check_open", [None, "today", "weekday", "saturday", "sunday"])
+@pytest.mark.parametrize(
+    ("building", "expected_buildings"),
+    [
+        (None, ["小吃部", "水木生活中心", "水木餐廳"]),
+        ("", ["小吃部", "水木生活中心", "水木餐廳"]),
+        ("小吃部", ["小吃部"]),
+        ("水木", ["水木生活中心", "水木餐廳"]),
+        ("水木生活中心", ["水木生活中心", "水木餐廳"]),
+    ],
+)
+async def test_dining_grouped_limits_over_protocol(
+    monkeypatch, dining_candidates, check_open, building, expected_buildings
+):
+    data = [
+        {
+            "building": name,
+            "restaurants": (
+                [{"name": "Pizza", "note": ""} for _ in range(12)]
+                + [
+                    {"name": "Sushi closed", "note": "平日休息、週六休息、週日休息"}
+                    for _ in range(12)
+                ]
+                + [
+                    {
+                        "name": f"Sushi-{index}",
+                        "phone": None,
+                        "schedule": {"weekday": "09:00-17:00"},
+                        "note": "",
+                    }
+                    for index in range(count)
+                ]
+            ),
+        }
+        for name, count in [("小吃部", 11), ("水木生活中心", 23), ("水木餐廳", 35)]
+    ]
+    data.append({"building": "Empty", "restaurants": []})
+    original = deepcopy(data)
+    calls = []
+
+    async def fake_get(endpoint):
+        assert endpoint == "dining.json"
+        calls.append(endpoint)
+        return "testhash", data
+
+    monkeypatch.setattr(nthudata, "get", fake_get)
+    async with Client(mcp) as client:
+        response = await client.call_tool(
+            "find_dining",
+            {"building": building, "restaurant_name": "Sushi", "check_open": check_open},
+        )
+    assert not response.is_error
+    assert set(response.data) == {"buildings"}
+    expected = []
+    for b in data:
+        if b["building"] not in expected_buildings:
+            continue
+        restaurants = [
+            r
+            for r in b["restaurants"]
+            if r["name"].startswith("Sushi") and (not check_open or not r["note"])
+        ]
+        if not building:
+            restaurants = restaurants[:10]
+        expected.append(
+            {
+                "building": b["building"],
+                "restaurants": [
+                    {
+                        "name": r["name"],
+                        "phone": r.get("phone"),
+                        "schedule": r.get("schedule"),
+                        "note": r["note"] or None,
+                    }
+                    for r in restaurants
+                ],
+            }
+        )
+    assert response.data == {"buildings": expected}
+    assert data == original
+    assert calls == ["dining.json"]
+
+
+@pytest.mark.parametrize("check_open", [None, "today", "weekday", "saturday", "sunday"])
+async def test_dining_omits_empty_buildings(monkeypatch, dining_candidates, check_open):
+    async def fake_get(endpoint):
+        assert endpoint == "dining.json"
+        return "testhash", [
+            {"building": "Empty", "restaurants": []},
+            {
+                "building": "Closed",
+                "restaurants": [{"name": "Cafe", "note": "平日休息、週六休息、週日休息"}],
+            },
+        ]
+
+    monkeypatch.setattr(nthudata, "get", fake_get)
+    async with Client(mcp) as client:
+        response = await client.call_tool("find_dining", {"check_open": check_open})
+    assert not response.is_error
+    if check_open:
+        assert response.data == {"buildings": []}
+    else:
+        assert [b["building"] for b in response.data["buildings"]] == ["Closed"]
