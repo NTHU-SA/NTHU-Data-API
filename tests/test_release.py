@@ -65,6 +65,78 @@ def test_new_required_parameter_is_breaking():
     assert release.breaking_changes({}, {"query:limit": {"required": True}}, "contract.parameters")
 
 
+@pytest.mark.parametrize("name", ["deprecated", "type"])
+@pytest.mark.parametrize("container", ["properties", "$defs", "definitions", "schemas"])
+def test_schema_names_are_not_keywords(name, container):
+    old = {container: {name: {"type": "string"}}}
+    new = {container: {name: {"type": "integer"}}}
+    assert release.breaking_changes(old, new) == [f"contract.{container}.{name}.type: changed"]
+    assert release.breaking_changes(old, {container: {}}) == [
+        f"contract.{container}.{name}: removed"
+    ]
+
+
+def test_optional_type_named_argument_is_not_a_constraint():
+    old = {"get_bus_schedule": {"input": {"properties": {}}}}
+    new = {
+        "get_bus_schedule": {
+            "input": {"properties": {"type": {"type": "string"}, "required": {"type": "string"}}}
+        }
+    }
+    assert not release.breaking_changes(old, new, "mcp_contract.json")
+    assert release.breaking_changes(new, old, "mcp_contract.json") == [
+        "mcp_contract.json.get_bus_schedule.input.properties.required: removed",
+        "mcp_contract.json.get_bus_schedule.input.properties.type: removed",
+    ]
+
+
+def test_tool_and_parameter_names_are_not_schema_keywords():
+    assert not release.breaking_changes({}, {"type": {"input": {}}}, "mcp_contract.json")
+    assert release.breaking_changes(
+        {"operations": {"GET /test": {"parameters": {"deprecated": {"required": False}}}}},
+        {"operations": {"GET /test": {"parameters": {}}}},
+        "openapi_contract.json",
+    ) == ["openapi_contract.json.operations.GET /test.parameters.deprecated: removed"]
+
+
+@pytest.mark.parametrize("keyword", ["default", "const", "enum"])
+def test_literal_schema_values_do_not_reenter_schema_context(keyword):
+    old_value = {"input": {"deprecated": "old"}}
+    new_value = {"input": {"deprecated": "new"}}
+    old = {keyword: [old_value] if keyword == "enum" else old_value}
+    new = {keyword: [new_value] if keyword == "enum" else new_value}
+    assert release.breaking_changes(old, new) == [f"contract.{keyword}: changed"]
+    if keyword == "enum":
+        assert not release.breaking_changes(old, {"enum": [old_value, new_value]})
+
+
+@pytest.mark.parametrize("keyword", ["additionalItems", "unevaluatedProperties"])
+def test_schema_valued_keywords_propagate_context(keyword):
+    assert release.breaking_changes({keyword: {}}, {keyword: {"type": "string"}}) == [
+        f"contract.{keyword}.type: new constraint or required input"
+    ]
+
+
+@pytest.mark.parametrize("change", ["extension", "narrowed", "branch", "removed_branch"])
+def test_nullable_stop_enum_compatibility(change):
+    old = json.loads(BASELINE.read_text(encoding="utf-8"))
+    new = deepcopy(old)
+    stop = new["get_bus_schedule"]["input"]["properties"]["stop"]
+    if change == "extension":
+        stop["anyOf"][0]["enum"].append("additional stop")
+    elif change == "narrowed":
+        stop["anyOf"][0]["enum"].pop()
+    elif change == "branch":
+        stop["anyOf"][1]["type"] = "integer"
+    else:
+        stop["anyOf"].pop()
+    changes = release.breaking_changes(old, new, "mcp_contract.json")
+    if change == "extension":
+        assert not changes
+    else:
+        assert changes
+
+
 @pytest.mark.parametrize(
     "old,new",
     [
@@ -98,6 +170,68 @@ def test_refreshed_baseline_cannot_hide_same_major_removal(monkeypatch, tmp_path
     else:
         with pytest.raises(ValueError, match="major"):
             release.compare_base(tmp_path, "a" * 40, current)
+
+
+@pytest.mark.parametrize(
+    "change,breaking",
+    [
+        ("remove_deprecated", True),
+        ("change_deprecated", True),
+        ("add_optional_type", False),
+        ("extend_stop_enum", False),
+        ("change_nullable_branch", True),
+        ("change_default_literal", True),
+        ("restrict_additional_items", True),
+        ("restrict_unevaluated_properties", True),
+    ],
+)
+def test_same_major_mcp_snapshot_changes(monkeypatch, change, breaking):
+    old = json.loads(BASELINE.read_text(encoding="utf-8"))
+    new = deepcopy(old)
+    old_properties = old["get_bus_schedule"]["input"]["properties"]
+    new_properties = new["get_bus_schedule"]["input"]["properties"]
+    if change == "remove_deprecated":
+        old_properties["deprecated"] = {"type": "string"}
+    elif change == "change_deprecated":
+        old_properties["deprecated"] = {"type": "string"}
+        new_properties["deprecated"] = {"type": "integer"}
+    elif change == "add_optional_type":
+        new_properties["type"] = {"type": "string"}
+    elif change == "extend_stop_enum":
+        old_properties["stop"]["anyOf"][0]["enum"].pop()
+    elif change == "change_nullable_branch":
+        new_properties["stop"]["anyOf"][1]["type"] = "integer"
+    elif change == "change_default_literal":
+        old_properties["stop"]["default"] = {"input": {"deprecated": "old"}}
+        new_properties["stop"]["default"] = {"input": {"deprecated": "new"}}
+    else:
+        keyword = (
+            "additionalItems" if change == "restrict_additional_items" else "unevaluatedProperties"
+        )
+        old_properties["stop"][keyword] = {}
+        new_properties["stop"][keyword] = {"type": "string"}
+
+    original_read_text = Path.read_text
+
+    def read_text(path, *args, **kwargs):
+        if path == Path.cwd() / BASELINE:
+            return json.dumps(new)
+        return original_read_text(path, *args, **kwargs)
+
+    def git_file(sha, path):
+        if path == "pyproject.toml":
+            return '[project]\nversion="3.0.0"\n'
+        if path.endswith("mcp_contract.json"):
+            return json.dumps(old)
+        return original_read_text(Path(path), encoding="utf-8")
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+    monkeypatch.setattr(release, "git_file", git_file)
+    if breaking:
+        with pytest.raises(ValueError, match="major"):
+            release.compare_base(Path.cwd(), "a" * 40, "3.0.1")
+    else:
+        assert not release.compare_base(Path.cwd(), "a" * 40, "3.0.1")
 
 
 async def test_mcp_structured_baseline():

@@ -50,6 +50,34 @@ CONSTRAINTS = {
     "items",
     "additionalItems",
 }
+NAMED_MAPS = {
+    "properties": "schema",
+    "$defs": "schema",
+    "definitions": "schema",
+    "patternProperties": "schema",
+    "dependentSchemas": "schema",
+    "schemas": "schema",
+    "operations": "operation",
+    "parameters": "parameter",
+    "responses": "response",
+    "content": "media",
+    "headers": "header",
+}
+SCHEMA_CHILDREN = {
+    "input",
+    "output",
+    "schema",
+    "items",
+    "additionalProperties",
+    "additionalItems",
+    "unevaluatedProperties",
+    "not",
+    "if",
+    "then",
+    "else",
+    "contains",
+    "propertyNames",
+}
 
 
 def version_tuple(value: str) -> tuple[int, ...]:
@@ -71,33 +99,76 @@ def validate_version(root: Path, tag: str | None = None) -> str:
     return version
 
 
-def breaking_changes(old: Any, new: Any, path: str = "contract") -> list[str]:
+def breaking_changes(
+    old: Any, new: Any, path: str = "contract", *, _context: str | None = None
+) -> list[str]:
     """Conservative structural guard, not a proof of behavioral compatibility."""
+    if _context is None:
+        _context = (
+            "map:tool"
+            if path == "mcp_contract.json"
+            else "document" if path == "openapi_contract.json" else "schema"
+        )
+        if path.endswith(".parameters"):
+            _context = "map:parameter"
+    if _context == "value":
+        return [] if old == new else [f"{path}: changed"]
     if isinstance(old, dict) and isinstance(new, dict):
+        named_map = _context.startswith("map:")
         changes = [
             f"{path}.{key}: removed"
             for key in sorted(old.keys() - new.keys())
-            if key != "deprecated"
+            if named_map or key != "deprecated" or _context not in {"schema", "operation"}
         ]
         for key in sorted(new.keys() - old.keys()):
             value = new[key]
             if (
-                key in CONSTRAINTS
-                or (key == "required" and value)
+                (_context == "schema" and key in CONSTRAINTS)
+                or (not named_map and key == "required" and value)
                 or (
-                    (path.endswith(".parameters") or key == "requestBody")
+                    (
+                        _context == "map:parameter"
+                        or (_context == "operation" and key == "requestBody")
+                    )
                     and isinstance(value, dict)
                     and value.get("required")
                 )
             ):
                 changes.append(f"{path}.{key}: new constraint or required input")
         for key in sorted(old.keys() & new.keys()):
-            if key == "deprecated":
+            if key == "deprecated" and _context in {"schema", "operation"}:
                 continue
-            if key == "enum" and set(old[key]) <= set(new[key]):
+            if (
+                _context == "schema"
+                and key == "enum"
+                and all(item in new[key] for item in old[key])
+            ):
                 continue
-            changes.extend(breaking_changes(old[key], new[key], f"{path}.{key}"))
+            if named_map:
+                child_context = _context.removeprefix("map:")
+            elif key in NAMED_MAPS:
+                child_context = f"map:{NAMED_MAPS[key]}"
+            elif _context == "schema" and key == "anyOf":
+                child_context = "anyOf"
+            elif _context == "schema" and key in {"default", "const", "enum"}:
+                child_context = "value"
+            elif key in SCHEMA_CHILDREN:
+                child_context = "schema"
+            else:
+                child_context = "structure"
+            changes.extend(
+                breaking_changes(old[key], new[key], f"{path}.{key}", _context=child_context)
+            )
         return changes
+    if _context == "anyOf" and isinstance(old, list) and isinstance(new, list):
+        if len(old) == len(new):
+            return [
+                change
+                for index, (previous, current) in enumerate(zip(old, new))
+                for change in breaking_changes(
+                    previous, current, f"{path}[{index}]", _context="schema"
+                )
+            ]
     if old != new:
         return [f"{path}: changed"]
     return []
