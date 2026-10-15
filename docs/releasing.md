@@ -19,8 +19,19 @@ The [API guide](api-guide.md#version-policy-and-30-migration) documents compatib
 and the 3.0 breaking changes. The offline suite pins structured REST and MCP
 contracts. PR CI also compares checked-in contracts with the base commit as data,
 without executing base-commit code. Removals, changed schemas/defaults/constraints
-and newly required inputs require a higher major version, even if a baseline was
-regenerated. Optional additions and enum extensions are allowed.
+and newly required inputs require a higher major version after publication, even
+if a baseline was regenerated. Optional additions and enum extensions are allowed.
+
+**Unreleased initial 3.0.0:** the course migration is part of 3.0.0, not 4.0.0.
+When both PR base and head are exactly 3.0.0, CI passes `--check-publication` to
+the release checker. It queries the exact `refs/tags/v3.0.0` ref in the fixed
+authoritative `NTHU-SA/NTHU-Data-API` remote with `git ls-remote --exit-code --refs`.
+Only a successful query establishing that the tag is absent permits same-version
+contract changes. A stable tag freezes the contract even without a GitHub Release
+page. Network/permission failures or unexpected output fail closed; missing local
+tags in a shallow checkout are not evidence. Without this explicit publication
+check, the ordinary strict major guard remains in effect. Other versions do not
+receive this initial-release exception. Version decreases always fail.
 
 The comparison is deliberately conservative: some safe schema changes may require
 manual redesign or a major release. It cannot identify behavioral changes hidden

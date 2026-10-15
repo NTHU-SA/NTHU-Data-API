@@ -1,65 +1,90 @@
-"""
-Courses domain service.
-
-Handles course data fetching, processing, and querying.
-"""
-
-from typing import Optional
+"""Normalized, independently cached course snapshots for each published semester."""
 
 from pydantic import TypeAdapter
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
-from data_api.data.nthudata import FetchFailure, JsonData, NTHUDataManager, Snapshot
-from data_api.domain.courses.models import Conditions, CourseData
+from data_api.data.nthudata import (
+    DatasetState,
+    FetchFailure,
+    Freshness,
+    JsonData,
+    NTHUDataManager,
+    Snapshot,
+)
+from data_api.domain.courses.models import Conditions
+from data_api.models.courses import CourseCatalog, CourseData, CourseListName, SemesterCode
+
+LATEST_PATH = "courses/latest.json"
+CATALOG_PATH = "courses/sources.json"
 
 
-def prepare_courses(raw: JsonData) -> list[CourseData]:
-    from data_api.models.courses import CourseData as CourseSchema
+class UnknownSemester(Exception):
+    """A well-formed semester absent from a verified published catalog."""
 
+
+def prepare_courses(raw: JsonData, semester: str | None = None) -> list[CourseData]:
     if not isinstance(raw, list):
         raise FetchFailure("payload_type")
-    rows = TypeAdapter(list[dict]).validate_python(raw, strict=True)
-    courses = [CourseData.from_dict(row) for row in rows]
-    for course in courses:
-        CourseSchema.model_validate(course, from_attributes=True)
-    if any(not course.id.strip() for course in courses):
+    courses = TypeAdapter(list[CourseData]).validate_python(raw, strict=True)
+    ids = [course.id for course in courses]
+    if len(ids) != len(set(ids)) or (
+        semester is not None and any(course.semester_code != semester for course in courses)
+    ):
         raise FetchFailure("validation")
     return courses
 
 
-class CoursesService:
-    """Service for course data operations."""
+def prepare_catalog(raw: JsonData) -> list[str]:
+    return CourseCatalog.model_validate(raw, strict=True).semesters
 
+
+class CoursesService:
     def __init__(self, manager: NTHUDataManager = nthudata) -> None:
         self.manager = manager
-        self.state = manager.register("courses.json", prepare_courses)
-        self._snapshot: Snapshot[list[CourseData]] | None = None
-        self._course_data: list[CourseData] = []
-        self.last_commit_hash: Optional[str] = None
+        self.state = manager.register(LATEST_PATH, prepare_courses)
+        self.catalog_state = manager.register(CATALOG_PATH, prepare_catalog)
+        self._semesters: dict[str, DatasetState[list[CourseData]]] = {}
 
-    async def update_data(self) -> None:
-        """Update course data from remote source."""
-        self._snapshot = await self.manager.get_snapshot("courses.json", self.state)
-        self.last_commit_hash = self._snapshot.version
+    async def get_semesters(self) -> Snapshot[list[str]]:
+        return await self.manager.get_snapshot(CATALOG_PATH, self.catalog_state)
 
-    def reset(self) -> None:
-        self._snapshot = None
-        self._course_data = []
-        self.last_commit_hash = None
+    async def get_snapshot(self, semester: str | None = None) -> Snapshot[list[CourseData]]:
+        if semester is None:
+            return await self.manager.get_snapshot(LATEST_PATH, self.state)
+        semester = TypeAdapter(SemesterCode).validate_python(semester, strict=True)
+        catalog = await self.get_semesters()
+        if semester not in catalog.data:
+            if self.catalog_state.freshness != Freshness.CURRENT:
+                raise DataNotAvailableException("Semester catalog temporarily unavailable.")
+            raise UnknownSemester("Semester is not published.")
+        path = f"courses/semesters/{semester}.json"
+        if semester not in self._semesters:
+            self._semesters[semester] = self.manager.register(
+                path, lambda raw: prepare_courses(raw, semester)
+            )
+        return await self.manager.get_snapshot(path, self._semesters[semester])
 
-    @property
-    def course_data(self) -> list[CourseData]:
-        return self._snapshot.data if self._snapshot is not None else self._course_data
+    @staticmethod
+    def query(
+        courses: list[CourseData],
+        conditions: Conditions,
+        course_type: CourseListName | None = None,
+    ) -> list[CourseData]:
+        return [
+            course
+            for course in courses
+            if conditions.accept(course)
+            and (
+                course_type is None
+                or (
+                    course_type == CourseListName.microcredits
+                    and course.credits is not None
+                    and not course.credits.is_integer()
+                )
+                or (course_type == CourseListName.xclass and "X-Class" in course.note)
+            )
+        ]
 
-    @course_data.setter
-    def course_data(self, value: list[CourseData]) -> None:
-        self._snapshot = None
-        self._course_data = value
 
-    def query(self, conditions: Conditions) -> list[CourseData]:
-        """Search all courses matching conditions."""
-        return [course for course in self.course_data if conditions.accept(course)]
-
-
-# Global service instance
 courses_service = CoursesService()

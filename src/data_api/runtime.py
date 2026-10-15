@@ -72,7 +72,6 @@ class Runtime:
             finally:
                 self.energy.client = None
                 self.libraries.client = None
-                self.courses.reset()
                 self.buses.reset()
 
 

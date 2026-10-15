@@ -44,6 +44,83 @@ def test_lock_mismatch_fails(tmp_path):
 
 
 @pytest.mark.parametrize(
+    "code,stdout,expected",
+    [
+        (2, "", True),
+        (0, "a" * 40 + "\trefs/tags/v3.0.0\n", False),
+        (128, "", None),
+        (0, "", None),
+        (2, "unexpected", None),
+        (0, "a" * 40 + "\trefs/tags/v3.0.1\n", None),
+    ],
+)
+def test_publication_uses_authoritative_remote_and_fails_closed(
+    monkeypatch, code, stdout, expected
+):
+    from types import SimpleNamespace
+
+    def run(args, **kwargs):
+        assert args == [
+            "git",
+            "ls-remote",
+            "--exit-code",
+            "--refs",
+            "https://github.com/NTHU-SA/NTHU-Data-API.git",
+            "refs/tags/v3.0.0",
+        ]
+        assert kwargs["timeout"] == 30
+        return SimpleNamespace(returncode=code, stdout=stdout)
+
+    monkeypatch.setattr(release.subprocess, "run", run)
+    if expected is None:
+        with pytest.raises(ValueError, match="Unable to verify"):
+            release.initial_version_is_unpublished("3.0.0")
+    else:
+        assert release.initial_version_is_unpublished("3.0.0") is expected
+    assert release.initial_version_is_unpublished("3.0.1") is False
+
+
+@pytest.mark.parametrize("failure", [OSError(), release.subprocess.TimeoutExpired("git", 30)])
+def test_publication_network_failure_is_not_unpublished(monkeypatch, failure):
+    def run(*args, **kwargs):
+        raise failure
+
+    monkeypatch.setattr(release.subprocess, "run", run)
+    with pytest.raises(ValueError, match="Unable to verify"):
+        release.initial_version_is_unpublished("3.0.0")
+
+
+@pytest.mark.parametrize("unpublished", [True, False, None])
+@pytest.mark.parametrize("current", ["3.0.0", "3.0.1", "2.9.0", "4.0.0"])
+def test_only_verified_unpublished_initial_version_can_update_contract(
+    monkeypatch, tmp_path, unpublished, current
+):
+    fixtures = tmp_path / "tests" / "fixtures"
+    fixtures.mkdir(parents=True)
+    for name in release.CONTRACTS:
+        (fixtures / name).write_text("{}", encoding="utf-8")
+
+    def git_file(sha, path):
+        return '[project]\nversion="3.0.0"\n' if path == "pyproject.toml" else '{"old": {}}'
+
+    def publication(version):
+        if unpublished is None:
+            raise ValueError("Unable to verify release publication")
+        return unpublished
+
+    monkeypatch.setattr(release, "git_file", git_file)
+    monkeypatch.setattr(release, "initial_version_is_unpublished", publication)
+    if current == "4.0.0" or (current == "3.0.0" and unpublished is True):
+        assert release.compare_base(tmp_path, "a" * 40, current, check_publication=True)
+    else:
+        with pytest.raises(ValueError):
+            release.compare_base(tmp_path, "a" * 40, current, check_publication=True)
+    if current == "3.0.0":
+        with pytest.raises(ValueError, match="major"):
+            release.compare_base(tmp_path, "a" * 40, current)
+
+
+@pytest.mark.parametrize(
     "old,new",
     [
         ({"GET /courses": {}}, {}),

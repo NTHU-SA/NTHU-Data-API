@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 
 import pytest
+from conftest import course_payload
 from fastapi import HTTPException
 from fastapi.exceptions import ResponseValidationError
 from fastapi.testclient import TestClient
@@ -56,7 +57,7 @@ class TestCombinedLifespan:
         monkeypatch.setattr(api_module, "mcp_app", SimpleNamespace(lifespan=_noop_lifespan))
         monkeypatch.setattr(nthudata, "prefetch", fake_prefetch)
         monkeypatch.setattr(buses_services.buses_service, "update_data", fake_buses_update)
-        monkeypatch.setattr(courses_services.courses_service, "update_data", fake_courses_update)
+        monkeypatch.setattr(courses_services.courses_service, "get_snapshot", fake_courses_update)
 
         async with api_module.combined_lifespan(app):
             pass
@@ -76,7 +77,7 @@ class TestCombinedLifespan:
         monkeypatch.setattr(api_module, "mcp_app", SimpleNamespace(lifespan=_noop_lifespan))
         monkeypatch.setattr(nthudata, "prefetch", fake_prefetch)
         monkeypatch.setattr(buses_services.buses_service, "update_data", noop)
-        monkeypatch.setattr(courses_services.courses_service, "update_data", noop)
+        monkeypatch.setattr(courses_services.courses_service, "get_snapshot", noop)
 
         with caplog.at_level(logging.INFO):
             async with api_module.combined_lifespan(app):
@@ -122,27 +123,7 @@ class TestCombinedLifespan:
             assert calls == ["mcp startup", "data startup", "data shutdown", "mcp shutdown"]
 
 
-FAKE_COURSE = {
-    "id": "11410TEST100000",
-    "chinese_title": "測試課程",
-    "english_title": "Test Course",
-    "credit": "3",
-    "size_limit": "50",
-    "freshman_reservation": "0",
-    "object": "",
-    "ge_type": "",
-    "language": "中",
-    "note": "",
-    "suspend": "",
-    "class_room_and_time": "T3T4",
-    "teacher": "測試教師",
-    "prerequisite": "",
-    "limit_note": "",
-    "expertise": "",
-    "program": "",
-    "no_extra_selection": "",
-    "required_optional_note": "",
-}
+FAKE_COURSE = course_payload(chinese_title="測試課程")
 
 
 async def _fake_fetch(url: str, sha256=None):
@@ -156,8 +137,10 @@ async def _fake_fetch(url: str, sha256=None):
                 ]
             }
         }
-    if url.endswith("courses.json"):
+    if url.endswith("courses/latest.json"):
         return [FAKE_COURSE]
+    if url.endswith("courses/sources.json"):
+        return {"semesters": ["11510"]}
     if url.endswith("buses.json"):
         return {}
     return []
@@ -173,10 +156,9 @@ class TestCoursesAfterStartup:
         """
         monkeypatch.setattr(api_module, "mcp_app", SimpleNamespace(lifespan=_noop_lifespan))
         monkeypatch.setattr(nthudata.fetcher, "fetch_json", _fake_fetch)
-        monkeypatch.setattr(courses_services.courses_service, "course_data", [])
 
         async with app.router.lifespan_context(app):
-            assert courses_services.courses_service.course_data, "courses data was not loaded"
+            assert courses_services.courses_service.state.usable, "courses data was not loaded"
 
             async with AsyncClient(
                 transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
@@ -328,8 +310,6 @@ def test_exported_app_serves_rest_and_mcp_with_middleware(monkeypatch):
     monkeypatch.setattr(nthudata, "prefetch", fake_prefetch)
     monkeypatch.setattr(nthudata.fetcher, "fetch_json", _fake_fetch)
     monkeypatch.setattr(buses_services.buses_service, "update_data", noop)
-    monkeypatch.setattr(courses_services.courses_service, "course_data", [])
-    monkeypatch.setattr(courses_services.courses_service, "last_commit_hash", None)
     origin = "https://example.com"
 
     with TestClient(app) as client:

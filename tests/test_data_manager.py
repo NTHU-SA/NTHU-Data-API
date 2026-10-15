@@ -7,6 +7,7 @@ from dataclasses import replace
 
 import httpx
 import pytest
+from conftest import course_payload
 from pydantic import TypeAdapter
 
 from data_api.core.exceptions import DataNotAvailableException
@@ -372,34 +373,32 @@ async def test_checksum_prevents_mislabeled_snapshot_during_publication():
 
 
 async def test_course_validation_and_conversion_before_swap(monkeypatch):
-    clock, publisher = Clock(), Publisher([{"id": "A", "language": "中"}], "courses.json")
+    clock, publisher = Clock(), Publisher([course_payload(id="11510A")], "courses/latest.json")
     manager = NTHUDataManager(clock=clock)
     service = CoursesService(manager)
     async with manager.lifespan(publisher.client()):
-        await service.update_data()
+        await service.get_snapshot()
         old = service.state.snapshot
-        for payload in [[], [{"id": "B", "language": "中"}]]:
+        for payload in [[], [course_payload(id="11510B")]]:
             publisher.version += "b"
             publisher.payload = payload
             clock.advance()
-            await service.update_data()
-            assert [c.id for c in service.course_data] == [r["id"] for r in payload]
+            snapshot = await service.get_snapshot()
+            assert [c.id for c in snapshot.data] == [r["id"] for r in payload]
         old = service.state.snapshot
         publisher.version, publisher.payload = "invalid", [{"id": None}]
         clock.advance()
-        await service.update_data()
+        await service.get_snapshot()
         assert service.state.snapshot is old
         assert service.state.last_error.category == "validation"
-
-        from data_api.domain.courses.models import CourseData
 
         def fail(raw):
             raise ValueError("conversion failed")
 
-        monkeypatch.setattr(CourseData, "from_dict", fail)
-        publisher.payload = [{"id": "C"}]
+        monkeypatch.setattr(service.state, "prepare", fail)
+        publisher.payload = [course_payload(id="11510C")]
         clock.advance()
-        await service.update_data()
+        await service.get_snapshot()
         assert service.state.snapshot is old
         assert service.state.last_error.category == "transformation"
 
@@ -517,17 +516,16 @@ async def test_shared_manifest_does_not_extend_freshness_for_later_readers():
 
 @pytest.mark.parametrize("payload", [[], [{"id": "B", "language": "invalid"}], [42], {"id": "B"}])
 async def test_initial_course_schema_validation(payload):
-    publisher = Publisher(payload, "courses.json")
+    publisher = Publisher(payload, "courses/latest.json")
     manager = NTHUDataManager()
     service = CoursesService(manager)
     async with manager.lifespan(publisher.client()):
         if payload == []:
-            await service.update_data()
-            assert service.course_data == []
+            assert (await service.get_snapshot()).data == []
             assert service.state.usable
         else:
             with pytest.raises(DataNotAvailableException):
-                await service.update_data()
+                await service.get_snapshot()
             assert not service.state.usable
             assert service.state.last_error.category in {"validation", "payload_type"}
 

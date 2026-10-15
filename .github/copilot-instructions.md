@@ -113,8 +113,18 @@ and migration differences that are not obvious from OpenAPI alone.
   service; trigger filters are managed in GCP. Do not reintroduce custom deployment
   orchestration or GCS locks. See [releasing](../docs/releasing.md).
 - Preserve REST/MCP search differences: MCP course search uses case-sensitive
-  literal substrings; REST course GET uses regex; the POST DSL defaults to exact
+  literal substrings; REST course GET text filters use regex; the POST DSL defaults to exact
   matching. Invalid regex must return 422 even with an empty dataset.
+- Courses use the publisher's normalized 33-field model, not the old string fields.
+  GET numeric/boolean filters and POST matchers use native types. Array leaf paths
+  use independent ANY predicates; missing union keys are not explicit null.
+  Preserve unknown values and `parsing_issues`, without guessing source repairs.
+  Latest uses `courses/latest.json`; discover semesters from `courses/sources.json`
+  and load `courses/semesters/{semester}.json` on demand. Hold snapshots and their
+  versions locally per request, never switch shared active-semester state.
+  Invalid, unpublished and unavailable semesters are 422, 404 and 503 respectively;
+  stale/unverified catalog absence cannot establish 404. Never fall back to latest.
+  MCP keeps its teacher convenience filter but returns full normalized courses.
 - Apply all search filters before result limits. Never mutate cached datasets
   while filtering, including nested directory people and newsletter articles.
 - Nullable publisher metadata defaults to `null`, but supplied values must still
@@ -201,9 +211,9 @@ Consume `file_details.json` in the publisher's existing shape:
 ```json
 {
   "file_details": {
-    "/": [
+    "courses": [
       {
-        "name": "courses.json",
+        "name": "latest.json",
         "last_commit": "opaque-version",
         "last_updated": "2026-09-27T22:24:37+08:00"
       }

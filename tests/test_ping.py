@@ -17,7 +17,8 @@ EXPECTED_DATASETS = {
     "/announcements_list.json",
     "/buses.json",
     "/calendars.json",
-    "/courses.json",
+    "/courses/latest.json",
+    "/courses/sources.json",
     "/dining.json",
     "/directory.json",
     "/libraries/calendars.json",
@@ -35,6 +36,7 @@ async def ping_runtime(monkeypatch):
         path: {} if path in {"/buses.json", "/maps.json", "/libraries/rss.json"} else []
         for path in EXPECTED_DATASETS
     }
+    payloads["/courses/sources.json"] = {"semesters": []}
 
     async def handler(self, request):
         path = request.url.path
@@ -214,7 +216,7 @@ async def test_ping_head_cors_preflight(ping_runtime):
 @pytest.mark.parametrize("freshness", [Freshness.STALE, Freshness.UNVERIFIED])
 async def test_ping_keeps_usable_fallback_ready(ping_runtime, freshness):
     client, _, calls = ping_runtime
-    state = nthudata.states["/courses.json"]
+    state = nthudata.states["/courses/latest.json"]
     now = datetime.now(timezone.utc)
     state.freshness = freshness
     state.last_error = RefreshError("http_status", now, 502)
@@ -226,7 +228,7 @@ async def test_ping_keeps_usable_fallback_ready(ping_runtime, freshness):
     assert response.status_code == 200
     assert response.json()["ready"] is True
     assert response.json()["status"] == "degraded"
-    health = response.json()["datasets"]["/courses.json"]
+    health = response.json()["datasets"]["/courses/latest.json"]
     assert health["freshness"] == freshness
     assert health["usable"] is True
     assert health["published_at"] == "2026-09-29T08:00:00+08:00"

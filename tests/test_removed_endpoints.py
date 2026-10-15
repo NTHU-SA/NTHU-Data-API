@@ -30,7 +30,12 @@ async def test_retired_routes_are_not_served(method, path):
         transport=ASGITransport(app=app), base_url="http://test", follow_redirects=False
     ) as client:
         response = await client.request(method, path)
-    assert response.status_code == 404
+    expected = (
+        422
+        if method == "GET" and path == "/courses/search"
+        else (405 if method == "POST" and path == "/courses/search" else 404)
+    )
+    assert response.status_code == expected
     assert "location" not in response.headers
 
 

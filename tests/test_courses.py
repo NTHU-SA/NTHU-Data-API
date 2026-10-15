@@ -1,355 +1,182 @@
-"""Tests for courses endpoints."""
-
-from unittest.mock import AsyncMock
+"""Course REST query regression tests using normalized offline snapshots."""
 
 import pytest
+from conftest import make_course, set_courses
 from httpx import ASGITransport, AsyncClient
 
-from data_api.api import schemas
 from data_api.api.api import app
-from data_api.domain.courses.models import CourseData
-from data_api.domain.courses.services import courses_service
+from data_api.models.courses import BOOLEAN_FIELDS, INTEGER_FIELDS, CourseFieldName
+
+INVALID_REGEX_PATTERNS = ["[", "(", "\\", "*", "(?invalid)", "a{99999999999999999999}", "(" * 1000]
 
 
-@pytest.fixture(autouse=True)
-def fixed_courses(monkeypatch):
-    """These query tests supply their own snapshots; lifecycle tests use real refresh."""
-    monkeypatch.setattr(courses_service, "course_data", [])
-    monkeypatch.setattr(courses_service, "update_data", AsyncMock())
-    monkeypatch.setattr(courses_service, "last_commit_hash", "course-test-version")
+@pytest.fixture
+def courses():
+    return [
+        make_course(
+            id=f"11510{identity}",
+            chinese_title=title,
+            english_title=english,
+            lecturers=[{"label": teacher}],
+            credits=credits,
+            note=note,
+            language_code="en" if identity == "B" else (None if identity == "C" else "zh"),
+        )
+        for identity, teacher, title, english, credits, note in [
+            ("A", "林福仁", "服務學習", "C++ [AI]", 0.5, "X-Class"),
+            ("B", "林福仁", "程式設計", "Programming", 3, ""),
+            ("C", "黃老師", "服務設計", "Design", 1.5, ""),
+            ("D", "孫老師", "跨域學習", "Learning", 2, "X-Class"),
+        ]
+    ]
 
 
-INVALID_REGEX_PATTERNS = [
-    "[",
-    "(",
-    "\\",
-    "*",
-    "(?invalid)",
-    pytest.param("a{99999999999999999999}", id="repeat-overflow"),
-    pytest.param("(" * 1000, id="nesting-too-deep"),
-]
+@pytest.fixture
+async def client(monkeypatch, courses):
+    set_courses(monkeypatch, courses)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        yield client
 
 
-class TestCoursesEndpoints:
-    """Tests for courses endpoints."""
-
-    @pytest.fixture
-    async def client(self):
-        """Create async test client."""
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
-        ) as client:
-            yield client
-
-    @pytest.mark.parametrize(
-        "url",
-        [
-            "/courses",
-            "/courses?type=microcredits",
-            "/courses?type=xclass",
-        ],
-    )
-    async def test_courses_list_endpoints(self, client: AsyncClient, url: str):
-        """Test courses list endpoints."""
-        response = await client.get(url)
-        assert response.status_code == 200
-
-    @pytest.mark.parametrize("path", ["/courses"])
-    @pytest.mark.parametrize(
-        "field_name",
-        [_.value for _ in schemas.courses.CourseFieldName],
-    )
-    async def test_courses_search_by_field(self, client: AsyncClient, field_name: str, path):
-        """Test searching courses by field name."""
-        response = await client.get(path, params={field_name: "中"})
-        assert response.status_code == 200
-
-    @pytest.mark.parametrize("path", ["/courses"])
-    async def test_invalid_language_is_still_rejected(self, client: AsyncClient, path):
-        response = await client.get(path, params={"language": "invalid"})
-        assert response.status_code == 422
-
-
-@pytest.mark.parametrize("path", ["/courses"])
-def test_course_search_query_model_keeps_flat_optional_parameters(path):
-    operation = app.openapi()["paths"][path]["get"]
+def test_course_search_query_model_keeps_flat_optional_parameters():
+    operation = app.openapi()["paths"]["/courses"]["get"]
     assert "requestBody" not in operation
     parameters = {parameter["name"]: parameter for parameter in operation["parameters"]}
-    expected = {field.value for field in schemas.courses.CourseFieldName}
-    if path == "/courses":
-        expected.add("type")
-    assert set(parameters) == expected
-    for parameter in parameters.values():
-        assert parameter["in"] == "query"
-        assert not parameter["required"]
+    assert set(parameters) == {field.value for field in CourseFieldName} | {"type"}
+    assert all(p["in"] == "query" and not p["required"] for p in parameters.values())
 
 
-@pytest.mark.parametrize("post_path", ["/courses/query"])
-class TestCoursesSearchPost:
-    """Tests for courses POST search with conditions."""
+@pytest.mark.parametrize("field", [field.value for field in CourseFieldName])
+async def test_every_get_field_is_accepted(client, field):
+    value = (
+        "false"
+        if field in BOOLEAN_FIELDS
+        else (
+            "0"
+            if field in INTEGER_FIELDS | {"credits"}
+            else ("zh" if field == "language_code" else "中")
+        )
+    )
+    assert (await client.get("/courses", params={field: value})).status_code == 200
 
-    @pytest.fixture
-    async def client(self):
-        """Create async test client."""
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
-        ) as client:
-            yield client
 
-    async def test_search_with_single_condition(self, client: AsyncClient, post_path):
-        """Test searching courses with single condition."""
-        body = {
-            "row_field": "chinese_title",
-            "matcher": "數統導論",
-            "regex_match": True,
-        }
-        response = await client.post(post_path, json=body)
-        assert response.status_code == 200
+@pytest.mark.parametrize(
+    "params,ids",
+    [
+        ({}, ["A", "B", "C", "D"]),
+        ({"lecturers.label": ""}, ["A", "B", "C", "D"]),
+        ({"lecturers.label": "林福仁"}, ["A", "B"]),
+        ({"chinese_title": "服務"}, ["A", "C"]),
+        ({"lecturers.label": "林福仁", "chinese_title": "服務"}, ["A"]),
+        ({"type": "microcredits"}, ["A", "C"]),
+        ({"type": "xclass"}, ["A", "D"]),
+        ({"type": "xclass", "lecturers.label": "林福仁"}, ["A"]),
+        ({"type": "microcredits", "lecturers.label": "林福仁"}, ["A"]),
+        ({"type": "xclass", "lecturers.label": "黃"}, []),
+        ({"english_title": r"^C\+\+", "id": "^11510A"}, ["A"]),
+        ({"language_code": "zh|en"}, ["A", "B", "D"]),
+        ({"language_code": "^en$"}, ["B"]),
+        ({"language_code": "中"}, []),
+        ({"credits": "3", "is_cancelled": "false", "reserved_for_freshmen": "0"}, ["B"]),
+        ({"is_cancelled": "true"}, []),
+    ],
+)
+async def test_get_collection_filters(client, params, ids):
+    response = await client.get("/courses", params=params)
+    assert response.status_code == 200, response.text
+    assert [course["id"] for course in response.json()] == [f"11510{i}" for i in ids]
+    assert response.headers["X-Total-Count"] == str(len(ids))
+    assert response.headers["X-Data-Commit-Hash"] == "course-test-version"
+    assert not response.history
 
-    async def test_search_with_two_conditions(self, client: AsyncClient, post_path):
-        """Test searching courses with two conditions using OR operator."""
-        body = [
-            {"row_field": "teacher", "matcher": "黃", "regex_match": True},
-            "or",
-            {"row_field": "teacher", "matcher": "孫", "regex_match": True},
-        ]
-        response = await client.post(post_path, json=body)
-        assert response.status_code == 200
 
-    async def test_search_with_multiple_conditions(self, client: AsyncClient, post_path):
-        """Test searching courses with multiple nested conditions."""
-        body = [
-            {"row_field": "credit", "matcher": "3", "regex_match": True},
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"type": "unknown"},
+        {"type": ""},
+        {"type": "XCLASS"},
+        {"credits": "bad"},
+        {"capacity": "1.5"},
+        {"is_cancelled": "bad"},
+        {"teacher": "old"},
+        {"credit": "3"},
+    ],
+)
+async def test_invalid_get_filters(client, params):
+    assert (await client.get("/courses", params=params)).status_code == 422
+
+
+@pytest.mark.parametrize("empty", [False, True])
+@pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
+@pytest.mark.parametrize("field", ["chinese_title", "lecturers.label", "id", "language_code"])
+async def test_get_invalid_regex(client, monkeypatch, empty, pattern, field):
+    if empty:
+        set_courses(monkeypatch, [])
+    response = await client.get("/courses", params={field: pattern})
+    assert response.status_code == 422
+    assert response.json() == {"detail": f"Invalid regular expression for course field '{field}'."}
+
+
+@pytest.mark.parametrize("matcher", ["C++ [AI]", "C++", "["])
+async def test_post_exact_text(client, matcher):
+    response = await client.post(
+        "/courses/query", json={"row_field": "english_title", "matcher": matcher}
+    )
+    assert response.status_code == 200
+    assert [course["id"] for course in response.json()] == (
+        ["11510A"] if matcher == "C++ [AI]" else []
+    )
+
+
+@pytest.mark.parametrize("empty", [False, True])
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
+async def test_post_invalid_regex(client, monkeypatch, empty, nested, pattern):
+    if empty:
+        set_courses(monkeypatch, [])
+    body = {"row_field": "lecturers.label", "matcher": pattern, "regex_match": True}
+    if nested:
+        body = [{"row_field": "id", "matcher": "absent"}, "and", [body]]
+    response = await client.post("/courses/query", json=body)
+    assert response.status_code == 422
+    assert any("Invalid regular expression" in e["msg"] for e in response.json()["detail"])
+
+
+async def test_post_nested_regex_and_typed_matchers(client):
+    response = await client.post(
+        "/courses/query",
+        json=[
+            {"row_field": "is_cancelled", "matcher": False},
             "and",
             [
-                [
-                    {"row_field": "id", "matcher": "STAT", "regex_match": True},
-                    "or",
-                    {"row_field": "id", "matcher": "MATH", "regex_match": True},
-                ],
-                "and",
-                [
-                    {
-                        "row_field": "class_room_and_time",
-                        "matcher": "T3T4",
-                        "regex_match": True,
-                    },
-                    "or",
-                    {
-                        "row_field": "class_room_and_time",
-                        "matcher": "R3R4",
-                        "regex_match": True,
-                    },
-                ],
+                {"row_field": "credits", "matcher": 0.5},
+                "or",
+                {"row_field": "lecturers.label", "matcher": "黃", "regex_match": True},
             ],
-        ]
-        response = await client.post(post_path, json=body)
-        assert response.status_code == 200
-
-    async def test_search_with_flatten_conditions(self, client: AsyncClient, post_path):
-        """Test searching courses with flatten multiple conditions."""
-        body = [
-            {"row_field": "chinese_title", "matcher": "微積分", "regex_match": True},
-            "and",
-            {"row_field": "credit", "matcher": "4", "regex_match": True},
-            "and",
-            {"row_field": "class_room_and_time", "matcher": "T", "regex_match": True},
-        ]
-        response = await client.post(post_path, json=body)
-        assert response.status_code == 200
-
-
-class TestCourseSearchValidation:
-    """Exercise the exported app with deterministic, non-empty course data."""
-
-    @pytest.fixture
-    async def client(self, monkeypatch):
-        monkeypatch.setattr(
-            courses_service,
-            "course_data",
-            [
-                CourseData.from_dict(
-                    {
-                        "id": "CS100",
-                        "chinese_title": "程式設計",
-                        "english_title": "C++ [AI]",
-                        "teacher": "Teacher (AI)",
-                        "language": "英",
-                    }
-                ),
-                CourseData.from_dict(
-                    {
-                        "id": "MATH100",
-                        "chinese_title": "微積分",
-                        "english_title": "Calculus",
-                        "teacher": "Someone else",
-                        "language": "英",
-                    }
-                ),
-            ],
-        )
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            yield client
-
-    @pytest.mark.parametrize("empty_data", [False, True])
-    @pytest.mark.parametrize("path", ["/courses"])
-    @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
-    @pytest.mark.parametrize("field", ["chinese_title", "teacher", "id"])
-    async def test_get_invalid_regex(self, client, monkeypatch, empty_data, pattern, field, path):
-        if empty_data:
-            monkeypatch.setattr(courses_service, "course_data", [])
-        response = await client.get(path, params={field: pattern})
-        assert response.status_code == 422
-        assert response.json() == {
-            "detail": f"Invalid regular expression for course field '{field}'."
-        }
-
-    @pytest.mark.parametrize("empty_data", [False, True])
-    @pytest.mark.parametrize("path", ["/courses/query"])
-    @pytest.mark.parametrize("nested", [False, True])
-    @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
-    async def test_post_invalid_regex(self, client, monkeypatch, empty_data, nested, pattern, path):
-        if empty_data:
-            monkeypatch.setattr(courses_service, "course_data", [])
-        body = {"row_field": "teacher", "matcher": pattern, "regex_match": True}
-        if nested:
-            body = [
-                {"row_field": "id", "matcher": "DOES_NOT_EXIST"},
-                "and",
-                [{"row_field": "credit", "matcher": "3"}, "or", body],
-            ]
-        response = await client.post(path, json=body)
-        assert response.status_code == 422
-        assert any(
-            "Invalid regular expression" in error["msg"] for error in response.json()["detail"]
-        )
-        assert "Traceback" not in response.text
-
-    @pytest.mark.parametrize("path", ["/courses"])
-    async def test_get_preserves_regex_and_all_filters(self, client, path):
-        response = await client.get(
-            path,
-            params={"english_title": r"^C\+\+", "teacher": r"Teacher \(AI\)", "id": "^CS"},
-        )
-        assert response.status_code == 200
-        assert [course["id"] for course in response.json()] == ["CS100"]
-        assert response.headers["X-Total-Count"] == "1"
-
-        response = await client.get(
-            path,
-            params={"english_title": r"^C\+\+", "teacher": "impossible", "id": "^CS"},
-        )
-        assert response.status_code == 200
-        assert response.json() == []
-        assert response.headers["X-Total-Count"] == "0"
-
-    @pytest.mark.parametrize("matcher", ["C++ [AI]", "C++", "["])
-    @pytest.mark.parametrize("path", ["/courses/query"])
-    async def test_post_preserves_exact_matching(self, client, matcher, path):
-        response = await client.post(
-            path,
-            json={"row_field": "english_title", "matcher": matcher, "regex_match": False},
-        )
-        assert response.status_code == 200
-        assert [course["id"] for course in response.json()] == (
-            ["CS100"] if matcher == "C++ [AI]" else []
-        )
-
-    @pytest.mark.parametrize("path", ["/courses/query"])
-    async def test_post_preserves_nested_regex(self, client, path):
-        response = await client.post(
-            path,
-            json=[
-                {"row_field": "id", "matcher": "^CS", "regex_match": True},
-                "and",
-                [
-                    {"row_field": "teacher", "matcher": "absent"},
-                    "or",
-                    {"row_field": "english_title", "matcher": r"\[AI\]", "regex_match": True},
-                ],
-            ],
-        )
-        assert response.status_code == 200
-        assert [course["id"] for course in response.json()] == ["CS100"]
-        assert response.headers["X-Total-Count"] == "1"
-        assert response.headers["X-Data-Commit-Hash"] == "course-test-version"
-
-
-class TestCourseCollection:
-    @pytest.fixture
-    async def client(self, monkeypatch):
-        monkeypatch.setattr(
-            courses_service,
-            "course_data",
-            [
-                CourseData.from_dict(
-                    {
-                        "id": course_id,
-                        "teacher": teacher,
-                        "chinese_title": title,
-                        "credit": credit,
-                        "note": note,
-                        "language": "中",
-                    }
-                )
-                for course_id, teacher, title, credit, note in [
-                    ("A", "林福仁", "服務學習", "0.5", "X-Class"),
-                    ("B", "林福仁", "程式設計", "3", ""),
-                    ("C", "黃老師", "服務設計", "1.5", ""),
-                    ("D", "孫老師", "跨域學習", "2", "X-Class"),
-                ]
-            ],
-        )
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            yield client
-
-    @pytest.mark.parametrize(
-        "params,expected_ids",
-        [
-            ({}, ["A", "B", "C", "D"]),
-            ({"teacher": ""}, ["A", "B", "C", "D"]),
-            ({"unknown": "ignored"}, ["A", "B", "C", "D"]),
-            ({"teacher": "林福仁"}, ["A", "B"]),
-            ({"chinese_title": "服務"}, ["A", "C"]),
-            ({"teacher": "林福仁", "chinese_title": "服務"}, ["A"]),
-            ({"type": "microcredits"}, ["A", "C"]),
-            ({"type": "xclass"}, ["A", "D"]),
-            ({"type": "xclass", "teacher": "林福仁"}, ["A"]),
-            ({"type": "microcredits", "teacher": "林福仁"}, ["A"]),
-            ({"type": "xclass", "teacher": "黃"}, []),
         ],
     )
-    async def test_get_collection_filters(self, client, params, expected_ids):
-        response = await client.get("/courses", params=params)
-        assert response.status_code == 200
-        assert [course["id"] for course in response.json()] == expected_ids
-        assert response.headers["X-Total-Count"] == str(len(expected_ids))
-        assert response.headers["X-Data-Commit-Hash"] == "course-test-version"
-        assert not response.history
+    assert response.status_code == 200
+    assert [c["id"] for c in response.json()] == ["11510A", "11510C"]
+    assert response.headers["X-Total-Count"] == "2"
+    assert response.headers["X-Data-Commit-Hash"] == "course-test-version"
 
-    @pytest.mark.parametrize("course_type", ["unknown", "", "XCLASS"])
-    async def test_invalid_course_type(self, client, course_type):
-        response = await client.get("/courses", params={"type": course_type})
-        assert response.status_code == 422
 
-    @pytest.mark.parametrize(
-        "body,expected_ids",
-        [
-            (
-                [
-                    {"row_field": "teacher", "matcher": "黃", "regex_match": True},
-                    "or",
-                    {"row_field": "teacher", "matcher": "孫", "regex_match": True},
-                ],
-                ["C", "D"],
-            ),
-            ({"row_field": "teacher", "matcher": "林福仁"}, ["A", "B"]),
-            ({"row_field": "teacher", "matcher": "林"}, []),
-        ],
+async def test_large_integer_credit_matcher_does_not_overflow(client):
+    response = await client.post(
+        "/courses/query", json={"row_field": "credits", "matcher": 10**400}
     )
-    async def test_query_conditions(self, client, body, expected_ids):
-        new = await client.post("/courses/query", json=body)
-        assert new.status_code == 200
-        assert [course["id"] for course in new.json()] == expected_ids
-        assert new.headers["X-Total-Count"] == str(len(expected_ids))
-        assert new.headers["X-Data-Commit-Hash"] == "course-test-version"
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+async def test_response_is_full_normalized_shape_and_nullable(client, monkeypatch):
+    course = make_course(credits=None, capacity_unlimited=None, language_code=None)
+    set_courses(monkeypatch, [course], version=None)
+    response = await client.get("/courses")
+    assert response.json() == [course.model_dump(mode="json")]
+    assert "X-Data-Commit-Hash" not in response.headers
+    assert (
+        await client.post("/courses/query", json={"row_field": "credits", "matcher": None})
+    ).json() == response.json()
+    assert (await client.get("/courses?type=microcredits")).json() == []
