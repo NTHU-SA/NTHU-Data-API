@@ -13,7 +13,7 @@ from data_api.data.nthudata import NTHUDataManager
 from data_api.utils.search import fuzzy_matches
 
 JSON_PATH = "newsletters.json"
-FUZZY_SEARCH_THRESHOLD = 80
+FUZZY_SEARCH_THRESHOLD = 60
 
 
 class NewslettersService:
