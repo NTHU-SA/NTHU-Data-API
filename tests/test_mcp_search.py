@@ -380,6 +380,7 @@ def directory_and_locations(monkeypatch):
         ("alice", 0, []),
         ("director", 0, []),
         ("ZZZZZZ", 0, []),
+        ("", 0, []),
     ],
 )
 async def test_registered_directory_search_modes(
@@ -393,7 +394,7 @@ async def test_registered_directory_search_modes(
     assert not response.is_error
     assert set(response.data) == {"departments", "people"}
     assert directory_and_locations[1] == ["directory.json"]
-    if fuzzy is False or query == "ZZZZZZ":
+    if fuzzy is False or query in ("ZZZZZZ", ""):
         assert len(response.data["departments"]) == department_count
         assert [person["name"] for person in response.data["people"]] == person_names
     else:
@@ -450,6 +451,21 @@ async def test_search_tools_unavailable_dataset(monkeypatch, tool, path, fuzzy):
     async with Client(mcp) as client:
         response = await client.call_tool(
             tool, {"query": "query", "fuzzy": fuzzy}, raise_on_error=False
+        )
+    assert response.is_error
+    assert "private upstream" not in str(response.content)
+
+
+@pytest.mark.parametrize("fuzzy", [True, False])
+async def test_empty_directory_search_unavailable_dataset(monkeypatch, fuzzy):
+    async def unavailable(endpoint):
+        assert endpoint == "directory.json"
+        raise DataNotAvailableException("private upstream")
+
+    monkeypatch.setattr(nthudata, "get", unavailable)
+    async with Client(mcp) as client:
+        response = await client.call_tool(
+            "search_directory", {"query": "", "fuzzy": fuzzy}, raise_on_error=False
         )
     assert response.is_error
     assert "private upstream" not in str(response.content)

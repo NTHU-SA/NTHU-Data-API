@@ -165,7 +165,8 @@ MCP `search_directory(query, fuzzy=true)` uses the same matching fields and mode
 but returns separate `departments` and `people` arrays, capped at 5 departments
 and 10 people after filtering and ranking. A department-name match does not
 automatically include its people in the separate people array. It does not search
-locations. A valid empty result is `{departments: [], people: []}`; an unavailable
+locations. Unlike REST, an empty MCP query returns no matches in either mode.
+A valid empty result is `{departments: [], people: []}`; an unavailable
 dataset is a tool error.
 The tool loads only the directory dataset, independently of location searches.
 

@@ -86,6 +86,8 @@ class DepartmentsService:
     ) -> tuple[Optional[str], dict[str, list]]:
         """Search departments and people using fuzzy or exact matching."""
         commit_hash, directory_data = await self.manager.get(JSON_PATH)
+        if not query:
+            return commit_hash, {"departments": [], "people": []}
 
         dept_results = []
         person_results = []
