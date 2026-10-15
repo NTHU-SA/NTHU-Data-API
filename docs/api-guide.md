@@ -77,9 +77,17 @@ must explicitly describe their impact. Removing an endpoint is still a breaking
 change even after deprecation; there is no promise that old clients keep working
 after a major upgrade.
 
+**3.0.0 is being prepared and includes breaking course changes.** Courses now use
+the publisher's normalized fields and support semester selection in REST and MCP;
+see [course queries](#course-queries) for the field migration. The unreleased
+3.0.0 contracts may be updated before its first stable tag. After publication,
+the ordinary major-version compatibility policy applies.
+
 **3.0.0 removes all previously deprecated REST operations.** Update clients using
 the following table. Existing supported operation IDs and the eight current MCP
-tool names remain unchanged. Removed paths return 404; there are no custom legacy
+tool names remain unchanged. Removed paths have no compatibility handlers; most
+return 404. `GET /courses/search` now matches the semester route and returns 422
+for an invalid semester; POST at that path returns 405. There are no custom legacy
 redirects. Ordinary FastAPI trailing-slash normalization remains enabled: for
 example, `/courses/` redirects to `/courses` with 307 and preserves query parameters.
 It no longer has a separate operation or special all-courses behavior.
@@ -115,10 +123,11 @@ use `get_bus_schedule` and refresh the client tool list. The earlier removed
   can match either the Chinese or English title. Regex characters such as `C++`
   and `[AI]` are treated literally. `limit` defaults to 20 and must be 1-100;
   zero, negative, and larger values are rejected.
-- REST `GET /courses` uses regular-expression matching and ANDs the
-  supplied fields. `POST /courses/query` supports nested AND/OR conditions and
-  exact matching unless `regex_match` is true. Invalid regex syntax returns HTTP
-  422, including when the course dataset is empty.
+- REST course GET uses regular expressions for text and exact matching for
+  numeric/boolean fields, combining supplied fields with AND. Course POST queries
+  support nested AND/OR conditions and typed exact matching unless
+  `regex_match` is true for a text field. Invalid regex syntax returns HTTP 422,
+  including when the course dataset is empty.
 - MCP `find_dining` applies building and restaurant-name fuzzy filters together
   with `check_open`, before limiting results. Open-status remains based on the
   existing schedule-note heuristic, not a guarantee that a restaurant is open.
@@ -221,36 +230,94 @@ requests return 503. A missing feed returns 404 and an invalid `rss_type` return
 
 ## Course queries
 
-The supported course endpoints are `GET /courses` for ordinary queries and
-`POST /courses/query` for the complex query DSL. GET without filters returns
-all courses; empty field values apply no filter. All supplied field filters and
-the optional `type` filter are combined with AND.
+### Semester selection
+
+`GET /courses` and `POST /courses/query` use the publisher's
+`courses/latest.json`. They do not infer a semester from today's date or the
+largest published semester code. Select a semester with `GET /courses/{semester}`
+or `POST /courses/{semester}/query`. Every course operation returns an array
+of the same normalized course objects.
+
+`GET /courses/semesters` returns five-digit semester codes, newest first, from
+the published `courses/sources.json` catalog:
+
+```json
+["11510", "11420", "11410"]
+```
+
+This is a shortened example, not the complete list. Discover available semesters
+rather than hardcoding them. `11510` means academic year 115, first semester;
+the path uses the complete publisher code without shortening it to `1151`.
+
+Malformed codes return **422**; well-formed, unpublished semesters return **404**.
+An unavailable catalog or course dataset with no usable snapshot returns **503**.
+A stale/unverified catalog cannot establish that an absent semester is unpublished:
+that case returns 503 instead of 404. Known entries may still use usable snapshots.
+There is no fallback to another semester or to latest.
+
+Course and semester-list responses include `X-Total-Count` and, when known,
+`X-Data-Commit-Hash` for the specific file used. latest and a named semester can
+have different contents and versions even when their semester codes agree.
+
+### GET filters
+
+GET without filters returns all courses; empty text filters apply no filter.
+All supplied field filters and the optional `type` filter are combined with AND.
+Text filters use regex; numbers and booleans use exact typed equality. Zero and
+false are real filters, not missing values. Unknown query parameters are rejected
+with 422.
 
 ```text
 GET /courses
-GET /courses?teacher=林福仁
+GET /courses/semesters
+GET /courses/11510
+GET /courses/11510?lecturers.name_zh=林福仁
+GET /courses/11420?lecturers.label=林福仁
 GET /courses?chinese_title=服務
+GET /courses?language_code=zh%7Cen
+GET /courses/11510?credits=3&is_cancelled=false
+GET /courses/11510?meetings.time_codes=M3
 GET /courses?type=microcredits
-GET /courses?type=xclass&teacher=林福仁
+GET /courses?type=xclass&lecturers.name_zh=林福仁
 ```
 
-`type` accepts `microcredits` and `xclass`, using the same predefined conditions
-as the legacy lists. Unknown or empty types return HTTP 422.
+`type` accepts `microcredits` (credits with a fractional part, such as 0.5 or 1.5;
+not integer credits or null) and `xclass` (case-sensitive `X-Class` in `note`).
+Unknown or empty types return HTTP 422.
+`language_code` is a text regex filter (for example, `zh|en`); published
+course values remain limited to `zh`, `en`, or null.
+
+Nested filters use leaf paths: `lecturers.label`, `lecturers.name_zh`,
+`lecturers.name_en`, `meetings.classroom`, `meetings.time`, `meetings.time_codes`,
+`expertises.name`, `expertises.type`, `curriculum_requirements.target`, and
+`curriculum_requirements.requirement`. `programs` and `parsing_issues` match
+individual string elements. Array predicates match **any** element. Two ANDed
+predicates may match different objects in the same array; same-object grouping
+is not supported. Missing teacher-union keys do not count as null values.
+
+### POST query DSL
 
 For nested AND/OR queries, send a condition object or a condition array to
-`POST /courses/query`:
+`POST /courses/query` or `POST /courses/11510/query`:
 
 ```json
 [
-  {"row_field": "teacher", "matcher": "黃", "regex_match": true},
+  {"row_field": "lecturers.name_zh", "matcher": "黃", "regex_match": true},
   "or",
-  {"row_field": "teacher", "matcher": "孫", "regex_match": true}
+  {"row_field": "lecturers.name_zh", "matcher": "孫", "regex_match": true}
 ]
 ```
 
-`regex_match` defaults to `false` (exact matching); set it to `true` for
-substring or regular-expression matching. Responses remain arrays of courses,
-with `X-Total-Count` and `X-Data-Commit-Hash` headers.
+`regex_match` defaults to `false` (exact matching). `matcher` must have the
+field's native type: `{"row_field":"credits","matcher":3}`,
+`{"row_field":"is_cancelled","matcher":false}`, or
+`{"row_field":"language_code","matcher":null}`. Null only matches an explicitly
+unknown nullable value, not a missing union key, empty array, empty string,
+zero or false. GET does not have a special `"null"` query value.
+
+Set `regex_match` to `true` only with a string matcher and a text field/leaf.
+Wrong matcher types and regex applied to non-text fields return 422, including
+on empty datasets. Numeric comparisons other than equality are not supported.
 
 A condition object may also be wrapped in a single-element array. Every non-empty
 array, including nested arrays, must have an odd number of elements alternating
@@ -265,6 +332,63 @@ counts as one node; fields inside condition objects do not count separately.
 Malformed grammar, exceeded limits and invalid regex syntax return HTTP 422,
 even when the course dataset is empty. The `/courses/search` and
 `/courses/lists/{list_name}` legacy operations are removed.
+
+### Normalized fields and 3.0 migration
+
+All course objects expose 33 fields. Numeric and boolean metadata may be null;
+missing source information is not silently converted to zero, false or Chinese.
+Arrays remain arrays, including empty arrays. Old field names are not aliases.
+
+| Before 3.0 | 3.0 field | Type |
+| --- | --- | --- |
+| `credit` | `credits` | nonnegative number or null |
+| `size_limit` | `capacity`, `capacity_unlimited` | nonnegative integer or null; boolean or null |
+| `freshman_reservation` | `reserved_for_freshmen` | nonnegative integer or null |
+| `suspend` | `is_cancelled` | boolean or null |
+| `language` | `language_code` | `"zh"`, `"en"` or null |
+| `teacher` | `lecturers` | array of `{label}` or `{name_zh, name_en}` |
+| `class_room_and_time` | `meetings` | array of `{classroom, time, time_codes}` |
+| `expertise` | `expertises` | array of `{name, type}` |
+| `program` | `programs` | string array |
+| `required_optional_note` | `curriculum_requirements` | array of `{target, requirement}` |
+| `prerequisite` | `prerequisite_text` | string |
+
+Retained names are `id`, `chinese_title`, `english_title`, `note`, `limit_note`,
+`object`, `ge_type`, and `no_extra_selection`. Note the corrected publisher
+semantics: `object` is the course audience/enrollment restriction, `ge_type`
+is the general-education audience, and the new `ge_category` is its category.
+
+Other new fields are `semester_code`; nullable text `department_code`,
+`course_number`, `department_name`, `college_name`, `course_level_code`,
+`course_level`, `remote_teaching`; nullable nonnegative integers `enrolled_count`,
+`enrollment_after_selection`, `enrollment_after_withdrawal`; and string-array
+`parsing_issues`. The three enrollment counts represent different source
+measurements and must not be substituted for each other. A capacity of zero,
+unlimited capacity and unknown capacity are distinct.
+
+Teacher objects preserve their published shape. A historical `{label}` is not
+guessed into Chinese and English names. Nested object values may be null;
+`meetings.time_codes` may also be null when the publisher could not parse the
+time text. Parser warnings are preserved, not repaired or used to reject otherwise
+valid records. Required fields and invalid structures still fail snapshot
+installation; an older usable snapshot is retained if available.
+
+MCP `search_courses` keeps `keyword`, `teacher`, `course_id` and `limit` and adds
+optional `semester`. `teacher` matches literal substrings in label, Chinese or
+English lecturer names. Its result remains `{count, courses}`, but each course
+now contains the complete normalized model above; old `credit`, `teacher`,
+`time_and_room` and `language` output fields are removed. MCP semester failures
+are tool errors, not successful empty results.
+
+### Snapshot loading
+
+Startup loads latest and the semester catalog. Historical semesters load on
+demand, using independent snapshots and refresh locks. REST and MCP in the same
+app share these snapshots; switching semesters does not change other requests'
+data. A failed refresh may serve only that dataset's last-known-good snapshot.
+`/ping` includes lazily registered semester datasets, so a requested semester
+without a usable snapshot also affects readiness. Polling readiness alone does
+not trigger recovery.
 
 ## Newsletter queries
 

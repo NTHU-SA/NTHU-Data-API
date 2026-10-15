@@ -186,7 +186,40 @@ def git_file(base_sha: str, path: str) -> str:
     ).stdout
 
 
-def compare_base(root: Path, base_sha: str, version: str) -> list[str]:
+def initial_version_is_unpublished(version: str) -> bool:
+    """Query the authoritative repository, never infer publication from a shallow clone."""
+    if version != "3.0.0":
+        return False
+    ref = f"refs/tags/v{version}"
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "ls-remote",
+                "--exit-code",
+                "--refs",
+                "https://github.com/NTHU-SA/NTHU-Data-API.git",
+                ref,
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError("Unable to verify release publication") from exc
+    if result.returncode == 2 and not result.stdout.strip():
+        return True
+    if result.returncode == 0 and re.fullmatch(
+        rf"[0-9a-f]{{40}}\s+{re.escape(ref)}\s*", result.stdout
+    ):
+        return False
+    raise ValueError("Unable to verify release publication")
+
+
+def compare_base(
+    root: Path, base_sha: str, version: str, *, check_publication: bool = False
+) -> list[str]:
     previous = tomllib.loads(git_file(base_sha, "pyproject.toml"))["project"]["version"]
     current_version, previous_version = version_tuple(version), version_tuple(previous)
     if current_version < previous_version:
@@ -203,7 +236,12 @@ def compare_base(root: Path, base_sha: str, version: str) -> list[str]:
     for change in changes:
         print(change)
     if changes and current_version[0] <= previous_version[0]:
-        raise ValueError("Public contract changes require a major version increase")
+        if not (
+            check_publication
+            and version == previous == "3.0.0"
+            and initial_version_is_unpublished(version)
+        ):
+            raise ValueError("Public contract changes require a major version increase")
     return changes
 
 
@@ -211,6 +249,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", help="Required vX.Y.Z tag for deployment validation")
     parser.add_argument("--base-sha", help="Compare checked-in contracts against a PR base SHA")
+    parser.add_argument(
+        "--check-publication",
+        action="store_true",
+        help="Verify whether the initial 3.0.0 contract is still unpublished",
+    )
     parser.add_argument("--next-version", help="Validate a proposed version before preparing a PR")
     args = parser.parse_args()
     try:
@@ -218,7 +261,9 @@ def main() -> int:
         if args.next_version and version_tuple(args.next_version) <= version_tuple(version):
             raise ValueError("New release version must be greater than the current version")
         if args.base_sha:
-            compare_base(Path.cwd(), args.base_sha, version)
+            compare_base(
+                Path.cwd(), args.base_sha, version, check_publication=args.check_publication
+            )
     except (ValueError, KeyError, OSError, subprocess.CalledProcessError) as exc:
         parser.exit(1, f"Release validation failed: {exc}\n")
     print(f"Release version validated: {version}")

@@ -1,4 +1,4 @@
-"""Courses router."""
+"""Latest and semester-specific normalized course queries."""
 
 from typing import Annotated
 
@@ -6,136 +6,136 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 from pydantic import ValidationError
 
 from data_api.api.schemas import courses as schemas
-from data_api.api.schemas.errors import VALIDATION_ERROR_RESPONSES
+from data_api.api.schemas.errors import VALIDATION_ERROR_RESPONSES, ErrorResponse
 from data_api.api.schemas.responses import COUNTED_SNAPSHOT_RESPONSES
-from data_api.domain.courses import models
+from data_api.data.nthudata import Snapshot
+from data_api.domain.courses.models import Conditions
+from data_api.domain.courses.services import UnknownSemester
+from data_api.models.courses import SemesterCode
 from data_api.runtime import get_runtime
 
 router = APIRouter(responses={**COUNTED_SNAPSHOT_RESPONSES, **VALIDATION_ERROR_RESPONSES})
 COURSE_QUERY_ERROR_RESPONSES = {
     422: {
         **VALIDATION_ERROR_RESPONSES[422],
-        "description": "Invalid condition grammar, query limits or regular expression",
+        "description": "Invalid condition grammar, matcher types, query limits or regular expression",
     }
 }
+SEMESTER_ERRORS = {404: {"model": ErrorResponse, "description": "Semester is not published"}}
 
 
-async def add_custom_header(response: Response):
-    """Add X-Data-Commit-Hash header."""
-    service = get_runtime().courses
-    await service.update_data()
-    if service.last_commit_hash is not None:
-        response.headers["X-Data-Commit-Hash"] = service.last_commit_hash
+async def latest_snapshot() -> Snapshot[list[schemas.CourseData]]:
+    return await get_runtime().courses.get_snapshot()
 
 
-def _course_type_condition(course_type: schemas.CourseListName) -> models.Conditions:
-    match course_type:
-        case schemas.CourseListName.microcredits:
-            return models.Conditions("credit", "[0-9].[0-9]", True)
-        case schemas.CourseListName.xclass:
-            return models.Conditions("note", "X-Class", True)
-    raise ValueError(f"Unsupported course type: {course_type}")
+async def semester_snapshot(semester: SemesterCode) -> Snapshot[list[schemas.CourseData]]:
+    try:
+        return await get_runtime().courses.get_snapshot(semester)
+    except UnknownSemester as exc:
+        raise HTTPException(404, detail="Semester is not published.") from exc
 
 
-def _filter_courses(
-    response: Response,
-    filters: schemas.CourseSearchParams,
-    course_type: schemas.CourseListName | None = None,
-) -> list[models.CourseData]:
-    condition = models.Conditions(list_build_target=[])
-    query_params = filters.model_dump(mode="json", exclude_none=True)
-    for field_name in schemas.CourseFieldName:
-        field_value = query_params.get(field_name.value)
-        if not field_value:
-            continue
-        try:
-            query_condition = schemas.CourseCondition(
-                row_field=field_name, matcher=field_value, regex_match=True
-            )
-        except ValidationError as exc:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Invalid regular expression for course field '{field_name.value}'.",
-            ) from exc
-        condition &= models.Conditions(
-            query_condition.row_field.value,
-            query_condition.matcher,
-            query_condition.regex_match,
-        )
-    if course_type is not None:
-        condition &= _course_type_condition(course_type)
+LatestSnapshot = Annotated[Snapshot[list[schemas.CourseData]], Depends(latest_snapshot)]
+SemesterSnapshot = Annotated[Snapshot[list[schemas.CourseData]], Depends(semester_snapshot)]
+CourseFilters = Annotated[schemas.CourseGetParams, Query()]
+CourseQuery = Annotated[schemas.CourseQueryCondition | schemas.CourseCondition, Body()]
 
-    result = get_runtime().courses.query(condition)
+
+def counted_response[T](
+    response: Response, snapshot: Snapshot[list[T]], result: list[T]
+) -> list[T]:
     response.headers["X-Total-Count"] = str(len(result))
+    if snapshot.version is not None:
+        response.headers["X-Data-Commit-Hash"] = snapshot.version
     return result
 
 
-@router.get(
-    "",
-    response_model=list[schemas.CourseData],
-    dependencies=[Depends(add_custom_header)],
-    operation_id="getCourses",
-)
-async def get_courses(
+def filter_courses(
     response: Response,
-    filters: Annotated[schemas.CourseGetParams, Query()],
-):
-    """
-    取得課程；未提供篩選條件時回傳所有課程。
-    欄位值使用正則表達式，所有欄位與 type 條件以 AND 組合。
-    type 可為 microcredits 或 xclass；無效類型或正則表達式回傳 HTTP 422。
-    資料來源：[教務處課務組/JSON格式下載](https://curricul.site.nthu.edu.tw/p/406-1208-111356,r7883.php?Lang=zh-tw)
-    """
-    return _filter_courses(response, filters, filters.type)
+    snapshot: Snapshot[list[schemas.CourseData]],
+    filters: schemas.CourseGetParams,
+) -> list[schemas.CourseData]:
+    condition = Conditions(list_build_target=[])
+    for field_name, value in filters.model_dump(
+        mode="json", by_alias=True, exclude_none=True, exclude={"type"}
+    ).items():
+        if value == "":
+            continue
+        try:
+            query = schemas.CourseCondition(
+                row_field=field_name, matcher=value, regex_match=isinstance(value, str)
+            )
+        except ValidationError as exc:
+            raise HTTPException(
+                422, detail=f"Invalid regular expression for course field '{field_name}'."
+            ) from exc
+        condition &= Conditions(query.row_field, query.matcher, query.regex_match)
+    result = get_runtime().courses.query(snapshot.data, condition, filters.type)
+    return counted_response(response, snapshot, result)
+
+
+def query_courses(
+    response: Response,
+    snapshot: Snapshot[list[schemas.CourseData]],
+    query: schemas.CourseQueryCondition | schemas.CourseCondition,
+) -> list[schemas.CourseData]:
+    body = query.model_dump(mode="json")
+    condition = Conditions(list_build_target=[body] if isinstance(body, dict) else body)
+    result = get_runtime().courses.query(snapshot.data, condition)
+    return counted_response(response, snapshot, result)
+
+
+@router.get("", response_model=list[schemas.CourseData], operation_id="getCourses")
+async def get_courses(response: Response, filters: CourseFilters, snapshot: LatestSnapshot):
+    """查詢最新課程。文字欄位使用 regex，數值與布林精確比對；所有條件以 AND 組合。"""
+    return filter_courses(response, snapshot, filters)
+
+
+@router.get("/semesters", response_model=list[SemesterCode], operation_id="getCourseSemesters")
+async def get_semesters(response: Response):
+    """列出已公布的學期碼，由新到舊排序。"""
+    snapshot = await get_runtime().courses.get_semesters()
+    return counted_response(response, snapshot, snapshot.data)
 
 
 @router.post(
     "/query",
     response_model=list[schemas.CourseData],
-    dependencies=[Depends(add_custom_header)],
     operation_id="queryCourses",
     responses=COURSE_QUERY_ERROR_RESPONSES,
 )
 async def search_courses_by_condition(
-    response: Response,
-    query_condition: Annotated[
-        schemas.CourseQueryCondition | schemas.CourseCondition,
-        Body(
-            openapi_examples={
-                "normal_1": {
-                    "summary": "單一搜尋條件",
-                    "value": {
-                        "row_field": "chinese_title",
-                        "matcher": "數統導論",
-                        "regex_match": True,
-                    },
-                },
-                "normal_2": {
-                    "summary": "兩個搜尋條件",
-                    "value": [
-                        {"row_field": "teacher", "matcher": "黃", "regex_match": True},
-                        "or",
-                        {"row_field": "teacher", "matcher": "孫", "regex_match": True},
-                    ],
-                },
-            }
-        ),
-    ],
+    response: Response, query_condition: CourseQuery, snapshot: LatestSnapshot
 ):
+    """進階搜尋最新課程。條件以 and/or 交替並由左至右計算，支援巢狀陣列。
+
+    空陣列符合全部；最多 32 層與 1024 節點。matcher 使用欄位的原生型別，
+    regex_match 只適用文字，預設為 false。陣列葉節點採任一元素符合。
     """
-    進階搜尋，根據條件取得課程。可以使用巢狀條件。
-    非空陣列必須依條件、and/or 運算子、條件交替排列，並由左至右計算；空陣列符合全部課程。
-    最多 32 層陣列及 1024 個節點（陣列、條件物件、運算子）；無效文法或超過上限回傳 HTTP 422。
-    regex_match 啟用時使用正則表達式，格式無效時回傳 HTTP 422；否則使用完全符合。
-    """
-    if type(query_condition) is schemas.CourseCondition:
-        condition = models.Conditions(
-            query_condition.row_field.value,
-            query_condition.matcher,
-            query_condition.regex_match,
-        )
-    elif type(query_condition) is schemas.CourseQueryCondition:
-        condition = models.Conditions(list_build_target=query_condition.model_dump(mode="json"))
-    result = get_runtime().courses.query(condition)
-    response.headers["X-Total-Count"] = str(len(result))
-    return result
+    return query_courses(response, snapshot, query_condition)
+
+
+@router.get(
+    "/{semester}",
+    response_model=list[schemas.CourseData],
+    operation_id="getSemesterCourses",
+    responses=SEMESTER_ERRORS,
+)
+async def get_semester_courses(
+    response: Response, filters: CourseFilters, snapshot: SemesterSnapshot
+):
+    """查詢指定學期課程，篩選方式與 GET /courses 相同，不自動改查其他學期。"""
+    return filter_courses(response, snapshot, filters)
+
+
+@router.post(
+    "/{semester}/query",
+    response_model=list[schemas.CourseData],
+    operation_id="querySemesterCourses",
+    responses={**SEMESTER_ERRORS, **COURSE_QUERY_ERROR_RESPONSES},
+)
+async def query_semester_courses(
+    response: Response, query_condition: CourseQuery, snapshot: SemesterSnapshot
+):
+    """進階搜尋指定學期，條件文法與 POST /courses/query 相同。"""
+    return query_courses(response, snapshot, query_condition)

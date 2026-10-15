@@ -8,6 +8,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from conftest import course_payload
 
 from data_api.api.schemas.ping import DatasetHealth, PingResponse
 from data_api.checks.common import CheckFailure, fetch_json, report
@@ -29,7 +30,9 @@ def publication():
         {
             "/buses.json": {},
             "/maps.json": {},
-            "/courses.json": [{"id": "11510TEST100000", "chinese_title": "Test", "language": "中"}],
+            "/courses/latest.json": [course_payload()],
+            "/courses/sources.json": {"semesters": ["11510"]},
+            "/courses/semesters/11510.json": [course_payload()],
             "/libraries/rss.json": rss,
         }
     )
@@ -37,7 +40,7 @@ def publication():
     manifest = {"file_details": {"/": [], "libraries": []}}
     for path, content in documents.items():
         section, _, name = path.lstrip("/").rpartition("/")
-        manifest["file_details"][section or "/"].append(
+        manifest["file_details"].setdefault(section or "/", []).append(
             {
                 "name": name,
                 "version": "fixture",
@@ -77,13 +80,13 @@ async def test_complete_publication_accepts_url_regressions_and_serializes(publi
 
 
 async def test_publication_check_does_not_reset_an_active_runtime(publication, dataset_runtime):
-    await dataset_runtime.get("courses.json")
-    snapshot = dataset_runtime.states["/courses.json"].snapshot
+    await dataset_runtime.get("courses/latest.json")
+    snapshot = dataset_runtime.states["/courses/latest.json"].snapshot
     active_client = dataset_runtime.fetcher.client
     documents, manifest = publication
     async with published_client(documents, manifest) as client:
         assert await check_published(client, "https://publisher.test") == []
-    assert dataset_runtime.states["/courses.json"].snapshot is snapshot
+    assert dataset_runtime.states["/courses/latest.json"].snapshot is snapshot
     assert dataset_runtime.fetcher.client is active_client
     assert not active_client.is_closed
 
@@ -94,7 +97,7 @@ async def test_legacy_manifest_and_empty_datasets_are_accepted(publication):
         for entry in entries:
             entry.pop("version")
             entry.pop("sha256")
-    documents["/courses.json"] = b"[]"
+    documents["/courses/latest.json"] = b"[]"
     documents["/libraries/rss.json"] = json.dumps(
         {"news": [], "eresources": [], "exhibit": [], "branches": []}
     ).encode()
@@ -133,7 +136,7 @@ async def test_delivery_failures_identify_dataset_and_stage(publication, respons
     "path,payload,expected_stage",
     [
         ("/directory.json", [{"unexpected": "private payload"}], "candidate"),
-        ("/courses.json", [{"id": ""}], "candidate"),
+        ("/courses/latest.json", [{"id": ""}], "candidate"),
         ("/buses.json", {"unexpected": []}, "candidate"),
         (
             "/libraries/rss.json",
@@ -166,6 +169,40 @@ async def test_missing_required_manifest_entry_is_not_silently_loaded(publicatio
         "/libraries/calendars.json",
     }
     assert all(failure.stage == "manifest" for failure in failures)
+
+
+async def test_published_semester_must_have_manifest_entry(publication):
+    documents, manifest = publication
+    manifest["file_details"]["courses/semesters"] = []
+    async with published_client(documents, manifest) as client:
+        failures = await check_published(client, "https://publisher.test")
+    assert failures == [
+        CheckFailure(
+            "/courses/semesters/11510.json",
+            "manifest",
+            "published semester dataset is missing",
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        [course_payload(id="11420OTHER", semester_code="11420")],
+        [course_payload(), course_payload()],
+        [{"id": "11510INVALID"}],
+    ],
+)
+async def test_published_semester_model_and_identity_are_validated(publication, payload):
+    documents, manifest = publication
+    path = "/courses/semesters/11510.json"
+    documents[path] = json.dumps(payload).encode()
+    manifest["file_details"]["courses/semesters"][0].pop("sha256")
+    async with published_client(documents, manifest) as client:
+        failures = await check_published(client, "https://publisher.test")
+    assert len(failures) == 1
+    assert failures[0].target == path
+    assert failures[0].stage == "candidate"
 
 
 async def test_duplicate_manifest_is_rejected(publication):
@@ -287,9 +324,9 @@ async def test_smoke_reports_endpoint_schema_headers_and_availability(path, resp
 async def test_smoke_rejects_false_readiness(missing, unusable):
     payload = healthy_readiness()
     if missing:
-        del payload["datasets"]["/courses.json"]
+        del payload["datasets"]["/courses/latest.json"]
     if unusable:
-        payload["datasets"]["/courses.json"]["usable"] = False
+        payload["datasets"]["/courses/latest.json"]["usable"] = False
     async with smoke_client(
         {"/ping": httpx.Response(200, json=payload, headers={"Cache-Control": "no-store"})}
     ) as client:

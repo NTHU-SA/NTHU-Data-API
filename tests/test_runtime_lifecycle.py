@@ -2,6 +2,7 @@
 
 import httpx
 import pytest
+from conftest import course_payload
 from fastmcp import Client
 from test_data_manager import Clock, Publisher
 
@@ -15,7 +16,7 @@ from data_api.mcp.server import mcp
 async def test_rest_and_mcp_observe_runtime_course_refresh(monkeypatch):
     clock = Clock()
     publisher = Publisher(
-        [{"id": "A", "english_title": "Version A", "language": "中"}], "courses.json"
+        [course_payload(id="11510A", english_title="Version A")], "courses/latest.json"
     )
     monkeypatch.setattr(nthudata, "clock", clock)
     async with nthudata.lifespan(publisher.client()):
@@ -26,38 +27,40 @@ async def test_rest_and_mcp_observe_runtime_course_refresh(monkeypatch):
             Client(mcp) as tools,
         ):
             first = await rest.get("/courses")
-            assert first.json()[0]["id"] == "A"
+            assert first.json()[0]["id"] == "11510A"
             assert first.headers["X-Data-Commit-Hash"] == "a"
             publisher.version, publisher.payload = "b", [
-                {"id": "B", "english_title": "Version B", "language": "中"}
+                course_payload(id="11510B", english_title="Version B")
             ]
             clock.advance()
             second = await rest.get("/courses?english_title=Version")
-            assert second.json()[0]["id"] == "B"
+            assert second.json()[0]["id"] == "11510B"
             assert second.headers["X-Data-Commit-Hash"] == "b"
             result = await tools.call_tool("search_courses", {})
-            assert result.data["courses"][0]["id"] == "B"
-            assert courses_service.state is nthudata.states["/courses.json"]
-            assert courses_service.course_data is courses_service.state.snapshot.data
-            assert publisher.calls.count("/courses.json") == 2
+            assert result.data["courses"][0]["id"] == "11510B"
+            assert courses_service.state is nthudata.states["/courses/latest.json"]
+            assert (
+                await courses_service.get_snapshot()
+            ).data is courses_service.state.snapshot.data
+            assert publisher.calls.count("/courses/latest.json") == 2
 
-            publisher.version, publisher.payload = "c", [{"id": "C", "language": "中"}]
+            publisher.version, publisher.payload = "c", [course_payload(id="11510C")]
             clock.advance()
             result = await tools.call_tool("search_courses", {})
-            assert result.data["courses"][0]["id"] == "C"
-            assert (await rest.get("/courses")).json()[0]["id"] == "C"
+            assert result.data["courses"][0]["id"] == "11510C"
+            assert (await rest.get("/courses")).json()[0]["id"] == "11510C"
             publisher.version, publisher.data_error = "d", 503
             clock.advance()
             fallback = await rest.get("/courses")
             assert fallback.status_code == 200
-            assert fallback.json()[0]["id"] == "C"
+            assert fallback.json()[0]["id"] == "11510C"
             assert fallback.headers["X-Data-Commit-Hash"] == "c"
             assert courses_service.state.freshness == Freshness.STALE
 
 
 @pytest.mark.parametrize("empty", [True, False])
 async def test_cold_start_empty_is_not_unavailable(empty):
-    publisher = Publisher([], "courses.json")
+    publisher = Publisher([], "courses/latest.json")
     if not empty:
         publisher.data_error = 503
     async with nthudata.lifespan(publisher.client()):
@@ -160,7 +163,7 @@ async def test_other_datasets_empty_unversioned_and_unavailable(
 
 @pytest.mark.parametrize("upstream_available", [True, False])
 async def test_real_data_lifespan_client_cleanup(monkeypatch, upstream_available):
-    publisher = Publisher([{"id": "A", "language": "中"}], "courses.json")
+    publisher = Publisher([course_payload()], "courses/latest.json")
     if not upstream_available:
         publisher.data_error = 503
 

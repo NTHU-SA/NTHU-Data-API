@@ -1,216 +1,137 @@
-"""Tests for course domain models."""
+"""Normalized course structure, typed matchers and array query semantics."""
 
 import pytest
+from conftest import course_payload, make_course
+from pydantic import ValidationError
 
-from data_api.domain.courses.models import Condition, Conditions, CourseData
-
-
-class TestCourseData:
-    """Tests for CourseData model."""
-
-    async def test_from_dict_with_chinese_keys(self):
-        """Test creating CourseData from dict with Chinese keys."""
-        data = {
-            "科號": "MATH1001",
-            "課程中文名稱": "微積分",
-            "課程英文名稱": "Calculus",
-            "學分數": "3",
-            "人限": "50",
-            "新生保留人數": "10",
-            "通識對象": "全校",
-            "通識類別": "自然",
-            "授課語言": "中文",
-            "備註": "無",
-            "停開註記": "",
-            "教室與上課時間": "M3M4",
-            "授課教師": "張三",
-            "擋修說明": "",
-            "課程限制說明": "",
-            "第一二專長對應": "",
-            "學分學程對應": "",
-            "不可加簽說明": "",
-            "必選修說明": "必修",
-        }
-        course = CourseData.from_dict(data)
-        assert course.id == "MATH1001"
-        assert course.chinese_title == "微積分"
-        assert course.english_title == "Calculus"
-        assert course.credit == "3"
-
-    async def test_from_dict_with_english_keys(self):
-        """Test creating CourseData from dict with English keys."""
-        data = {
-            "id": "CS1001",
-            "chinese_title": "程式設計",
-            "english_title": "Programming",
-            "credit": "3",
-            "size_limit": "60",
-            "freshman_reservation": "15",
-            "object": "",
-            "ge_type": "",
-            "language": "中文",
-            "note": "",
-            "suspend": "",
-            "class_room_and_time": "T2T3",
-            "teacher": "李四",
-            "prerequisite": "",
-            "limit_note": "",
-            "expertise": "",
-            "program": "",
-            "no_extra_selection": "",
-            "required_optional_note": "",
-        }
-        course = CourseData.from_dict(data)
-        assert course.id == "CS1001"
-        assert course.chinese_title == "程式設計"
-
-    async def test_from_dict_missing_fields(self):
-        """Test creating CourseData with missing fields defaults to empty string."""
-        data = {"科號": "TEST001"}
-        course = CourseData.from_dict(data)
-        assert course.id == "TEST001"
-        assert course.chinese_title == ""
-        assert course.credit == ""
-
-    async def test_repr(self):
-        """Test CourseData string representation."""
-        data = {"科號": "TEST001", "課程中文名稱": "測試課程"}
-        course = CourseData.from_dict(data)
-        repr_str = repr(course)
-        assert "TEST001" in repr_str
+from data_api.domain.courses.models import Condition, Conditions
+from data_api.domain.courses.services import prepare_catalog, prepare_courses
+from data_api.models.courses import CourseCondition, CourseData
 
 
-class TestCondition:
-    """Tests for Condition model."""
-
-    async def test_condition_exact_match(self):
-        """Test exact match condition."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
-        cond = Condition(row_field="id", matcher="MATH1001", regex_match=False)
-        assert cond.check(course) is True
-
-    async def test_condition_exact_match_fail(self):
-        """Test exact match condition fails for non-matching."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
-        cond = Condition(row_field="id", matcher="CS1001", regex_match=False)
-        assert cond.check(course) is False
-
-    async def test_condition_regex_match(self):
-        """Test regex match condition."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
-        cond = Condition(row_field="id", matcher="MATH", regex_match=True)
-        assert cond.check(course) is True
-
-    async def test_condition_regex_match_fail(self):
-        """Test regex match condition fails for non-matching."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
-        cond = Condition(row_field="id", matcher="CS", regex_match=True)
-        assert cond.check(course) is False
-
-    async def test_condition_field_name_lowercase(self):
-        """Test field name is converted to lowercase."""
-        course = CourseData.from_dict({"科號": "MATH1001"})
-        cond = Condition(row_field="ID", matcher="MATH1001", regex_match=False)
-        assert cond.row_field == "id"
-
-
-class TestConditions:
-    """Tests for Conditions model."""
-
-    async def test_conditions_single(self):
-        """Test single condition."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
-        conds = Conditions(row_field="id", matcher="MATH", regex_match=True)
-        assert conds.accept(course) is True
-
-    async def test_conditions_and(self):
-        """Test AND combination of conditions."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"})
-        cond1 = Conditions(row_field="id", matcher="MATH", regex_match=True)
-        cond2 = Conditions(row_field="credit", matcher="3", regex_match=False)
-        combined = cond1 & cond2
-        assert combined.accept(course) is True
-
-    async def test_conditions_or(self):
-        """Test OR combination of conditions."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分"})
-        cond1 = Conditions(row_field="id", matcher="CS", regex_match=True)
-        cond2 = Conditions(row_field="id", matcher="MATH", regex_match=True)
-        combined = cond1 | cond2
-        assert combined.accept(course) is True
-
-    async def test_conditions_complex(self):
-        """Test complex condition tree."""
-        course = CourseData.from_dict({"科號": "MATH1001", "課程中文名稱": "微積分", "學分數": "3"})
-        cond1 = Conditions(row_field="id", matcher="MATH", regex_match=True)
-        cond2 = Conditions(row_field="credit", matcher="3", regex_match=False)
-        cond3 = Conditions(row_field="id", matcher="CS", regex_match=True)
-        combined = (cond1 & cond2) | cond3
-        assert combined.accept(course) is True
-
-    async def test_conditions_from_list(self):
-        """Test conditions from list_build_target."""
-        course = CourseData.from_dict({"科號": "MATH1001"})
-        conds = Conditions(
-            list_build_target=[
-                {"row_field": "id", "matcher": "MATH", "regex_match": True},
-                "and",
-                True,
-            ]
-        )
-        assert conds.accept(course) is True
-
-    async def test_conditions_empty_list(self):
-        """Test conditions with empty list returns True."""
-        course = CourseData.from_dict({"科號": "MATH1001"})
-        conds = Conditions(list_build_target=[])
-        assert conds.accept(course) is True
-
-    async def test_conditions_no_args_raises(self):
-        """Test that missing required args raises ValueError."""
-        with pytest.raises(ValueError):
-            Conditions()
-
-    async def test_conditions_unknown_operator_raises(self):
-        """Test that unknown operator raises ValueError."""
-        course = CourseData.from_dict({"科號": "MATH1001"})
-        conds = Conditions(
-            list_build_target=[
-                {"row_field": "id", "matcher": "MATH", "regex_match": True},
-                "xor",
-                {"row_field": "id", "matcher": "CS", "regex_match": True},
-            ]
-        )
-        with pytest.raises(ValueError, match="Unknown operator"):
-            conds.accept(course)
-
-    async def test_conditions_invalid_item_type_raises(self):
-        """Test that invalid operands raise a grammar validation error."""
-        course = CourseData.from_dict({"科號": "MATH1001"})
-        conds = Conditions(list_build_target=["invalid_string", "and", True])
-        with pytest.raises(ValueError, match="Expected a condition"):
-            conds.accept(course)
-
-    @pytest.mark.parametrize(
-        "body",
-        [
-            [{"row_field": "id", "matcher": "MATH1001"}] * 2,
-            [{"row_field": "id", "matcher": "MATH1001"}] * 3,
-            [{"row_field": "id", "matcher": "MATH1001"}, "and"],
-            [
-                {"row_field": "id", "matcher": "MATH1001"},
-                "and",
-                "or",
-                {"row_field": "id", "matcher": "MATH1001"},
-            ],
-            [
-                {"row_field": "id", "matcher": "MATH1001"},
-                "and",
-                [{"row_field": "id", "matcher": "MATH1001"}] * 2,
-            ],
-        ],
+def test_complete_normalized_course_and_union_shapes():
+    payload = course_payload(
+        lecturers=[{"label": "Historical teacher"}, {"name_zh": "姓名", "name_en": None}],
+        meetings=[{"classroom": None, "time": "bad", "time_codes": None}],
+        credits=None,
+        language_code=None,
+        is_cancelled=None,
+        parsing_issues=["Unrecognized time code"],
     )
-    def test_conditions_reject_malformed_sequences(self, body):
-        course = CourseData.from_dict({"id": "MATH1001"})
-        with pytest.raises(ValueError):
-            Conditions(list_build_target=body).accept(course)
+    assert CourseData.model_validate(payload).model_dump(mode="json") == payload
+    assert len(payload) == 33
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"id": ""},
+        {"id": "11410TEST100000"},
+        {"semester_code": "１１５１０"},
+        {"chinese_title": "", "english_title": " "},
+        {"credits": True},
+        {"credits": -1},
+        {"credits": float("inf")},
+        {"capacity": 1.5},
+        {"capacity": True},
+        {"enrolled_count": -1},
+        {"is_cancelled": "false"},
+        {"language_code": "中"},
+        {"lecturers": [{"label": "A", "name_en": "B"}]},
+        {"lecturers": [{"name_zh": "A"}]},
+        {"meetings": [{"classroom": "R", "time": "M1"}]},
+        {"programs": "Program"},
+    ],
+)
+def test_invalid_candidates_rejected(overrides):
+    with pytest.raises(ValidationError):
+        prepare_courses([course_payload(**overrides)])
+
+
+@pytest.mark.parametrize("field", list(course_payload()))
+def test_missing_published_fields_are_not_silently_filled(field):
+    payload = course_payload()
+    del payload[field]
+    with pytest.raises(ValidationError):
+        prepare_courses([payload])
+
+
+def test_snapshot_identity_and_semester_validation():
+    from data_api.data.nthudata import FetchFailure
+
+    with pytest.raises(FetchFailure, match="validation"):
+        prepare_courses([course_payload(), course_payload()])
+    with pytest.raises(FetchFailure, match="validation"):
+        prepare_courses([course_payload()], "11420")
+    with pytest.raises(FetchFailure, match="payload_type"):
+        prepare_courses({})
+    assert prepare_courses([]) == []
+    assert prepare_catalog({"semesters": ["11420", "11510"], "ignored": True}) == ["11510", "11420"]
+    for semesters in [["11510", "11510"], ["bad"], [11510]]:
+        with pytest.raises(ValidationError):
+            prepare_catalog({"semesters": semesters})
+
+
+@pytest.mark.parametrize(
+    "field,matcher,regex",
+    [
+        ("credits", "3", False),
+        ("credits", True, False),
+        ("credits", float("nan"), False),
+        ("capacity", 3.5, False),
+        ("capacity", -1, False),
+        ("is_cancelled", 0, False),
+        ("chinese_title", 3, False),
+        ("id", None, False),
+        ("credits", 3, True),
+        ("credits", "3", True),
+        ("note", None, True),
+        ("unknown", "x", False),
+        ("teacher", "x", False),
+    ],
+)
+def test_matcher_type_validation(field, matcher, regex):
+    with pytest.raises(ValidationError):
+        CourseCondition(row_field=field, matcher=matcher, regex_match=regex)
+
+
+def test_array_leaves_and_null_do_not_match_absent_keys_or_empty_arrays():
+    course = make_course(
+        lecturers=[{"label": "Alice"}, {"name_zh": "Bob", "name_en": None}],
+        meetings=[{"classroom": None, "time": "bad", "time_codes": None}],
+        programs=["Program A", "Program B"],
+    )
+    assert Condition("lecturers.label", "Alice").check(course)
+    assert Condition("lecturers.name_en", None).check(course)
+    assert Condition("meetings.time_codes", None).check(course)
+    assert Condition("programs", "B", True).check(course)
+    assert not Condition("lecturers.label", None).check(course)
+    assert not Condition("programs", "").check(course)
+    empty = make_course()
+    assert not Condition("lecturers.name_en", None).check(empty)
+    assert not Condition("meetings.time_codes", None).check(empty)
+    assert not Condition("programs", "A").check(empty)
+    assert Condition("is_cancelled", False).check(empty)
+    assert Condition("reserved_for_freshmen", 0).check(empty)
+
+
+def test_independent_any_conditions_and_cached_predicate():
+    course = make_course(lecturers=[{"label": "Alice"}, {"name_zh": "Bob", "name_en": None}])
+    conditions = Conditions("lecturers.label", "Alice") & Conditions("lecturers.name_zh", "Bob")
+    assert conditions.accept(course)
+    predicate = conditions._predicate
+    assert conditions.accept(course)
+    assert conditions._predicate is predicate
+    assert not hasattr(conditions, "course")
+    assert (Conditions("id", "absent") | conditions).accept(course)
+
+
+@pytest.mark.parametrize("body", [["and"], [True, "xor", True], [True, True], [42], [None]])
+def test_domain_invalid_conditions(body):
+    with pytest.raises((ValueError, TypeError)):
+        Conditions(list_build_target=body).accept(make_course())
+
+
+def test_conditions_require_a_field_or_sequence():
+    with pytest.raises(ValueError):
+        Conditions()

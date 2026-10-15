@@ -677,6 +677,33 @@
       "deprecated": false,
       "operationId": "getCourses",
       "parameters": {
+        "query:capacity": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:capacity_unlimited": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
         "query:chinese_title": {
           "required": false,
           "schema": {
@@ -690,7 +717,7 @@
             ]
           }
         },
-        "query:class_room_and_time": {
+        "query:college_name": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -703,7 +730,99 @@
             ]
           }
         },
-        "query:credit": {
+        "query:course_level": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:course_level_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:course_number": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:credits": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:curriculum_requirements.requirement": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:curriculum_requirements.target": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:department_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:department_name": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -729,7 +848,49 @@
             ]
           }
         },
-        "query:expertise": {
+        "query:enrolled_count": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:enrollment_after_selection": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:enrollment_after_withdrawal": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:expertises.name": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -742,7 +903,20 @@
             ]
           }
         },
-        "query:freshman_reservation": {
+        "query:expertises.type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:ge_category": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -781,12 +955,64 @@
             ]
           }
         },
-        "query:language": {
+        "query:is_cancelled": {
           "required": false,
           "schema": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CourseLanguage"
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:language_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:lecturers.label": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:lecturers.name_en": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:lecturers.name_zh": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
               },
               {
                 "type": "null"
@@ -795,6 +1021,45 @@
           }
         },
         "query:limit_note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:meetings.classroom": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:meetings.time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:meetings.time_codes": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -846,7 +1111,7 @@
             ]
           }
         },
-        "query:prerequisite": {
+        "query:parsing_issues": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -859,7 +1124,7 @@
             ]
           }
         },
-        "query:program": {
+        "query:prerequisite_text": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -872,7 +1137,7 @@
             ]
           }
         },
-        "query:required_optional_note": {
+        "query:programs": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -885,7 +1150,7 @@
             ]
           }
         },
-        "query:size_limit": {
+        "query:remote_teaching": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -898,12 +1163,13 @@
             ]
           }
         },
-        "query:suspend": {
+        "query:reserved_for_freshmen": {
           "required": false,
           "schema": {
             "anyOf": [
               {
-                "type": "string"
+                "minimum": 0,
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -911,7 +1177,7 @@
             ]
           }
         },
-        "query:teacher": {
+        "query:semester_code": {
           "required": false,
           "schema": {
             "anyOf": [
@@ -962,6 +1228,654 @@
               "schema": {
                 "minimum": 0,
                 "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /courses/semesters": {
+      "deprecated": false,
+      "operationId": "getCourseSemesters",
+      "parameters": {},
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "pattern": "^[0-9]{5}$",
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /courses/{semester}": {
+      "deprecated": false,
+      "operationId": "getSemesterCourses",
+      "parameters": {
+        "path:semester": {
+          "required": true,
+          "schema": {
+            "pattern": "^[0-9]{5}$",
+            "type": "string"
+          }
+        },
+        "query:capacity": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:capacity_unlimited": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:chinese_title": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:college_name": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:course_level": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:course_level_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:course_number": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:credits": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:curriculum_requirements.requirement": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:curriculum_requirements.target": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:department_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:department_name": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:english_title": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:enrolled_count": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:enrollment_after_selection": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:enrollment_after_withdrawal": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:expertises.name": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:expertises.type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:ge_category": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:ge_type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:id": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:is_cancelled": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:language_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:lecturers.label": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:lecturers.name_en": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:lecturers.name_zh": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:limit_note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:meetings.classroom": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:meetings.time": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:meetings.time_codes": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:no_extra_selection": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:note": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:object": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:parsing_issues": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:prerequisite_text": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:programs": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:remote_teaching": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:reserved_for_freshmen": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:semester_code": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "query:type": {
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseListName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": null,
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
               }
             }
           }
@@ -1575,6 +2489,91 @@
           }
         }
       }
+    },
+    "POST /courses/{semester}/query": {
+      "deprecated": false,
+      "operationId": "querySemesterCourses",
+      "parameters": {
+        "path:semester": {
+          "required": true,
+          "schema": {
+            "pattern": "^[0-9]{5}$",
+            "type": "string"
+          }
+        }
+      },
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CourseQueryCondition"
+                },
+                {
+                  "$ref": "#/components/schemas/CourseCondition"
+                }
+              ]
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/CourseData"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "headers": {
+            "X-Data-Commit-Hash": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "X-Total-Count": {
+              "required": true,
+              "schema": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "schemas": {
@@ -1947,7 +2946,23 @@
     "CourseCondition": {
       "properties": {
         "matcher": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "regex_match": {
           "default": false,
@@ -1965,35 +2980,201 @@
     },
     "CourseData": {
       "properties": {
+        "capacity": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capacity_unlimited": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "chinese_title": {
           "type": "string"
         },
-        "class_room_and_time": {
-          "type": "string"
+        "college_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "credit": {
-          "type": "string"
+        "course_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "course_level_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "course_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "credits": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "curriculum_requirements": {
+          "items": {
+            "$ref": "#/components/schemas/CurriculumRequirement"
+          },
+          "type": "array"
+        },
+        "department_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "english_title": {
           "type": "string"
         },
-        "expertise": {
-          "type": "string"
+        "enrolled_count": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "freshman_reservation": {
+        "enrollment_after_selection": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enrollment_after_withdrawal": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expertises": {
+          "items": {
+            "$ref": "#/components/schemas/CourseExpertise"
+          },
+          "type": "array"
+        },
+        "ge_category": {
           "type": "string"
         },
         "ge_type": {
           "type": "string"
         },
         "id": {
+          "minLength": 1,
           "type": "string"
         },
-        "language": {
-          "$ref": "#/components/schemas/CourseLanguage"
+        "is_cancelled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "language_code": {
+          "anyOf": [
+            {
+              "pattern": "^(zh|en)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lecturers": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LecturerLabel"
+              },
+              {
+                "$ref": "#/components/schemas/LecturerNames"
+              }
+            ]
+          },
+          "type": "array"
         },
         "limit_note": {
           "type": "string"
+        },
+        "meetings": {
+          "items": {
+            "$ref": "#/components/schemas/CourseMeeting"
+          },
+          "type": "array"
         },
         "no_extra_selection": {
           "type": "string"
@@ -2004,22 +3185,44 @@
         "object": {
           "type": "string"
         },
-        "prerequisite": {
+        "parsing_issues": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "prerequisite_text": {
           "type": "string"
         },
-        "program": {
-          "type": "string"
+        "programs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
-        "required_optional_note": {
-          "type": "string"
+        "remote_teaching": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "size_limit": {
-          "type": "string"
+        "reserved_for_freshmen": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "suspend": {
-          "type": "string"
-        },
-        "teacher": {
+        "semester_code": {
+          "pattern": "^[0-9]{5}$",
           "type": "string"
         }
       },
@@ -2027,22 +3230,65 @@
         "id",
         "chinese_title",
         "english_title",
-        "credit",
-        "size_limit",
-        "freshman_reservation",
+        "note",
+        "limit_note",
         "object",
         "ge_type",
-        "language",
-        "note",
-        "suspend",
-        "class_room_and_time",
-        "teacher",
-        "prerequisite",
-        "limit_note",
-        "expertise",
-        "program",
+        "ge_category",
         "no_extra_selection",
-        "required_optional_note"
+        "semester_code",
+        "department_code",
+        "course_number",
+        "department_name",
+        "college_name",
+        "course_level_code",
+        "course_level",
+        "remote_teaching",
+        "credits",
+        "capacity",
+        "capacity_unlimited",
+        "enrolled_count",
+        "enrollment_after_selection",
+        "enrollment_after_withdrawal",
+        "reserved_for_freshmen",
+        "is_cancelled",
+        "language_code",
+        "lecturers",
+        "meetings",
+        "expertises",
+        "programs",
+        "curriculum_requirements",
+        "prerequisite_text",
+        "parsing_issues"
+      ],
+      "type": "object"
+    },
+    "CourseExpertise": {
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "type"
       ],
       "type": "object"
     },
@@ -2051,29 +3297,42 @@
         "id",
         "chinese_title",
         "english_title",
-        "credit",
-        "size_limit",
-        "freshman_reservation",
+        "note",
+        "limit_note",
         "object",
         "ge_type",
-        "language",
-        "note",
-        "suspend",
-        "class_room_and_time",
-        "teacher",
-        "prerequisite",
-        "limit_note",
-        "expertise",
-        "program",
+        "ge_category",
         "no_extra_selection",
-        "required_optional_note"
-      ],
-      "type": "string"
-    },
-    "CourseLanguage": {
-      "enum": [
-        "中",
-        "英"
+        "semester_code",
+        "department_code",
+        "course_number",
+        "department_name",
+        "college_name",
+        "course_level_code",
+        "course_level",
+        "remote_teaching",
+        "credits",
+        "capacity",
+        "capacity_unlimited",
+        "enrolled_count",
+        "enrollment_after_selection",
+        "enrollment_after_withdrawal",
+        "reserved_for_freshmen",
+        "is_cancelled",
+        "language_code",
+        "lecturers.label",
+        "lecturers.name_zh",
+        "lecturers.name_en",
+        "meetings.classroom",
+        "meetings.time",
+        "meetings.time_codes",
+        "expertises.name",
+        "expertises.type",
+        "programs",
+        "curriculum_requirements.target",
+        "curriculum_requirements.requirement",
+        "prerequisite_text",
+        "parsing_issues"
       ],
       "type": "string"
     },
@@ -2083,6 +3342,49 @@
         "xclass"
       ],
       "type": "string"
+    },
+    "CourseMeeting": {
+      "properties": {
+        "classroom": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_codes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "classroom",
+        "time",
+        "time_codes"
+      ],
+      "type": "object"
     },
     "CourseQueryCondition": {
       "items": {
@@ -2106,6 +3408,35 @@
         "or"
       ],
       "type": "string"
+    },
+    "CurriculumRequirement": {
+      "properties": {
+        "requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "requirement"
+      ],
+      "type": "object"
     },
     "Department": {
       "properties": {
@@ -2403,6 +3734,55 @@
           "type": "array"
         }
       },
+      "type": "object"
+    },
+    "LecturerLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "type": "object"
+    },
+    "LecturerNames": {
+      "additionalProperties": false,
+      "properties": {
+        "name_en": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name_zh": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name_zh",
+        "name_en"
+      ],
       "type": "object"
     },
     "LibraryLostAndFound": {

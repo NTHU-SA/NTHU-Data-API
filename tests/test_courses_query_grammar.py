@@ -1,8 +1,9 @@
 """Regression coverage for the advanced course query grammar and tree budgets."""
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
 
 import pytest
+from conftest import make_course, set_courses
 from httpx import ASGITransport, AsyncClient
 from pydantic import ValidationError
 
@@ -13,13 +14,13 @@ from data_api.api.schemas.courses import (
     CourseCondition,
     CourseQueryCondition,
 )
-from data_api.domain.courses.models import Conditions, CourseData
+from data_api.domain.courses.models import Conditions
 from data_api.domain.courses.services import courses_service
 
-ALICE = {"row_field": "teacher", "matcher": "Alice"}
-BOB = {"row_field": "teacher", "matcher": "Bob"}
-THREE_CREDITS = {"row_field": "credit", "matcher": "3"}
-FOUR_CREDITS = {"row_field": "credit", "matcher": "4"}
+ALICE = {"row_field": "lecturers.label", "matcher": "Alice"}
+BOB = {"row_field": "lecturers.label", "matcher": "Bob"}
+THREE_CREDITS = {"row_field": "credits", "matcher": 3}
+FOUR_CREDITS = {"row_field": "credits", "matcher": 4}
 
 INVALID_QUERIES = [
     pytest.param([ALICE, BOB], id="adjacent-two"),
@@ -53,7 +54,7 @@ VALID_QUERIES = [
     pytest.param([[], "or", ALICE], ["A", "B"], id="empty-or"),
     pytest.param([[]], ["A", "B"], id="nested-empty"),
     pytest.param(
-        [{"row_field": "teacher", "matcher": "^A", "regex_match": True}, "or", BOB],
+        [{"row_field": "lecturers.label", "matcher": "^A", "regex_match": True}, "or", BOB],
         ["A", "B"],
         id="regex",
     ),
@@ -91,10 +92,10 @@ LIMIT_QUERIES = [
 @pytest.fixture
 def courses():
     return [
-        CourseData.from_dict(
-            {"id": course_id, "teacher": teacher, "credit": credit, "language": "英"}
+        make_course(
+            {"id": f"11510{course_id}", "lecturers": [{"label": teacher}], "credits": credit}
         )
-        for course_id, teacher, credit in [("A", "Alice", "3"), ("B", "Bob", "4")]
+        for course_id, teacher, credit in [("A", "Alice", 3), ("B", "Bob", 4)]
     ]
 
 
@@ -109,7 +110,7 @@ def test_schema_preserves_legal_query_semantics(body, expected_ids, courses):
     schema = CourseCondition if isinstance(body, dict) else CourseQueryCondition
     parsed = schema.model_validate(body)
     conditions = Conditions(list_build_target=[parsed.model_dump(mode="json")])
-    assert [course.id for course in courses if conditions.accept(course)] == expected_ids
+    assert [course.id[5:] for course in courses if conditions.accept(course)] == expected_ids
 
 
 @pytest.mark.parametrize("body,accepted", LIMIT_QUERIES)
@@ -151,9 +152,7 @@ def test_schema_accepts_prevalidated_conditions_and_nested_models():
 class TestCourseQueryGrammarEndpoints:
     @pytest.fixture
     async def client(self, monkeypatch, courses, empty_data):
-        monkeypatch.setattr(courses_service, "course_data", [] if empty_data else courses)
-        monkeypatch.setattr(courses_service, "update_data", AsyncMock())
-        monkeypatch.setattr(courses_service, "last_commit_hash", "grammar-test-version")
+        set_courses(monkeypatch, [] if empty_data else courses, "grammar-test-version")
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             yield client
 
@@ -172,7 +171,7 @@ class TestCourseQueryGrammarEndpoints:
         response = await client.post(path, json=body)
         assert response.status_code == 200
         expected_ids = [] if empty_data else expected_ids
-        assert [course["id"] for course in response.json()] == expected_ids
+        assert [course["id"][5:] for course in response.json()] == expected_ids
         assert response.headers["X-Total-Count"] == str(len(expected_ids))
         assert response.headers["X-Data-Commit-Hash"] == "grammar-test-version"
 
@@ -184,7 +183,7 @@ class TestCourseQueryGrammarEndpoints:
             expected_ids = (
                 [] if empty_data else (["A", "B"] if body == wide_query(512, []) else ["A"])
             )
-            assert [course["id"] for course in response.json()] == expected_ids
+            assert [course["id"][5:] for course in response.json()] == expected_ids
             assert response.headers["X-Total-Count"] == str(len(expected_ids))
         else:
             assert any("cannot exceed" in error["msg"] for error in response.json()["detail"])

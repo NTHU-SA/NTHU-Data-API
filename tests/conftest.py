@@ -1,9 +1,66 @@
 """Offline upstream fixtures for API smoke tests."""
 
+from datetime import datetime, timezone
+from unittest.mock import AsyncMock
+
 import httpx
 import pytest
 
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import Snapshot
+from data_api.models.courses import CourseData
+
+
+def course_payload(**overrides):
+    data = {
+        "id": "11510TEST100000",
+        "chinese_title": "Test course",
+        "english_title": "Test Course",
+        "note": "",
+        "limit_note": "",
+        "object": "",
+        "ge_type": "",
+        "ge_category": "",
+        "no_extra_selection": "",
+        "semester_code": "11510",
+        "department_code": "TEST",
+        "course_number": "100000",
+        "department_name": None,
+        "college_name": None,
+        "course_level_code": None,
+        "course_level": None,
+        "remote_teaching": None,
+        "credits": 3,
+        "capacity": None,
+        "capacity_unlimited": True,
+        "enrolled_count": None,
+        "enrollment_after_selection": None,
+        "enrollment_after_withdrawal": None,
+        "reserved_for_freshmen": 0,
+        "is_cancelled": False,
+        "language_code": "zh",
+        "lecturers": [],
+        "meetings": [],
+        "expertises": [],
+        "programs": [],
+        "curriculum_requirements": [],
+        "prerequisite_text": "",
+        "parsing_issues": [],
+    }
+    return data | overrides
+
+
+def make_course(data=None, **overrides):
+    return CourseData.model_validate(course_payload(**((data or {}) | overrides)))
+
+
+def set_courses(monkeypatch, courses, version="course-test-version"):
+    from data_api.domain.courses.services import courses_service
+
+    snapshot = Snapshot([], courses, version, datetime.now(timezone.utc))
+    monkeypatch.setattr(courses_service, "get_snapshot", AsyncMock(return_value=snapshot))
+    return snapshot
+
 
 NEWSLETTER_NAMES = ["NTHU-Newsletter", "教務處綜合教務組電子報"]
 
@@ -67,9 +124,8 @@ def lost_items_empty_page():
 @pytest.fixture
 async def dataset_runtime():
     data = {
-        "/courses.json": [
-            {"id": "11410TEST100000", "chinese_title": "Test course", "language": "中"}
-        ],
+        "/courses/latest.json": [course_payload()],
+        "/courses/sources.json": {"semesters": ["11510"]},
         "/buses.json": {},
         "/calendars.json": [],
         "/libraries/calendars.json": [],
