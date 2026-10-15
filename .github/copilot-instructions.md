@@ -95,11 +95,19 @@ local configuration. Settings load environment variables and `.env`.
 
 Read [the API guide](../docs/api-guide.md) before changing query semantics,
 response shapes, route aliases, or MCP tools. It records supported endpoints
-and migration differences that are not obvious from OpenAPI alone.
+and behavior that is not obvious from OpenAPI alone. Read and update
+[the 3.0 migration guide](../docs/migration-3.0.md) for breaking client changes.
 
 - MCP tools explicitly declare stable English `name` values and Traditional
   Chinese display `title` values. Internal Python renames must not change public
   names. Preserve argument defaults, limits, validation and response shapes.
+- Unreleased 3.0.0 replaces `search_campus` with independent `search_directory`
+  and `search_locations` tools, without an alias. Both take `query` and
+  `fuzzy=true`; false means case-sensitive full-string equality. Directory
+  returns separate departments/people arrays capped at 5/10, while locations
+  returns a locations array capped at 5. Filter before limiting and load only
+  the relevant dataset. REST `/directory` shares the matching modes but retains
+  its nested Department array and returns all data for an omitted/empty query.
 - Only register supported slashless routes; keep FastAPI's ordinary slash redirects.
   The deprecated operations were removed in 3.0.0. Do not restore compatibility
   aliases or change existing operation IDs for internal renames.
@@ -290,10 +298,12 @@ accepted risks, not eliminated vulnerabilities.
 ## Documentation
 
 Keep `README.md` focused on project overview, public entry points, quick start
-and contribution basics. Put consumer-facing query behavior and migration notes
-in `docs/api-guide.md`; put agent workflow and internal maintenance constraints
-here. Update the relevant guide when public behavior changes, instead of
-appending implementation history to the README.
+and contribution basics. Put consumer-facing query behavior in `docs/api-guide.md`,
+3.0 client migration notes in `docs/migration-3.0.md`, development and validation
+workflows in `docs/development.md`, and release procedures in `docs/releasing.md`.
+Keep agent workflow and internal maintenance constraints here. Update the relevant
+guide when public behavior changes, instead of appending implementation history
+to the README.
 
 ## Commit Message Guidelines
 

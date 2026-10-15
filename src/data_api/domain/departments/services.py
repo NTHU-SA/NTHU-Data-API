@@ -17,7 +17,16 @@ FUZZY_SEARCH_THRESHOLD_PERSON = 80
 FUZZY_SEARCH_THRESHOLD_PERSON_TITLE = 90
 
 
-def _person_match_score(query: str, person: dict) -> int:
+def _department_match_score(query: str, department: dict, fuzzy: bool) -> int:
+    if not fuzzy:
+        return 100 if query == department["name"] else 0
+    score = fuzz.partial_ratio(query, department["name"])
+    return score if score >= FUZZY_SEARCH_THRESHOLD_DEPT else 0
+
+
+def _person_match_score(query: str, person: dict, fuzzy: bool) -> int:
+    if not fuzzy:
+        return 100 if query == person["name"] or query == person.get("title") else 0
     name_score = fuzz.partial_ratio(query, person["name"])
     if name_score >= FUZZY_SEARCH_THRESHOLD_PERSON:
         return name_score
@@ -35,7 +44,9 @@ class DepartmentsService:
         """Get all departments."""
         return await self.manager.get(JSON_PATH)
 
-    async def get_directory(self, query: str | None = None) -> tuple[Optional[str], list[dict]]:
+    async def get_directory(
+        self, query: str | None = None, fuzzy: bool = True
+    ) -> tuple[Optional[str], list[dict]]:
         """Return matching departments, retaining only matching people when needed."""
         commit_hash, directory_data = await self.get_all_departments()
         if not query:
@@ -43,8 +54,7 @@ class DepartmentsService:
 
         results = []
         for department in directory_data:
-            department_score = fuzz.partial_ratio(query, department["name"])
-            if department_score >= FUZZY_SEARCH_THRESHOLD_DEPT:
+            if department_score := _department_match_score(query, department, fuzzy):
                 results.append((department_score, department))
                 continue
 
@@ -52,7 +62,7 @@ class DepartmentsService:
             matching_people = [
                 (score, person)
                 for person in details.get("people", [])
-                if (score := _person_match_score(query, person))
+                if (score := _person_match_score(query, person, fuzzy))
             ]
             if matching_people:
                 results.append(
@@ -71,10 +81,10 @@ class DepartmentsService:
         results.sort(key=lambda item: item[0], reverse=True)
         return commit_hash, [department for _, department in results]
 
-    async def fuzzy_search_departments_and_people(
-        self, query: str
+    async def search_departments_and_people(
+        self, query: str, fuzzy: bool = True
     ) -> tuple[Optional[str], dict[str, list]]:
-        """Fuzzy search departments and people."""
+        """Search departments and people using fuzzy or exact matching."""
         commit_hash, directory_data = await self.manager.get(JSON_PATH)
 
         dept_results = []
@@ -82,14 +92,13 @@ class DepartmentsService:
 
         for department in directory_data:
             # Search departments
-            dept_similarity = fuzz.partial_ratio(query, department["name"])
-            if dept_similarity >= FUZZY_SEARCH_THRESHOLD_DEPT:
+            if dept_similarity := _department_match_score(query, department, fuzzy):
                 dept_results.append((dept_similarity, department))
 
             # Search people in this department
             people = department.get("details", {}).get("people", [])
             for person in people:
-                if score := _person_match_score(query, person):
+                if score := _person_match_score(query, person, fuzzy):
                     person_results.append((score, person))
 
         dept_results.sort(key=lambda x: x[0], reverse=True)

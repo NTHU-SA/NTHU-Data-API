@@ -33,7 +33,7 @@ all-courses behavior.
 | --- | --- |
 | `GET /announcements/`, `/calendars/`, `/dining/`, `/locations/`, `/newsletters/` | Use the slashless collection URL directly to avoid a 307 redirect. |
 | `GET /departments/` | `GET /directory`; same department collection model. |
-| `GET /departments/search` | `GET /directory?query=...`; returns departments with matching nested people, not separate `departments`/`people` arrays. MCP campus search retains its own separate arrays. |
+| `GET /departments/search` | `GET /directory?query=...`; returns departments with matching nested people, not separate `departments`/`people` arrays. MCP `search_directory` retains its own separate arrays. |
 | `GET /announcements/lists/departments` | `GET /announcements/sources`; extract and deduplicate `department` locally, sorting if needed. |
 | `GET /courses/` | `GET /courses`; supplied filters now apply, including after a slash redirect. |
 | `GET /courses/search` | `GET /courses` with the same field filters; no non-empty filters now returns **all courses**, not `[]`. |
@@ -102,16 +102,30 @@ for the current REST and MCP response rules.
 
 ## MCP client migration
 
-The eight current [MCP tool names](api-guide.md#mcp-tool-names-and-display-titles)
-remain unchanged. Refresh the client tool list when upgrading.
+MCP `search_campus` is removed and replaced by independent `search_directory`
+and `search_locations` tools, without a compatibility alias. Refresh the client
+tool list when upgrading; the current names and titles are listed in the
+[API guide](api-guide.md#mcp-tool-names-and-display-titles).
 
 | Tool | Client action |
 | --- | --- |
 | `search_courses` | Keep `keyword`, `teacher`, `course_id` and `limit`; use optional `semester` to select a semester. The result remains `{count, courses}`, but each course is now the complete normalized model. Old `credit`, `teacher`, `time_and_room` and `language` output fields are removed. |
 | `get_bus_schedule` | Use this instead of the earlier removed `get_next_buses` and `get_bus_stops`; no compatibility names are restored. Read the current `buses`, `stop_name` and `stop_info` response fields and the [bus query defaults](api-guide.md#bus-mcp-query). |
-| `search_campus` | Retains separate `departments` and `people` arrays, unlike REST directory filtering. |
+| `search_campus` | Replace with `search_directory(query, fuzzy=true)` for contacts and `search_locations(query, fuzzy=true)` for coordinates. Call both tools if both kinds of data are needed. |
 | `find_dining` | Always read `buildings[].restaurants`, whether or not `check_open` is supplied. A non-empty `building` filter returns all matching restaurants in every matching building. |
 | `get_newsletters` | Handle all matching sources, not a maximum of 15. The per-source three-article preview and response fields are unchanged. |
+
+`search_directory` returns `{departments, people}`, capped at 5 departments and
+10 people. `search_locations` returns `{locations}`, capped at 5 locations.
+Both filter before limiting, accept required `query` and optional `fuzzy=true`,
+and use case-sensitive full-string equality when `fuzzy=false`. Each tool loads
+only its own dataset, so an unavailable directory does not prevent location
+searches, or vice versa.
+
+REST `/directory` also adds optional `fuzzy=true` with the same matching modes,
+while retaining its nested Department array and full-directory behavior for an
+omitted or empty query. See [directory queries](api-guide.md#directory-queries)
+and [location queries](api-guide.md#location-queries) for current response rules.
 
 **Unreleased 3.0 MCP breaking change:** `find_dining(check_open=...)` no longer
 returns `{schedule, open_restaurants}` or applies a global 20-restaurant limit.

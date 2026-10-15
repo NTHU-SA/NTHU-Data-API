@@ -31,8 +31,11 @@ class CampusDepartmentResult(TypedDict):
     details: NotRequired[CampusDepartmentDetailsResult]
 
 
-class CampusResult(TypedDict):
+class LocationsResult(TypedDict):
     locations: list[LocationResult]
+
+
+class DirectoryResult(TypedDict):
     departments: list[CampusDepartmentResult]
     people: list[CampusPersonResult]
 

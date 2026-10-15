@@ -223,24 +223,6 @@
       "type": "object"
     }
   },
-  "search_campus": {
-    "input": {
-      "additionalProperties": false,
-      "properties": {
-        "query": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "output": {
-      "additionalProperties": true,
-      "type": "object"
-    }
-  },
   "search_courses": {
     "input": {
       "additionalProperties": false,
@@ -297,6 +279,50 @@
           "default": null
         }
       },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "search_directory": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "fuzzy": {
+          "default": true,
+          "type": "boolean"
+        },
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "search_locations": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "fuzzy": {
+          "default": true,
+          "type": "boolean"
+        },
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
       "type": "object"
     },
     "output": {

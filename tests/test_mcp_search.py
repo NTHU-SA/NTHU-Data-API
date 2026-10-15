@@ -9,11 +9,13 @@ from conftest import make_course, set_courses
 from fastmcp import Client
 from pydantic import ValidationError
 
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 from data_api.domain.dining import services as dining_services
 from data_api.mcp.server import mcp
 from data_api.mcp.tools.courses import _search_courses
 from data_api.mcp.tools.dining import _find_dining
+from data_api.runtime import get_runtime
 
 FILTER_COMBINATIONS = list(product([False, True], repeat=3))
 
@@ -321,3 +323,187 @@ async def test_dining_omits_empty_buildings(monkeypatch, dining_candidates, chec
         assert response.data == {"buildings": []}
     else:
         assert [b["building"] for b in response.data["buildings"]] == ["Closed"]
+
+
+@pytest.fixture
+def directory_and_locations(monkeypatch):
+    datasets = {
+        "directory.json": [
+            {
+                "index": str(index),
+                "name": "Office",
+                "details": {
+                    "people": [
+                        {"name": "Alice", "title": "Director"},
+                        {"name": "Alice Smith", "title": None},
+                        {"name": "Bob", "title": "Director"},
+                        {"name": "Carol"},
+                        {"name": "Dave", "title": ""},
+                    ]
+                },
+            }
+            for index in range(8)
+        ],
+        "maps.json": {
+            "main": {
+                "Main gate": {"latitude": "24.79", "longitude": "120.99"},
+                **{
+                    f"Main hall {index}": {"latitude": "24.79", "longitude": "120.99"}
+                    for index in range(7)
+                },
+            },
+        },
+    }
+    original = deepcopy(datasets)
+    calls = []
+
+    async def get_dataset(path):
+        calls.append(path)
+        return "test-version", datasets[path]
+
+    monkeypatch.setattr(nthudata, "get", get_dataset)
+    yield datasets, calls
+    assert datasets == original
+
+
+@pytest.mark.parametrize("fuzzy", [None, True, False])
+@pytest.mark.parametrize(
+    "query,department_count,person_names",
+    [
+        ("Office", 5, []),
+        ("Alice", 0, ["Alice"] * 8),
+        ("Director", 0, ["Alice", "Bob"] * 5),
+        ("Off", 0, []),
+        ("Ali", 0, []),
+        ("Dir", 0, []),
+        ("office", 0, []),
+        ("alice", 0, []),
+        ("director", 0, []),
+        ("ZZZZZZ", 0, []),
+    ],
+)
+async def test_registered_directory_search_modes(
+    directory_and_locations, query, department_count, person_names, fuzzy
+):
+    arguments = {"query": query}
+    if fuzzy is not None:
+        arguments["fuzzy"] = fuzzy
+    async with Client(mcp) as client:
+        response = await client.call_tool("search_directory", arguments)
+    assert not response.is_error
+    assert set(response.data) == {"departments", "people"}
+    assert directory_and_locations[1] == ["directory.json"]
+    if fuzzy is False or query == "ZZZZZZ":
+        assert len(response.data["departments"]) == department_count
+        assert [person["name"] for person in response.data["people"]] == person_names
+    else:
+        expected_departments = 5 if query.lower() in ("office", "off") else 0
+        assert len(response.data["departments"]) == expected_departments
+        if expected_departments:
+            assert response.data["departments"] == directory_and_locations[0]["directory.json"][:5]
+        elif query == "alice":
+            assert [person["name"] for person in response.data["people"]] == (
+                ["Alice"] * 8 + ["Alice Smith"] * 2
+            )
+        elif query.lower() in ("alice", "ali"):
+            assert [person["name"] for person in response.data["people"]] == [
+                "Alice",
+                "Alice Smith",
+            ] * 5
+        else:
+            assert [person["name"] for person in response.data["people"]] == ["Alice", "Bob"] * 5
+
+
+@pytest.mark.parametrize("fuzzy", [None, True, False])
+@pytest.mark.parametrize("query", ["Main gate", "Main", "main gate", "ZZZZZZ", ""])
+async def test_registered_locations_search_modes(directory_and_locations, query, fuzzy):
+    arguments = {"query": query}
+    if fuzzy is not None:
+        arguments["fuzzy"] = fuzzy
+    async with Client(mcp) as client:
+        response = await client.call_tool("search_locations", arguments)
+    assert not response.is_error
+    assert set(response.data) == {"locations"}
+    assert directory_and_locations[1] == ["maps.json"]
+    locations = response.data["locations"]
+    if fuzzy is False:
+        assert [location["name"] for location in locations] == (
+            ["Main gate"] if query == "Main gate" else []
+        )
+    elif query in ("ZZZZZZ", ""):
+        assert locations == []
+    else:
+        assert len(locations) == 5
+        assert locations[0]["name"] == "Main gate"
+
+
+@pytest.mark.parametrize("fuzzy", [True, False])
+@pytest.mark.parametrize(
+    "tool,path", [("search_directory", "directory.json"), ("search_locations", "maps.json")]
+)
+async def test_search_tools_unavailable_dataset(monkeypatch, tool, path, fuzzy):
+    async def unavailable(endpoint):
+        assert endpoint == path
+        raise DataNotAvailableException("private upstream")
+
+    monkeypatch.setattr(nthudata, "get", unavailable)
+    async with Client(mcp) as client:
+        response = await client.call_tool(
+            tool, {"query": "query", "fuzzy": fuzzy}, raise_on_error=False
+        )
+    assert response.is_error
+    assert "private upstream" not in str(response.content)
+
+
+@pytest.mark.parametrize("tool", ["search_directory", "search_locations"])
+async def test_search_tools_protocol_validation(tool):
+    async with Client(mcp) as client:
+        for arguments in ({}, {"query": "query", "fuzzy": "invalid"}):
+            response = await client.call_tool(tool, arguments, raise_on_error=False)
+            assert response.is_error
+        removed = await client.call_tool("search_campus", {"query": "query"}, raise_on_error=False)
+        assert removed.is_error
+
+
+@pytest.mark.parametrize("query", ["Office", "Alice", "Director", "Ali", "alice", "director"])
+async def test_directory_exact_rest_shape_and_case(directory_and_locations, query):
+    _, departments = await get_runtime().departments.get_directory(query, fuzzy=False)
+    if query == "Office":
+        assert departments == directory_and_locations[0]["directory.json"]
+    elif query in ("Alice", "Director"):
+        assert len(departments) == 8
+        for department in departments:
+            expected = ["Alice"] if query == "Alice" else ["Alice", "Bob"]
+            assert [person["name"] for person in department["details"]["people"]] == expected
+    else:
+        assert departments == []
+
+
+@pytest.mark.parametrize("fuzzy", [True, False])
+async def test_directory_filters_before_caps_and_preserves_exact_order(monkeypatch, fuzzy):
+    data = [
+        {"index": str(index), "name": "ZZZZZZ", "details": {"people": [{"name": "ZZZZZZ"}]}}
+        for index in range(20)
+    ] + [
+        {
+            "index": str(index),
+            "name": "Office",
+            "details": {"people": [{"name": "Alice"}]},
+        }
+        for index in range(20, 28)
+    ]
+
+    async def get_dataset(path):
+        assert path == "directory.json"
+        return "test-version", data
+
+    monkeypatch.setattr(nthudata, "get", get_dataset)
+    async with Client(mcp) as client:
+        departments = await client.call_tool(
+            "search_directory", {"query": "Office", "fuzzy": fuzzy}
+        )
+        people = await client.call_tool("search_directory", {"query": "Alice", "fuzzy": fuzzy})
+    assert [department["index"] for department in departments.data["departments"]] == [
+        str(index) for index in range(20, 25)
+    ]
+    assert people.data == {"departments": [], "people": [{"name": "Alice"}] * 8}

@@ -7,7 +7,8 @@ from data_api.mcp.server import mcp
 
 async def test_tool_names_and_titles_exposed_to_clients():
     expected = {
-        "search_campus": "搜尋校園資訊",
+        "search_directory": "搜尋清華通訊錄",
+        "search_locations": "搜尋校園地點",
         "get_bus_schedule": "查詢公車時刻表",
         "search_courses": "搜尋課程列表",
         "get_announcements": "搜尋校園公告",
@@ -25,3 +26,9 @@ async def test_tool_names_and_titles_exposed_to_clients():
     assert all(tool.description for tool in tools)
     bus_tool = next(tool for tool in tools if tool.name == "get_bus_schedule")
     assert {"stop", "day", "time", "details"} <= bus_tool.input_schema["properties"].keys()
+    for name in ("search_directory", "search_locations"):
+        tool = next(tool for tool in tools if tool.name == name)
+        assert set(tool.input_schema["properties"]) == {"query", "fuzzy"}
+        assert tool.input_schema["required"] == ["query"]
+        assert tool.input_schema["properties"]["fuzzy"]["type"] == "boolean"
+        assert tool.input_schema["properties"]["fuzzy"]["default"] is True

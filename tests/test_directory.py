@@ -54,6 +54,7 @@ def directory_data(monkeypatch):
     return data
 
 
+@pytest.mark.parametrize("fuzzy", [None, True, False])
 @pytest.mark.parametrize(
     "query,indices,people",
     [
@@ -66,7 +67,7 @@ def directory_data(monkeypatch):
         ("ZZZ", [], None),
     ],
 )
-async def test_directory_query(directory_data, query, indices, people):
+async def test_directory_query(directory_data, query, indices, people, fuzzy):
     original = deepcopy(directory_data)
     expected = [deepcopy(item) for item in directory_data if item["index"] in indices]
     if people is not None:
@@ -77,7 +78,10 @@ async def test_directory_query(directory_data, query, indices, people):
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test", follow_redirects=False
     ) as client:
-        response = await client.get("/directory", params={} if query is None else {"query": query})
+        params = {} if query is None else {"query": query}
+        if fuzzy is not None:
+            params["fuzzy"] = fuzzy
+        response = await client.get("/directory", params=params)
         unfiltered = await client.get("/directory")
 
     assert response.status_code == 200
@@ -120,10 +124,8 @@ async def test_directory_sorts_by_match_score(directory_data, monkeypatch):
     assert [department["index"] for department in results] == ["computing", "admin"]
 
 
-async def test_campus_search_keeps_separate_results(directory_data):
-    commit, result = await services.departments_service.fuzzy_search_departments_and_people(
-        "王小明"
-    )
+async def test_directory_search_keeps_separate_results(directory_data):
+    commit, result = await services.departments_service.search_departments_and_people("王小明")
     assert commit == "directory-commit"
     assert result["departments"] == []
     assert [person["name"] for person in result["people"]] == ["王小明", "王小明"]
@@ -151,6 +153,10 @@ def test_directory_openapi():
     assert not operation.get("deprecated", False)
     assert operation["parameters"][0]["name"] == "query"
     assert operation["parameters"][0]["required"] is False
+    parameters = {parameter["name"]: parameter for parameter in operation["parameters"]}
+    assert parameters.keys() == {"query", "fuzzy"}
+    assert parameters["fuzzy"]["schema"]["type"] == "boolean"
+    assert parameters["fuzzy"]["schema"]["default"] is True
     assert operation["responses"]["200"]["content"]["application/json"]["schema"]["items"] == {
         "$ref": "#/components/schemas/Department"
     }
@@ -162,13 +168,34 @@ async def test_directory_search_path_is_not_registered():
     assert response.status_code == 404
 
 
+@pytest.mark.parametrize("fuzzy", [True, False])
 @pytest.mark.parametrize("query", [None, "王小明"])
-async def test_directory_unavailable_dataset(monkeypatch, query):
+async def test_directory_unavailable_dataset(monkeypatch, query, fuzzy):
     async def unavailable(endpoint):
         raise DataNotAvailableException("Dataset temporarily unavailable")
 
     monkeypatch.setattr(nthudata, "get", unavailable)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.get("/directory", params={} if query is None else {"query": query})
+        params = {"fuzzy": fuzzy}
+        if query is not None:
+            params["query"] = query
+        response = await client.get("/directory", params=params)
     assert response.status_code == 503
     assert response.json() == {"detail": "Service temporarily unavailable"}
+
+
+@pytest.mark.parametrize("query", ["校務", "小明", "主"])
+async def test_directory_exact_rejects_partial_matches(directory_data, query):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        fuzzy = await client.get("/directory", params={"query": query})
+        exact = await client.get("/directory", params={"query": query, "fuzzy": False})
+    assert fuzzy.status_code == exact.status_code == 200
+    assert fuzzy.json()
+    assert exact.json() == []
+
+
+async def test_directory_invalid_fuzzy(directory_data):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/directory", params={"fuzzy": "invalid"})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["query", "fuzzy"]
