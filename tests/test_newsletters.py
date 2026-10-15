@@ -2,9 +2,11 @@
 
 from copy import deepcopy
 from itertools import product
+from unittest.mock import AsyncMock
 
 import pytest
 from conftest import NEWSLETTER_NAMES
+from fastmcp import Client
 from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
@@ -12,6 +14,9 @@ from data_api.api.api import app
 from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 from data_api.domain.newsletters.services import newsletters_service
+from data_api.mcp.server import mcp
+from data_api.mcp.tools.newsletters import _get_newsletters
+from data_api.runtime import get_runtime
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
@@ -143,12 +148,91 @@ async def test_filter_edge_cases(newsletter_data, path, params, expected_names):
         assert all("articles" not in source for source in response.json())
 
 
-@pytest.mark.parametrize("score,matched", [(79, False), (80, True)])
+@pytest.mark.parametrize("score,matched", [(59, False), (60, True)])
 @pytest.mark.parametrize("field", ["name", "title"])
 async def test_fuzzy_threshold(newsletter_data, monkeypatch, score, matched, field):
     monkeypatch.setattr("thefuzz.fuzz.partial_ratio", lambda query, value: score)
     _, result = await newsletters_service.get_newsletters(**{field: "query"})
     assert bool(result) is matched
+
+
+@pytest.mark.parametrize("search", [None, "", "Alhpa", "Missing"])
+async def test_mcp_and_rest_name_search_match(newsletter_data, search):
+    original = deepcopy(newsletter_data)
+    async with (
+        AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as rest,
+        Client(mcp) as tools,
+    ):
+        response = await rest.get("/newsletters", params={"name": search or ""})
+        result = await tools.call_tool("get_newsletters", {"search": search})
+    assert response.status_code == 200
+    assert not result.is_error
+    assert [source["name"] for source in result.data["newsletters"]] == [
+        source["name"] for source in response.json()
+    ]
+    assert result.data["count"] == len(response.json())
+    assert newsletter_data == original
+
+
+@pytest.mark.parametrize("search", [None, "", "query"])
+async def test_mcp_delegates_search_to_domain(monkeypatch, search):
+    get_newsletters = AsyncMock(return_value=("test", []))
+    monkeypatch.setattr(get_runtime().newsletters, "get_newsletters", get_newsletters)
+    assert await _get_newsletters(search) == {"count": 0, "newsletters": []}
+    get_newsletters.assert_awaited_once_with(name=search)
+
+
+@pytest.mark.parametrize("score,matched", [(59, False), (60, True)])
+async def test_rest_and_mcp_share_fuzzy_threshold(newsletter_data, monkeypatch, score, matched):
+    monkeypatch.setattr("thefuzz.fuzz.partial_ratio", lambda query, value: score)
+    async with (
+        AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as rest,
+        Client(mcp) as tools,
+    ):
+        response = await rest.get("/newsletters", params={"name": "query"})
+        result = await tools.call_tool("get_newsletters", {"search": "query"})
+    assert response.status_code == 200
+    assert not result.is_error
+    expected_names = [source["name"] for source in newsletter_data] if matched else []
+    assert [source["name"] for source in response.json()] == expected_names
+    assert [source["name"] for source in result.data["newsletters"]] == expected_names
+    assert result.data["count"] == len(expected_names)
+
+
+@pytest.mark.parametrize("search", [None, "", "Alpha", "ZZZZZZ"])
+async def test_mcp_returns_all_matching_sources(newsletter_data, search):
+    template = deepcopy(newsletter_data[0])
+    newsletter_data[:] = [
+        {**deepcopy(template), "name": f"Alpha {index}"} for index in range(20)
+    ] + [
+        {**deepcopy(template), "name": "ZZZZZZ"},
+        {**deepcopy(template), "name": "Alpha Empty", "articles": []},
+    ]
+    original = deepcopy(newsletter_data)
+    if search == "Alpha":
+        expected = original[:20] + original[-1:]
+    elif search == "ZZZZZZ":
+        expected = original[20:21]
+    else:
+        expected = original
+    async with Client(mcp) as tools:
+        result = await tools.call_tool("get_newsletters", {"search": search})
+    assert not result.is_error
+    assert result.data == {
+        "count": len(expected),
+        "newsletters": [
+            {
+                "name": source["name"],
+                "link": source["link"],
+                "latest_articles": [
+                    {"title": article.get("title"), "date": article.get("date")}
+                    for article in source["articles"][:3]
+                ],
+            }
+            for source in expected
+        ],
+    }
+    assert newsletter_data == original
 
 
 @pytest.mark.parametrize("path", ["/newsletters", "/newsletters/sources"])

@@ -394,7 +394,8 @@ not trigger recovery.
 
 `GET /newsletters` supports optional `name`, `title`, and `fuzzy` (default
 `true`) parameters. Name and article-title filters are combined with AND.
-Fuzzy matching uses partial similarity with a threshold of 80, like announcements.
+Fuzzy matching uses partial similarity with a threshold of 60 for both names and
+article titles, sharing the name-search logic with MCP `get_newsletters`.
 With `fuzzy=false`, names must match exactly and titles use case-sensitive literal
 substring matching. Empty filters apply no filtering.
 
@@ -405,6 +406,20 @@ filter, sources with empty article lists are retained. No matches return `[]`.
 `GET /newsletters/sources` lists `name`, `link`, and `details` without articles.
 Its optional `name` filter matches exactly. Both endpoints return the dataset's
 `X-Data-Commit-Hash` when available.
+
+MCP `get_newsletters` accepts an optional `search` for fuzzy source-name matching
+with the same threshold of 60. Omitted or empty searches return all sources.
+It returns all matching sources in publisher order, without a source-count limit.
+Each source contains `name`, `link`, and `latest_articles`, retaining at most the
+first three articles in publisher order with their `title` and `date`.
+`count` is the number of matching sources and always equals the length of
+`newsletters`, not the number of articles. No matches return
+`{"count": 0, "newsletters": []}`.
+
+**Behavior change:** REST newsletter fuzzy matching now uses 60 instead of 80,
+so more names and article titles may match. MCP no longer truncates matching
+sources to 15; all are returned, while the three-article preview remains unchanged.
+The response fields and tool arguments are unchanged.
 
 ```text
 /newsletters/sources

@@ -19,14 +19,7 @@ async def _get_newsletters(
     Returns:
         Dictionary with newsletter information.
     """
-    _, newsletters = await get_runtime().newsletters.get_all_newsletters()
-
-    if search:
-        from thefuzz import fuzz
-
-        newsletters = [
-            n for n in newsletters if fuzz.partial_ratio(search, n.get("name", "")) >= 60
-        ]
+    _, newsletters = await get_runtime().newsletters.get_newsletters(name=search)
 
     return {
         "count": len(newsletters),
@@ -39,7 +32,7 @@ async def _get_newsletters(
                     for a in n.get("articles", [])[:3]
                 ],
             }
-            for n in newsletters[:15]
+            for n in newsletters
         ],
     }
 
