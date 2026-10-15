@@ -6,14 +6,15 @@ from fastapi import APIRouter, Response
 
 from data_api.api.schemas.ping import DatasetError, DatasetHealth, PingResponse
 from data_api.core.config import PREFETCH_ENDPOINTS
-from data_api.data.manager import nthudata
 from data_api.data.nthudata import Freshness
+from data_api.runtime import get_runtime
 
 router = APIRouter()
 
 
 @router.get("/ping", response_model=PingResponse, include_in_schema=False)
 async def ping(response: Response) -> PingResponse:
+    nthudata = get_runtime().datasets
     now = nthudata.clock()
     endpoints = {f"/{endpoint}" for endpoint in PREFETCH_ENDPOINTS} | nthudata.states.keys()
     datasets: dict[str, DatasetHealth] = {}

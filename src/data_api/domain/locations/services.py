@@ -8,8 +8,8 @@ from typing import Optional
 
 from thefuzz import fuzz
 
-from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
 
 JSON_PATH = "maps.json"
 FUZZY_SEARCH_THRESHOLD = 60
@@ -18,17 +18,16 @@ FUZZY_SEARCH_THRESHOLD = 60
 class LocationsService:
     """Service for location data operations."""
 
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+
     async def get_all_locations(self) -> tuple[Optional[str], list[dict]]:
         """Get all locations."""
         return await self.get_locations()
 
     async def get_locations(self, name: str | None = None) -> tuple[Optional[str], list[dict]]:
         """Get locations with an optional exact name filter."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-
-        commit_hash, map_data = result
+        commit_hash, map_data = await self.manager.get(JSON_PATH)
         locations = [
             {
                 "name": location_name,
@@ -43,11 +42,7 @@ class LocationsService:
 
     async def fuzzy_search_locations(self, query: str) -> tuple[Optional[str], list[dict]]:
         """Fuzzy search locations by name."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-
-        commit_hash, map_data = result
+        commit_hash, map_data = await self.manager.get(JSON_PATH)
         tmp_results = []
         for campus_locations in map_data.values():
             for location_name, coordinates in campus_locations.items():

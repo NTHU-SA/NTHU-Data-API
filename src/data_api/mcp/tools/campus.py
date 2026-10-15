@@ -1,11 +1,11 @@
 """Campus search MCP tool."""
 
-from data_api.domain.departments import services as departments_services
-from data_api.domain.locations import services as locations_services
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import CampusResult
+from data_api.runtime import get_runtime
 
 
-async def _search_campus(query: str) -> dict:
+async def _search_campus(query: str) -> CampusResult:
     """
     Search for campus locations, departments, or people.
 
@@ -16,14 +16,11 @@ async def _search_campus(query: str) -> dict:
         Dictionary with locations, departments, and people matching the query.
     """
     # Search locations
-    _, locations = await locations_services.locations_service.fuzzy_search_locations(query=query)
+    runtime = get_runtime()
+    _, locations = await runtime.locations.fuzzy_search_locations(query=query)
 
     # Search departments and people
-    _, dept_results = (
-        await departments_services.departments_service.fuzzy_search_departments_and_people(
-            query=query
-        )
-    )
+    _, dept_results = await runtime.departments.fuzzy_search_departments_and_people(query=query)
 
     return {
         "locations": locations[:5] if locations else [],

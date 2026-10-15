@@ -7,6 +7,7 @@ from httpx import ASGITransport, AsyncClient
 
 from data_api.api.api import app
 from data_api.api.schemas.departments import Department
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 from data_api.domain.departments import services
 
@@ -164,7 +165,7 @@ async def test_directory_search_path_is_not_registered():
 @pytest.mark.parametrize("query", [None, "王小明"])
 async def test_directory_unavailable_dataset(monkeypatch, query):
     async def unavailable(endpoint):
-        return None
+        raise DataNotAvailableException("Dataset temporarily unavailable")
 
     monkeypatch.setattr(nthudata, "get", unavailable)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:

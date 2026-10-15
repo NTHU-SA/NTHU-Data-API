@@ -11,13 +11,9 @@ from typing import Any, Literal, Optional, cast
 
 from pydantic import TypeAdapter
 
-from data_api.core import constants
 from data_api.data.manager import nthudata
-from data_api.data.nthudata import FetchFailure, JsonData, NTHUDataManager
+from data_api.data.nthudata import FetchFailure, JsonData, NTHUDataManager, Snapshot
 from data_api.domain.buses import enums, graph, models
-
-# Constants
-DATA_TTL_HOURS = constants.DATA_TTL_HOURS
 
 # Type lists
 BUS_ROUTE_TYPE = [t.value for t in enums.BusRouteType]
@@ -116,26 +112,15 @@ def sort_by_time(target: list[dict], time_keys: list[str]) -> None:
     target.sort(key=get_sort_key)
 
 
-class BusesService:
-    """
-    Bus schedule management service.
+class PreparedBusData:
+    """Prepared bus indexes and pure queries, without client or refresh ownership."""
 
-    This service handles:
-    - Fetching and caching bus schedule data from remote source
-    - Processing raw schedules into detailed schedules with arrival times
-    - Managing route information and stop registries
-    - Providing query methods for schedules and stop information
-    """
-
-    def __init__(self, manager: NTHUDataManager | None = None) -> None:
-        self.manager = manager
-        self.state = manager.register("buses.json", self.prepare) if manager is not None else None
+    def __init__(self) -> None:
         # Schedule data stores: (route_type, day, direction) -> list of schedules
         self.raw_schedule_data = self._new_schedule_store()
         self.detailed_schedule_data = self._new_schedule_store()
         self._route_info: dict[RouteInfoKey, dict[str, Any]] = {}
 
-        self.last_commit_hash = None
         self._res_json: dict[str, Any] = {}
         # Track Gen2 (綜二館) departures for route calculation
         self._gen2_departures: set[str] = set()
@@ -147,32 +132,13 @@ class BusesService:
             for rtype, day, direction in product(BUS_ROUTE_TYPE, BUS_DAY, BUS_DIRECTION)
         }
 
-    async def update_data(self) -> None:
-        """
-        Update bus schedule data from remote source.
-
-        Fetches buses.json and processes it if the data has changed.
-        Only reprocesses when commit hash differs from cached version.
-        """
-        if self.manager is None or self.state is None:
-            raise RuntimeError("Bus service has no data manager")
-        snapshot = await self.manager.get_snapshot("buses.json", self.state)
-        candidate = snapshot.data
-        # Publish complete derived structures without yielding to another reader.
-        self.raw_schedule_data = candidate.raw_schedule_data
-        self.detailed_schedule_data = candidate.detailed_schedule_data
-        self._route_info = candidate._route_info
-        self._res_json = candidate._res_json
-        self._gen2_departures = candidate._gen2_departures
-        self.last_commit_hash = snapshot.version
-
     @staticmethod
-    def prepare(raw: JsonData) -> BusesService:
-        from data_api.api.schemas.buses import BusInfo, BusSchedule
+    def prepare(raw: JsonData) -> PreparedBusData:
+        from data_api.models.buses import BusInfo, BusSchedule
 
         if not isinstance(raw, dict):
             raise FetchFailure("payload_type")
-        candidate = BusesService()
+        candidate = PreparedBusData()
         info_keys = {
             "towardTSMCBuildingInfo",
             "towardMainGateInfo",
@@ -502,7 +468,8 @@ class BusesService:
         time_path = ["dep_info", "time"] if detailed else ["time"]
         return after_specific_time(schedules, after_time, time_path)[:limit]
 
-    def gen_bus_stops_info(self) -> list[dict]:
+    @staticmethod
+    def gen_bus_stops_info() -> list[dict]:
         return [
             {
                 "name": s.name,
@@ -514,5 +481,72 @@ class BusesService:
         ]
 
 
-# Global Instance
+class BusesService:
+    """Refresh orchestration with one atomic, versioned prepared-data view."""
+
+    prepare = staticmethod(PreparedBusData.prepare)
+    gen_bus_stops_info = staticmethod(PreparedBusData.gen_bus_stops_info)
+
+    def __init__(self, manager: NTHUDataManager = nthudata) -> None:
+        self._snapshot: Snapshot[PreparedBusData] | None = None
+        self.manager = manager
+        self.state = manager.register("buses.json", self.prepare)
+        self.last_commit_hash: str | None = None
+
+    async def update_data(self) -> None:
+        self._snapshot = await self.manager.get_snapshot("buses.json", self.state)
+        self.last_commit_hash = self._snapshot.version
+
+    def reset(self) -> None:
+        self._snapshot = None
+        self.last_commit_hash = None
+
+    @property
+    def data(self) -> PreparedBusData:
+        if self._snapshot is None:
+            raise RuntimeError("Bus service has not loaded a snapshot")
+        return self._snapshot.data
+
+    @property
+    def raw_schedule_data(self) -> ScheduleStore:
+        return self.data.raw_schedule_data
+
+    def get_route_info(self, route_type: str | None, direction: str | None) -> list[dict]:
+        return self.data.get_route_info(route_type, direction)
+
+    def get_schedule(
+        self,
+        *,
+        route_type: str,
+        day: str,
+        direction: str,
+        detailed: bool = False,
+        stop: enums.BusStopsName | None = None,
+    ) -> list[dict]:
+        return self.data.get_schedule(
+            route_type=route_type, day=day, direction=direction, detailed=detailed, stop=stop
+        )
+
+    def query_schedule(
+        self,
+        *,
+        route_type: str,
+        day: str,
+        direction: str,
+        detailed: bool = False,
+        stop: enums.BusStopsName | None = None,
+        after_time: str = "",
+        limit: int | None = 5,
+    ) -> list[dict]:
+        return self.data.query_schedule(
+            route_type=route_type,
+            day=day,
+            direction=direction,
+            detailed=detailed,
+            stop=stop,
+            after_time=after_time,
+            limit=limit,
+        )
+
+
 buses_service = BusesService(nthudata)

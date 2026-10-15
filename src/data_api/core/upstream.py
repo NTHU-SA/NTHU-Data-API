@@ -1,8 +1,9 @@
 """Classify expected failures at live upstream boundaries."""
 
 import json
-from collections.abc import Iterator
-from contextlib import contextmanager
+from collections.abc import AsyncIterator, Iterator
+from contextlib import asynccontextmanager, contextmanager
+from ssl import SSLContext
 
 import httpx
 from pydantic import ValidationError
@@ -12,6 +13,18 @@ from data_api.core.exceptions import (
     UpstreamResponseException,
     UpstreamTimeoutException,
 )
+
+
+@asynccontextmanager
+async def live_client(
+    client: httpx.AsyncClient | None, *, verify: SSLContext | bool = True
+) -> AsyncIterator[httpx.AsyncClient]:
+    """Borrow a runtime client, or own one for a standalone service call."""
+    if client is not None:
+        yield client
+    else:
+        async with httpx.AsyncClient(verify=verify) as owned:
+            yield owned
 
 
 @contextmanager

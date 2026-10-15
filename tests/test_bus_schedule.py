@@ -1,6 +1,6 @@
 """Regression tests for unified bus schedules and stop filters."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from fastmcp import Client
@@ -9,17 +9,32 @@ from httpx import ASGITransport, AsyncClient
 from data_api.api.api import app
 from data_api.api.routers import buses as bus_router
 from data_api.api.schemas.buses import BusCanonicalDetailedSchedule, BusCanonicalSchedule
+from data_api.data.nthudata import NTHUDataManager, Snapshot
 from data_api.domain.buses import services
 from data_api.domain.buses.enums import BusStopsName
 from data_api.mcp.server import mcp
 from data_api.mcp.tools import buses as bus_tools
+from data_api.runtime import default_runtime
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
 
+def prepared_service(raw):
+    manager = NTHUDataManager()
+    service = services.BusesService(manager)
+    now = datetime.now(timezone.utc)
+    snapshot = Snapshot(raw, service.prepare(raw), "bus-fixture", now)
+    service.state.snapshot = snapshot
+    service.state.last_checked_at = now
+    service.state.next_check = float("inf")
+    service._snapshot = snapshot
+    service.last_commit_hash = snapshot.version
+    return service
+
+
 @pytest.fixture
 def populated_buses(monkeypatch):
-    service = services.BusesService.prepare(
+    service = prepared_service(
         {
             "towardTSMCBuildingInfo": {
                 "direction": "up",
@@ -59,13 +74,8 @@ def populated_buses(monkeypatch):
             ],
         }
     )
-    service.last_commit_hash = "bus-fixture"
-
-    async def update_data():
-        pass
-
-    monkeypatch.setattr(service, "update_data", update_data)
     monkeypatch.setattr(services, "buses_service", service)
+    monkeypatch.setattr(default_runtime, "buses", service)
     return service
 
 
@@ -495,9 +505,9 @@ async def test_published_nanda_line_rest_and_mcp(populated_buses, monkeypatch, d
             {"time": "11:30", "description": "", "line": "route1"}
         ],
     }
-    service = services.BusesService.prepare(published)
-    monkeypatch.setattr(service, "update_data", populated_buses.update_data)
+    service = prepared_service(published)
     monkeypatch.setattr(services, "buses_service", service)
+    monkeypatch.setattr(default_runtime, "buses", service)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await get_schedule(client, route="nanda", direction="up", details=details)
         education = await get_schedule(

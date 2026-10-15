@@ -6,8 +6,9 @@ from typing import Annotated, Optional
 from pydantic import Field, validate_call
 
 from data_api.domain.courses import models as courses_models
-from data_api.domain.courses import services as courses_services
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import CoursesResult
+from data_api.runtime import get_runtime
 
 CourseSearchLimit = Annotated[int, Field(ge=1, le=100)]
 
@@ -18,7 +19,7 @@ async def _search_courses(
     teacher: Optional[str] = None,
     course_id: Optional[str] = None,
     limit: CourseSearchLimit = 20,
-) -> dict:
+) -> CoursesResult:
     """
     Search for courses at NTHU.
 
@@ -33,7 +34,8 @@ async def _search_courses(
     Returns:
         Dictionary with matching courses.
     """
-    await courses_services.courses_service.update_data()
+    service = get_runtime().courses
+    await service.update_data()
     condition = courses_models.Conditions(list_build_target=[])
 
     if keyword:
@@ -45,7 +47,7 @@ async def _search_courses(
         if value:
             condition &= courses_models.Conditions(field_name, re.escape(value), regex_match=True)
 
-    courses = courses_services.courses_service.query(condition)[:limit]
+    courses = service.query(condition)[:limit]
 
     # Format response
     return {

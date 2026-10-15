@@ -14,26 +14,26 @@ from data_api.api.errors import service_errors
 from data_api.api.schemas import buses as schemas
 from data_api.api.schemas.errors import ErrorResponse
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.buses import services
+from data_api.domain.buses.query import resolve_bus_time
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
 
 async def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    await services.buses_service.update_data()
-    if services.buses_service.last_commit_hash is not None:
-        response.headers["X-Data-Commit-Hash"] = services.buses_service.last_commit_hash
+    service = get_runtime().buses
+    await service.update_data()
+    if service.last_commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = service.last_commit_hash
 
 
 def get_current_time_state():
     """
     Get current time state (day type and time).
     """
-    current = datetime.now()
-    current_time = current.time().strftime("%H:%M")
-    current_day = "weekday" if current.weekday() < 5 else "weekend"
-    return current_day, current_time
+    state = resolve_bus_time("current", None, datetime.now())
+    return state.day, state.after_time
 
 
 def _query_bus_schedule(
@@ -44,9 +44,13 @@ def _query_bus_schedule(
     stop: schemas.BusStopsName | None,
     query: schemas.BusQuery,
 ):
-    find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
+    if day == "current":
+        find_day, after_time = get_current_time_state()
+    else:
+        state = resolve_bus_time(day, query.time, datetime.now())
+        find_day, after_time = state.day, state.after_time
     with service_errors():
-        return services.buses_service.query_schedule(
+        return get_runtime().buses.query_schedule(
             route_type=route,
             day=find_day,
             direction=direction,
@@ -74,7 +78,7 @@ async def get_bus_route_metadata(
     - 南大來自[總務處事務組](https://affairs.site.nthu.edu.tw/p/412-1165-20979.php?Lang=zh-tw)
     """
     with service_errors():
-        return services.buses_service.get_route_info(route, direction)
+        return get_runtime().buses.get_route_info(route, direction)
 
 
 @router.get(
@@ -87,7 +91,7 @@ async def get_bus_route_metadata(
 async def get_bus_stops_information():
     """取得所有公車站牌的經緯度與資訊。"""
     with service_errors():
-        return services.buses_service.gen_bus_stops_info()
+        return get_runtime().buses.gen_bus_stops_info()
 
 
 @router.get(

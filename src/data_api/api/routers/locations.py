@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import locations as schemas
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.locations import services
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -25,9 +25,9 @@ async def get_locations(
     資料來源：[國立清華大學校園地圖](https://www.nthu.edu.tw/campusmap)
     """
     if name and fuzzy:
-        commit_hash, data = await services.locations_service.fuzzy_search_locations(query=name)
+        commit_hash, data = await get_runtime().locations.fuzzy_search_locations(query=name)
     else:
-        commit_hash, data = await services.locations_service.get_locations(name=name)
+        commit_hash, data = await get_runtime().locations.get_locations(name=name)
     if commit_hash is not None:
         response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

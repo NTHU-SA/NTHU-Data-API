@@ -65,12 +65,29 @@ by pre-commit hooks. Black targets Python 3.14; isort uses the Black profile.
 | `src/data_api/api/` | FastAPI app, middleware, REST routers and response schemas |
 | `src/data_api/mcp/` | MCP server, tools and tool errors |
 | `src/data_api/domain/` | Domain models, adapters and shared services |
+| `src/data_api/models/` | Transport-neutral dataset, value and validation models |
+| `src/data_api/runtime.py` | App-owned services, live clients and request-local runtime binding |
 | `src/data_api/data/` | Dataset manager, snapshot cache and validation |
 | `src/data_api/core/` | Settings, dataset configuration, constants and shared exceptions |
 | `src/data_api/utils/` | Shared calendar, search and schema helpers |
 | `tests/` | Endpoint, domain, MCP and lifecycle tests |
 
 Keep business logic in shared domain services so REST and MCP stay consistent.
+Data and domain code must not import REST schemas; use `data_api.models` for shared
+models. REST schema modules retain import facades and HTTP-specific parameters.
+`create_app()` creates an independent runtime and MCP transport. The exported app
+uses the default runtime, also used by standalone MCP calls. Bind services through
+`get_runtime()` at transport boundaries; inject dataset managers into domain
+services. Never change the active runtime by mutating a process-global variable.
+Within each app, REST and MCP share snapshots; separate app instances must not
+share locks, clients or service state. Prepared bus snapshots contain
+`PreparedBusData`, not live service instances.
+
+Live electricity and library clients are separate from the dataset client and
+are owned by the app lifespan, including cleanup on startup failure. Standalone
+service calls own temporary clients; the three electricity requests share one
+client. Do not add live snapshot fallback or automatic retries. Internal MCP
+result types do not change public tool output annotations or schemas.
 Start the application with `uv run python main.py`; `.env.template` provides
 local configuration. Settings load environment variables and `.env`.
 

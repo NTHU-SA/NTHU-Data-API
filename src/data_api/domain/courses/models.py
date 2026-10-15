@@ -5,7 +5,9 @@ Pure Python domain models without FastAPI or Pydantic dependencies.
 """
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import Any, Optional, Union
 
 
@@ -101,16 +103,19 @@ class Condition:
     row_field: str
     matcher: Union[str, re.Pattern]
     regex_match: bool = False
+    _pattern: re.Pattern | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         # Normalize field names to lowercase
         self.row_field = self.row_field.lower()
+        if self.regex_match:
+            self._pattern = re.compile(self.matcher)
 
     def check(self, course: CourseData) -> bool:
         """Check if course satisfies this condition."""
         field_data = getattr(course, self.row_field, "")
-        if self.regex_match:
-            return re.search(self.matcher, field_data) is not None
+        if self._pattern is not None:
+            return self._pattern.search(field_data) is not None
         else:
             return field_data == self.matcher
 
@@ -139,7 +144,6 @@ class Conditions:
     """Complex condition tree for filtering courses."""
 
     condition_stat: Any = field(default=None)
-    course: Optional[CourseData] = field(default=None, init=False)
 
     def __init__(
         self,
@@ -159,7 +163,6 @@ class Conditions:
             ]
         else:
             raise ValueError("Must provide row_field and matcher, or list_build_target")
-        self.course = None
 
     def __and__(self, other: "Conditions") -> "Conditions":
         return Conditions(list_build_target=[self.condition_stat, "and", other.condition_stat])
@@ -167,47 +170,36 @@ class Conditions:
     def __or__(self, other: "Conditions") -> "Conditions":
         return Conditions(list_build_target=[self.condition_stat, "or", other.condition_stat])
 
-    def _solve_condition_stat(self, data: Any) -> bool:
-        """Recursively evaluate condition tree."""
-        if not isinstance(data, list):
-            return self._check_condition(data)
-
-        validate_condition_sequence(data)
-        if len(data) < 3:
-            if not data:
-                return True
-            return self._check_condition(data[0])
-
-        # Evaluate conditions iteratively
-        result = self._check_condition(data[0])
-        i = 1
-        while i < len(data) - 1:
-            op = data[i]
-            next_condition = data[i + 1]
-            next_condition_value = self._check_condition(next_condition)
-            if op == "and":
-                result = result and next_condition_value
-            elif op == "or":
-                result = result or next_condition_value
-            else:
-                raise ValueError(f"Unknown operator: {op}")
-            i += 2
-        return result
-
-    def _check_condition(self, item: ConditionType) -> bool:
-        """Check a single condition item."""
+    @staticmethod
+    def _prepare(item: ConditionType) -> Callable[[CourseData], bool]:
         if isinstance(item, dict):
-            return Condition(**item).check(self.course)
+            return Condition(**item).check
         elif isinstance(item, list):
-            return self._solve_condition_stat(item)
+            validate_condition_sequence(item)
+            if not item:
+                return lambda course: True
+            operands = [Conditions._prepare(value) for value in item[::2]]
+            operators = tuple(item[1::2])
+
+            def evaluate(course: CourseData) -> bool:
+                result = operands[0](course)
+                for operator, predicate in zip(operators, operands[1:], strict=True):
+                    value = predicate(course)
+                    result = result and value if operator == "and" else result or value
+                return result
+
+            return evaluate
         elif isinstance(item, Condition):
-            return item.check(self.course)
+            return item.check
         elif isinstance(item, bool):
-            return item
+            return lambda course: item
         else:
             raise TypeError(f"Cannot handle condition item: {item}")
 
+    @cached_property
+    def _predicate(self) -> Callable[[CourseData], bool]:
+        return self._prepare(self.condition_stat)
+
     def accept(self, course: CourseData) -> bool:
         """Check if course satisfies all conditions."""
-        self.course = course
-        return self._solve_condition_stat(self.condition_stat)
+        return self._predicate(course)

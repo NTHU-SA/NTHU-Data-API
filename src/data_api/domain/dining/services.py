@@ -10,8 +10,8 @@ from zoneinfo import ZoneInfo
 
 from thefuzz import fuzz
 
-from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
 from data_api.domain.dining import enums
 from data_api.utils.search import fuzzy_matches
 
@@ -62,6 +62,9 @@ def _filter_by_schedule(dining_data: list[dict], schedule: Optional[str]) -> lis
 class DiningService:
     """Service for dining data operations."""
 
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+
     async def get_dining_data(
         self,
         building_name: Optional[str] = None,
@@ -69,11 +72,7 @@ class DiningService:
         schedule: Optional[str] = None,
     ) -> tuple[Optional[str], list[dict]]:
         """Get grouped dining data with building, name, and opening-day filters."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-
-        commit_hash, dining_data = result
+        commit_hash, dining_data = await self.manager.get(JSON_PATH)
 
         filtered = []
 
@@ -122,11 +121,7 @@ class DiningService:
         Fuzzy search dining data while maintaining the nested structure.
         Returns: list[DiningBuilding]
         """
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-
-        commit_hash, raw_data = result
+        commit_hash, raw_data = await self.manager.get(JSON_PATH)
         filtered_results = []
 
         # 2. 遍歷每一棟建築

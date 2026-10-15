@@ -7,13 +7,13 @@ from functools import lru_cache
 
 from pydantic import BaseModel, HttpUrl, TypeAdapter
 
-from data_api.api.schemas.announcements import AnnouncementDetail, AnnouncementSource
-from data_api.api.schemas.calendars import Calendar, CalendarEvent
-from data_api.api.schemas.departments import Department
-from data_api.api.schemas.dining import DiningBuilding
-from data_api.api.schemas.libraries import LibraryRssItem
-from data_api.api.schemas.newsletters import NewsletterInfo
 from data_api.data.nthudata import FetchFailure, JsonData
+from data_api.models.announcements import AnnouncementDetail, AnnouncementSource
+from data_api.models.calendars import Calendar, CalendarEvent
+from data_api.models.departments import Department
+from data_api.models.dining import DiningBuilding
+from data_api.models.libraries import LibraryRssItem
+from data_api.models.newsletters import NewsletterInfo
 
 
 class Coordinates(BaseModel):

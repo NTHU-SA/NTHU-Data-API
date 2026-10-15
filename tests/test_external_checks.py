@@ -71,6 +71,18 @@ async def test_complete_publication_accepts_url_regressions_and_serializes(publi
     assert documents == original
 
 
+async def test_publication_check_does_not_reset_an_active_runtime(publication, dataset_runtime):
+    await dataset_runtime.get("courses.json")
+    snapshot = dataset_runtime.states["/courses.json"].snapshot
+    active_client = dataset_runtime.fetcher.client
+    documents, manifest = publication
+    async with published_client(documents, manifest) as client:
+        assert await check_published(client, "https://publisher.test") == []
+    assert dataset_runtime.states["/courses.json"].snapshot is snapshot
+    assert dataset_runtime.fetcher.client is active_client
+    assert not active_client.is_closed
+
+
 async def test_legacy_manifest_and_empty_datasets_are_accepted(publication):
     documents, manifest = publication
     for entries in manifest["file_details"].values():

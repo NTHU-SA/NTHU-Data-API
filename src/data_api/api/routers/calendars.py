@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Path, Query, Response
 from data_api.api.schemas.calendars import Calendar, CalendarEvent
 from data_api.api.schemas.errors import ErrorResponse
 from data_api.api.schemas.responses import COUNT_HEADERS, SNAPSHOT_RESPONSES
-from data_api.domain.calendars.services import calendars_service
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -25,7 +25,7 @@ async def get_all_calendars(response: Response):
     資料來源：[清華校園資料](https://data.nthusa.tw/calendars.json)、
     [圖書館行事曆](https://data.nthusa.tw/libraries/calendars.json)
     """
-    commit_hash, calendars = await calendars_service.get_all_calendars()
+    commit_hash, calendars = await get_runtime().calendars.get_all_calendars()
     if commit_hash is not None:
         response.headers["X-Data-Commit-Hash"] = commit_hash
     return calendars
@@ -39,7 +39,7 @@ async def get_all_calendars(response: Response):
 )
 async def get_calendar(response: Response, calendar_id: str = CALENDAR_ID_PATH):
     """取得指定行事曆的資訊（不含事件）。"""
-    commit_hash, calendar = await calendars_service.get_calendar(calendar_id)
+    commit_hash, calendar = await get_runtime().calendars.get_calendar(calendar_id)
     if calendar is None:
         raise HTTPException(status_code=404, detail="找不到行事曆")
     if commit_hash is not None:
@@ -83,7 +83,7 @@ async def search_calendar_events(
     """
     if start and end and start > end:
         raise HTTPException(status_code=400, detail="start 不可晚於 end")
-    commit_hash, events = await calendars_service.search_calendar_events(
+    commit_hash, events = await get_runtime().calendars.search_calendar_events(
         calendar_id, start=start, end=end, keyword=keyword
     )
     if events is None:
@@ -106,7 +106,7 @@ async def get_calendar_event(
     event_id: str = Path(..., description="事件 id"),
 ):
     """取得指定行事曆中的單一事件。"""
-    commit_hash, event = await calendars_service.get_calendar_event(calendar_id, event_id)
+    commit_hash, event = await get_runtime().calendars.get_calendar_event(calendar_id, event_id)
     if event is None:
         raise HTTPException(status_code=404, detail="找不到事件")
     if commit_hash is not None:

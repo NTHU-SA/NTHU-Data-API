@@ -2,15 +2,16 @@
 
 from typing import Literal, Optional
 
-from data_api.domain.dining import services as dining_services
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import DiningBuildingsResult, OpenDiningResult
+from data_api.runtime import get_runtime
 
 
 async def _find_dining(
     restaurant_name: Optional[str] = None,
     building: Optional[str] = None,
     check_open: Optional[Literal["today", "weekday", "saturday", "sunday"]] = None,
-) -> dict:
+) -> DiningBuildingsResult | OpenDiningResult:
     """
     Find dining options on campus.
 
@@ -26,8 +27,9 @@ async def _find_dining(
 
     Building, restaurant name, and open-status filters apply together.
     """
+    service = get_runtime().dining
     if check_open:
-        _, restaurants = await dining_services.dining_service.get_open_restaurants(
+        _, restaurants = await service.get_open_restaurants(
             schedule=check_open,
             building_name=building,
             restaurant_name=restaurant_name,
@@ -45,7 +47,7 @@ async def _find_dining(
             ],
         }
     else:
-        _, data = await dining_services.dining_service.fuzzy_search_dining_data(
+        _, data = await service.fuzzy_search_dining_data(
             building_name=building,
             restaurant_name=restaurant_name,
         )

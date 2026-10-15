@@ -9,7 +9,7 @@ from data_api.api.schemas.libraries import (
     LibrarySpace,
 )
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.libraries.services import libraries_service
+from data_api.runtime import get_runtime
 
 router = APIRouter()
 
@@ -26,7 +26,7 @@ async def get_library_space_availability():
     資料來源：[圖書館空間預約系統](https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx)
     """
     with service_errors():
-        return await libraries_service.get_space_availability()
+        return await get_runtime().libraries.get_space_availability()
 
 
 @router.get(
@@ -41,7 +41,7 @@ async def get_library_lost_and_found_items():
     資料來源：[圖書館失物招領系統](https://adage.lib.nthu.edu.tw/find)
     """
     with service_errors():
-        return await libraries_service.get_lost_and_found_items()
+        return await get_runtime().libraries.get_lost_and_found_items()
 
 
 @router.get(
@@ -64,7 +64,7 @@ async def get_library_rss_data(
     取得指定圖書館的 RSS 資料。
     資料來源：[圖書館官網 RSS](https://www.lib.nthu.edu.tw/bulletin/RSS/index.html)
     """
-    commit_hash, items = await libraries_service.get_rss_items(rss_type.value)
+    commit_hash, items = await get_runtime().libraries.get_rss_items(rss_type.value)
     if items is None:
         raise HTTPException(status_code=404, detail="找不到 RSS 資料")
 

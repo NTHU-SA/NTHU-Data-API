@@ -8,8 +8,8 @@ from typing import Optional
 
 from thefuzz import fuzz
 
-from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
 
 JSON_PATH = "directory.json"
 FUZZY_SEARCH_THRESHOLD_DEPT = 80
@@ -28,12 +28,12 @@ def _person_match_score(query: str, person: dict) -> int:
 class DepartmentsService:
     """Service for department directory operations."""
 
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+
     async def get_all_departments(self) -> tuple[Optional[str], list[dict]]:
         """Get all departments."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-        return result
+        return await self.manager.get(JSON_PATH)
 
     async def get_directory(self, query: str | None = None) -> tuple[Optional[str], list[dict]]:
         """Return matching departments, retaining only matching people when needed."""
@@ -75,11 +75,7 @@ class DepartmentsService:
         self, query: str
     ) -> tuple[Optional[str], dict[str, list]]:
         """Fuzzy search departments and people."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-
-        commit_hash, directory_data = result
+        commit_hash, directory_data = await self.manager.get(JSON_PATH)
 
         dept_results = []
         person_results = []

@@ -5,8 +5,8 @@ import json
 from datetime import date
 from typing import Optional
 
-from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
 from data_api.utils.calendars import filter_calendar_events
 
 JSON_PATH = "calendars.json"
@@ -15,6 +15,9 @@ LIBRARY_PREFIX = "library-"
 
 
 class CalendarsService:
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+
     async def get_all_calendars(self) -> tuple[Optional[str], list[dict]]:
         """Get calendar metadata without events."""
         campus_version, campus = await self._get_data(JSON_PATH)
@@ -32,10 +35,7 @@ class CalendarsService:
         ]
 
     async def _get_data(self, path: str) -> tuple[Optional[str], list[dict]]:
-        result = await nthudata.get(path)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-        return result
+        return await self.manager.get(path)
 
     @staticmethod
     def _library_calendar(calendar: dict) -> dict:

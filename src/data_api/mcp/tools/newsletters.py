@@ -2,13 +2,14 @@
 
 from typing import Optional
 
-from data_api.domain.newsletters import services as newsletters_services
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import NewslettersResult
+from data_api.runtime import get_runtime
 
 
 async def _get_newsletters(
     search: Optional[str] = None,
-) -> dict:
+) -> NewslettersResult:
     """
     Get campus newsletter information.
 
@@ -18,7 +19,7 @@ async def _get_newsletters(
     Returns:
         Dictionary with newsletter information.
     """
-    _, newsletters = await newsletters_services.newsletters_service.get_all_newsletters()
+    _, newsletters = await get_runtime().newsletters.get_all_newsletters()
 
     if search:
         from thefuzz import fuzz

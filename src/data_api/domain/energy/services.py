@@ -11,7 +11,7 @@ import re
 import httpx
 
 from data_api.core.exceptions import UpstreamResponseException
-from data_api.core.upstream import upstream_errors
+from data_api.core.upstream import live_client, upstream_errors
 
 # Electricity system data
 ELECTRICITY_USAGE_DATA = [
@@ -23,13 +23,12 @@ URL_PREFIX = "http://140.114.188.86/powermanage/fn1/kw"
 URL_POSTFIX = ".aspx"
 
 
-async def fetch_electricity_data(item: dict) -> dict:
+async def fetch_electricity_data(item: dict, client: httpx.AsyncClient) -> dict:
     """Async fetch electricity data for one system."""
     url = f"{URL_PREFIX}{item['id']}{URL_POSTFIX}"
     with upstream_errors():
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            response.raise_for_status()
+        response = await client.get(url)
+        response.raise_for_status()
 
         data_match = re.search(r"alt=\"kW: ([\d,-]+?)\"", response.text, re.S)
         if not data_match:
@@ -50,10 +49,23 @@ async def fetch_electricity_data(item: dict) -> dict:
 class EnergyService:
     """Service for energy data operations."""
 
+    def __init__(self):
+        self.client: httpx.AsyncClient | None = None
+
     async def get_realtime_electricity_usage(self) -> list[dict]:
         """Get real-time electricity usage for all systems."""
-        tasks = [fetch_electricity_data(item.copy()) for item in ELECTRICITY_USAGE_DATA]
-        return await asyncio.gather(*tasks)
+        async with live_client(self.client) as client:
+            tasks = [
+                asyncio.create_task(fetch_electricity_data(item, client))
+                for item in ELECTRICITY_USAGE_DATA
+            ]
+            try:
+                return await asyncio.gather(*tasks)
+            finally:
+                for task in tasks:
+                    if not task.done():
+                        task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
 
 
 # Global service instance
