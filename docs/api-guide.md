@@ -4,8 +4,8 @@
 
 This guide is for REST and MCP consumers. Start with discovery and shared query
 conventions, then use the resource sections for examples. Existing clients should
-read the 3.0 migration section before upgrading. For local setup and validation,
-see the [development guide](development.md).
+read the [3.0 migration guide](migration-3.0.md) before upgrading. For local setup
+and validation, see the [development guide](development.md).
 
 The examples below use paths relative to `https://api.nthusa.tw` (local:
 `http://localhost:5000`). See [Swagger UI](https://api.nthusa.tw/docs) for
@@ -13,19 +13,26 @@ complete request and response schemas.
 
 ## Contents
 
-- [Discovery and MCP](#discovery-and-mcp)
-- [Version policy and 3.0 migration](#version-policy-and-30-migration)
-- [Query conventions](#query-conventions)
-- [Directory](#directory-queries)
-- [Announcements](#announcement-queries)
-- [Library and energy](#library-and-energy)
-- [Courses](#course-queries)
-- [Newsletters](#newsletter-queries)
-- [Locations](#location-queries)
-- [Buses](#bus-routes-stops-and-schedules)
-- [Dining](#dining-queries)
-- [Calendars](#campus-calendars)
-- [Availability and readiness](#availability-and-readiness)
+| Task | Read |
+| --- | --- |
+| Connect to REST or MCP | [Discovery and MCP](#discovery-and-mcp) |
+| Understand paths, filters, responses and headers | [Query conventions](#query-conventions) |
+| Upgrade an existing client | [Version policy](#version-policy-and-30-migration) and [3.0 migration guide](migration-3.0.md) |
+| Handle unavailable data or check readiness | [Availability and readiness](#availability-and-readiness) |
+
+### Query reference
+
+| Resource | Main endpoints | Details |
+| --- | --- | --- |
+| Courses | `/courses`, `/courses/semesters`, `/courses/{semester}` | [Semester selection](#semester-selection), [GET filters](#get-filters), [POST query DSL](#post-query-dsl), [MCP](#course-mcp-query) |
+| Directory | `/directory` | [Department and people matching](#directory-queries) |
+| Announcements | `/announcements`, `/announcements/sources` | [Source and content filters](#announcement-queries) |
+| Newsletters | `/newsletters`, `/newsletters/sources` | [Source and article filters](#newsletter-queries) |
+| Locations | `/locations` | [Name matching](#location-queries) |
+| Buses | `/buses/routes`, `/buses/stops`, `/buses/schedule` | [Routes and stops](#bus-routes-and-stops), [schedule filters](#bus-schedule-filters), [MCP](#bus-mcp-query) |
+| Dining | `/dining` | [Name and schedule filters](#dining-queries) |
+| Library and energy | `/libraries/spaces`, `/libraries/lost-and-found`, `/libraries/rss/{rss_type}`, `/energy/electricity` | [Live queries](#live-library-and-energy-endpoints), [RSS](#library-rss) |
+| Calendars | `/calendars`, `/calendars/{calendar_id}/events` | [Calendar selection](#campus-calendars), [event filters](#calendar-event-filters) |
 
 ## Discovery and MCP
 
@@ -82,65 +89,43 @@ must explicitly describe their impact. Removing an endpoint is still a breaking
 change even after deprecation; there is no promise that old clients keep working
 after a major upgrade.
 
-**3.0.0 is being prepared and includes breaking course changes.** Courses now use
-the publisher's normalized fields and support semester selection in REST and MCP;
-see [course queries](#course-queries) for the field migration. The unreleased
-3.0.0 contracts may be updated before its first stable tag. After publication,
-the ordinary major-version compatibility policy applies.
-
-**3.0.0 removes all previously deprecated REST operations.** Update clients using
-the following table. Existing supported operation IDs and the eight current MCP
-tool names remain unchanged. Removed paths have no compatibility handlers; most
-return 404. `GET /courses/search` now matches the semester route and returns 422
-for an invalid semester; POST at that path returns 405. There are no custom legacy
-redirects. Ordinary FastAPI trailing-slash normalization remains enabled: for
-example, `/courses/` redirects to `/courses` with 307 and preserves query parameters.
-It no longer has a separate operation or special all-courses behavior.
-
-| Removed operation | Replacement and migration difference |
-| --- | --- |
-| `GET /announcements/`, `/calendars/`, `/dining/`, `/locations/`, `/newsletters/` | Use the slashless collection URL directly to avoid a 307 redirect. |
-| `GET /departments/` | `GET /directory`; same department collection model. |
-| `GET /departments/search` | `GET /directory?query=...`; returns departments with matching nested people, not separate `departments`/`people` arrays. MCP campus search retains its own separate arrays. |
-| `GET /announcements/lists/departments` | `GET /announcements/sources`; extract and deduplicate `department` locally, sorting if needed. |
-| `GET /courses/` | `GET /courses`; supplied filters now apply, including after a slash redirect. |
-| `GET /courses/search` | `GET /courses` with the same field filters; no non-empty filters now returns **all courses**, not `[]`. |
-| `POST /courses/search` | `POST /courses/query` with the same body. |
-| `GET /courses/lists/{list_name}` | `GET /courses?type={list_name}`. |
-| `GET /newsletters/{newsletter_name}` | `GET /newsletters?name={newsletter_name}&fuzzy=false`; returns an array, or `[]` instead of 404. Names are no longer restricted to a fixed legacy enum. |
-| `GET /locations/search?query=...` | `GET /locations?name=...`; no matches returns `[]` instead of 404. |
-| `GET /buses/info/stops` | `GET /buses/stops`; same collection format. |
-| `GET /buses/schedules` | `GET /buses/schedule`; rename `bus_type` to `route`. Defaults are now `route=all`, `day=current`, `direction=all`. Line IDs are campus-qualified; when `stop` is supplied, time filtering uses arrival at that stop, not departure. |
-| `GET /buses/stops/{stop_name}` | `GET /buses/schedule?stop={stop_name}&details=true`; read `dep_info` and `stops_time`, not flat arrival records. Arrival filtering still includes in-transit buses. |
-| `GET /libraries/space` | `GET /libraries/spaces`. |
-| `GET /libraries/lost_and_found` | `GET /libraries/lost-and-found`. |
-| `GET /energy/electricity_usage` | `GET /energy/electricity`. |
-
-Earlier removed MCP names `get_next_buses` and `get_bus_stops` are not restored;
-use `get_bus_schedule` and refresh the client tool list. The earlier removed
-`/dining/open` remains absent; see [dining queries](#dining-queries).
+**3.0.0 is being prepared and includes breaking changes.** Endpoint replacements,
+course field mappings and MCP client changes are collected in the
+[3.0 migration guide](migration-3.0.md). The unreleased contracts may change before
+the first stable tag; after publication, the compatibility policy above applies.
 
 ## Query conventions
 
+### Root endpoint paths
+
+Use root GET endpoints without a trailing slash: `/announcements`, `/calendars`,
+`/dining`, `/locations`, and `/newsletters`. Only slashless operations are
+registered and documented. Trailing-slash requests use the framework's automatic
+307 redirect, not separate compatibility endpoints. `GET /courses` and
+`GET /directory` follow the same convention.
+
 ### Search behavior
-- MCP `search_courses` matches case-sensitive literal substrings in course titles,
-  teacher names, and course IDs. Supplied filters are combined with AND; a keyword
-  can match either the Chinese or English title. Regex characters such as `C++`
-  and `[AI]` are treated literally. `limit` defaults to 20 and must be 1-100;
-  zero, negative, and larger values are rejected.
-- REST course GET uses regular expressions for text and exact matching for
-  numeric/boolean fields, combining supplied fields with AND. Course POST queries
-  support nested AND/OR conditions and typed exact matching unless
-  `regex_match` is true for a text field. Invalid regex syntax returns HTTP 422,
-  including when the course dataset is empty.
-- MCP `find_dining` applies building and restaurant-name fuzzy filters together
-  with `check_open`, before limiting results. Open-status remains based on the
-  existing schedule-note heuristic, not a guarantee that a restaurant is open.
-- The exported REST/MCP app applies CORS and returns `X-Process-Time`. CORS
-  exposes `X-Total-Count`, `X-Data-Commit-Hash`, and `X-Process-Time` to browser
-  clients from configured origins. Unexpected failures before a response starts,
-  including dependency and response validation errors, retain CORS and timing
-  headers.
+
+Matching rules are resource-specific, not interchangeable. In particular:
+
+| Query | Matching |
+| --- | --- |
+| Course REST GET | Regex for text; exact native values for numeric/boolean fields |
+| Course REST POST | Typed exact matching by default; opt-in text regex and nested AND/OR |
+| Course MCP | Case-sensitive literal substrings, not regex |
+| Dining | Fuzzy name matching by default; schedule notes are not live availability |
+
+The resource sections below document defaults, empty-filter behavior and limits.
+Apply all filters before result limits. Invalid course regex returns 422 even
+when the dataset is empty.
+
+### Response headers and CORS
+
+The exported REST/MCP app applies CORS and returns `X-Process-Time`. CORS
+exposes `X-Total-Count`, `X-Data-Commit-Hash`, and `X-Process-Time` to browser
+clients from configured origins. Unexpected failures before a response starts,
+including dependency and response validation errors, retain CORS and timing
+headers.
 
 ### Response schemas
 
@@ -158,14 +143,6 @@ or a string for invalid GET regular expressions. OpenAPI success responses decla
 `X-Data-Commit-Hash` where supplied (omitted for unknown versions), and
 `X-Total-Count` on course responses and paginated calendar event lists.
 
-### Root endpoint paths
-
-Use root GET endpoints without a trailing slash: `/announcements`, `/calendars`,
-`/dining`, `/locations`, and `/newsletters`. Only slashless operations are
-registered and documented. Trailing-slash requests use the framework's automatic
-307 redirect, not separate compatibility endpoints. `GET /courses` and
-`GET /directory` follow the same convention.
-
 ## Directory queries
 
 The documentation groups these endpoints under `Directory`.
@@ -178,7 +155,6 @@ department metadata is retained and `details.people` contains only matching
 people. Results are sorted by match score, while people retain their dataset
 order. Filtering does not modify the cached dataset.
 
-There is no `/directory/search` endpoint. The `/departments` routes are removed.
 MCP campus search retains its separate `departments` and `people` response.
 
 ## Announcement queries
@@ -189,7 +165,6 @@ The sources response is a `list[AnnouncementSource]` with required `title`, `lin
 (HTTP/HTTPS URL), `language`, and `department` fields, documented in OpenAPI.
 Use the `department` fields in `/announcements/sources` to discover department
 names; clients needing a unique department list can deduplicate those values.
-The redundant `GET /announcements/lists/departments` endpoint is removed.
 
 ```text
 GET /announcements
@@ -216,9 +191,8 @@ and the optional `department` filter on `/announcements/sources` are unchanged.
 Use `GET /libraries/spaces` for the library space availability collection
 (`list[LibrarySpace]`), `GET /libraries/lost-and-found` for library lost items, and
 `GET /energy/electricity` for realtime campus electricity usage.
-The former singular/underscore aliases are removed; see the migration table.
-
-MCP tool names and arguments are unchanged.
+For failure status codes and MCP tool errors, see
+[live integration errors](#live-integration-errors).
 
 ### Library RSS
 
@@ -238,6 +212,14 @@ requests return 503. A missing feed returns 404 and an invalid `rss_type` return
 ## Course queries
 
 ### Semester selection
+
+| Endpoint | Dataset or purpose |
+| --- | --- |
+| `GET /courses/semesters` | Discover published semester codes |
+| `GET /courses` | Latest courses with GET filters |
+| `POST /courses/query` | Latest courses with a query body |
+| `GET /courses/{semester}` | Selected semester with GET filters |
+| `POST /courses/{semester}/query` | Selected semester with a query body |
 
 `GET /courses` and `POST /courses/query` use the publisher's
 `courses/latest.json`. They do not infer a semester from today's date or the
@@ -337,35 +319,26 @@ Queries allow at most **32 array levels** (the outermost array is level 1) and
 **1,024 nodes** across the whole tree. Each array, condition object and operator
 counts as one node; fields inside condition objects do not count separately.
 Malformed grammar, exceeded limits and invalid regex syntax return HTTP 422,
-even when the course dataset is empty. The `/courses/search` and
-`/courses/lists/{list_name}` legacy operations are removed.
+even when the course dataset is empty.
 
 ### Normalized fields and 3.0 migration
 
 All course objects expose 33 fields. Numeric and boolean metadata may be null;
 missing source information is not silently converted to zero, false or Chinese.
-Arrays remain arrays, including empty arrays. Old field names are not aliases.
+Arrays remain arrays, including empty arrays. For old-to-new field mappings,
+see the [course migration table](migration-3.0.md#course-fields-and-queries);
+old field names are not aliases. Swagger UI defines the complete response schema.
 
-| Before 3.0 | 3.0 field | Type |
-| --- | --- | --- |
-| `credit` | `credits` | nonnegative number or null |
-| `size_limit` | `capacity`, `capacity_unlimited` | nonnegative integer or null; boolean or null |
-| `freshman_reservation` | `reserved_for_freshmen` | nonnegative integer or null |
-| `suspend` | `is_cancelled` | boolean or null |
-| `language` | `language_code` | `"zh"`, `"en"` or null |
-| `teacher` | `lecturers` | array of `{label}` or `{name_zh, name_en}` |
-| `class_room_and_time` | `meetings` | array of `{classroom, time, time_codes}` |
-| `expertise` | `expertises` | array of `{name, type}` |
-| `program` | `programs` | string array |
-| `required_optional_note` | `curriculum_requirements` | array of `{target, requirement}` |
-| `prerequisite` | `prerequisite_text` | string |
+`credits` is a nullable nonnegative number; `capacity` and `reserved_for_freshmen`
+are nullable nonnegative integers; `capacity_unlimited` and `is_cancelled` are
+nullable booleans. `language_code` is `"zh"`, `"en"` or null.
+`lecturers`, `meetings`, `expertises`, `programs` and `curriculum_requirements`
+are arrays; `prerequisite_text` is a string.
 
-Retained names are `id`, `chinese_title`, `english_title`, `note`, `limit_note`,
-`object`, `ge_type`, and `no_extra_selection`. Note the corrected publisher
-semantics: `object` is the course audience/enrollment restriction, `ge_type`
-is the general-education audience, and the new `ge_category` is its category.
+`object` is the course audience/enrollment restriction, `ge_type` is the
+general-education audience, and `ge_category` is its category.
 
-Other new fields are `semester_code`; nullable text `department_code`,
+Additional fields are `semester_code`; nullable text `department_code`,
 `course_number`, `department_name`, `college_name`, `course_level_code`,
 `course_level`, `remote_teaching`; nullable nonnegative integers `enrolled_count`,
 `enrollment_after_selection`, `enrollment_after_withdrawal`; and string-array
@@ -380,12 +353,17 @@ time text. Parser warnings are preserved, not repaired or used to reject otherwi
 valid records. Required fields and invalid structures still fail snapshot
 installation; an older usable snapshot is retained if available.
 
-MCP `search_courses` keeps `keyword`, `teacher`, `course_id` and `limit` and adds
-optional `semester`. `teacher` matches literal substrings in label, Chinese or
-English lecturer names. Its result remains `{count, courses}`, but each course
-now contains the complete normalized model above; old `credit`, `teacher`,
-`time_and_room` and `language` output fields are removed. MCP semester failures
-are tool errors, not successful empty results.
+### Course MCP query
+
+`search_courses` accepts `keyword`, `teacher`, `course_id`, `limit` and optional
+`semester`. Filters use case-sensitive literal substrings and are combined with
+AND. A keyword can match either the Chinese or English course title; `teacher`
+matches label, Chinese or English lecturer names. Regex characters such as `C++`
+and `[AI]` are treated literally. `limit` defaults to 20 and must be 1-100;
+zero, negative and larger values are rejected.
+
+The result is `{count, courses}`, with complete normalized course objects.
+Semester failures are tool errors, not successful empty results.
 
 ### Snapshot loading
 
@@ -419,10 +397,6 @@ Its optional `name` filter matches exactly. Both endpoints return the dataset's
 /newsletters?name=教務處綜合教務組電子報&title=選課&fuzzy=false
 ```
 
-`GET /newsletters/{newsletter_name}` is removed. Use
-`/newsletters?name={newsletter_name}&fuzzy=false`, which returns a list
-(or `[]` if no source matches).
-
 ## Location queries
 
 Use `GET /locations` to list all campus locations, or supply `name` to search
@@ -440,8 +414,6 @@ Responses are arrays of locations with `name`, `latitude`, and `longitude`,
 and include `X-Data-Commit-Hash` when available. No matches return HTTP 200
 with `[]`.
 
-`GET /locations/search` is removed. Use the collection's `name` filter.
-
 ## Bus routes, stops, and schedules
 
 The bus API exposes three resources:
@@ -452,37 +424,56 @@ The bus API exposes three resources:
 | `GET /buses/stops` | All bus stops with names and coordinates |
 | `GET /buses/schedule` | Timetable query, optionally filtered by stop |
 
-`GET /buses/stops` replaces the removed `/buses/info/stops`.
+### Bus routes and stops
+
 Stop-specific timetable queries use
 `GET /buses/schedule?stop=台積館`, not a stop resource path.
 
 Use `GET /buses/routes?route=main` to select campus route metadata. Its optional
 `route` (`main`, `nanda`) and `direction` (`up`, `down`) filters return all routes
-and directions when omitted. The query parameter `bus_type` is replaced by `route`.
+and directions when omitted.
 
-Use `GET /buses/schedule` with optional `route` (`main`, `nanda`, `all`),
-`day` (`weekday`, `weekend`, `current`), and `direction` (`up`, `down`, `all`).
-Defaults are `route=all`, `day=current`, and `direction=all`, so a request without
-parameters returns the next departures across all routes and directions.
+### Bus schedule filters
+
+Use `GET /buses/schedule` with these optional parameters:
+
+| Parameter | Values or purpose | REST default |
+| --- | --- | --- |
+| `route` | `main`, `nanda`, `all` | `all` |
+| `day` | `weekday`, `weekend`, `current` | `current` |
+| `direction` | `up`, `down`, `all` | `all` |
+| `stop` | Only buses serving the named stop | No stop filter |
+| `time` | HH:MM threshold; ignored for `day=current` | See time filtering below |
+| `details` | Include `dep_info` and `stops_time` | `false` |
+| `limit` | Result limit, at least 1 | `5` |
+
+A request without parameters returns the next departures across all routes and
+directions. The parameter is `limit`, not `limits`.
+Stop and time filters are applied before the limit; no matches return `[]`.
+
+### Bus response fields
+
 `route` selects a campus route; response `bus_type` identifies the vehicle type
-(for example, `large-sized_bus`), not the campus route.
-The current REST endpoint and MCP use campus-qualified `line` identifiers:
+(for example, `large-sized_bus`), not the campus route. `details=false` returns
+departure schedules; `details=true` includes `dep_info` and all `stops_time` entries.
+Filtering by `stop` does not change the response format.
+
+The REST endpoint and MCP use campus-qualified `line` identifiers:
 `main_red`, `main_green`, `nanda_route_1`, and `nanda_route_2`. With `details=true`,
 the identifier is in `dep_info.line`; otherwise it is in `line`.
 Nanda route selection uses the publisher's explicit `line` (`route1`/`route2`),
 including when `description` is empty. Only records without a line use the legacy
 description heuristic. The same selection determines stop membership and arrival times.
-Optional `stop` filters to buses serving that stop, without changing the response
-format. `details=false` (default) returns departure schedules; `details=true`
-includes `dep_info` and all `stops_time` entries. `time` is in HH:MM format and
-filters by estimated arrival time at the selected `stop`, including buses that
+
+### Bus time filtering
+
+`time` is in HH:MM format and filters by estimated arrival time at the selected
+`stop`, including buses that
 have departed but have not arrived at that stop yet. Arrivals exactly at the
 requested time are included; buses that have already passed the stop are excluded.
 Without `stop`, filtering still uses departure time. Both detail modes use the
-same time filter and retain departure-time ordering. `day=current` uses the current day
-and time and ignores `time`. `limit` defaults to 5 and must be at least 1.
-The shared `BusQuery` parameter is `limit`, not `limits`.
-Stop and time filters are applied before the limit; no matches return `[]`.
+same time filter and retain departure-time ordering. `day=current` uses the
+current day and time and ignores `time`.
 
 ```text
 /buses/schedule
@@ -492,16 +483,13 @@ Stop and time filters are applied before the limit; no matches return `[]`.
 /buses/schedule?route=all&day=weekday&direction=up&stop=台積館&details=true
 ```
 
-`GET /buses/schedules` and `GET /buses/stops/{stop_name}` are removed.
-See the 3.0 migration table for query, line identifier and response-shape changes.
+### Bus MCP query
 
-MCP `get_bus_schedule` replaces `get_next_buses` and `get_bus_stops` without
-compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,
+`get_bus_schedule` accepts `route`, `direction`, `limit`, `stop`, `day`,
 `time`, and `details`, using the same schedule filters as REST. Defaults are
 `route=all`, `direction=all`, `day=current`, `limit=5`, and `details=true`.
 Its `buses` list uses the REST schedule format; `stop_name` and `stop_info`
-(including coordinates) are included when `stop` is supplied. MCP clients must
-refresh their tool list and use the new name and response format.
+(including coordinates) are included when `stop` is supplied.
 If supplied, MCP `time` must be a zero-padded HH:MM value from `00:00` to `23:59`;
 malformed values are rejected during argument validation, even for `day=current`.
 
@@ -531,10 +519,8 @@ hours, holidays, or live availability. MCP `find_dining(check_open="today")`
 uses the same Taiwan-date interpretation and retains its existing response
 format and limits.
 
-**Breaking change:** `/dining/open` has been removed, without a redirect or
-compatibility alias. Replace `/dining/open?schedule=today` with
-`/dining?schedule=today`. The old endpoint returned a flat restaurant list;
-clients must now read each building's `restaurants` (or flatten them locally).
+MCP `find_dining` applies building and restaurant-name fuzzy filters together
+with `check_open`, before limiting results.
 
 ## Campus calendars
 
@@ -571,9 +557,7 @@ Library opening hours use the same query parameters:
 /calendars/library-main/events?start=2026-10-01&end=2026-10-31
 ```
 
-**Breaking change:** All four `/libraries/calendars` endpoints have been removed,
-without deprecated routes, redirects, or compatibility aliases. Migrate to
-`/calendars` and `/calendars/library-{main,hss,nanda}` with the same event paths.
+### Calendar event filters
 
 - `start` and `end` are optional inclusive dates (`YYYY-MM-DD`), interpreted using
   the local dates in the source calendar (`Asia/Taipei` for `academic`). Events
@@ -599,6 +583,8 @@ without deprecated routes, redirects, or compatibility aliases. Migrate to
 
 ## Availability and readiness
 
+### Dataset snapshots
+
 The published datasets at `NTHU_DATA_URL` are the persistent source of truth.
 Each process keeps in-memory snapshots shared by REST and MCP. Requests drive
 freshness checks, controlled by `FILE_DETAILS_CACHE_EXPIRY` (default 300 seconds).
@@ -620,6 +606,8 @@ Snapshots are not durable or synchronized across instances. A restart or
 scale-to-zero loses cached data, and different instances can temporarily serve
 different versions. Startup prefetch failures do not prevent other datasets from
 being served.
+
+### Live integration errors
 
 Live electricity, library space, and lost-and-found integrations are not published
 datasets and retain their existing on-demand behavior and separate HTTP clients.
@@ -646,22 +634,29 @@ readiness status codes as GET (200 or 503), returns no body, and retains
 `Cache-Control: no-store`. It is also excluded from the API schema and never
 fetches upstream data.
 
-- HTTP **200** with `ready: true` means every dataset has a usable snapshot.
-  `status` is `ok` when all recorded freshness values are `current` and no check
-  is due, or `degraded` when usable data is stale, unverified, or due for a check.
-- HTTP **503** with `ready: false` and `status: "unavailable"` means at least one
-  dataset has no usable snapshot, including datasets not loaded yet. Valid empty
-  snapshots count as usable.
-- `checked_at` is the UTC report time, not an upstream verification time.
-  `datasets` is keyed by published JSON path and includes `usable`, `freshness`,
-  `check_due`, `version`, `loaded_at`, `published_at`, `last_checked_at`,
-  `last_refresh_attempt_at`, `last_refresh_success_at`, and `last_error`.
-  Errors expose only category, upstream HTTP status (when known), and UTC time;
-  payloads, exception messages, and upstream URLs are not returned.
-- `freshness` is the last recorded refresh result; `check_due` separately indicates
-  that its TTL has expired or it has never been checked. Unknown metadata is `null`.
-  The report includes all configured datasets, even before their first request,
-  plus any additional datasets registered in the manager.
+| HTTP | `ready` | `status` | Meaning |
+| --- | --- | --- | --- |
+| 200 | `true` | `ok` | Every dataset is usable, recorded freshness is `current`, and no check is due |
+| 200 | `true` | `degraded` | Every dataset is usable, but some data is stale, unverified or due for a check |
+| 503 | `false` | `unavailable` | At least one dataset has no usable snapshot, including datasets not loaded yet |
+
+Valid empty snapshots count as usable.
+
+### Readiness report fields
+
+`checked_at` is the UTC report time, not an upstream verification time.
+`datasets` is keyed by published JSON path and includes `usable`, `freshness`,
+`check_due`, `version`, `loaded_at`, `published_at`, `last_checked_at`,
+`last_refresh_attempt_at`, `last_refresh_success_at`, and `last_error`.
+Errors expose only category, upstream HTTP status (when known), and UTC time;
+payloads, exception messages, and upstream URLs are not returned.
+
+`freshness` is the last recorded refresh result; `check_due` separately indicates
+that its TTL has expired or it has never been checked. Unknown metadata is `null`.
+The report includes all configured datasets, even before their first request,
+plus any additional datasets registered in the manager.
+
+### Readiness limitations
 
 This is a **readiness**, not a liveness, check. Do not use it as a Cloud Run
 startup/liveness probe. Failed startup loads are retried by normal dataset

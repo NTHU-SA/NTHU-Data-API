@@ -4,7 +4,7 @@
 
 For local setup, tests and external data checks, see the
 [development guide](development.md). For consumer-facing changes, see the
-[API guide](api-guide.md#version-policy-and-30-migration).
+[3.0 migration guide](migration-3.0.md).
 
 The API maintains one live version. GitHub Actions checks pull requests and main.
 `cloudbuild.yaml` validates release tags, builds and publishes container images,
@@ -26,8 +26,9 @@ FastAPI/OpenAPI, discovery and MCP server metadata read installed distribution
 metadata. The local package entry in `uv.lock` must match. Never patch a version
 inside a build or deploy a different commit from the one tagged.
 
-The [API guide](api-guide.md#version-policy-and-30-migration) documents compatibility
-and the 3.0 breaking changes. The offline suite pins structured REST and MCP
+The [API guide](api-guide.md#version-policy-and-30-migration) documents compatibility;
+the [3.0 migration guide](migration-3.0.md) lists breaking changes.
+The offline suite pins structured REST and MCP
 contracts. PR CI also compares checked-in contracts with the base commit as data,
 without executing base-commit code. Removals, changed schemas/defaults/constraints
 and newly required inputs require a higher major version after publication, even

@@ -50,11 +50,11 @@ curl "https://api.nthusa.tw/buses/schedule?stop=台積館&limit=5"
 ```
 
 查詢範例、MCP 工具與回應規則請見 [API guide](docs/api-guide.md)；
-升級既有應用程式請先閱讀 [3.0 遷移說明](docs/api-guide.md#version-policy-and-30-migration)。
+升級既有應用程式請先閱讀 [3.0 遷移說明](docs/migration-3.0.md)。
 完整參數與回應結構可於 Swagger UI 查閱。
 
 See the [API guide](docs/api-guide.md) for query examples, MCP tools and response
-conventions, and the [3.0 migration guide](docs/api-guide.md#version-policy-and-30-migration)
+conventions, and the [3.0 migration guide](docs/migration-3.0.md)
 when upgrading clients. Swagger UI provides complete parameter and response schemas.
 
 ### 文件導覽 / Documentation
@@ -67,6 +67,7 @@ deployment procedures live in the focused guides below.
 | 文件 / Guide | 內容 / Contents |
 | --- | --- |
 | [API guide](docs/api-guide.md) | 查詢、MCP、遷移與可用性<br>Queries, MCP, migration and availability |
+| [3.0 migration guide](docs/migration-3.0.md) | 舊端點替換與課程欄位遷移<br>Endpoint replacements and course field migration |
 | [Development guide](docs/development.md) | 設定、測試與資料契約檢查<br>Configuration, tests and data-contract checks |
 | [Release guide](docs/releasing.md) | 版本準備與 Cloud Build 部署<br>Version preparation and Cloud Build deployment |
 
@@ -127,9 +128,9 @@ for providing code quality metrics.
 
 ## Changelog
 
-- **3.0.0**：改善 MCP 工具設計與資料維護性，強化資料更新、快取與錯誤處理的穩定度，並精簡整併 API 端點。擴充校園與圖書館行事曆資料，採用標準化課程欄位，支援 REST 與 MCP 指定學期查詢；介面調整請見 [3.0 遷移說明](docs/api-guide.md#version-policy-and-30-migration)。
+- **3.0.0**：改善 MCP 工具設計與資料維護性，強化資料更新、快取與錯誤處理的穩定度，並精簡整併 API 端點。擴充校園與圖書館行事曆資料，採用標準化課程欄位，支援 REST 與 MCP 指定學期查詢；介面調整請見 [3.0 遷移說明](docs/migration-3.0.md)。
 
-  Improves MCP design, data maintainability and refresh/cache/error handling; consolidates API endpoints, expands campus/library calendars, and adds normalized courses with semester selection in REST and MCP. See the [3.0 migration guide](docs/api-guide.md#version-policy-and-30-migration) for interface changes.
+  Improves MCP design, data maintainability and refresh/cache/error handling; consolidates API endpoints, expands campus/library calendars, and adds normalized courses with semester selection in REST and MCP. See the [3.0 migration guide](docs/migration-3.0.md) for interface changes.
 
 - **2.0.0**：新增 MCP 介面，讓 AI 助理也能查詢校園資訊；主要資料改用 Data Scraper 提供的 JSON，將資料爬取與 API 服務分離，提升可維護性。
 
