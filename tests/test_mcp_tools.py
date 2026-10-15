@@ -19,21 +19,23 @@ from data_api.domain.newsletters import services as newsletters_services
 from data_api.mcp.server import mcp
 from data_api.mcp.tools.announcements import _get_announcements
 from data_api.mcp.tools.buses import _get_bus_schedule
-from data_api.mcp.tools.campus import _search_campus
 from data_api.mcp.tools.courses import _search_courses
 from data_api.mcp.tools.dining import _find_dining
+from data_api.mcp.tools.directory import _search_directory
 from data_api.mcp.tools.energy import _get_energy_usage
 from data_api.mcp.tools.library import _get_library_info
+from data_api.mcp.tools.locations import _search_locations
 from data_api.mcp.tools.newsletters import _get_newsletters
 from data_api.mcp.tools.result_types import (
     AnnouncementsResult,
     BusResult,
-    CampusResult,
     CoursesResult,
     DiningBuildingsResult,
+    DirectoryResult,
     EnergyResult,
     LibraryItemsResult,
     LibrarySpacesResult,
+    LocationsResult,
     NewslettersResult,
 )
 from data_api.models.courses import CourseData
@@ -45,20 +47,19 @@ pytestmark = pytest.mark.usefixtures("dataset_runtime")
 class TestMCPTools:
     """Tests for MCP tools functionality."""
 
-    async def test_search_campus(self):
-        """Test campus search tool."""
-        result = await _search_campus(query="教務處")
-        assert "locations" in result
+    async def test_search_directory(self):
+        """Test directory search tool."""
+        result = await _search_directory(query="教務處")
+        assert set(result) == {"departments", "people"}
         assert "departments" in result
         assert "people" in result
-        assert isinstance(result["locations"], list)
         assert isinstance(result["departments"], list)
         assert isinstance(result["people"], list)
 
-    async def test_search_campus_location(self):
-        """Test campus search for location."""
-        result = await _search_campus(query="校門")
-        assert "locations" in result
+    async def test_search_locations(self):
+        """Test location search."""
+        result = await _search_locations(query="校門")
+        assert set(result) == {"locations"}
         assert isinstance(result["locations"], list)
 
     async def test_get_bus_schedule_default(self):
@@ -223,13 +224,15 @@ class TestMCPTools:
 class TestMCPToolIntegration:
     """Integration tests for MCP tools."""
 
-    async def test_search_campus_returns_limited_results(self):
-        """Test that campus search limits results appropriately."""
-        result = await _search_campus(query="系")
-        # Should return at most 5 locations, 5 departments, 10 people
-        assert len(result["locations"]) <= 5
+    async def test_search_directory_returns_limited_results(self):
+        """Test that directory search limits results appropriately."""
+        result = await _search_directory(query="系")
         assert len(result["departments"]) <= 5
         assert len(result["people"]) <= 10
+
+    async def test_search_locations_returns_limited_results(self):
+        result = await _search_locations(query="館")
+        assert len(result["locations"]) <= 5
 
     async def test_get_bus_schedule_respects_limit(self):
         """Test that bus results respect limit parameter."""
@@ -276,15 +279,15 @@ class TestRegisteredPayloads:
         ("name", "arguments", "result_type", "expected"),
         [
             (
-                "search_campus",
+                "search_directory",
                 {"query": "not-found"},
-                CampusResult,
+                DirectoryResult,
                 {
-                    "locations": [],
                     "departments": [],
                     "people": [],
                 },
             ),
+            ("search_locations", {"query": "not-found"}, LocationsResult, {"locations": []}),
             (
                 "get_bus_schedule",
                 {"day": "weekday"},
@@ -350,7 +353,7 @@ class TestRegisteredPayloads:
         )
         monkeypatch.setattr(
             departments_services.departments_service,
-            "fuzzy_search_departments_and_people",
+            "search_departments_and_people",
             AsyncMock(
                 return_value=(
                     "fixture",
@@ -425,13 +428,10 @@ class TestRegisteredPayloads:
         )
         cases = [
             (
-                "search_campus",
+                "search_directory",
                 {"query": "Alice"},
-                CampusResult,
+                DirectoryResult,
                 {
-                    "locations": [
-                        {"name": "Main gate", "latitude": "24.79", "longitude": "120.99"}
-                    ],
                     "departments": [
                         {
                             "index": "01",
@@ -441,6 +441,12 @@ class TestRegisteredPayloads:
                     ],
                     "people": [{"name": "Alice", "title": None}],
                 },
+            ),
+            (
+                "search_locations",
+                {"query": "Main"},
+                LocationsResult,
+                {"locations": [{"name": "Main gate", "latitude": "24.79", "longitude": "120.99"}]},
             ),
             (
                 "get_announcements",

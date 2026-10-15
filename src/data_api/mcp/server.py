@@ -44,6 +44,7 @@ mcp = FastMCP(
     instructions="""You are an assistant for National Tsing Hua University (NTHU) in Taiwan.
 You can help with:
 - Finding campus locations and directions
+- Looking up departments and staff contact information
 - Checking bus schedules and next arrivals
 - Searching for courses
 - Getting campus announcements
@@ -86,22 +87,25 @@ from data_api.mcp.tools import (  # noqa: E402, F401
     _get_energy_usage,
     _get_library_info,
     _get_newsletters,
-    _search_campus,
     _search_courses,
+    _search_directory,
+    _search_locations,
     find_dining,
     get_announcements,
     get_bus_schedule,
     get_energy_usage,
     get_library_info,
     get_newsletters,
-    search_campus,
     search_courses,
+    search_directory,
+    search_locations,
 )
 
 __all__ = [
     "mcp",
     # Implementation functions (for testing)
-    "_search_campus",
+    "_search_directory",
+    "_search_locations",
     "_get_bus_schedule",
     "_search_courses",
     "_get_announcements",
@@ -110,7 +114,8 @@ __all__ = [
     "_get_newsletters",
     "_get_energy_usage",
     # MCP tool wrappers
-    "search_campus",
+    "search_directory",
+    "search_locations",
     "get_bus_schedule",
     "search_courses",
     "get_announcements",

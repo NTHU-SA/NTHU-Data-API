@@ -63,7 +63,8 @@ labels; other clients may continue to display the English names.
 
 | Tool name | Display title |
 | --- | --- |
-| `search_campus` | 搜尋校園資訊 |
+| `search_directory` | 搜尋清華通訊錄 |
+| `search_locations` | 搜尋校園地點 |
 | `get_bus_schedule` | 查詢公車時刻表 |
 | `search_courses` | 搜尋課程列表 |
 | `get_announcements` | 搜尋校園公告 |
@@ -147,15 +148,27 @@ or a string for invalid GET regular expressions. OpenAPI success responses decla
 
 The documentation groups these endpoints under `Directory`.
 Use `GET /directory` to retrieve the directory, or `GET /directory?query=...`
-to fuzzy-match department names, people names, or titles. An omitted or empty
-`query` returns the entire directory; no matches return an empty array.
+to match department names, people names, or titles. The optional `fuzzy` boolean
+defaults to `true`. Set `fuzzy=false` for case-sensitive full-string equality
+against any of those fields, not substring or regular-expression matching.
+For example, `/directory?query=王小明&fuzzy=false` matches that full person name.
+An omitted or empty `query` returns the entire directory; no matches return an
+empty array.
 The response is always a list of the existing `Department` model. A department
 name match returns that department in full. When only its people match, the
 department metadata is retained and `details.people` contains only matching
-people. Results are sorted by match score, while people retain their dataset
-order. Filtering does not modify the cached dataset.
+people. Fuzzy results are sorted by match score, while nested people retain their
+dataset order; exact results retain dataset order. Filtering does not modify the
+cached dataset.
 
-MCP campus search retains its separate `departments` and `people` response.
+MCP `search_directory(query, fuzzy=true)` uses the same matching fields and modes
+but returns separate `departments` and `people` arrays, capped at 5 departments
+and 10 people after filtering and ranking. A department-name match does not
+automatically include its people in the separate people array. It does not search
+locations. Unlike REST, an empty MCP query returns no matches in either mode.
+A valid empty result is `{departments: [], people: []}`; an unavailable
+dataset is a tool error.
+The tool loads only the directory dataset, independently of location searches.
 
 ## Announcement queries
 
@@ -420,6 +433,13 @@ Use `GET /locations` to list all campus locations, or supply `name` to search
 by name. `fuzzy` defaults to `true`; set `fuzzy=false` to require an exact
 name match. Omitting `name` or passing an empty value returns all locations
 regardless of `fuzzy`.
+
+MCP `search_locations(query, fuzzy=true)` searches only locations and returns
+`{locations}`, capped at 5 results after filtering and fuzzy ranking. Set
+`fuzzy=false` for case-sensitive full-string name equality. Unlike the REST
+listing endpoint, an empty MCP query does not request all locations. No matches
+return `{locations: []}`; an unavailable dataset is a tool error. Use
+`search_directory` for department or staff contacts instead.
 
 ```text
 GET /locations

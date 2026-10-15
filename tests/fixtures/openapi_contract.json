@@ -1982,6 +1982,13 @@
       "deprecated": false,
       "operationId": "getDirectory",
       "parameters": {
+        "query:fuzzy": {
+          "required": false,
+          "schema": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
         "query:query": {
           "required": false,
           "schema": {
