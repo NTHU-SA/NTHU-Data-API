@@ -97,10 +97,10 @@ Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/),
 such as `feat: add a feature` or `fix: fix a bug`.
 Development workflow, architecture, compatibility rules, and CI maintenance
 details are in [Copilot instructions](.github/copilot-instructions.md).
-For version preparation, tag-only Cloud Build deployment, trigger setup and
-rollback, see [releasing](docs/releasing.md). The service maintains one live API
-version. After the documented one-time trigger migration, only stable release
-tags deploy; normal pushes and pull requests run CI without deploying.
+For version preparation and tag-only Cloud Build deployment, see
+[releasing](docs/releasing.md). The service maintains one live API version.
+`cloudbuild.yaml` validates release tags, builds and publishes images, then updates
+the existing Cloud Run service. Trigger filters are configured separately in GCP.
 
 ### Published data and deployment checks
 

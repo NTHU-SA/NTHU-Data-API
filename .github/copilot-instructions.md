@@ -90,9 +90,11 @@ and migration differences that are not obvious from OpenAPI alone.
   releases preserve contracts; announce deprecations and replacements before a
   major removal. Update and review REST/MCP baselines together with migration notes.
 - `pyproject.toml` is the version source; use installed distribution metadata in
-  Python and keep the local project's `uv.lock` version synchronized. Deployment
-  validates an exact stable `vX.Y.Z` tag and must not rewrite source versions.
-  See [releasing](../docs/releasing.md) for Cloud Build trigger migration and gates.
+  Python and keep the local project's `uv.lock` version synchronized. Release
+  builds validate an exact stable `vX.Y.Z` tag and must not rewrite source versions.
+  `cloudbuild.yaml` validates, builds, publishes and updates the existing Cloud Run
+  service; trigger filters are managed in GCP. Do not reintroduce custom deployment
+  orchestration or GCS locks. See [releasing](../docs/releasing.md).
 - Preserve REST/MCP search differences: MCP course search uses case-sensitive
   literal substrings; REST course GET uses regex; the POST DSL defaults to exact
   matching. Invalid regex must return 422 even with an empty dataset.

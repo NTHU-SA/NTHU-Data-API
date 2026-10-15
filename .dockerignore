@@ -11,11 +11,5 @@ dist/
 .coverage*
 coverage/
 coverage.xml
-release-state.json
-release-owner.json
-release-token
-image-digest.txt
-candidate-ok
-production-ok
 .env
 tests/
