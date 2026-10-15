@@ -973,7 +973,7 @@
           "schema": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CourseLanguage"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -1612,7 +1612,7 @@
           "schema": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CourseLanguage"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -3333,13 +3333,6 @@
         "curriculum_requirements.requirement",
         "prerequisite_text",
         "parsing_issues"
-      ],
-      "type": "string"
-    },
-    "CourseLanguage": {
-      "enum": [
-        "zh",
-        "en"
       ],
       "type": "string"
     },

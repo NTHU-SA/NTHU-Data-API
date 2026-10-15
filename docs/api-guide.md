@@ -274,6 +274,7 @@ GET /courses/11510
 GET /courses/11510?lecturers.name_zh=林福仁
 GET /courses/11420?lecturers.label=林福仁
 GET /courses?chinese_title=服務
+GET /courses?language_code=zh%7Cen
 GET /courses/11510?credits=3&is_cancelled=false
 GET /courses/11510?meetings.time_codes=M3
 GET /courses?type=microcredits
@@ -283,6 +284,8 @@ GET /courses?type=xclass&lecturers.name_zh=林福仁
 `type` accepts `microcredits` (credits with a fractional part, such as 0.5 or 1.5;
 not integer credits or null) and `xclass` (case-sensitive `X-Class` in `note`).
 Unknown or empty types return HTTP 422.
+`language_code` is a text regex filter (for example, `zh|en`); published
+course values remain limited to `zh`, `en`, or null.
 
 Nested filters use leaf paths: `lecturers.label`, `lecturers.name_zh`,
 `lecturers.name_en`, `meetings.classroom`, `meetings.time`, `meetings.time_codes`,

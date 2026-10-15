@@ -20,6 +20,7 @@ def courses():
             lecturers=[{"label": teacher}],
             credits=credits,
             note=note,
+            language_code="en" if identity == "B" else (None if identity == "C" else "zh"),
         )
         for identity, teacher, title, english, credits, note in [
             ("A", "林福仁", "服務學習", "C++ [AI]", 0.5, "X-Class"),
@@ -73,6 +74,9 @@ async def test_every_get_field_is_accepted(client, field):
         ({"type": "microcredits", "lecturers.label": "林福仁"}, ["A"]),
         ({"type": "xclass", "lecturers.label": "黃"}, []),
         ({"english_title": r"^C\+\+", "id": "^11510A"}, ["A"]),
+        ({"language_code": "zh|en"}, ["A", "B", "D"]),
+        ({"language_code": "^en$"}, ["B"]),
+        ({"language_code": "中"}, []),
         ({"credits": "3", "is_cancelled": "false", "reserved_for_freshmen": "0"}, ["B"]),
         ({"is_cancelled": "true"}, []),
     ],
@@ -92,7 +96,6 @@ async def test_get_collection_filters(client, params, ids):
         {"type": "unknown"},
         {"type": ""},
         {"type": "XCLASS"},
-        {"language_code": "中"},
         {"credits": "bad"},
         {"capacity": "1.5"},
         {"is_cancelled": "bad"},
@@ -106,7 +109,7 @@ async def test_invalid_get_filters(client, params):
 
 @pytest.mark.parametrize("empty", [False, True])
 @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
-@pytest.mark.parametrize("field", ["chinese_title", "lecturers.label", "id"])
+@pytest.mark.parametrize("field", ["chinese_title", "lecturers.label", "id", "language_code"])
 async def test_get_invalid_regex(client, monkeypatch, empty, pattern, field):
     if empty:
         set_courses(monkeypatch, [])

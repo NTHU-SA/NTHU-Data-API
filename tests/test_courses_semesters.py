@@ -223,6 +223,10 @@ async def test_filters_apply_to_selected_semester_and_teacher_union():
         assert len(response.json()) == 1
         assert (await rest.get("/courses/11420?type=microcredits")).json() == response.json()
         assert (await rest.get("/courses/11420?credits=3")).json() == []
+        assert (await rest.get("/courses/11420?language_code=zh%7Cen")).json() == []
+        assert (await rest.get("/courses/11510", params={"language_code": "zh|en"})).json()[0][
+            "id"
+        ] == "11510NEW"
         for teacher in ["Old [AI]", "[AI]"]:
             result = await mcp.call_tool(
                 "search_courses", {"semester": "11420", "teacher": teacher}

@@ -243,7 +243,7 @@ class CourseSearchParams(BaseModel):
     enrollment_after_withdrawal: Annotated[int, Field(ge=0)] | None = None
     reserved_for_freshmen: Annotated[int, Field(ge=0)] | None = None
     is_cancelled: bool | None = None
-    language_code: CourseLanguage | None = None
+    language_code: str | None = None
     lecturer_label: str | None = Field(None, alias="lecturers.label")
     lecturer_name_zh: str | None = Field(None, alias="lecturers.name_zh")
     lecturer_name_en: str | None = Field(None, alias="lecturers.name_en")
