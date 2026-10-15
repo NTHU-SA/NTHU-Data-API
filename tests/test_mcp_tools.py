@@ -407,7 +407,12 @@ class TestRegisteredPayloads:
                         {
                             "building": "Hall",
                             "restaurants": [
-                                {"name": "Cafe", "phone": None, "schedule": "weekday", "note": ""}
+                                {
+                                    "name": "Cafe",
+                                    "phone": None,
+                                    "schedule": {"weekday": "09:00-17:00"},
+                                    "note": "",
+                                }
                             ],
                         }
                     ],
@@ -420,7 +425,14 @@ class TestRegisteredPayloads:
             AsyncMock(
                 return_value=(
                     "fixture",
-                    [{"name": "Cafe", "area": None, "phone": None, "schedule": "weekday"}],
+                    [
+                        {
+                            "name": "Cafe",
+                            "area": None,
+                            "phone": None,
+                            "schedule": {"weekday": "09:00-17:00"},
+                        }
+                    ],
                 )
             ),
         )
@@ -485,7 +497,12 @@ class TestRegisteredPayloads:
                         {
                             "building": "Hall",
                             "restaurants": [
-                                {"name": "Cafe", "phone": None, "schedule": "weekday", "note": None}
+                                {
+                                    "name": "Cafe",
+                                    "phone": None,
+                                    "schedule": {"weekday": "09:00-17:00"},
+                                    "note": None,
+                                }
                             ],
                         }
                     ],
@@ -498,7 +515,12 @@ class TestRegisteredPayloads:
                 {
                     "schedule": "weekday",
                     "open_restaurants": [
-                        {"name": "Cafe", "area": None, "phone": None, "schedule": "weekday"}
+                        {
+                            "name": "Cafe",
+                            "area": None,
+                            "phone": None,
+                            "schedule": {"weekday": "09:00-17:00"},
+                        }
                     ],
                 },
             ),

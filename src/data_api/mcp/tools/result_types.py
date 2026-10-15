@@ -114,7 +114,7 @@ class AnnouncementsResult(TypedDict):
 class DiningRestaurantResult(TypedDict):
     name: str | None
     phone: str | None
-    schedule: str | None
+    schedule: dict[str, object] | None
     note: str | None
 
 
@@ -131,7 +131,7 @@ class OpenRestaurantResult(TypedDict):
     name: str | None
     area: str | None
     phone: str | None
-    schedule: str | None
+    schedule: dict[str, object] | None
 
 
 class OpenDiningResult(TypedDict):
