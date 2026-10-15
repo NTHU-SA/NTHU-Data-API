@@ -521,8 +521,26 @@ matching and restaurant names use case-sensitive literal substring matching.
 separate Saturday and Sunday categories. Filtering only excludes restaurants
 whose notes indicate a closure on that day. It does not check current opening
 hours, holidays, or live availability. MCP `find_dining(check_open="today")`
-uses the same Taiwan-date interpretation and retains its existing response
-format and limits.
+uses the same Taiwan-date interpretation.
+
+MCP `find_dining` always returns `{"buildings": [...]}`, with each building's
+matching restaurants nested under `restaurants`, whether or not `check_open`
+is supplied. Restaurant entries contain `name`, `phone`, `schedule`, and `note`
+(empty notes become `null`). All filters apply before limiting results.
+Without a non-empty `building` filter, each building includes at most 10
+matching restaurants. Supplying `building` returns **all** matching restaurants
+in every fuzzy-matched building, not just the first matching building.
+Buildings with no matches are omitted; no matches return `{"buildings": []}`.
+For example, `find_dining(building="水木", check_open="today")` lists all
+restaurants matching the opening-day heuristic in matching buildings, using
+the same grouped structure as a query without `check_open`.
+
+**Unreleased 3.0 MCP breaking change:** `find_dining(check_open=...)` no longer
+returns `{schedule, open_restaurants}` or applies a global 20-restaurant limit.
+Read `buildings[].restaurants` instead (or flatten locally); the requested
+schedule remains an input, not a top-level response field. Queries without
+`check_open` also return all matches when a non-empty `building` is supplied,
+instead of truncating each matching building to 10.
 
 **Breaking change:** `/dining/open` has been removed, without a redirect or
 compatibility alias. Replace `/dining/open?schedule=today` with
