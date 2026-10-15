@@ -95,7 +95,7 @@ async def dataset_runtime():
                 200,
                 json={
                     "file_details": {
-                        "/": [{"name": path.lstrip("/"), "last_commit": "fixture"} for path in data]
+                        "/": [{"name": path.lstrip("/"), "version": "fixture"} for path in data]
                     }
                 },
             )

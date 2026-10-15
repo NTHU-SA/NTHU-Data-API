@@ -38,7 +38,12 @@ def publication():
     for path, content in documents.items():
         section, _, name = path.lstrip("/").rpartition("/")
         manifest["file_details"][section or "/"].append(
-            {"name": name, "last_commit": "fixture", "sha256": hashlib.sha256(content).hexdigest()}
+            {
+                "name": name,
+                "version": "fixture",
+                "last_commit": "not-the-version",
+                "sha256": hashlib.sha256(content).hexdigest(),
+            }
         )
     return documents, manifest
 
@@ -87,7 +92,7 @@ async def test_legacy_manifest_and_empty_datasets_are_accepted(publication):
     documents, manifest = publication
     for entries in manifest["file_details"].values():
         for entry in entries:
-            entry.pop("last_commit")
+            entry.pop("version")
             entry.pop("sha256")
     documents["/courses.json"] = b"[]"
     documents["/libraries/rss.json"] = json.dumps(

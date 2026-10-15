@@ -475,6 +475,16 @@ Failed refreshes retain the last-known-good snapshot; without a usable snapshot,
 REST returns **503** and MCP returns a controlled tool error. Valid empty datasets
 still succeed, and unknown versions omit `X-Data-Commit-Hash`.
 
+Dataset versions come only from each entry's `version` in `file_details.json`;
+`last_commit` is ignored, including when `version` is missing or null. Versions
+are opaque equality tokens. An unchanged version avoids downloading, while a
+changed version triggers a download and validation. Optional `sha256` verifies
+downloaded bytes; it is not a version identifier, and checksum-only changes do
+not trigger a download. Missing or null versions retain an existing snapshot as
+unverified; without a snapshot, a direct load is attempted and remains unverified.
+The public `X-Data-Commit-Hash` header retains its name but carries the dataset
+version (or the combined calendar version described above).
+
 Snapshots are not durable or synchronized across instances. A restart or
 scale-to-zero loses cached data, and different instances can temporarily serve
 different versions. Startup prefetch failures do not prevent other datasets from
