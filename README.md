@@ -153,3 +153,9 @@ Maintained by NTHUSA 32nd. Licensed under the [MIT License](LICENSE).
 
 Thanks to [SonarCloud](https://sonarcloud.io/summary/new_code?id=NTHU-SA_NTHU-Data-API)
 for providing code quality metrics.
+
+## Changelog
+
+- **3.0.0**：改善 MCP 工具設計與資料維護性，強化資料更新、快取與錯誤處理的穩定度，並精簡整併 API 端點。擴充校園與圖書館行事曆資料，採用標準化課程欄位，支援 REST 與 MCP 指定學期查詢；介面調整請見 [3.0 遷移說明](docs/api-guide.md#version-policy-and-30-migration)。
+- **2.0.0**：新增 MCP 介面，讓 AI 助理也能查詢校園資訊；主要資料改用 Data Scraper 提供的 JSON，將資料爬取與 API 服務分離，提升可維護性。
+- **1.0.0**：推出校園資料 REST API，由 API 端即時爬取來源資料並進行處理，提供課程、公車、餐飲與用電等資訊查詢。
