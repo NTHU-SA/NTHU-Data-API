@@ -14,6 +14,7 @@ applies.
 
 - [REST endpoint migration](#rest-endpoint-migration)
 - [Course fields and queries](#course-fields-and-queries)
+- [Newsletter matching](#newsletter-matching)
 - [MCP client migration](#mcp-client-migration)
 
 ## REST endpoint migration
@@ -87,6 +88,18 @@ Other added metadata and unknown-value handling are documented under
 Do not guess Chinese/English teacher names from historical `{label}` objects,
 or treat unknown numeric/boolean values as zero/false.
 
+## Newsletter matching
+
+REST newsletter fuzzy matching now uses a threshold of 60 instead of 80 for both
+source names and article titles, so more names and titles may match. Source-name
+matching shares its logic with MCP `get_newsletters`. Exact name and literal title
+matching with `fuzzy=false` are unchanged.
+
+MCP no longer truncates matching sources to 15; all are returned in publisher
+order, while the three-article preview remains unchanged. The response fields
+and tool arguments are unchanged. See [newsletter queries](api-guide.md#newsletter-queries)
+for the current REST and MCP response rules.
+
 ## MCP client migration
 
 The eight current [MCP tool names](api-guide.md#mcp-tool-names-and-display-titles)
@@ -97,6 +110,17 @@ remain unchanged. Refresh the client tool list when upgrading.
 | `search_courses` | Keep `keyword`, `teacher`, `course_id` and `limit`; use optional `semester` to select a semester. The result remains `{count, courses}`, but each course is now the complete normalized model. Old `credit`, `teacher`, `time_and_room` and `language` output fields are removed. |
 | `get_bus_schedule` | Use this instead of the earlier removed `get_next_buses` and `get_bus_stops`; no compatibility names are restored. Read the current `buses`, `stop_name` and `stop_info` response fields and the [bus query defaults](api-guide.md#bus-mcp-query). |
 | `search_campus` | Retains separate `departments` and `people` arrays, unlike REST directory filtering. |
+| `find_dining` | Always read `buildings[].restaurants`, whether or not `check_open` is supplied. A non-empty `building` filter returns all matching restaurants in every matching building. |
+| `get_newsletters` | Handle all matching sources, not a maximum of 15. The per-source three-article preview and response fields are unchanged. |
+
+**Unreleased 3.0 MCP breaking change:** `find_dining(check_open=...)` no longer
+returns `{schedule, open_restaurants}` or applies a global 20-restaurant limit.
+Read `buildings[].restaurants` instead (or flatten locally); the requested
+schedule remains an input, not a top-level response field. Queries without
+`check_open` also return all matches when a non-empty `building` is supplied,
+instead of truncating each matching building to 10. Without a non-empty building
+filter, the current limit is 10 matching restaurants per building. See
+[dining MCP queries](api-guide.md#dining-mcp-query) for the complete response rules.
 
 Course semester failures and live upstream failures are tool errors, not
 successful empty results or `{"error": ...}` results. Valid empty results still

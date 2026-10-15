@@ -35,7 +35,6 @@ from data_api.mcp.tools.result_types import (
     LibraryItemsResult,
     LibrarySpacesResult,
     NewslettersResult,
-    OpenDiningResult,
 )
 from data_api.models.courses import CourseData
 from data_api.runtime import get_runtime
@@ -133,9 +132,8 @@ class TestMCPTools:
     async def test_find_dining_check_open(self):
         """Test find dining with open check."""
         result = await _find_dining(check_open="today")
-        assert "schedule" in result
-        assert "open_restaurants" in result
-        assert isinstance(result["open_restaurants"], list)
+        assert set(result) == {"buildings"}
+        assert isinstance(result["buildings"], list)
 
     @pytest.mark.parametrize("empty", [False, True])
     async def test_get_library_info_space(self, mock_upstream, library_space_payload, empty):
@@ -318,11 +316,8 @@ class TestRegisteredPayloads:
             (
                 "find_dining",
                 {"check_open": "weekday"},
-                OpenDiningResult,
-                {
-                    "schedule": "weekday",
-                    "open_restaurants": [],
-                },
+                DiningBuildingsResult,
+                {"buildings": []},
             ),
             (
                 "get_newsletters",
@@ -413,23 +408,6 @@ class TestRegisteredPayloads:
             ),
         )
         monkeypatch.setattr(
-            dining_services.dining_service,
-            "get_open_restaurants",
-            AsyncMock(
-                return_value=(
-                    "fixture",
-                    [
-                        {
-                            "name": "Cafe",
-                            "area": None,
-                            "phone": None,
-                            "schedule": {"weekday": "09:00-17:00"},
-                        }
-                    ],
-                )
-            ),
-        )
-        monkeypatch.setattr(
             newsletters_services.newsletters_service,
             "get_all_newsletters",
             AsyncMock(
@@ -504,15 +482,19 @@ class TestRegisteredPayloads:
             (
                 "find_dining",
                 {"check_open": "weekday"},
-                OpenDiningResult,
+                DiningBuildingsResult,
                 {
-                    "schedule": "weekday",
-                    "open_restaurants": [
+                    "buildings": [
                         {
-                            "name": "Cafe",
-                            "area": None,
-                            "phone": None,
-                            "schedule": {"weekday": "09:00-17:00"},
+                            "building": "Hall",
+                            "restaurants": [
+                                {
+                                    "name": "Cafe",
+                                    "phone": None,
+                                    "schedule": {"weekday": "09:00-17:00"},
+                                    "note": None,
+                                }
+                            ],
                         }
                     ],
                 },
