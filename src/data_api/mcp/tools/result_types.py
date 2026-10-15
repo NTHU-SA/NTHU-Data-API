@@ -78,20 +78,9 @@ class BusResult(TypedDict):
     stop_info: NotRequired[list[BusStopResult]]
 
 
-class CourseResult(TypedDict):
-    id: str
-    chinese_title: str
-    english_title: str
-    teacher: str
-    credit: str
-    time_and_room: str
-    language: str
-    note: str | None
-
-
 class CoursesResult(TypedDict):
     count: int
-    courses: list[CourseResult]
+    courses: list[dict[str, object]]
 
 
 class AnnouncementArticleResult(TypedDict):

@@ -33,8 +33,8 @@ def test_compatibility_check_identifies_structural_changes(change):
             del actual["operations"]["GET /courses"]
             location = "GET /courses"
         case "parameter":
-            del operation["parameters"]["query:teacher"]
-            location = "query:teacher"
+            del operation["parameters"]["query:lecturers.label"]
+            location = "query:lecturers.label"
         case "operationId":
             operation["operationId"] = "unexpectedRename"
             location = "operationId"
@@ -120,7 +120,7 @@ def assert_error_matches_schema(response, schema_path, status, method="get"):
             str,
         ),
         ("/courses?type=invalid", "/courses", 422, list),
-        ("/courses?teacher=%5B", "/courses", 422, str),
+        ("/courses?lecturers.label=%5B", "/courses", 422, str),
     ],
 )
 async def test_actual_manual_and_validation_errors(

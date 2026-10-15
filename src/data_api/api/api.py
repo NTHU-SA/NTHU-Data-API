@@ -40,9 +40,9 @@ async def lifespan(app: FastAPI):
         logging.getLogger(__name__).info(
             "Data startup: %s/%s datasets usable", sum(results.values()), len(results)
         )
-        for service in (runtime.buses, runtime.courses):
+        for update in (runtime.buses.update_data, runtime.courses.get_snapshot):
             try:
-                await service.update_data()
+                await update()
             except DataNotAvailableException:
                 # The manager records the failure. Other datasets must remain available.
                 continue

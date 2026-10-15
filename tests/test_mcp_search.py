@@ -3,15 +3,13 @@
 from copy import deepcopy
 from datetime import datetime
 from itertools import product
-from unittest.mock import AsyncMock
 
 import pytest
+from conftest import make_course, set_courses
 from fastmcp import Client
 from pydantic import ValidationError
 
 from data_api.data.manager import nthudata
-from data_api.domain.courses.models import CourseData
-from data_api.domain.courses.services import courses_service
 from data_api.domain.dining import services as dining_services
 from data_api.mcp.server import mcp
 from data_api.mcp.tools.courses import _search_courses
@@ -22,7 +20,7 @@ FILTER_COMBINATIONS = list(product([False, True], repeat=3))
 
 @pytest.fixture(autouse=True)
 def fixed_course_refresh(monkeypatch):
-    monkeypatch.setattr(courses_service, "update_data", AsyncMock())
+    set_courses(monkeypatch, [])
 
 
 @pytest.fixture
@@ -30,18 +28,18 @@ def course_candidates(monkeypatch):
     candidates = [
         (
             flags,
-            CourseData.from_dict(
+            make_course(
                 {
-                    "id": f"{'11510ISS 509900' if flags[2] else 'OTHER'}-{index}",
+                    "id": f"{'11510ISS 509900' if flags[2] else '11510OTHER'}-{index}",
                     "chinese_title": "服務科學導論" if flags[0] else "微積分",
                     "english_title": "Service Science" if flags[0] else "Calculus",
-                    "teacher": "Teacher" if flags[1] else "Someone else",
+                    "lecturers": [{"label": "Teacher" if flags[1] else "Someone else"}],
                 }
             ),
         )
         for index, flags in enumerate(FILTER_COMBINATIONS)
     ]
-    monkeypatch.setattr(courses_service, "course_data", [course for _, course in candidates])
+    set_courses(monkeypatch, [course for _, course in candidates])
     return candidates
 
 
@@ -83,9 +81,16 @@ async def test_course_filters_all_contribute(course_candidates, selected, keywor
     [("C++", "CCC"), ("[AI]", "AI"), ("(", "ordinary"), (".", "ordinary"), ("\\", "ordinary")],
 )
 async def test_course_search_uses_literal_substrings(monkeypatch, argument, field, literal, decoy):
-    match = CourseData.from_dict({"id": "match", field: f"prefix {literal} suffix"})
-    other = CourseData.from_dict({"id": "decoy", field: decoy})
-    monkeypatch.setattr(courses_service, "course_data", [other, match])
+    value, other_value = f"prefix {literal} suffix", decoy
+    if field == "teacher":
+        field, value, other_value = "lecturers", [{"label": value}], [{"label": other_value}]
+    if field == "id":
+        match = make_course(id=f"11510prefix {literal} suffix")
+        other = make_course(id=f"11510{decoy}")
+    else:
+        match = make_course({"id": "11510match", field: value})
+        other = make_course({"id": "11510decoy", field: other_value})
+    set_courses(monkeypatch, [other, match])
 
     result = await _search_courses(**{argument: literal})
     assert [course["id"] for course in result["courses"]] == [match.id]
@@ -98,11 +103,7 @@ async def test_course_limit_rejected_by_implementation(limit):
 
 
 async def test_course_limit_schema_and_protocol_validation(monkeypatch):
-    monkeypatch.setattr(
-        courses_service,
-        "course_data",
-        [CourseData.from_dict({"id": str(index)}) for index in range(105)],
-    )
+    set_courses(monkeypatch, [make_course(id=f"11510{index}") for index in range(105)])
     async with Client(mcp) as client:
         tools = await client.list_tools()
         tool = next(tool for tool in tools if tool.name == "search_courses")

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
+from conftest import course_payload
 from fastmcp import Client
 from httpx import Response
 from pydantic import TypeAdapter
@@ -36,6 +37,7 @@ from data_api.mcp.tools.result_types import (
     NewslettersResult,
     OpenDiningResult,
 )
+from data_api.models.courses import CourseData
 from data_api.runtime import get_runtime
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
@@ -246,17 +248,8 @@ class TestMCPToolIntegration:
         result = await _search_courses(limit=1)
         if result["courses"]:
             course = result["courses"][0]
-            expected_fields = [
-                "id",
-                "chinese_title",
-                "english_title",
-                "teacher",
-                "credit",
-                "time_and_room",
-                "language",
-            ]
-            for field in expected_fields:
-                assert field in course, f"Missing field: {field}"
+            assert set(course) == set(CourseData.model_fields)
+            CourseData.model_validate(course)
 
     async def test_announcements_result_format(self):
         """Test that announcements return expected structure."""
@@ -608,22 +601,13 @@ class TestRegisteredPayloads:
                 else:
                     assert "stops_time" not in result["buses"][0]
 
-    async def test_course_payload_note_null(self):
+    async def test_course_payload_preserves_normalized_values(self):
         async with Client(mcp) as client:
             response = await client.call_tool("search_courses", {"limit": 1})
         assert not response.is_error
         TypeAdapter(CoursesResult).validate_python(response.data)
         assert response.data["count"] == 1
-        assert response.data["courses"][0] == {
-            "id": "11410TEST100000",
-            "chinese_title": "Test course",
-            "english_title": "",
-            "teacher": "",
-            "credit": "",
-            "time_and_room": "",
-            "language": "中",
-            "note": None,
-        }
+        assert response.data["courses"][0] == course_payload()
 
     async def test_live_payloads_and_empty_results(
         self,

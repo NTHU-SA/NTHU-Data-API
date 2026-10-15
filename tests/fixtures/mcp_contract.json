@@ -273,6 +273,18 @@
           "minimum": 1,
           "type": "integer"
         },
+        "semester": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "teacher": {
           "anyOf": [
             {

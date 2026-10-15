@@ -21,6 +21,7 @@ from data_api.api.schemas.newsletters import NewsletterInfo, NewsletterSource
 from data_api.api.schemas.ping import PingResponse
 from data_api.checks.common import CheckFailure, fetch_json, report, validation_reason
 from data_api.core.config import PREFETCH_ENDPOINTS
+from data_api.models.courses import SemesterCode
 
 
 @dataclass(frozen=True)
@@ -32,7 +33,10 @@ class EndpointCheck:
 
 
 ENDPOINTS = [
-    EndpointCheck("/courses", TypeAdapter(list[CourseData]), "/courses.json", counted=True),
+    EndpointCheck("/courses", TypeAdapter(list[CourseData]), "/courses/latest.json", counted=True),
+    EndpointCheck(
+        "/courses/semesters", TypeAdapter(list[SemesterCode]), "/courses/sources.json", counted=True
+    ),
     EndpointCheck("/directory", TypeAdapter(list[Department]), "/directory.json"),
     EndpointCheck("/announcements", TypeAdapter(list[AnnouncementDetail]), "/announcements.json"),
     EndpointCheck(
@@ -65,9 +69,11 @@ async def check_endpoints(
     client: httpx.AsyncClient,
     api_url: str,
     expected_versions: dict[str, str | None] | None = None,
+    *,
+    checks: list[EndpointCheck] | None = None,
 ) -> list[CheckFailure]:
     failures = []
-    for check in ENDPOINTS:
+    for check in ENDPOINTS if checks is None else checks:
         try:
             payload, response = await fetch_json(client, f"{api_url}{check.path}", check.path)
             try:

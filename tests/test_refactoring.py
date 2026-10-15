@@ -8,6 +8,7 @@ from unittest.mock import Mock
 
 import httpx
 import pytest
+from conftest import course_payload, make_course
 
 from data_api.api import api
 from data_api.core.config import PREFETCH_ENDPOINTS
@@ -15,7 +16,7 @@ from data_api.core.exceptions import UpstreamException
 from data_api.data.nthudata import NTHUDataManager
 from data_api.domain.buses.query import resolve_bus_time
 from data_api.domain.buses.services import BusesService, PreparedBusData
-from data_api.domain.courses.models import Conditions, CourseData
+from data_api.domain.courses.models import Conditions
 from data_api.domain.energy.services import EnergyService
 from data_api.domain.libraries.services import LibrariesService
 from data_api.runtime import Runtime, default_runtime, get_runtime
@@ -54,10 +55,10 @@ def test_bus_time_resolution(day, time, instant, expected):
 
 def test_course_conditions_prepare_once_and_do_not_retain_course():
     conditions = Conditions(
-        list_build_target=[{"row_field": "id", "matcher": "^A", "regex_match": True}]
+        list_build_target=[{"row_field": "id", "matcher": "^11510A", "regex_match": True}]
     )
-    first = CourseData.from_dict({"id": "A"})
-    second = CourseData.from_dict({"id": "B"})
+    first = make_course(id="11510A")
+    second = make_course(id="11510B")
     assert conditions.accept(first)
     predicate = conditions._predicate
     assert not conditions.accept(second)
@@ -91,6 +92,7 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
         {
             "/buses.json": {},
             "/maps.json": {},
+            "/courses/sources.json": {"semesters": ["11510"]},
             "/libraries/rss.json": {
                 "news": [],
                 "eresources": [],
@@ -112,8 +114,8 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
                     }
                 },
             )
-        if request.url.path == "/courses.json":
-            return httpx.Response(200, json=[{"id": marker, "language": "中"}])
+        if request.url.path == "/courses/latest.json":
+            return httpx.Response(200, json=[course_payload(id=f"11510{marker}")])
         return httpx.Response(200, json=payloads[request.url.path])
 
     mock_upstream(handler)
@@ -149,7 +151,7 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
                     first_rest.get("/courses"), second_rest.get("/courses")
                 )
                 for response, marker in zip(responses, ("first", "second"), strict=True):
-                    assert response.json()[0]["id"] == marker
+                    assert response.json()[0]["id"] == f"11510{marker}"
                     assert response.headers["X-Data-Commit-Hash"] == marker
                 for rest, marker in ((first_rest, "first"), (second_rest, "second")):
                     initialized = await _mcp_request(
@@ -166,10 +168,13 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
                         rest, "tools/call", {"name": "search_courses", "arguments": {}}
                     )
                     assert not result.get("isError", False)
-                    assert json.loads(result["content"][0]["text"])["courses"][0]["id"] == marker
+                    assert (
+                        json.loads(result["content"][0]["text"])["courses"][0]["id"]
+                        == f"11510{marker}"
+                    )
                     ping = await rest.get("/ping")
                     assert ping.status_code == 200
-                    assert ping.json()["datasets"]["/courses.json"]["version"] == marker
+                    assert ping.json()["datasets"]["/courses/latest.json"]["version"] == marker
                 assert len(calls) == before
                 assert get_runtime() is default_runtime
         assert all(client.is_closed for client in second_clients)
@@ -179,7 +184,7 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
     assert first.state.runtime.libraries.client is None
     assert not first.state.runtime.courses.state.usable
     assert not second.state.runtime.courses.state.usable
-    assert first.state.runtime.courses.course_data == []
+    assert first.state.runtime.courses.state.snapshot is None
     assert first.state.runtime.buses._snapshot is None
 
 

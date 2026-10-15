@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import json
 import math
 from typing import Any
 
@@ -12,7 +13,7 @@ from data_api.api.api import create_app
 from data_api.api.schemas.buses import BusCanonicalDetailedSchedule, BusCanonicalSchedule
 from data_api.api.schemas.courses import CourseData
 from data_api.checks.common import CheckFailure, fetch_json, report, validation_reason
-from data_api.checks.smoke import ENDPOINTS, check_endpoints
+from data_api.checks.smoke import ENDPOINTS, EndpointCheck, check_endpoints
 from data_api.core.config import PREFETCH_ENDPOINTS
 from data_api.data.nthudata import (
     FetchFailure,
@@ -22,6 +23,7 @@ from data_api.data.nthudata import (
     parse_manifest,
 )
 from data_api.domain.buses.services import PreparedBusData
+from data_api.domain.courses.services import prepare_catalog, prepare_courses
 from data_api.runtime import Runtime
 
 MANIFEST_PATH = "/file_details.json"
@@ -29,7 +31,7 @@ MANIFEST_PATH = "/file_details.json"
 
 def _check_serialization(path: str, candidate: Any) -> None:
     try:
-        if path == "/courses.json":
+        if path == "/courses/latest.json" or path.startswith("/courses/semesters/"):
             adapter = TypeAdapter(list[CourseData])
             parsed = adapter.validate_python(candidate, from_attributes=True)
             adapter.dump_json(parsed, warnings="error")
@@ -53,7 +55,11 @@ async def _check_download(
 ) -> bytes:
     payload, response = await fetch_json(client, f"{data_url}{path}", path, checksum)
     try:
-        candidate = runtime.datasets.state_for(path).prepare(payload)
+        if path.startswith("/courses/semesters/"):
+            semester = path.rsplit("/", 1)[1].removesuffix(".json")
+            candidate = prepare_courses(payload, semester)
+        else:
+            candidate = runtime.datasets.state_for(path).prepare(payload)
     except ValidationError as exc:
         raise CheckFailure(path, "candidate", validation_reason(exc)) from exc
     except FetchFailure as exc:
@@ -92,17 +98,25 @@ async def _check_local_responses(
                 )
         if failures:
             return failures
-        await runtime.courses.update_data()
+        await runtime.courses.get_snapshot()
         await runtime.buses.update_data()
         expected_versions = {
             check.path: entries[check.dataset].active_version for check in ENDPOINTS
         }
         expected_versions["/calendars"], _ = await runtime.calendars.get_all_calendars()
+        checks = list(ENDPOINTS)
+        for semester in prepare_catalog(json.loads(documents["/courses/sources.json"])):
+            path = f"/courses/{semester}"
+            dataset = f"/courses/semesters/{semester}.json"
+            checks.append(EndpointCheck(path, TypeAdapter(list[CourseData]), dataset, counted=True))
+            expected_versions[path] = entries[dataset].active_version
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=create_app(runtime)),
             base_url="http://contract.test",
         ) as local:
-            failures = await check_endpoints(local, "http://contract.test", expected_versions)
+            failures = await check_endpoints(
+                local, "http://contract.test", expected_versions, checks=checks
+            )
     return [
         CheckFailure(failure.target, f"serialization/{failure.stage}", failure.reason)
         for failure in failures
@@ -130,6 +144,19 @@ async def check_published(client: httpx.AsyncClient, data_url: str) -> list[Chec
         try:
             if path not in entries:
                 raise CheckFailure(path, "manifest", "required dataset is missing")
+            documents[path] = await _check_download(
+                client, data_url, path, entries[path].sha256, runtime
+            )
+        except CheckFailure as exc:
+            failures.append(exc)
+    if failures:
+        return failures
+    semesters = prepare_catalog(json.loads(documents["/courses/sources.json"]))
+    for semester in semesters:
+        path = f"/courses/semesters/{semester}.json"
+        try:
+            if path not in entries:
+                raise CheckFailure(path, "manifest", "published semester dataset is missing")
             documents[path] = await _check_download(
                 client, data_url, path, entries[path].sha256, runtime
             )
