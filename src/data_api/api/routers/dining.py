@@ -8,7 +8,7 @@ from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import dining as schemas
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.dining import services
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -35,13 +35,13 @@ async def get_dining_data(
     資料來源：[總務處經營管理組](https://ddfm.site.nthu.edu.tw/p/404-1494-256455.php?Lang=zh-tw)
     """
     if fuzzy:
-        commit_hash, data = await services.dining_service.fuzzy_search_dining_data(
+        commit_hash, data = await get_runtime().dining.fuzzy_search_dining_data(
             building_name=building_name,
             restaurant_name=restaurant_name,
             schedule=schedule,
         )
     else:
-        commit_hash, data = await services.dining_service.get_dining_data(
+        commit_hash, data = await get_runtime().dining.get_dining_data(
             building_name=building_name,
             restaurant_name=restaurant_name,
             schedule=schedule,

@@ -11,7 +11,7 @@ from pydantic import TypeAdapter
 
 from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.nthudata import FetchFailure, Freshness, NTHUDataManager
-from data_api.domain.buses.services import BusesService
+from data_api.domain.buses.services import BusesService, PreparedBusData
 from data_api.domain.courses.services import CoursesService
 
 
@@ -422,7 +422,7 @@ async def test_bus_indexes_are_built_before_swap(monkeypatch):
             raise ValueError("index construction failed")
 
         with monkeypatch.context() as patch:
-            patch.setattr(BusesService, "_derive_combined_views", fail)
+            patch.setattr(PreparedBusData, "_derive_combined_views", fail)
             publisher.version = "b"
             clock.advance()
             await service.update_data()

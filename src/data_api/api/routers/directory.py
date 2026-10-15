@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas.departments import Department
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.departments.services import departments_service
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -24,7 +24,7 @@ async def get_directory(
     無結果時回傳空陣列。
     資料來源：[清華通訊錄](https://tel.net.nthu.edu.tw/nthusearch/)
     """
-    commit_hash, data = await departments_service.get_directory(query=query)
+    commit_hash, data = await get_runtime().departments.get_directory(query=query)
     if commit_hash is not None:
         response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

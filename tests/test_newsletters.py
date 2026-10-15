@@ -9,6 +9,7 @@ from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
 from data_api.api.api import app
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
 from data_api.domain.newsletters.services import newsletters_service
 
@@ -154,6 +155,8 @@ async def test_fuzzy_threshold(newsletter_data, monkeypatch, score, matched, fie
 @pytest.mark.parametrize("dataset", [None, ("empty", []), (None, [])])
 async def test_empty_and_unavailable_dataset(monkeypatch, path, dataset):
     async def get_dataset(endpoint):
+        if dataset is None:
+            raise DataNotAvailableException("Dataset temporarily unavailable")
         return dataset
 
     monkeypatch.setattr(nthudata, "get", get_dataset)

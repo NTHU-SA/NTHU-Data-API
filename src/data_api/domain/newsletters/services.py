@@ -8,8 +8,8 @@ from typing import Optional
 
 from thefuzz import fuzz
 
-from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
 from data_api.utils.search import fuzzy_matches
 
 JSON_PATH = "newsletters.json"
@@ -19,12 +19,12 @@ FUZZY_SEARCH_THRESHOLD = 80
 class NewslettersService:
     """Service for newsletter data operations."""
 
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+
     async def get_all_newsletters(self) -> tuple[Optional[str], list[dict]]:
         """Get all newsletters."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-        return result
+        return await self.manager.get(JSON_PATH)
 
     async def get_newsletters(
         self,

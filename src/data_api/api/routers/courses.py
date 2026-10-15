@@ -8,7 +8,8 @@ from pydantic import ValidationError
 from data_api.api.schemas import courses as schemas
 from data_api.api.schemas.errors import VALIDATION_ERROR_RESPONSES
 from data_api.api.schemas.responses import COUNTED_SNAPSHOT_RESPONSES
-from data_api.domain.courses import models, services
+from data_api.domain.courses import models
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses={**COUNTED_SNAPSHOT_RESPONSES, **VALIDATION_ERROR_RESPONSES})
 COURSE_QUERY_ERROR_RESPONSES = {
@@ -21,9 +22,10 @@ COURSE_QUERY_ERROR_RESPONSES = {
 
 async def add_custom_header(response: Response):
     """Add X-Data-Commit-Hash header."""
-    await services.courses_service.update_data()
-    if services.courses_service.last_commit_hash is not None:
-        response.headers["X-Data-Commit-Hash"] = services.courses_service.last_commit_hash
+    service = get_runtime().courses
+    await service.update_data()
+    if service.last_commit_hash is not None:
+        response.headers["X-Data-Commit-Hash"] = service.last_commit_hash
 
 
 def _course_type_condition(course_type: schemas.CourseListName) -> models.Conditions:
@@ -63,7 +65,7 @@ def _filter_courses(
     if course_type is not None:
         condition &= _course_type_condition(course_type)
 
-    result = services.courses_service.query(condition)
+    result = get_runtime().courses.query(condition)
     response.headers["X-Total-Count"] = str(len(result))
     return result
 
@@ -134,6 +136,6 @@ async def search_courses_by_condition(
         )
     elif type(query_condition) is schemas.CourseQueryCondition:
         condition = models.Conditions(list_build_target=query_condition.model_dump(mode="json"))
-    result = services.courses_service.query(condition)
+    result = get_runtime().courses.query(condition)
     response.headers["X-Total-Count"] = str(len(result))
     return result

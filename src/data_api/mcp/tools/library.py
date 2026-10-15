@@ -4,15 +4,16 @@ from typing import Literal
 
 from pydantic import validate_call
 
-from data_api.domain.libraries.services import libraries_service
 from data_api.mcp.errors import live_tool_errors
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import LibraryItemsResult, LibrarySpacesResult
+from data_api.runtime import get_runtime
 
 
 @validate_call
 async def _get_library_info(
     info_type: Literal["space", "lost_and_found"] = "space",
-) -> dict:
+) -> LibraryItemsResult | LibrarySpacesResult:
     """
     Get library information.
 
@@ -24,7 +25,7 @@ async def _get_library_info(
     """
     with live_tool_errors():
         if info_type == "space":
-            spaces = await libraries_service.get_space_availability()
+            spaces = await get_runtime().libraries.get_space_availability()
             return {
                 "spaces": [
                     {
@@ -35,7 +36,7 @@ async def _get_library_info(
                     for s in spaces
                 ]
             }
-        items = await libraries_service.get_lost_and_found_items()
+        items = await get_runtime().libraries.get_lost_and_found_items()
         return {"items": items[:10]}
 
 

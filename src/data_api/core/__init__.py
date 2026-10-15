@@ -1,3 +1,3 @@
-"""Core module containing configuration, constants, and exceptions."""
+"""Core configuration, settings, and exceptions."""
 
-__all__ = ["config", "constants", "exceptions", "settings"]
+__all__ = ["config", "exceptions", "settings"]

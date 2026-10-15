@@ -2,15 +2,16 @@
 
 from typing import Optional
 
-from data_api.domain.announcements import services as announcements_services
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import AnnouncementsResult
+from data_api.runtime import get_runtime
 
 
 async def _get_announcements(
     department: Optional[str] = None,
     keyword: Optional[str] = None,
     limit: int = 10,
-) -> dict:
+) -> AnnouncementsResult:
     """
     Get campus announcements.
 
@@ -22,7 +23,7 @@ async def _get_announcements(
     Returns:
         Dictionary with announcements grouped by department.
     """
-    _, data = await announcements_services.announcements_service.fuzzy_search_announcements(
+    _, data = await get_runtime().announcements.fuzzy_search_announcements(
         department=department,
         title=keyword,
     )

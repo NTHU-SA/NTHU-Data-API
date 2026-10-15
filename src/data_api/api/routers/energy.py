@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from data_api.api.errors import service_errors
 from data_api.api.schemas import energy as schemas
 from data_api.api.schemas.errors import LIVE_ERROR_RESPONSES
-from data_api.domain.energy import services
+from data_api.runtime import get_runtime
 
 router = APIRouter()
 
@@ -22,4 +22,4 @@ async def get_realtime_electricity_usage():
     資料來源：[校園能源查詢管理系統](http://140.114.188.86/powermanage/index.aspx)
     """
     with service_errors():
-        return await services.energy_service.get_realtime_electricity_usage()
+        return await get_runtime().energy.get_realtime_electricity_usage()

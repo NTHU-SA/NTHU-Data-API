@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import newsletters as schemas
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.newsletters import services
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -20,7 +20,7 @@ async def get_all_newsletters(
     取得所有的電子報。
     資料來源：[國立清華大學電子報系統](https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/)
     """
-    commit_hash, data = await services.newsletters_service.get_newsletters(
+    commit_hash, data = await get_runtime().newsletters.get_newsletters(
         name=name, title=title, fuzzy=fuzzy
     )
     if commit_hash is not None:
@@ -41,7 +41,7 @@ async def get_newsletter_sources(
     取得電子報來源列表（不包含文章）。
     資料來源：[國立清華大學電子報系統](https://newsletter.cc.nthu.edu.tw/nthu-list/index.php/zh/)
     """
-    commit_hash, data = await services.newsletters_service.get_newsletter_sources(name=name)
+    commit_hash, data = await get_runtime().newsletters.get_newsletter_sources(name=name)
     if commit_hash is not None:
         response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

@@ -14,21 +14,17 @@ import httpx
 import truststore
 from bs4 import BeautifulSoup
 from pydantic import TypeAdapter
-from thefuzz import fuzz
 
-from data_api.api.schemas.libraries import LibraryLostAndFound, LibrarySpace
 from data_api.core.exceptions import (
-    DataNotAvailableException,
     UpstreamException,
     UpstreamResponseException,
 )
-from data_api.core.upstream import upstream_errors
+from data_api.core.upstream import live_client, upstream_errors
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
+from data_api.models.libraries import LibraryLostAndFound, LibrarySpace
 
-JSON_PATH = "libraries.json"
 RSS_JSON_PATH = "libraries/rss.json"
-FUZZY_SEARCH_THRESHOLD = 70
-DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 }
@@ -75,10 +71,14 @@ def parse_lost_items(html: str) -> list[dict[str, str]]:
 class LibrariesService:
     """Service for library data operations."""
 
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+        self.client: httpx.AsyncClient | None = None
+
     async def get_space_availability(self) -> list[dict]:
         """Get validated live library space data."""
         with upstream_errors():
-            async with httpx.AsyncClient(verify=ctx) as client:
+            async with live_client(self.client, verify=ctx) as client:
                 response = await client.get(
                     "https://libsms.lib.nthu.edu.tw/RWDAPI_New/GetDevUseStatus.aspx",
                     headers=DEFAULT_HEADERS,
@@ -109,7 +109,7 @@ class LibrariesService:
             "SUMIT": "\u9001\u51fa",
         }
         with upstream_errors():
-            async with httpx.AsyncClient(verify=ctx) as client:
+            async with live_client(self.client, verify=ctx) as client:
                 response = await client.post(
                     "https://adage.lib.nthu.edu.tw/find/search_it.php",
                     data=post_data,
@@ -118,48 +118,9 @@ class LibrariesService:
                 response.raise_for_status()
             return parse_lost_items(response.text)
 
-    async def get_all_libraries(self) -> tuple[Optional[str], list[dict]]:
-        """Get all libraries."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-        return result
-
-    async def get_library_by_name(self, name: str) -> tuple[Optional[str], Optional[dict]]:
-        """Get library by name."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, libraries_data = result
-        for library in libraries_data:
-            if library["name"] == name:
-                return commit_hash, library
-        return commit_hash, None
-
-    async def fuzzy_search_libraries(self, query: str) -> tuple[Optional[str], list[dict]]:
-        """Fuzzy search libraries by name."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, libraries_data = result
-        results_with_score = []
-        for library in libraries_data:
-            similarity = fuzz.partial_ratio(query, library["name"])
-            if similarity >= FUZZY_SEARCH_THRESHOLD:
-                results_with_score.append((similarity, library))
-
-        results_with_score.sort(key=lambda x: x[0], reverse=True)
-        return commit_hash, [lib for _, lib in results_with_score]
-
     async def get_rss_items(self, rss_type: str) -> tuple[Optional[str], Optional[list[dict]]]:
         """Get the items of one library RSS feed."""
-        result = await nthudata.get(RSS_JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, rss_data = result
+        commit_hash, rss_data = await self.manager.get(RSS_JSON_PATH)
         return commit_hash, rss_data.get(rss_type)
 
 

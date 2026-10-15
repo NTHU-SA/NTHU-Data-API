@@ -8,7 +8,7 @@ from fastapi import APIRouter, Query, Response
 
 from data_api.api.schemas import announcements as schemas
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
-from data_api.domain.announcements import services
+from data_api.runtime import get_runtime
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -37,11 +37,11 @@ async def get_announcements(
     資料來源：各處室網站
     """
     if fuzzy:
-        commit_hash, data = await services.announcements_service.fuzzy_search_announcements(
+        commit_hash, data = await get_runtime().announcements.fuzzy_search_announcements(
             department=department, title=title, language=language, url=url
         )
     else:
-        commit_hash, data = await services.announcements_service.get_announcements(
+        commit_hash, data = await get_runtime().announcements.get_announcements(
             department=department, title=title, language=language, url=url
         )
     if commit_hash is not None:
@@ -62,7 +62,7 @@ async def get_announcements_list(
     取得公告列表（不包含文章內容）。
     資料來源：各處室網站
     """
-    commit_hash, data = await services.announcements_service.get_announcements_list(
+    commit_hash, data = await get_runtime().announcements.get_announcements_list(
         department=department
     )
     if commit_hash is not None:

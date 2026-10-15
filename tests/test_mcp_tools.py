@@ -1,8 +1,21 @@
 """Tests for MCP tools."""
 
-import pytest
-from httpx import Response
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
+import pytest
+from fastmcp import Client
+from httpx import Response
+from pydantic import TypeAdapter
+
+from data_api.domain.announcements import services as announcements_services
+from data_api.domain.buses import services as buses_services
+from data_api.domain.departments import services as departments_services
+from data_api.domain.dining import services as dining_services
+from data_api.domain.energy import services as energy_services
+from data_api.domain.locations import services as locations_services
+from data_api.domain.newsletters import services as newsletters_services
+from data_api.mcp.server import mcp
 from data_api.mcp.tools.announcements import _get_announcements
 from data_api.mcp.tools.buses import _get_bus_schedule
 from data_api.mcp.tools.campus import _search_campus
@@ -11,6 +24,19 @@ from data_api.mcp.tools.dining import _find_dining
 from data_api.mcp.tools.energy import _get_energy_usage
 from data_api.mcp.tools.library import _get_library_info
 from data_api.mcp.tools.newsletters import _get_newsletters
+from data_api.mcp.tools.result_types import (
+    AnnouncementsResult,
+    BusResult,
+    CampusResult,
+    CoursesResult,
+    DiningBuildingsResult,
+    EnergyResult,
+    LibraryItemsResult,
+    LibrarySpacesResult,
+    NewslettersResult,
+    OpenDiningResult,
+)
+from data_api.runtime import get_runtime
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
@@ -250,3 +276,393 @@ class TestMCPToolIntegration:
 
         result = await _get_bus_schedule(stop=BusStopsName.M1, limit=2)
         assert len(result["buses"]) <= 2
+
+
+class TestRegisteredPayloads:
+    """Exercise the private payload shapes through the registered MCP transport."""
+
+    @pytest.mark.parametrize(
+        ("name", "arguments", "result_type", "expected"),
+        [
+            (
+                "search_campus",
+                {"query": "not-found"},
+                CampusResult,
+                {
+                    "locations": [],
+                    "departments": [],
+                    "people": [],
+                },
+            ),
+            (
+                "get_bus_schedule",
+                {"day": "weekday"},
+                BusResult,
+                {
+                    "buses": [],
+                    "route_info": [],
+                },
+            ),
+            (
+                "search_courses",
+                {"keyword": "not-found"},
+                CoursesResult,
+                {
+                    "count": 0,
+                    "courses": [],
+                },
+            ),
+            (
+                "get_announcements",
+                {},
+                AnnouncementsResult,
+                {
+                    "count": 0,
+                    "sources": [],
+                },
+            ),
+            ("find_dining", {}, DiningBuildingsResult, {"buildings": []}),
+            (
+                "find_dining",
+                {"check_open": "weekday"},
+                OpenDiningResult,
+                {
+                    "schedule": "weekday",
+                    "open_restaurants": [],
+                },
+            ),
+            (
+                "get_newsletters",
+                {"search": "not-found"},
+                NewslettersResult,
+                {
+                    "count": 0,
+                    "newsletters": [],
+                },
+            ),
+        ],
+    )
+    async def test_empty_dataset_payloads(self, name, arguments, result_type, expected):
+        async with Client(mcp) as client:
+            response = await client.call_tool(name, arguments)
+        assert not response.is_error
+        TypeAdapter(result_type).validate_python(response.data)
+        assert expected.items() <= response.data.items()
+
+    async def test_nested_dataset_payloads_and_nulls(self, monkeypatch):
+        monkeypatch.setattr(
+            locations_services.locations_service,
+            "fuzzy_search_locations",
+            AsyncMock(
+                return_value=(
+                    "fixture",
+                    [{"name": "Main gate", "latitude": "24.79", "longitude": "120.99"}],
+                )
+            ),
+        )
+        monkeypatch.setattr(
+            departments_services.departments_service,
+            "fuzzy_search_departments_and_people",
+            AsyncMock(
+                return_value=(
+                    "fixture",
+                    {
+                        "departments": [
+                            {
+                                "index": "01",
+                                "name": "Office",
+                                "details": {"people": [{"name": "Alice", "title": None}]},
+                            }
+                        ],
+                        "people": [{"name": "Alice", "title": None}],
+                    },
+                )
+            ),
+        )
+        monkeypatch.setattr(
+            announcements_services.announcements_service,
+            "fuzzy_search_announcements",
+            AsyncMock(
+                return_value=(
+                    "fixture",
+                    [
+                        {
+                            "department": "Office",
+                            "language": None,
+                            "articles": [
+                                {"title": "Notice", "link": "https://example.com", "date": None}
+                            ],
+                        }
+                    ],
+                )
+            ),
+        )
+        monkeypatch.setattr(
+            dining_services.dining_service,
+            "fuzzy_search_dining_data",
+            AsyncMock(
+                return_value=(
+                    "fixture",
+                    [
+                        {
+                            "building": "Hall",
+                            "restaurants": [
+                                {"name": "Cafe", "phone": None, "schedule": "weekday", "note": ""}
+                            ],
+                        }
+                    ],
+                )
+            ),
+        )
+        monkeypatch.setattr(
+            dining_services.dining_service,
+            "get_open_restaurants",
+            AsyncMock(
+                return_value=(
+                    "fixture",
+                    [{"name": "Cafe", "area": None, "phone": None, "schedule": "weekday"}],
+                )
+            ),
+        )
+        monkeypatch.setattr(
+            newsletters_services.newsletters_service,
+            "get_all_newsletters",
+            AsyncMock(
+                return_value=(
+                    "fixture",
+                    [
+                        {
+                            "name": "Newsletter",
+                            "link": None,
+                            "articles": [{"title": "Issue", "date": None}],
+                        }
+                    ],
+                )
+            ),
+        )
+        cases = [
+            (
+                "search_campus",
+                {"query": "Alice"},
+                CampusResult,
+                {
+                    "locations": [
+                        {"name": "Main gate", "latitude": "24.79", "longitude": "120.99"}
+                    ],
+                    "departments": [
+                        {
+                            "index": "01",
+                            "name": "Office",
+                            "details": {"people": [{"name": "Alice", "title": None}]},
+                        }
+                    ],
+                    "people": [{"name": "Alice", "title": None}],
+                },
+            ),
+            (
+                "get_announcements",
+                {},
+                AnnouncementsResult,
+                {
+                    "count": 1,
+                    "sources": [
+                        {
+                            "department": "Office",
+                            "language": None,
+                            "articles": [
+                                {"title": "Notice", "link": "https://example.com", "date": None}
+                            ],
+                        }
+                    ],
+                },
+            ),
+            (
+                "find_dining",
+                {},
+                DiningBuildingsResult,
+                {
+                    "buildings": [
+                        {
+                            "building": "Hall",
+                            "restaurants": [
+                                {"name": "Cafe", "phone": None, "schedule": "weekday", "note": None}
+                            ],
+                        }
+                    ],
+                },
+            ),
+            (
+                "find_dining",
+                {"check_open": "weekday"},
+                OpenDiningResult,
+                {
+                    "schedule": "weekday",
+                    "open_restaurants": [
+                        {"name": "Cafe", "area": None, "phone": None, "schedule": "weekday"}
+                    ],
+                },
+            ),
+            (
+                "get_newsletters",
+                {},
+                NewslettersResult,
+                {
+                    "count": 1,
+                    "newsletters": [
+                        {
+                            "name": "Newsletter",
+                            "link": None,
+                            "latest_articles": [{"title": "Issue", "date": None}],
+                        }
+                    ],
+                },
+            ),
+        ]
+        async with Client(mcp) as client:
+            for name, arguments, result_type, expected in cases:
+                response = await client.call_tool(name, arguments)
+                assert not response.is_error
+                assert response.data == expected
+                TypeAdapter(result_type).validate_python(response.data)
+
+    async def test_bus_simple_detailed_and_stop_payloads(self, monkeypatch):
+        from data_api.domain.buses.enums import BusStopsName
+
+        prepared = buses_services.BusesService.prepare(
+            {
+                "towardTSMCBuildingInfo": {
+                    "direction": "up",
+                    "duration": "2026",
+                    "route": "main-up",
+                    "routeEN": "Main up",
+                },
+                "weekdayBusScheduleTowardTSMCBuilding": [
+                    {"time": "08:00", "description": "", "dep_stop": "校門", "line": "red"}
+                ],
+            }
+        )
+        monkeypatch.setattr(
+            get_runtime(),
+            "buses",
+            SimpleNamespace(
+                update_data=AsyncMock(),
+                query_schedule=prepared.query_schedule,
+                get_route_info=prepared.get_route_info,
+                gen_bus_stops_info=prepared.gen_bus_stops_info,
+            ),
+        )
+        async with Client(mcp) as client:
+            for details in (False, True):
+                response = await client.call_tool(
+                    "get_bus_schedule",
+                    {
+                        "route": "main",
+                        "direction": "up",
+                        "day": "weekday",
+                        "details": details,
+                        "stop": BusStopsName.M1.value,
+                    },
+                )
+                assert not response.is_error
+                result = response.data
+                TypeAdapter(BusResult).validate_python(result)
+                assert result["route_info"] == [
+                    {
+                        "direction": "up",
+                        "duration": "2026",
+                        "route": "main-up",
+                        "routeEN": "Main up",
+                    }
+                ]
+                assert result["stop_name"] == BusStopsName.M1.value
+                assert result["stop_info"][0]["name"] == BusStopsName.M1.value
+                assert {"name_en", "latitude", "longitude"} <= result["stop_info"][0].keys()
+                assert result["buses"]
+                departure = result["buses"][0]["dep_info"] if details else result["buses"][0]
+                assert departure["time"] == "08:00"
+                assert departure["line"] == "main_red"
+                if details:
+                    assert {"stop", "arrive_time"} <= result["buses"][0]["stops_time"][0].keys()
+                else:
+                    assert "stops_time" not in result["buses"][0]
+
+    async def test_course_payload_note_null(self):
+        async with Client(mcp) as client:
+            response = await client.call_tool("search_courses", {"limit": 1})
+        assert not response.is_error
+        TypeAdapter(CoursesResult).validate_python(response.data)
+        assert response.data["count"] == 1
+        assert response.data["courses"][0] == {
+            "id": "11410TEST100000",
+            "chinese_title": "Test course",
+            "english_title": "",
+            "teacher": "",
+            "credit": "",
+            "time_and_room": "",
+            "language": "中",
+            "note": None,
+        }
+
+    async def test_live_payloads_and_empty_results(
+        self,
+        monkeypatch,
+        mock_upstream,
+        library_space_payload,
+        lost_items_html,
+        lost_items_empty_page,
+    ):
+        async with Client(mcp) as client:
+            mock_upstream(lambda request: Response(200, json=library_space_payload))
+            space = await client.call_tool("get_library_info", {"info_type": "space"})
+            assert space.data == {
+                "spaces": [
+                    {
+                        "zone": "Main library",
+                        "type": "Study room",
+                        "available": "12",
+                    }
+                ]
+            }
+            TypeAdapter(LibrarySpacesResult).validate_python(space.data)
+
+            library_space_payload["rows"] = []
+            empty_space = await client.call_tool("get_library_info", {"info_type": "space"})
+            assert empty_space.data == {"spaces": []}
+
+            mock_upstream(lambda request: Response(200, text=lost_items_html(1)))
+            items = await client.call_tool("get_library_info", {"info_type": "lost_and_found"})
+            assert items.data == {
+                "items": [
+                    {
+                        "序號": "0",
+                        "拾獲時間": "2026-09-30",
+                        "拾獲地點": "Main library",
+                        "描述": "Book title",
+                    }
+                ]
+            }
+            TypeAdapter(LibraryItemsResult).validate_python(items.data)
+
+            mock_upstream(lambda request: Response(200, text=lost_items_empty_page))
+            empty_items = await client.call_tool(
+                "get_library_info", {"info_type": "lost_and_found"}
+            )
+            assert empty_items.data == {"items": []}
+
+            mock_upstream(lambda request: Response(200, text='<img alt="kW: 0">'))
+            energy = await client.call_tool("get_energy_usage", {})
+            TypeAdapter(EnergyResult).validate_python(energy.data)
+            assert len(energy.data["zones"]) == 3
+            assert all(
+                zone["usage_kw"] == 0 and zone["usage_percent"] == 0
+                for zone in energy.data["zones"]
+            )
+
+            monkeypatch.setattr(
+                energy_services.energy_service,
+                "get_realtime_electricity_usage",
+                AsyncMock(return_value=[]),
+            )
+            empty_energy = await client.call_tool("get_energy_usage", {})
+            assert empty_energy.data == {"zones": []}
+            TypeAdapter(EnergyResult).validate_python(empty_energy.data)

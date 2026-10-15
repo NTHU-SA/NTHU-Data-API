@@ -5,10 +5,12 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
-from data_api.api.schemas.buses import BusCanonicalDetailedSchedule, BusCanonicalSchedule
-from data_api.domain.buses import services as buses_services
 from data_api.domain.buses.enums import BusDayWithCurrent, BusStopsName
+from data_api.domain.buses.query import resolve_bus_time
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import BusResult
+from data_api.models.buses import BusCanonicalDetailedSchedule, BusCanonicalSchedule
+from data_api.runtime import get_runtime
 
 
 async def _get_bus_schedule(
@@ -19,30 +21,28 @@ async def _get_bus_schedule(
     day: BusDayWithCurrent = BusDayWithCurrent.current,
     time: str | None = None,
     details: bool = True,
-) -> dict:
+) -> BusResult:
     """Query schedules using the same stop and time filters as REST."""
-    await buses_services.buses_service.update_data()
+    service = get_runtime().buses
+    await service.update_data()
 
-    current = datetime.now()
-    current_time = current.time().strftime("%H:%M")
-    find_day = ("weekday" if current.weekday() < 5 else "weekend") if day == "current" else day
-    after_time = current_time if day == "current" else time or ""
+    bus_time = resolve_bus_time(day, time, datetime.now())
 
-    buses = buses_services.buses_service.query_schedule(
+    buses = service.query_schedule(
         route_type=route,
-        day=find_day,
+        day=bus_time.day,
         direction=direction,
         detailed=details,
         stop=stop,
-        after_time=after_time,
+        after_time=bus_time.after_time,
         limit=limit,
     )
     schedule_model = BusCanonicalDetailedSchedule if details else BusCanonicalSchedule
     result = {
-        "current_time": current_time,
-        "day_type": find_day,
+        "current_time": bus_time.current_time,
+        "day_type": bus_time.day,
         "buses": [schedule_model.model_validate(bus).model_dump(mode="json") for bus in buses],
-        "route_info": buses_services.buses_service.get_route_info(
+        "route_info": service.get_route_info(
             route if route != "all" else None,
             direction if direction != "all" else None,
         ),
@@ -50,9 +50,7 @@ async def _get_bus_schedule(
     if stop is not None:
         result["stop_name"] = stop.value
         result["stop_info"] = [
-            info
-            for info in buses_services.buses_service.gen_bus_stops_info()
-            if info["name"] == stop.value
+            info for info in service.gen_bus_stops_info() if info["name"] == stop.value
         ]
     return result
 

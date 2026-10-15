@@ -6,14 +6,14 @@ from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
 from data_api.api.api import app
-from data_api.domain.buses.services import BusesService, buses_service
+from data_api.domain.buses.services import PreparedBusData, buses_service
 from data_api.mcp.server import mcp
 
 pytestmark = pytest.mark.usefixtures("dataset_runtime")
 
 
 def test_missing_route_metadata_is_not_registered():
-    service = BusesService()
+    service = PreparedBusData()
     service._res_json = {"towardMainCampusInfo": {"direction": "down"}}
 
     service._populate_info_data()
@@ -29,11 +29,11 @@ def test_missing_route_metadata_is_not_registered():
         ("/buses/stops", "gen_bus_stops_info"),
         (
             "/buses/schedule?route=main&day=weekday&direction=up",
-            "get_schedule",
+            "query_schedule",
         ),
         (
             "/buses/schedule?route=main&day=weekday&direction=up&stop=台積館",
-            "get_schedule",
+            "query_schedule",
         ),
     ],
 )

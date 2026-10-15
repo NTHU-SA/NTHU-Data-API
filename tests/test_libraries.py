@@ -6,6 +6,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient, Response
 
 from data_api.api.api import app
+from data_api.core.exceptions import DataNotAvailableException
 from data_api.domain.libraries import services
 from data_api.utils.calendars import filter_calendar_events, get_event_date_range
 
@@ -104,7 +105,7 @@ def fake_data(monkeypatch):
     async def fake_get(endpoint_name):
         if endpoint_name in FAKE_DATA:
             return "fakehash", FAKE_DATA[endpoint_name]
-        return None
+        raise DataNotAvailableException("Dataset temporarily unavailable")
 
     monkeypatch.setattr(services.nthudata, "get", fake_get)
 
@@ -114,7 +115,7 @@ def no_data(monkeypatch):
     """Simulate data.nthusa.tw being unavailable."""
 
     async def fake_get(endpoint_name):
-        return None
+        raise DataNotAvailableException("Dataset temporarily unavailable")
 
     monkeypatch.setattr(services.nthudata, "get", fake_get)
 

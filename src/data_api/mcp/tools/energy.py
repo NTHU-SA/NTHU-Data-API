@@ -1,11 +1,12 @@
 """Energy usage MCP tool."""
 
-from data_api.domain.energy import services as energy_services
 from data_api.mcp.errors import live_tool_errors
 from data_api.mcp.server import mcp
+from data_api.mcp.tools.result_types import EnergyResult
+from data_api.runtime import get_runtime
 
 
-async def _get_energy_usage() -> dict:
+async def _get_energy_usage() -> EnergyResult:
     """
     Get real-time electricity usage for campus.
 
@@ -13,7 +14,7 @@ async def _get_energy_usage() -> dict:
         Dictionary with current electricity usage by zone.
     """
     with live_tool_errors():
-        data = await energy_services.energy_service.get_realtime_electricity_usage()
+        data = await get_runtime().energy.get_realtime_electricity_usage()
         zones = []
         for item in data:
             capacity = item.get("capacity") or 1  # Avoid division by zero

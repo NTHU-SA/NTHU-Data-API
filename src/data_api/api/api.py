@@ -23,9 +23,9 @@ from data_api.core.exceptions import (
     UpstreamException,
 )
 from data_api.core.settings import settings
-from data_api.data.manager import nthudata
-from data_api.domain.buses import services as buses_services
 from data_api.mcp import mcp
+from data_api.mcp.server import create_mcp
+from data_api.runtime import Runtime, RuntimeMiddleware, default_runtime
 
 logger = logging.getLogger(__name__)
 
@@ -33,15 +33,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown tasks."""
-    from data_api.domain.courses import services as courses_services
-
-    async with nthudata.lifespan():
-        app.state.datasets = nthudata
-        results = await nthudata.prefetch(config.PREFETCH_ENDPOINTS)
+    runtime: Runtime = app.state.runtime
+    async with runtime.lifespan():
+        app.state.datasets = runtime.datasets
+        results = await runtime.datasets.prefetch(config.PREFETCH_ENDPOINTS)
         logging.getLogger(__name__).info(
             "Data startup: %s/%s datasets usable", sum(results.values()), len(results)
         )
-        for service in (buses_services.buses_service, courses_services.courses_service):
+        for service in (runtime.buses, runtime.courses):
             try:
                 await service.update_data()
             except DataNotAvailableException:
@@ -57,7 +56,8 @@ mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=
 @asynccontextmanager
 async def combined_lifespan(app: FastAPI):
     """Run both MCP and data lifespans on the exported application."""
-    async with mcp_app.lifespan(app):
+    transport = mcp_app if app.state.runtime is default_runtime else app.state.mcp_app
+    async with transport.lifespan(app):
         async with lifespan(app):
             yield
 
@@ -90,20 +90,32 @@ class _SafeUnexpectedErrorsMiddleware:
             )
 
 
-def create_app() -> FastAPI:
+def create_app(runtime: Runtime | None = None) -> FastAPI:
     """
     Create and configure the FastAPI application.
 
     Returns:
         FastAPI: Configured application instance.
     """
+    runtime = Runtime.create() if runtime is None else runtime
+    server = mcp if runtime is default_runtime else create_mcp(runtime)
+    transport = (
+        mcp_app
+        if runtime is default_runtime
+        else server.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
+    )
     app = FastAPI(
         lifespan=combined_lifespan,
-        routes=list(mcp_app.routes),
+        routes=list(transport.routes),
         title="NTHU Data API",
         version=__version__,
         description="由國立清華大學校內各單位資料所組成的公共資料 API。",
     )
+    app.state.runtime = runtime
+    app.state.datasets = runtime.datasets
+    app.state.mcp = server
+    app.state.mcp_app = transport
+    app.add_middleware(RuntimeMiddleware, runtime=runtime)
 
     @app.exception_handler(DataNotAvailableException)
     async def dataset_unavailable(request: Request, exc: DataNotAvailableException):
@@ -150,9 +162,9 @@ def create_app() -> FastAPI:
     # Process time middleware
     @app.middleware("http")
     async def add_process_time_header(request: Request, call_next):
-        start_time = time.time()
+        start_time = time.perf_counter()
         response = await call_next(request)
-        process_time = time.time() - start_time
+        process_time = time.perf_counter() - start_time
         response.headers["X-Process-Time"] = str(process_time)
         return response
 
@@ -205,7 +217,7 @@ def create_app() -> FastAPI:
     return app
 
 
-app = create_app()
+app = create_app(default_runtime)
 
 # Preserve module aliases without constructing a second, unconfigured app.
 fast_api_app = combined_app = app

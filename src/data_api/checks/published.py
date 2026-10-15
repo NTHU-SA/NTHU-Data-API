@@ -14,11 +14,15 @@ from data_api.api.schemas.courses import CourseData
 from data_api.checks.common import CheckFailure, fetch_json, report, validation_reason
 from data_api.checks.smoke import ENDPOINTS, check_endpoints
 from data_api.core.config import PREFETCH_ENDPOINTS
-from data_api.data.manager import nthudata
-from data_api.data.nthudata import FetchFailure, JsonData, ManifestEntry, parse_manifest
-from data_api.domain.buses.services import BusesService, buses_service
-from data_api.domain.calendars.services import calendars_service
-from data_api.domain.courses.services import courses_service
+from data_api.data.nthudata import (
+    FetchFailure,
+    JsonData,
+    ManifestEntry,
+    NTHUDataManager,
+    parse_manifest,
+)
+from data_api.domain.buses.services import PreparedBusData
+from data_api.runtime import Runtime
 
 MANIFEST_PATH = "/file_details.json"
 
@@ -29,7 +33,7 @@ def _check_serialization(path: str, candidate: Any) -> None:
             adapter = TypeAdapter(list[CourseData])
             parsed = adapter.validate_python(candidate, from_attributes=True)
             adapter.dump_json(parsed, warnings="error")
-        elif isinstance(candidate, BusesService):
+        elif isinstance(candidate, PreparedBusData):
             for model, store in [
                 (BusCanonicalSchedule, candidate.raw_schedule_data),
                 (BusCanonicalDetailedSchedule, candidate.detailed_schedule_data),
@@ -45,11 +49,11 @@ def _check_serialization(path: str, candidate: Any) -> None:
 
 
 async def _check_download(
-    client: httpx.AsyncClient, data_url: str, path: str, checksum: str | None
+    client: httpx.AsyncClient, data_url: str, path: str, checksum: str | None, runtime: Runtime
 ) -> bytes:
     payload, response = await fetch_json(client, f"{data_url}{path}", path, checksum)
     try:
-        candidate = nthudata.state_for(path).prepare(payload)
+        candidate = runtime.datasets.state_for(path).prepare(payload)
     except ValidationError as exc:
         raise CheckFailure(path, "candidate", validation_reason(exc)) from exc
     except FetchFailure as exc:
@@ -61,7 +65,7 @@ async def _check_download(
 
 
 async def _check_local_responses(
-    documents: dict[str, bytes], entries: dict[str, ManifestEntry]
+    documents: dict[str, bytes], entries: dict[str, ManifestEntry], runtime: Runtime
 ) -> list[CheckFailure]:
     def serve_downloaded(request: httpx.Request) -> httpx.Response:
         content = documents.get(request.url.path)
@@ -71,6 +75,7 @@ async def _check_local_responses(
 
     # Serialization uses exactly the checked bytes, never a second publisher download or live API.
     failures = []
+    nthudata = runtime.datasets
     async with nthudata.lifespan(
         httpx.AsyncClient(transport=httpx.MockTransport(serve_downloaded))
     ):
@@ -87,14 +92,15 @@ async def _check_local_responses(
                 )
         if failures:
             return failures
-        await courses_service.update_data()
-        await buses_service.update_data()
+        await runtime.courses.update_data()
+        await runtime.buses.update_data()
         expected_versions = {
             check.path: entries[check.dataset].active_version for check in ENDPOINTS
         }
-        expected_versions["/calendars"], _ = await calendars_service.get_all_calendars()
+        expected_versions["/calendars"], _ = await runtime.calendars.get_all_calendars()
         async with httpx.AsyncClient(
-            transport=httpx.ASGITransport(app=create_app()), base_url="http://contract.test"
+            transport=httpx.ASGITransport(app=create_app(runtime)),
+            base_url="http://contract.test",
         ) as local:
             failures = await check_endpoints(local, "http://contract.test", expected_versions)
     return [
@@ -117,18 +123,21 @@ async def check_published(client: httpx.AsyncClient, data_url: str) -> list[Chec
         return [exc]
 
     failures = []
+    runtime = Runtime.create(NTHUDataManager(base_url=data_url))
     documents = {MANIFEST_PATH: manifest_response.content}
     for endpoint in PREFETCH_ENDPOINTS:
         path = f"/{endpoint}"
         try:
             if path not in entries:
                 raise CheckFailure(path, "manifest", "required dataset is missing")
-            documents[path] = await _check_download(client, data_url, path, entries[path].sha256)
+            documents[path] = await _check_download(
+                client, data_url, path, entries[path].sha256, runtime
+            )
         except CheckFailure as exc:
             failures.append(exc)
     if failures:
         return failures
-    return await _check_local_responses(documents, entries)
+    return await _check_local_responses(documents, entries, runtime)
 
 
 async def run(data_url: str, timeout: float) -> int:

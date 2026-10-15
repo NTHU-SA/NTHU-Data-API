@@ -9,15 +9,14 @@ from typing import Optional
 
 from thefuzz import fuzz
 
-from data_api.core.exceptions import DataNotAvailableException
 from data_api.data.manager import nthudata
+from data_api.data.nthudata import NTHUDataManager
 from data_api.utils.search import fuzzy_matches
 
 # Constants
 ANNOUNCEMENTS_JSON = "announcements.json"
 ANNOUNCEMENTS_LIST_JSON = "announcements_list.json"
 FUZZY_SEARCH_THRESHOLD = 80
-DATASET_UNAVAILABLE = "Dataset temporarily unavailable"
 
 
 def _matches_source_url(link: str, url: str) -> bool:
@@ -40,6 +39,9 @@ def _matches_source_url(link: str, url: str) -> bool:
 class AnnouncementsService:
     """Service for fetching and filtering announcements."""
 
+    def __init__(self, manager: NTHUDataManager = nthudata):
+        self.manager = manager
+
     async def get_announcements(
         self,
         department: Optional[str] = None,
@@ -53,11 +55,7 @@ class AnnouncementsService:
         Returns:
             tuple: (commit_hash, filtered_announcements)
         """
-        result = await nthudata.get(ANNOUNCEMENTS_JSON)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, announcements_data = result
+        commit_hash, announcements_data = await self.manager.get(ANNOUNCEMENTS_JSON)
 
         if url:
             announcements_data = [
@@ -90,11 +88,7 @@ class AnnouncementsService:
         self, department: Optional[str] = None
     ) -> tuple[Optional[str], list[dict]]:
         """Get announcements list (without article content)."""
-        result = await nthudata.get(ANNOUNCEMENTS_LIST_JSON)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, announcements_list = result
+        commit_hash, announcements_list = await self.manager.get(ANNOUNCEMENTS_LIST_JSON)
 
         if department:
             announcements_list = [
@@ -117,11 +111,7 @@ class AnnouncementsService:
         Returns the original structure but with non-matching articles removed.
         """
         # 1. 取得原始資料
-        result = await nthudata.get(ANNOUNCEMENTS_JSON)
-        if result is None:
-            raise DataNotAvailableException(DATASET_UNAVAILABLE)
-
-        commit_hash, raw_data = result
+        commit_hash, raw_data = await self.manager.get(ANNOUNCEMENTS_JSON)
 
         filtered_results = []
 
