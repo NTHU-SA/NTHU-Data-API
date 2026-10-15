@@ -60,7 +60,7 @@ class SemesterPublisher:
                         "/": [
                             {
                                 "name": name[1:],
-                                "last_commit": self.version + name,
+                                "version": self.version + name,
                                 "sha256": hashlib.sha256(json.dumps(data).encode()).hexdigest(),
                             }
                             for name, data in docs.items()

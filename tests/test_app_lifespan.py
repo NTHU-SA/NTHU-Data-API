@@ -132,7 +132,7 @@ async def _fake_fetch(url: str, sha256=None):
         return {
             "file_details": {
                 "/": [
-                    {"name": name, "last_commit": "testcommithash"}
+                    {"name": name, "version": "testcommithash"}
                     for name in config.PREFETCH_ENDPOINTS
                 ]
             }

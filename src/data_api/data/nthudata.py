@@ -116,14 +116,13 @@ class ManifestEntry(BaseModel):
     model_config = ConfigDict(extra="ignore", strict=True)
 
     name: str = Field(min_length=1)
-    last_commit: str | None = Field(default=None, min_length=1)
     version: str | None = Field(default=None, min_length=1)
     sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     last_updated: str | None = None
 
     @property
     def active_version(self) -> str | None:
-        return self.last_commit or self.version
+        return self.version
 
 
 class PublishedManifest(BaseModel):

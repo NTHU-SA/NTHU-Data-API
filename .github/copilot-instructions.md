@@ -214,7 +214,7 @@ Consume `file_details.json` in the publisher's existing shape:
     "courses": [
       {
         "name": "latest.json",
-        "last_commit": "opaque-version",
+        "version": "opaque-version",
         "last_updated": "2026-09-27T22:24:37+08:00"
       }
     ],
@@ -225,8 +225,9 @@ Consume `file_details.json` in the publisher's existing shape:
 }
 ```
 
-Section plus `name` identifies the dataset path. Prefer `last_commit`, with
-`version` as fallback; versions are opaque equality tokens, not sortable revisions.
+Section plus `name` identifies the dataset path. Use only `version` as the version
+identifier; ignore `last_commit` and do not use it as a fallback. Missing or null
+`version` means unknown freshness. Versions are opaque equality tokens, not sortable revisions.
 Verify the optional lowercase `sha256` digest of file bytes before installation
 to prevent manifest/data publication races. Legacy manifests without checksums
 remain supported but do not provide this integrity guarantee.

@@ -46,10 +46,7 @@ async def ping_runtime(monkeypatch):
                 200,
                 json={
                     "file_details": {
-                        "/": [
-                            {"name": name.lstrip("/"), "last_commit": "fixture"}
-                            for name in payloads
-                        ]
+                        "/": [{"name": name.lstrip("/"), "version": "fixture"} for name in payloads]
                     }
                 },
             )

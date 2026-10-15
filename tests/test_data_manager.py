@@ -39,7 +39,7 @@ class Publisher:
         self.sha256 = None
 
     def manifest(self):
-        entry = {"name": self.endpoint, "last_commit": self.version}
+        entry = {"name": self.endpoint, "version": self.version}
         if self.sha256:
             entry["sha256"] = self.sha256
         return {"file_details": {"/": [entry]}}
@@ -182,6 +182,56 @@ async def test_ttl_and_version_matching():
         assert state.last_refresh_success_at == old.loaded_at
 
 
+async def test_only_version_changes_trigger_refresh():
+    clock, publisher = Clock(), Publisher([1])
+    entry = {"name": "test.json", "version": "a", "last_commit": "commit-a"}
+    publisher.manifest_override = {"file_details": {"/": [entry]}}
+    manager = NTHUDataManager(clock=clock)
+    async with manager.lifespan(publisher.client()):
+        assert await manager.get("test.json") == ("a", [1])
+        state = manager.state_for("test.json")
+        old = state.snapshot
+
+        entry["last_commit"] = "commit-b"
+        entry["sha256"] = hashlib.sha256(b"[2]").hexdigest()
+        publisher.payload = b"[2]"
+        clock.advance()
+        assert await manager.get("test.json") == ("a", [1])
+        assert state.snapshot is old
+        assert state.freshness == Freshness.CURRENT
+        assert publisher.calls.count("/test.json") == 1
+
+        entry["version"] = "b"
+        clock.advance()
+        assert await manager.get("test.json") == ("b", [2])
+        assert state.snapshot is not old
+        assert state.freshness == Freshness.CURRENT
+        assert publisher.calls.count("/test.json") == 2
+
+
+@pytest.mark.parametrize("loaded", [False, True])
+@pytest.mark.parametrize("metadata", [{}, {"version": None}])
+async def test_missing_version_never_falls_back_to_last_commit(loaded, metadata):
+    clock, publisher = Clock(), Publisher([1])
+    manager = NTHUDataManager(clock=clock)
+    async with manager.lifespan(publisher.client()):
+        if loaded:
+            await manager.get("test.json")
+        state = manager.state_for("test.json")
+        old = state.snapshot
+        publisher.manifest_override = {
+            "file_details": {"/": [{"name": "test.json", "last_commit": "commit-b", **metadata}]}
+        }
+        publisher.payload = [2]
+        clock.advance()
+        assert await manager.get("test.json") == (("a", [1]) if loaded else (None, [2]))
+        if loaded:
+            assert state.snapshot is old
+        assert state.freshness == Freshness.UNVERIFIED
+        assert state.last_error.category == "version_unknown"
+        assert publisher.calls.count("/test.json") == 1
+
+
 @pytest.mark.parametrize("current,expected", [("a", None), (None, None), (None, "a"), ("a", "b")])
 async def test_unknown_versions_are_not_a_match(current, expected):
     clock, publisher = Clock(), Publisher([1])
@@ -209,7 +259,8 @@ async def test_unknown_versions_are_not_a_match(current, expected):
         ({}, "manifest_parsing"),
         ({"file_details": []}, "manifest_parsing"),
         ({"file_details": {"/": [42]}}, "manifest_parsing"),
-        ({"file_details": {"/": [{"name": "test.json", "last_commit": 42}]}}, "manifest_parsing"),
+        ({"file_details": {"/": [{"name": "test.json", "version": 42}]}}, "manifest_parsing"),
+        ({"file_details": {"/": [{"name": "test.json", "version": ""}]}}, "manifest_parsing"),
         ({"file_details": {"/": [{"name": "test.json", "sha256": "bad"}]}}, "manifest_parsing"),
         ({"file_details": {"/": []}}, "version_unknown"),
         ({"file_details": {"/": [{"name": "test.json"}]}}, "version_unknown"),
@@ -237,7 +288,9 @@ async def test_manifest_extra_fields_optional_metadata_and_nested_paths():
     publisher.manifest_override = {
         "extra": "ignored",
         "file_details": {
-            "libraries": [{"name": "rss.json", "version": "b", "extra": "ignored"}],
+            "libraries": [
+                {"name": "rss.json", "version": "b", "last_commit": 42, "extra": "ignored"}
+            ],
         },
     }
     manager = NTHUDataManager(base_url="https://example.com/")
@@ -333,8 +386,8 @@ async def test_unrelated_dataset_downloads_do_not_block():
     publisher.manifest_override = {
         "file_details": {
             "/": [
-                {"name": "slow.json", "last_commit": "a"},
-                {"name": "fast.json", "last_commit": "a"},
+                {"name": "slow.json", "version": "a"},
+                {"name": "fast.json", "version": "a"},
             ]
         }
     }
@@ -497,8 +550,8 @@ async def test_shared_manifest_does_not_extend_freshness_for_later_readers():
     publisher.manifest_override = {
         "file_details": {
             "/": [
-                {"name": "first.json", "last_commit": "a"},
-                {"name": "later.json", "last_commit": "a"},
+                {"name": "first.json", "version": "a"},
+                {"name": "later.json", "version": "a"},
             ]
         }
     }
@@ -698,8 +751,8 @@ async def test_duplicate_manifest_paths_are_malformed():
     publisher.manifest_override = {
         "file_details": {
             "/": [
-                {"name": "test.json", "last_commit": "a"},
-                {"name": "test.json", "last_commit": "b"},
+                {"name": "test.json", "version": "a"},
+                {"name": "test.json", "version": "b"},
             ]
         }
     }

@@ -110,7 +110,7 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
                 200,
                 json={
                     "file_details": {
-                        "/": [{"name": path, "last_commit": marker} for path in PREFETCH_ENDPOINTS]
+                        "/": [{"name": path, "version": marker} for path in PREFETCH_ENDPOINTS]
                     }
                 },
             )
