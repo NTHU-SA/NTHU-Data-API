@@ -1,0 +1,112 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable version to prepare (X.Y.Z, without v)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Validate proposed version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          uv sync --locked --all-groups
+          uv run --no-sync python -m data_api.checks.release --next-version "$RELEASE_VERSION"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$RELEASE_VERSION"; then
+            echo "Release tag already exists" >&2
+            exit 1
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+          fi
+      - name: Update version and locked project metadata
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          uv version "$RELEASE_VERSION"
+          uv lock --check
+      - name: Validate prepared source
+        run: |
+          uv run --locked pre-commit run --all-files
+          uv run --locked --group test pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85
+          uv run --locked python -m data_api.checks.openapi
+          uv run --locked python -m data_api.checks.mcp
+          uv run --locked python -m data_api.checks.release
+      - name: Fill repository PR template
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          template = Path(".github/PULL_REQUEST_TEMPLATE/pull_request_template.md").read_text()
+          notes = [
+              "N/A",
+              "N/A",
+              "N/A",
+              f"Prepare {os.environ['RELEASE_VERSION']}; update pyproject.toml and uv.lock.",
+              "See docs/releasing.md for tag-only Cloud Build deployment.",
+              "Passed: uv run --locked pre-commit run --all-files; "
+              "uv run --locked --group test pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85; "
+              "uv run --locked python -m data_api.checks.openapi; "
+              "uv run --locked python -m data_api.checks.mcp; "
+              "uv run --locked python -m data_api.checks.release. "
+              "This PR does not create a tag or deploy. Checks run here because GITHUB_TOKEN-created PRs do not trigger PR workflows.",
+          ]
+          for note in notes:
+              template = template.replace("- <something>", f"- {note}", 1)
+          Path(os.environ["RUNNER_TEMP"], "release-pr.md").write_text(template)
+          PY
+      - name: Open version preparation PR
+        id: release-pr
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          branch: release/v${{ inputs.version }}
+          base: main
+          title: "chore: prepare release ${{ inputs.version }}"
+          body-path: ${{ runner.temp }}/release-pr.md
+          commit-message: |
+            chore: prepare release ${{ inputs.version }}
+
+            Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>
+          add-paths: |
+            pyproject.toml
+            uv.lock
+      - name: Dispatch required CI on the prepared branch
+        if: steps.release-pr.outputs.pull-request-operation != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          gh workflow run tests.yml --ref "release/v$RELEASE_VERSION"
+          gh workflow run pre-commit.yml --ref "release/v$RELEASE_VERSION"

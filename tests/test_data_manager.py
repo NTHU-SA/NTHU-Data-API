@@ -417,7 +417,6 @@ async def test_bus_indexes_are_built_before_swap(monkeypatch):
     async with manager.lifespan(publisher.client()):
         await service.update_data()
         old = service.state.snapshot
-        old_registry = service.stops_schedule_registry
 
         def fail(self):
             raise ValueError("index construction failed")
@@ -428,7 +427,6 @@ async def test_bus_indexes_are_built_before_swap(monkeypatch):
             clock.advance()
             await service.update_data()
             assert service.state.snapshot is old
-            assert service.stops_schedule_registry is old_registry
         publisher.payload = {}
         clock.advance()
         await service.update_data()

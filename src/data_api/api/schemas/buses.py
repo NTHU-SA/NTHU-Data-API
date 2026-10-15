@@ -30,13 +30,10 @@ __all__ = [
     "BusInfo",
     "BusStopsInfo",
     "BusSchedule",
-    "BusStopsQueryResult",
     "BusArriveTime",
     "BusDetailedSchedule",
     "BusCanonicalSchedule",
     "BusCanonicalDetailedSchedule",
-    "BusMainData",
-    "BusNandaData",
 ]
 
 
@@ -85,16 +82,6 @@ class BusSchedule(BaseModel):
     bus_type: BusType = Field(..., description="營運車輛類型")
 
 
-class BusStopsQueryResult(BaseModel):
-    """Result of querying bus stops."""
-
-    arrive_time: str = Field(..., description="預計到達時間")
-    dep_time: str = Field(..., description="發車時間")
-    dep_stop: str = Field(..., description="發車站牌")
-    description: str = Field(..., description="備註")
-    bus_type: BusType = Field(..., description="營運車輛類型")
-
-
 class BusArriveTime(BaseModel):
     """Bus arrival time at a stop."""
 
@@ -129,41 +116,3 @@ class BusCanonicalDetailedSchedule(BusDetailedSchedule):
     """Detailed schedule with campus-qualified departure line identifiers."""
 
     dep_info: BusCanonicalSchedule = Field(..., description="發車資訊")
-
-
-class BusMainData(BaseModel):
-    """Main campus bus data."""
-
-    toward_TSMC_building_info: BusInfo = Field(..., description="校門口往台積館公車資訊")
-    weekday_bus_schedule_toward_TSMC_building: list[BusSchedule] = Field(
-        ..., description="校門口往台積館公車時刻表（平日）"
-    )
-    weekend_bus_schedule_toward_TSMC_building: list[BusSchedule] = Field(
-        ..., description="校門口往台積館公車時刻表（假日）"
-    )
-    toward_main_gate_info: BusInfo = Field(..., description="台積館往校門口公車資訊")
-    weekday_bus_schedule_toward_main_gate: list[BusSchedule] = Field(
-        ..., description="台積館往校門口公車時刻表（平日）"
-    )
-    weekend_bus_schedule_toward_main_gate: list[BusSchedule] = Field(
-        ..., description="台積館往校門口公車時刻表（假日）"
-    )
-
-
-class BusNandaData(BaseModel):
-    """Nanda campus bus data."""
-
-    toward_nanda_info: BusInfo = Field(..., description="本部往南大區間車資訊")
-    weekday_bus_schedule_toward_nanda: list[BusSchedule] = Field(
-        ..., description="本部往南大區間車時刻表（平日）"
-    )
-    weekend_bus_schedule_toward_nanda: list[BusSchedule] = Field(
-        ..., description="本部往南大區間車時刻表（假日）"
-    )
-    toward_main_campus_info: BusInfo = Field(..., description="南大往本部區間車資訊")
-    weekday_bus_schedule_toward_main_campus: list[BusSchedule] = Field(
-        ..., description="南大往本部區間車時刻表（平日）"
-    )
-    weekend_bus_schedule_toward_main_campus: list[BusSchedule] = Field(
-        ..., description="南大往本部區間車時刻表（假日）"
-    )

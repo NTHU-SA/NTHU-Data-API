@@ -9,6 +9,7 @@ complete request and response schemas.
 ## Contents
 
 - [Discovery and MCP](#discovery-and-mcp)
+- [Version policy and 3.0 migration](#version-policy-and-30-migration)
 - [Query conventions](#query-conventions)
 - [Directory](#directory-queries)
 - [Announcements](#announcement-queries)
@@ -31,7 +32,7 @@ upstream requests. The name and version match the FastAPI application metadata.
 ```json
 {
   "name": "NTHU Data API",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "docs": "/docs",
   "openapi": "/openapi.json",
   "mcp": "/mcp"
@@ -58,6 +59,53 @@ labels; other clients may continue to display the English names.
 | `get_library_info` | 查詢圖書館資訊 |
 | `get_newsletters` | 搜尋電子報列表 |
 | `get_energy_usage` | 查詢校園即時用電 |
+
+## Version policy and 3.0 migration
+
+The service runs **one live version**, without versioned URL prefixes or
+per-request version selection. A release tag identifies deployed source, not an
+independently supported API. Minor and patch releases preserve public REST/MCP
+contracts; prefer adding optional filters or metadata over renaming endpoints.
+Clients should tolerate extra response fields and discover dataset-backed values
+instead of treating examples as exhaustive lists.
+
+Deprecation is advance notice, not permission to remove an interface in a minor
+release. Future deprecations must document a replacement and migration differences,
+appear in OpenAPI/tool documentation as applicable, and be announced before removal
+in a major release. Necessary security or correctness fixes may be exceptions and
+must explicitly describe their impact. Removing an endpoint is still a breaking
+change even after deprecation; there is no promise that old clients keep working
+after a major upgrade.
+
+**3.0.0 removes all previously deprecated REST operations.** Update clients using
+the following table. Existing supported operation IDs and the eight current MCP
+tool names remain unchanged. Removed paths return 404; there are no custom legacy
+redirects. Ordinary FastAPI trailing-slash normalization remains enabled: for
+example, `/courses/` redirects to `/courses` with 307 and preserves query parameters.
+It no longer has a separate operation or special all-courses behavior.
+
+| Removed operation | Replacement and migration difference |
+| --- | --- |
+| `GET /announcements/`, `/calendars/`, `/dining/`, `/locations/`, `/newsletters/` | Use the slashless collection URL directly to avoid a 307 redirect. |
+| `GET /departments/` | `GET /directory`; same department collection model. |
+| `GET /departments/search` | `GET /directory?query=...`; returns departments with matching nested people, not separate `departments`/`people` arrays. MCP campus search retains its own separate arrays. |
+| `GET /announcements/lists/departments` | `GET /announcements/sources`; extract and deduplicate `department` locally, sorting if needed. |
+| `GET /courses/` | `GET /courses`; supplied filters now apply, including after a slash redirect. |
+| `GET /courses/search` | `GET /courses` with the same field filters; no non-empty filters now returns **all courses**, not `[]`. |
+| `POST /courses/search` | `POST /courses/query` with the same body. |
+| `GET /courses/lists/{list_name}` | `GET /courses?type={list_name}`. |
+| `GET /newsletters/{newsletter_name}` | `GET /newsletters?name={newsletter_name}&fuzzy=false`; returns an array, or `[]` instead of 404. Names are no longer restricted to a fixed legacy enum. |
+| `GET /locations/search?query=...` | `GET /locations?name=...`; no matches returns `[]` instead of 404. |
+| `GET /buses/info/stops` | `GET /buses/stops`; same collection format. |
+| `GET /buses/schedules` | `GET /buses/schedule`; rename `bus_type` to `route`. Defaults are now `route=all`, `day=current`, `direction=all`. Line IDs are campus-qualified; when `stop` is supplied, time filtering uses arrival at that stop, not departure. |
+| `GET /buses/stops/{stop_name}` | `GET /buses/schedule?stop={stop_name}&details=true`; read `dep_info` and `stops_time`, not flat arrival records. Arrival filtering still includes in-transit buses. |
+| `GET /libraries/space` | `GET /libraries/spaces`. |
+| `GET /libraries/lost_and_found` | `GET /libraries/lost-and-found`. |
+| `GET /energy/electricity_usage` | `GET /energy/electricity`. |
+
+Earlier removed MCP names `get_next_buses` and `get_bus_stops` are not restored;
+use `get_bus_schedule` and refresh the client tool list. The earlier removed
+`/dining/open` remains absent; see [dining queries](#dining-queries).
 
 ## Query conventions
 
@@ -99,15 +147,10 @@ or a string for invalid GET regular expressions. OpenAPI success responses decla
 ### Root endpoint paths
 
 Use root GET endpoints without a trailing slash: `/announcements`, `/calendars`,
-`/dining`, `/locations`, and `/newsletters`. Both forms respond
-directly without a redirect and retain the same query parameters, response schemas,
-and data-version headers. The trailing-slash endpoints remain available for
-compatibility but are marked **deprecated** in OpenAPI, with descriptions pointing
-to their replacements. Existing operation IDs identify the slashless endpoints;
-the deprecated aliases use a `Deprecated` suffix to keep operation IDs unique.
-
-`GET /courses` already uses this convention; its deprecated `/courses/` endpoint
-retains its existing all-courses behavior.
+`/dining`, `/locations`, and `/newsletters`. Only slashless operations are
+registered and documented. Trailing-slash requests use the framework's automatic
+307 redirect, not separate compatibility endpoints. `GET /courses` and
+`GET /directory` follow the same convention.
 
 ## Directory queries
 
@@ -121,18 +164,8 @@ department metadata is retained and `details.people` contains only matching
 people. Results are sorted by match score, while people retain their dataset
 order. Filtering does not modify the cached dataset.
 
-There is no new `/directory/search` endpoint. The deprecated
-`/departments/search` retains its separate `departments` and `people` response
-for existing clients, including MCP campus search.
-
-### Legacy directory endpoints
-
-The legacy endpoints are grouped under `Departments` in the documentation. Both
-endpoints are deprecated: `GET /departments/` and `GET /departments/search`.
-The slashless `GET /departments` route has been removed; FastAPI's default
-trailing-slash redirect still forwards requests to `/departments/`. The retained
-endpoints keep their existing response schemas, operation IDs, and data-version
-headers.
+There is no `/directory/search` endpoint. The `/departments` routes are removed.
+MCP campus search retains its separate `departments` and `people` response.
 
 ## Announcement queries
 
@@ -142,10 +175,7 @@ The sources response is a `list[AnnouncementSource]` with required `title`, `lin
 (HTTP/HTTPS URL), `language`, and `department` fields, documented in OpenAPI.
 Use the `department` fields in `/announcements/sources` to discover department
 names; clients needing a unique department list can deduplicate those values.
-The redundant `GET /announcements/lists/departments` endpoint is deprecated in
-OpenAPI but remains available for compatibility. It still returns HTTP 200 with
-a sorted, unique list of department names and the `X-Data-Commit-Hash` header
-when available.
+The redundant `GET /announcements/lists/departments` endpoint is removed.
 
 ```text
 GET /announcements
@@ -170,14 +200,7 @@ and the optional `department` filter on `/announcements/sources` are unchanged.
 Use `GET /libraries/spaces` for the library space availability collection
 (`list[LibrarySpace]`), `GET /libraries/lost-and-found` for library lost items, and
 `GET /energy/electricity` for realtime campus electricity usage.
-The old paths remain available with the same response formats and error behavior,
-but are marked **deprecated** in OpenAPI:
-
-| Deprecated endpoint | Replacement |
-| --- | --- |
-| `GET /libraries/space` | `GET /libraries/spaces` |
-| `GET /libraries/lost_and_found` | `GET /libraries/lost-and-found` |
-| `GET /energy/electricity_usage` | `GET /energy/electricity` |
+The former singular/underscore aliases are removed; see the migration table.
 
 MCP tool names and arguments are unchanged.
 
@@ -240,21 +263,8 @@ Queries allow at most **32 array levels** (the outermost array is level 1) and
 **1,024 nodes** across the whole tree. Each array, condition object and operator
 counts as one node; fields inside condition objects do not count separately.
 Malformed grammar, exceeded limits and invalid regex syntax return HTTP 422,
-even when the course dataset is empty. These rules also apply to the deprecated
-`POST /courses/search` alias.
-
-The old endpoints remain available but are marked **deprecated** in OpenAPI:
-
-| Deprecated endpoint | Replacement |
-| --- | --- |
-| `GET /courses/` | `GET /courses` |
-| `GET /courses/search` | `GET /courses` with the same field filters |
-| `POST /courses/search` | `POST /courses/query` with the same body |
-| `GET /courses/lists/{list_name}` | `GET /courses?type={list_name}` |
-
-Legacy behavior is preserved: `GET /courses/` returns all courses, while
-`GET /courses/search` without non-empty field filters returns `[]`. Migrating
-the latter to an unfiltered `GET /courses` instead returns all courses.
+even when the course dataset is empty. The `/courses/search` and
+`/courses/lists/{list_name}` legacy operations are removed.
 
 ## Newsletter queries
 
@@ -278,10 +288,9 @@ Its optional `name` filter matches exactly. Both endpoints return the dataset's
 /newsletters?name=教務處綜合教務組電子報&title=選課&fuzzy=false
 ```
 
-`GET /newsletters/{newsletter_name}` remains available with its existing enum,
-single-object response, and 404 behavior, but is **deprecated** in OpenAPI.
-Migrate to `/newsletters?name={newsletter_name}&fuzzy=false`, which returns
-a list (or `[]` if no source matches). No removal date has been set.
+`GET /newsletters/{newsletter_name}` is removed. Use
+`/newsletters?name={newsletter_name}&fuzzy=false`, which returns a list
+(or `[]` if no source matches).
 
 ## Location queries
 
@@ -300,14 +309,7 @@ Responses are arrays of locations with `name`, `latitude`, and `longitude`,
 and include `X-Data-Commit-Hash` when available. No matches return HTTP 200
 with `[]`.
 
-The old search endpoint remains available but is marked **deprecated** in OpenAPI:
-
-| Deprecated endpoint | Replacement |
-| --- | --- |
-| `GET /locations/search?query=...` | `GET /locations?name=...` |
-
-Legacy search behavior is preserved: `/locations/search` requires `query` and
-returns HTTP 404 when no locations match.
+`GET /locations/search` is removed. Use the collection's `name` filter.
 
 ## Bus routes, stops, and schedules
 
@@ -319,9 +321,8 @@ The bus API exposes three resources:
 | `GET /buses/stops` | All bus stops with names and coordinates |
 | `GET /buses/schedule` | Timetable query, optionally filtered by stop |
 
-`GET /buses/stops` replaces `/buses/info/stops`. The old path remains available
-with the same response format, is deprecated in OpenAPI, and will be removed
-in the next major release. Stop-specific timetable queries use
+`GET /buses/stops` replaces the removed `/buses/info/stops`.
+Stop-specific timetable queries use
 `GET /buses/schedule?stop=台積館`, not a stop resource path.
 
 Use `GET /buses/routes?route=main` to select campus route metadata. Its optional
@@ -349,8 +350,7 @@ requested time are included; buses that have already passed the stop are exclude
 Without `stop`, filtering still uses departure time. Both detail modes use the
 same time filter and retain departure-time ordering. `day=current` uses the current day
 and time and ignores `time`. `limit` defaults to 5 and must be at least 1.
-The shared `BusQuery` parameter is now `limit`, not `limits`, including on
-deprecated bus endpoints; update clients to use the singular spelling.
+The shared `BusQuery` parameter is `limit`, not `limits`.
 Stop and time filters are applied before the limit; no matches return `[]`.
 
 ```text
@@ -361,16 +361,8 @@ Stop and time filters are applied before the limit; no matches return `[]`.
 /buses/schedule?route=all&day=weekday&direction=up&stop=台積館&details=true
 ```
 
-`GET /buses/schedules` and `GET /buses/stops/{stop_name}` remain available but are
-deprecated in OpenAPI and will be removed in the next major release. Migrate to `/buses/schedule` and
-`/buses/schedule?stop={stop_name}&details=true`, respectively, and rename query
-`bus_type` to `route`. Both legacy endpoints retain their required `bus_type`,
-`day`, and `direction` parameters. Both deprecated endpoints retain their response
-formats; `/buses/schedules` keeps unqualified `line` values (`red`, `green`,
-`route_1`, `route_2`) and departure-time filtering, even with `stop`.
-The old stop endpoint retains its arrival-based
-response and time filtering; the new endpoint uses the selected stop's estimated
-arrival time while retaining the schedule response format.
+`GET /buses/schedules` and `GET /buses/stops/{stop_name}` are removed.
+See the 3.0 migration table for query, line identifier and response-shape changes.
 
 MCP `get_bus_schedule` replaces `get_next_buses` and `get_bus_stops` without
 compatibility aliases. It accepts `route`, `direction`, `limit`, `stop`, `day`,

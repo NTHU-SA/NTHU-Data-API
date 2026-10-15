@@ -1,0 +1,295 @@
+{
+  "find_dining": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "building": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "check_open": {
+          "anyOf": [
+            {
+              "enum": [
+                "today",
+                "weekday",
+                "saturday",
+                "sunday"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "restaurant_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "get_announcements": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "department": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limit": {
+          "default": 10,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "get_bus_schedule": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "default": "current",
+          "enum": [
+            "weekday",
+            "weekend",
+            "current"
+          ],
+          "type": "string"
+        },
+        "details": {
+          "default": true,
+          "type": "boolean"
+        },
+        "direction": {
+          "default": "all",
+          "enum": [
+            "up",
+            "down",
+            "all"
+          ],
+          "type": "string"
+        },
+        "limit": {
+          "default": 5,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "route": {
+          "default": "all",
+          "enum": [
+            "main",
+            "nanda",
+            "all"
+          ],
+          "type": "string"
+        },
+        "stop": {
+          "anyOf": [
+            {
+              "enum": [
+                "北校門口",
+                "綜二館",
+                "楓林小徑",
+                "人社院&生科館",
+                "台積館",
+                "奕園停車場",
+                "教育學院大樓&南門停車場",
+                "南大校區校門口右側(食品路校牆邊)"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "time": {
+          "anyOf": [
+            {
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "get_energy_usage": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "get_library_info": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "info_type": {
+          "default": "space",
+          "enum": [
+            "space",
+            "lost_and_found"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "get_newsletters": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "search": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "search_campus": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "search_courses": {
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "course_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "teacher": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  }
+}

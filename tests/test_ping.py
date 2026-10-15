@@ -320,7 +320,7 @@ async def test_ping_hidden_from_openapi_and_swagger(ping_runtime):
     schema = await client.get("/openapi.json")
     assert schema.status_code == 200
     assert "/ping" not in schema.json()["paths"]
-    assert "/courses/" in schema.json()["paths"]
+    assert "/courses" in schema.json()["paths"]
     assert "PingResponse" not in schema.json()["components"]["schemas"]
     docs = await client.get("/docs")
     assert docs.status_code == 200

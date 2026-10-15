@@ -15,14 +15,6 @@ router = APIRouter()
 
 
 @router.get(
-    "/space",
-    response_model=list[LibrarySpace],
-    operation_id="getLibrarySpaceAvailability",
-    responses=LIVE_ERROR_RESPONSES,
-    deprecated=True,
-    description="已棄用，請改用 `GET /libraries/spaces`。",
-)
-@router.get(
     "/spaces",
     response_model=list[LibrarySpace],
     operation_id="getLibrarySpaces",
@@ -37,14 +29,6 @@ async def get_library_space_availability():
         return await libraries_service.get_space_availability()
 
 
-@router.get(
-    "/lost_and_found",
-    response_model=list[LibraryLostAndFound],
-    operation_id="getLibraryLostAndFoundItems",
-    responses=LIVE_ERROR_RESPONSES,
-    deprecated=True,
-    description="已棄用，請改用 `GET /libraries/lost-and-found`。",
-)
 @router.get(
     "/lost-and-found",
     response_model=list[LibraryLostAndFound],

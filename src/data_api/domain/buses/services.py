@@ -125,11 +125,6 @@ class BusesService:
     - Processing raw schedules into detailed schedules with arrival times
     - Managing route information and stop registries
     - Providing query methods for schedules and stop information
-
-    The service maintains three main data structures:
-    1. raw_schedule_data: Basic departure times and info
-    2. detailed_schedule_data: Schedules with calculated arrival times per stop
-    3. stops_schedule_registry: Index of all buses arriving at each stop
     """
 
     def __init__(self, manager: NTHUDataManager | None = None) -> None:
@@ -139,9 +134,6 @@ class BusesService:
         self.raw_schedule_data = self._new_schedule_store()
         self.detailed_schedule_data = self._new_schedule_store()
         self._route_info: dict[RouteInfoKey, dict[str, Any]] = {}
-
-        # Stop data aggregation (Stop ID -> {(RouteType, Day, Direction) -> List[Items]})
-        self.stops_schedule_registry: dict[str, dict[ScheduleKey, list[dict[str, Any]]]] = {}
 
         self.last_commit_hash = None
         self._res_json: dict[str, Any] = {}
@@ -169,7 +161,6 @@ class BusesService:
         # Publish complete derived structures without yielding to another reader.
         self.raw_schedule_data = candidate.raw_schedule_data
         self.detailed_schedule_data = candidate.detailed_schedule_data
-        self.stops_schedule_registry = candidate.stops_schedule_registry
         self._route_info = candidate._route_info
         self._res_json = candidate._res_json
         self._gen2_departures = candidate._gen2_departures
@@ -236,7 +227,6 @@ class BusesService:
         self._generate_detailed_schedule_and_stops()
         self._sort_schedule_store(self.raw_schedule_data, ["time"])
         self._sort_schedule_store(self.detailed_schedule_data, ["dep_info", "time"])
-        self._sort_stop_registry_lists()
         self._derive_combined_views()
 
     def _reset_registries(self) -> None:
@@ -244,7 +234,6 @@ class BusesService:
         self.raw_schedule_data = self._new_schedule_store()
         self.detailed_schedule_data = self._new_schedule_store()
         self._route_info = {}
-        self.stops_schedule_registry = {s_id: {} for s_id in graph.STOPS_DATA.keys()}
 
     # --- 1. Info Data ---
     def _populate_info_data(self) -> None:
@@ -346,21 +335,19 @@ class BusesService:
 
             detailed_list = []
             for bus in raw_list:
-                detailed_entry = self._create_detailed_schedule_entry(bus, rtype, day, rdir)
+                detailed_entry = self._create_detailed_schedule_entry(bus, rtype, rdir)
                 detailed_list.append(detailed_entry)
 
             self.detailed_schedule_data[(rtype, day, rdir)] = detailed_list
 
-    def _create_detailed_schedule_entry(self, bus: dict, rtype: str, day: str, rdir: str) -> dict:
+    def _create_detailed_schedule_entry(self, bus: dict, rtype: str, rdir: str) -> dict:
         """Create a detailed schedule entry with stop arrival times."""
         route = self._get_route_from_graph(bus, rtype, rdir)
         stops_time_info = []
 
         if route:
             start_time = bus.get("time", "00:00")
-            stops_time_info = self._calculate_stop_arrival_times(
-                route, start_time, bus, rtype, day, rdir
-            )
+            stops_time_info = self._calculate_stop_arrival_times(route, start_time)
 
         return {
             "dep_info": bus,
@@ -372,10 +359,6 @@ class BusesService:
         self,
         route: models.Route,
         start_time: str,
-        bus: dict,
-        rtype: str,
-        day: str,
-        rdir: str,
     ) -> list[dict]:
         """Calculate arrival times for each stop on the route."""
         stops_time_info = []
@@ -383,20 +366,6 @@ class BusesService:
             arr_time = add_time(start_time, offset)
             stops_time_info.append({"stop": stop.name, "arrive_time": arr_time})
 
-            # Register this bus arrival at the stop
-            self._add_to_stop_registry(
-                stop.id,
-                rtype,
-                day,
-                rdir,
-                {
-                    "arrive_time": arr_time,
-                    "dep_time": start_time,
-                    "dep_stop": bus.get("dep_stop", ""),
-                    "description": bus.get("description", ""),
-                    "bus_type": bus.get("bus_type", ""),
-                },
-            )
         return stops_time_info
 
     def _get_route_from_graph(self, bus: dict, rtype: str, rdir: str) -> Optional[models.Route]:
@@ -438,32 +407,18 @@ class BusesService:
             direction, bus.get("description", ""), bus.get("line", "")
         )
 
-    def _add_to_stop_registry(
-        self, stop_id: str, rtype: str, day: str, rdir: str, data: dict
-    ) -> None:
-        stop_data = self.stops_schedule_registry.setdefault(stop_id, {})
-        stop_data.setdefault((rtype, day, rdir), []).append(data)
-
     def _sort_schedule_store(self, store: ScheduleStore, time_path: list[str]) -> None:
         for entries in store.values():
             if isinstance(entries, list) and entries:
                 sort_by_time(entries, time_path)
 
-    def _sort_stop_registry_lists(self) -> None:
-        for stop_data in self.stops_schedule_registry.values():
-            for entries in stop_data.values():
-                if entries:
-                    sort_by_time(entries, ["arrive_time"])
-
     # --- 4. Post-Processing ("All" fields) ---
     def _derive_combined_views(self) -> None:
         self._combine_route_types_for_store(self.raw_schedule_data, ["time"])
         self._combine_route_types_for_store(self.detailed_schedule_data, ["dep_info", "time"])
-        self._combine_route_types_for_stops()
 
         self._combine_directions_for_store(self.raw_schedule_data, ["time"])
         self._combine_directions_for_store(self.detailed_schedule_data, ["dep_info", "time"])
-        self._combine_directions_for_stops()
 
     def _combine_route_types_for_store(self, store: ScheduleStore, time_path: list[str]) -> None:
         for day, rdir in product(BUS_DAY, BUS_DIRECTION_WITHOUT_ALL):
@@ -484,51 +439,6 @@ class BusesService:
             if combined:
                 sort_by_time(combined, time_path)
             store[(rtype, day, "all")] = combined
-
-    def _combine_route_types_for_stops(self) -> None:
-        for stop_data in self.stops_schedule_registry.values():
-            for day, rdir in product(BUS_DAY, BUS_DIRECTION_WITHOUT_ALL):
-                combined = [
-                    *stop_data.get(("main", day, rdir), []),
-                    *stop_data.get(("nanda", day, rdir), []),
-                ]
-                if combined:
-                    sort_by_time(combined, ["arrive_time"])
-                stop_data[("all", day, rdir)] = combined
-
-    def _combine_directions_for_stops(self) -> None:
-        for stop_data in self.stops_schedule_registry.values():
-            for rtype, day in product(BUS_ROUTE_TYPE, BUS_DAY):
-                combined = [
-                    *stop_data.get((rtype, day, "up"), []),
-                    *stop_data.get((rtype, day, "down"), []),
-                ]
-                if combined:
-                    sort_by_time(combined, ["arrive_time"])
-                stop_data[(rtype, day, "all")] = combined
-
-    def _get_route_data_bundle(self, rtype: str) -> dict:
-        mapping_name = "TSMC_building" if rtype == "main" else "nanda"
-        down_name = "main_gate" if rtype == "main" else "main_campus"
-
-        def gd(day: str, rdir: str) -> list[dict]:
-            return self.raw_schedule_data.get((rtype, day, rdir), [])
-
-        def gi(rdir: str) -> dict:
-            return self._route_info.get((rtype, rdir)) or {}
-
-        directions = {
-            "up": mapping_name,
-            "down": down_name,
-        }
-
-        bundle = {}
-        for rdir, name in directions.items():
-            bundle[f"toward_{name}_info"] = gi(rdir)
-            bundle[f"weekday_bus_schedule_toward_{name}"] = gd("weekday", rdir)
-            bundle[f"weekend_bus_schedule_toward_{name}"] = gd("weekend", rdir)
-
-        return bundle
 
     def get_route_info(self, route_type: Optional[str], direction: Optional[str]) -> list[dict]:
         # 用篩選條件取得路線資訊
@@ -570,10 +480,9 @@ class BusesService:
         stop: enums.BusStopsName | None = None,
         after_time: str = "",
         limit: int | None = 5,
-        use_stop_arrival_time: bool = True,
     ) -> list[dict]:
         """Filter by the selected stop's arrival time, or departure time without a stop."""
-        if stop is not None and use_stop_arrival_time:
+        if stop is not None:
             schedules = self.get_schedule(
                 route_type=route_type, day=day, direction=direction, detailed=True, stop=stop
             )
@@ -603,14 +512,6 @@ class BusesService:
             }
             for s in graph.STOPS_DATA.values()
         ]
-
-    def get_stop_schedule(self, stop_name: str, rtype: str, day: str, rdir: str) -> list[dict]:
-        stop_id = next((k for k, v in graph.STOPS_DATA.items() if v.name == stop_name), None)
-        if not stop_id:
-            return []
-
-        registry_data = self.stops_schedule_registry.get(stop_id, {})
-        return registry_data.get((rtype, day, rdir), [])
 
 
 # Global Instance

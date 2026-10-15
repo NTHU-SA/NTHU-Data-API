@@ -161,12 +161,6 @@ class AnnouncementsService:
 
         return commit_hash, filtered_results
 
-    async def list_departments(self) -> tuple[Optional[str], list[str]]:
-        """Get list of all departments with announcements."""
-        commit_hash, announcements_list = await self.get_announcements_list()
-        departments = {announcement["department"] for announcement in announcements_list}
-        return commit_hash, sorted(departments)
-
 
 # Global service instance
 announcements_service = AnnouncementsService()

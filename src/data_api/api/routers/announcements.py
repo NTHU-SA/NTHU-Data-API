@@ -18,13 +18,6 @@ router = APIRouter(responses=SNAPSHOT_RESPONSES)
     response_model=list[schemas.AnnouncementDetail],
     operation_id="getAnnouncements",
 )
-@router.get(
-    "/",
-    response_model=list[schemas.AnnouncementDetail],
-    operation_id="getAnnouncementsDeprecated",
-    deprecated=True,
-    description="已棄用，請改用 GET /announcements。查詢參數與回傳格式不變。",
-)
 async def get_announcements(
     response: Response,
     department: str = Query(
@@ -51,21 +44,6 @@ async def get_announcements(
         commit_hash, data = await services.announcements_service.get_announcements(
             department=department, title=title, language=language, url=url
         )
-    if commit_hash is not None:
-        response.headers["X-Data-Commit-Hash"] = commit_hash
-    return data
-
-
-@router.get(
-    "/lists/departments",
-    response_model=list[str],
-    operation_id="listAnnouncementDepartments",
-    deprecated=True,
-    description="已棄用，請改從 GET /announcements/sources 的 department 欄位取得部門名稱並去除重複值。",
-)
-async def list_announcement_departments(response: Response):
-    """取得所有有公告的部門列表，保留舊版回應格式。"""
-    commit_hash, data = await services.announcements_service.list_departments()
     if commit_hash is not None:
         response.headers["X-Data-Commit-Hash"] = commit_hash
     return data

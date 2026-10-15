@@ -83,10 +83,16 @@ and migration differences that are not obvious from OpenAPI alone.
 - MCP tools explicitly declare stable English `name` values and Traditional
   Chinese display `title` values. Internal Python renames must not change public
   names. Preserve argument defaults, limits, validation and response shapes.
-- Keep supported slashless routes and deprecated compatibility aliases consistent
-  with the guide. Existing operation IDs belong to slashless endpoints; deprecated
-  trailing-slash aliases use a `Deprecated` suffix to keep operation IDs unique.
-  Do not reintroduce removed endpoints without an intentional API change.
+- Only register supported slashless routes; keep FastAPI's ordinary slash redirects.
+  The deprecated operations were removed in 3.0.0. Do not restore compatibility
+  aliases or change existing operation IDs for internal renames.
+- Maintain one live API version, without versioned URL prefixes. Minor/patch
+  releases preserve contracts; announce deprecations and replacements before a
+  major removal. Update and review REST/MCP baselines together with migration notes.
+- `pyproject.toml` is the version source; use installed distribution metadata in
+  Python and keep the local project's `uv.lock` version synchronized. Deployment
+  validates an exact stable `vX.Y.Z` tag and must not rewrite source versions.
+  See [releasing](../docs/releasing.md) for Cloud Build trigger migration and gates.
 - Preserve REST/MCP search differences: MCP course search uses case-sensitive
   literal substrings; REST course GET uses regex; the POST DSL defaults to exact
   matching. Invalid regex must return 422 even with an empty dataset.

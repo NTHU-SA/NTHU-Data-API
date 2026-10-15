@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import math
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -17,6 +18,7 @@ from data_api.api.schemas.departments import Department
 from data_api.api.schemas.dining import DiningBuilding
 from data_api.api.schemas.libraries import LibraryRssItem, LibraryRssType
 from data_api.api.schemas.locations import LocationDetail
+from data_api.api.schemas.meta import MetaResponse
 from data_api.api.schemas.newsletters import NewsletterInfo, NewsletterSource
 from data_api.api.schemas.ping import PingResponse
 from data_api.checks.common import CheckFailure, fetch_json, report, validation_reason
@@ -123,19 +125,52 @@ async def check_smoke(client: httpx.AsyncClient, api_url: str) -> list[CheckFail
     return failures
 
 
-async def run(api_url: str, timeout: float) -> int:
-    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
-        return report(await check_smoke(client, api_url), "deployment-smoke")
+async def check_version(
+    client: httpx.AsyncClient, api_url: str, expected_version: str
+) -> list[CheckFailure]:
+    try:
+        _, response = await fetch_json(client, f"{api_url.rstrip('/')}/", "/")
+        try:
+            metadata = MetaResponse.model_validate_json(response.content, strict=True)
+        except ValidationError as exc:
+            raise CheckFailure("/", "response-schema", validation_reason(exc)) from exc
+        if metadata.version != expected_version:
+            raise CheckFailure("/", "version", "deployed version does not match release")
+    except CheckFailure as exc:
+        return [exc]
+    return []
+
+
+async def run(
+    api_url: str, timeout: float, expected_version: str | None = None, token: str | None = None
+) -> int:
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    async with httpx.AsyncClient(
+        timeout=timeout, follow_redirects=False, headers=headers
+    ) as client:
+        failures = await check_smoke(client, api_url)
+        if expected_version is not None:
+            failures.extend(await check_version(client, api_url, expected_version))
+        return report(failures, "deployment-smoke")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-url", default="https://api.nthusa.tw")
     parser.add_argument("--timeout", type=float, default=15)
+    parser.add_argument("--expected-version")
+    parser.add_argument("--identity-token-file", type=Path)
     args = parser.parse_args()
     if not math.isfinite(args.timeout) or args.timeout <= 0:
         parser.error("--timeout must be finite and positive")
-    return asyncio.run(run(args.api_url, args.timeout))
+    token = (
+        args.identity_token_file.read_text(encoding="utf-8").strip()
+        if args.identity_token_file
+        else None
+    )
+    if args.identity_token_file and not token:
+        parser.error("identity token file is empty")
+    return asyncio.run(run(args.api_url, args.timeout, args.expected_version, token))
 
 
 if __name__ == "__main__":

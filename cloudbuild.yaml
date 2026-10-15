@@ -1,0 +1,121 @@
+# Trigger: Push new tag, stable vX.Y.Z only. See docs/releasing.md before enabling.
+timeout: 1800s
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _REGION: ""
+  _SERVICE: ""
+  _IMAGE: ""
+  _LOCK_BUCKET: ""
+  _SMOKE_ACCOUNT: ""
+  _API_URL: "https://api.nthusa.tw"
+
+steps:
+  - id: validate-and-test
+    name: ghcr.io/astral-sh/uv:0.12.19-python3.14-trixie-slim@sha256:a2657d5b8da6a702204e49b2ed2467597da15fb45eb9fee00304c127dad4b1e9
+    entrypoint: sh
+    env:
+      - UV_PROJECT_ENVIRONMENT=/workspace/.venv
+      - RELEASE_TAG=$TAG_NAME
+      - RELEASE_REGION=$_REGION
+      - RELEASE_SERVICE=$_SERVICE
+      - RELEASE_IMAGE=$_IMAGE
+      - RELEASE_LOCK_BUCKET=$_LOCK_BUCKET
+      - RELEASE_SMOKE_ACCOUNT=$_SMOKE_ACCOUNT
+    args:
+      - -eu
+      - -c
+      - |
+        : "$${RELEASE_TAG:?A stable release tag is required}"
+        : "$${RELEASE_REGION:?Configure _REGION}"
+        : "$${RELEASE_SERVICE:?Configure _SERVICE}"
+        : "$${RELEASE_IMAGE:?Configure _IMAGE}"
+        : "$${RELEASE_LOCK_BUCKET:?Configure _LOCK_BUCKET}"
+        : "$${RELEASE_SMOKE_ACCOUNT:?Configure _SMOKE_ACCOUNT}"
+        uv sync --locked --all-groups
+        uv run --no-sync python -m data_api.checks.release --tag "$$RELEASE_TAG"
+        uv run --no-sync black --check src tests main.py
+        uv run --no-sync isort --check-only src tests main.py
+        uv run --no-sync pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85
+        uv run --no-sync python -m data_api.checks.openapi
+        uv run --no-sync python -m data_api.checks.mcp
+
+  - id: build-and-push
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env:
+      - RELEASE_IMAGE=$_IMAGE
+      - RELEASE_TAG=$TAG_NAME
+      - RELEASE_COMMIT=$COMMIT_SHA
+    args:
+      - -euc
+      - |
+        docker build -t "$$RELEASE_IMAGE:$$RELEASE_TAG" -t "$$RELEASE_IMAGE:$$RELEASE_COMMIT" .
+        docker push "$$RELEASE_IMAGE:$$RELEASE_TAG"
+        docker push "$$RELEASE_IMAGE:$$RELEASE_COMMIT"
+        docker inspect --format='{{index .RepoDigests 0}}' "$$RELEASE_IMAGE:$$RELEASE_TAG" > /workspace/image-digest.txt
+
+  - id: prepare-candidate
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+    entrypoint: python3
+    args:
+      - src/data_api/checks/cloud_run_release.py
+      - prepare
+      - --project
+      - $PROJECT_ID
+      - --region
+      - $_REGION
+      - --service
+      - $_SERVICE
+      - --lock-bucket
+      - $_LOCK_BUCKET
+      - --smoke-account
+      - $_SMOKE_ACCOUNT
+      - --build-id
+      - $BUILD_ID
+
+  - id: candidate-smoke
+    name: ghcr.io/astral-sh/uv:0.12.19-python3.14-trixie-slim@sha256:a2657d5b8da6a702204e49b2ed2467597da15fb45eb9fee00304c127dad4b1e9
+    entrypoint: sh
+    env:
+      - RELEASE_TAG=$TAG_NAME
+    # Failure is consumed by promote, which fails the build and releases the lock.
+    allowFailure: true
+    args:
+      - -euc
+      - |
+        url=$$(uv run --no-sync python -c 'import json; print(json.load(open("/workspace/release-state.json"))["candidate_url"])')
+        uv run --no-sync python -m data_api.checks.smoke --api-url "$$url" --expected-version "$${RELEASE_TAG#v}" --identity-token-file /workspace/release-token
+        touch /workspace/candidate-ok
+
+  - id: promote
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+    entrypoint: python3
+    args:
+      - src/data_api/checks/cloud_run_release.py
+      - promote
+      - --success-file
+      - /workspace/candidate-ok
+
+  - id: production-smoke
+    name: ghcr.io/astral-sh/uv:0.12.19-python3.14-trixie-slim@sha256:a2657d5b8da6a702204e49b2ed2467597da15fb45eb9fee00304c127dad4b1e9
+    entrypoint: sh
+    env:
+      - RELEASE_TAG=$TAG_NAME
+      - RELEASE_API_URL=$_API_URL
+    allowFailure: true
+    args:
+      - -euc
+      - |
+        uv run --no-sync python -m data_api.checks.smoke --api-url "$$RELEASE_API_URL" --expected-version "$${RELEASE_TAG#v}" --identity-token-file /workspace/release-token
+        touch /workspace/production-ok
+
+  - id: finalize-or-rollback
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+    entrypoint: python3
+    args:
+      - src/data_api/checks/cloud_run_release.py
+      - finalize
+      - --success-file
+      - /workspace/production-ok
