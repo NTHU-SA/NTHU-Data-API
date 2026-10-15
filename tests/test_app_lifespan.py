@@ -181,7 +181,7 @@ class TestCoursesAfterStartup:
             async with AsyncClient(
                 transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
             ) as client:
-                response = await client.get("/courses/")
+                response = await client.get("/courses")
 
         assert response.status_code == 200
         assert len(response.json()) == 1
@@ -333,7 +333,7 @@ def test_exported_app_serves_rest_and_mcp_with_middleware(monkeypatch):
     origin = "https://example.com"
 
     with TestClient(app) as client:
-        response = client.get("/courses/", headers={"Origin": origin})
+        response = client.get("/courses", headers={"Origin": origin})
         assert response.status_code == 200
         assert [course["id"] for course in response.json()] == [FAKE_COURSE["id"]]
         assert float(response.headers["X-Process-Time"]) >= 0
@@ -346,7 +346,7 @@ def test_exported_app_serves_rest_and_mcp_with_middleware(monkeypatch):
         }
         assert {"x-total-count", "x-data-commit-hash", "x-process-time"} <= exposed
 
-        for path, method in [("/courses/", "GET"), ("/mcp", "POST")]:
+        for path, method in [("/courses", "GET"), ("/mcp", "POST")]:
             response = client.options(
                 path,
                 headers={
@@ -365,7 +365,7 @@ def test_exported_app_serves_rest_and_mcp_with_middleware(monkeypatch):
 
         response = client.get("/openapi.json")
         assert response.status_code == 200
-        assert "/courses/search" in response.json()["paths"]
+        assert "/courses" in response.json()["paths"]
 
         for method, params in [
             (

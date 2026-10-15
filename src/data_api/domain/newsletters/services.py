@@ -69,18 +69,6 @@ class NewslettersService:
         ]
         return commit_hash, sources
 
-    async def get_newsletter_by_name(self, name: str) -> tuple[Optional[str], Optional[dict]]:
-        """Get newsletter by name."""
-        result = await nthudata.get(JSON_PATH)
-        if result is None:
-            raise DataNotAvailableException("Dataset temporarily unavailable")
-
-        commit_hash, newsletter_data = result
-        for newsletter in newsletter_data:
-            if newsletter["name"] == name:
-                return commit_hash, newsletter
-        return commit_hash, None
-
 
 # Global service instance
 newsletters_service = NewslettersService()

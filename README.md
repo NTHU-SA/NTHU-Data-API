@@ -38,7 +38,7 @@ curl "https://api.nthusa.tw/buses/schedule?stop=台積館&limit=5"
 ```
 
 See the [API guide](docs/api-guide.md) for query examples, MCP tool names,
-response conventions, readiness checks, and migration notes for deprecated endpoints.
+response conventions, readiness checks, and the 3.0 migration guide.
 Use Swagger UI for complete parameter and response schemas.
 
 ## Run locally
@@ -97,6 +97,10 @@ Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/),
 such as `feat: add a feature` or `fix: fix a bug`.
 Development workflow, architecture, compatibility rules, and CI maintenance
 details are in [Copilot instructions](.github/copilot-instructions.md).
+For version preparation and tag-only Cloud Build deployment, see
+[releasing](docs/releasing.md). The service maintains one live API version.
+`cloudbuild.yaml` validates release tags, builds and publishes images, then updates
+the existing Cloud Run service. Trigger filters are configured separately in GCP.
 
 ### Published data and deployment checks
 

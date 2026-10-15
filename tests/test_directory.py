@@ -78,7 +78,6 @@ async def test_directory_query(directory_data, query, indices, people):
     ) as client:
         response = await client.get("/directory", params={} if query is None else {"query": query})
         unfiltered = await client.get("/directory")
-        legacy = await client.get("/departments/")
 
     assert response.status_code == 200
     assert "location" not in response.headers
@@ -86,7 +85,9 @@ async def test_directory_query(directory_data, query, indices, people):
     assert response.json() == [
         Department.model_validate(item).model_dump(mode="json") for item in expected
     ]
-    assert unfiltered.json() == legacy.json()
+    assert unfiltered.json() == [
+        Department.model_validate(item).model_dump(mode="json") for item in original
+    ]
     assert directory_data == original
 
 
@@ -118,13 +119,13 @@ async def test_directory_sorts_by_match_score(directory_data, monkeypatch):
     assert [department["index"] for department in results] == ["computing", "admin"]
 
 
-async def test_legacy_search_keeps_separate_results(directory_data):
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.get("/departments/search", params={"query": "王小明"})
-    assert response.status_code == 200
-    assert response.headers["X-Data-Commit-Hash"] == "directory-commit"
-    assert response.json()["departments"] == []
-    assert [person["name"] for person in response.json()["people"]] == ["王小明", "王小明"]
+async def test_campus_search_keeps_separate_results(directory_data):
+    commit, result = await services.departments_service.fuzzy_search_departments_and_people(
+        "王小明"
+    )
+    assert commit == "directory-commit"
+    assert result["departments"] == []
+    assert [person["name"] for person in result["people"]] == ["王小明", "王小明"]
 
 
 async def test_directory_without_commit_hash(monkeypatch):

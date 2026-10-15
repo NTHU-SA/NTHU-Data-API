@@ -5,4 +5,6 @@ This package provides a REST API for accessing National Tsing Hua University dat
 including buses, courses, dining, announcements, and more.
 """
 
-__version__ = "1.0.0"
+from importlib.metadata import version
+
+__version__ = version("nthu-data-api")

@@ -45,11 +45,8 @@ class TestCoursesEndpoints:
         "url",
         [
             "/courses",
-            "/courses/",
             "/courses?type=microcredits",
             "/courses?type=xclass",
-            "/courses/lists/microcredits",
-            "/courses/lists/xclass",
         ],
     )
     async def test_courses_list_endpoints(self, client: AsyncClient, url: str):
@@ -57,7 +54,7 @@ class TestCoursesEndpoints:
         response = await client.get(url)
         assert response.status_code == 200
 
-    @pytest.mark.parametrize("path", ["/courses", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses"])
     @pytest.mark.parametrize(
         "field_name",
         [_.value for _ in schemas.courses.CourseFieldName],
@@ -67,20 +64,13 @@ class TestCoursesEndpoints:
         response = await client.get(path, params={field_name: "中"})
         assert response.status_code == 200
 
-    @pytest.mark.parametrize("path", ["/courses", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses"])
     async def test_invalid_language_is_still_rejected(self, client: AsyncClient, path):
         response = await client.get(path, params={"language": "invalid"})
         assert response.status_code == 422
 
-    @pytest.mark.parametrize("params", [{}, {"unknown": "ignored"}, {"teacher": ""}])
-    async def test_absent_filters_return_empty_results(self, client: AsyncClient, params):
-        response = await client.get("/courses/search", params=params)
-        assert response.status_code == 200
-        assert response.json() == []
-        assert response.headers["X-Total-Count"] == "0"
 
-
-@pytest.mark.parametrize("path", ["/courses", "/courses/search"])
+@pytest.mark.parametrize("path", ["/courses"])
 def test_course_search_query_model_keeps_flat_optional_parameters(path):
     operation = app.openapi()["paths"][path]["get"]
     assert "requestBody" not in operation
@@ -94,7 +84,7 @@ def test_course_search_query_model_keeps_flat_optional_parameters(path):
         assert not parameter["required"]
 
 
-@pytest.mark.parametrize("post_path", ["/courses/query", "/courses/search"])
+@pytest.mark.parametrize("post_path", ["/courses/query"])
 class TestCoursesSearchPost:
     """Tests for courses POST search with conditions."""
 
@@ -202,7 +192,7 @@ class TestCourseSearchValidation:
             yield client
 
     @pytest.mark.parametrize("empty_data", [False, True])
-    @pytest.mark.parametrize("path", ["/courses", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses"])
     @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
     @pytest.mark.parametrize("field", ["chinese_title", "teacher", "id"])
     async def test_get_invalid_regex(self, client, monkeypatch, empty_data, pattern, field, path):
@@ -215,7 +205,7 @@ class TestCourseSearchValidation:
         }
 
     @pytest.mark.parametrize("empty_data", [False, True])
-    @pytest.mark.parametrize("path", ["/courses/query", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses/query"])
     @pytest.mark.parametrize("nested", [False, True])
     @pytest.mark.parametrize("pattern", INVALID_REGEX_PATTERNS)
     async def test_post_invalid_regex(self, client, monkeypatch, empty_data, nested, pattern, path):
@@ -235,7 +225,7 @@ class TestCourseSearchValidation:
         )
         assert "Traceback" not in response.text
 
-    @pytest.mark.parametrize("path", ["/courses", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses"])
     async def test_get_preserves_regex_and_all_filters(self, client, path):
         response = await client.get(
             path,
@@ -254,7 +244,7 @@ class TestCourseSearchValidation:
         assert response.headers["X-Total-Count"] == "0"
 
     @pytest.mark.parametrize("matcher", ["C++ [AI]", "C++", "["])
-    @pytest.mark.parametrize("path", ["/courses/query", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses/query"])
     async def test_post_preserves_exact_matching(self, client, matcher, path):
         response = await client.post(
             path,
@@ -265,7 +255,7 @@ class TestCourseSearchValidation:
             ["CS100"] if matcher == "C++ [AI]" else []
         )
 
-    @pytest.mark.parametrize("path", ["/courses/query", "/courses/search"])
+    @pytest.mark.parametrize("path", ["/courses/query"])
     async def test_post_preserves_nested_regex(self, client, path):
         response = await client.post(
             path,
@@ -283,34 +273,6 @@ class TestCourseSearchValidation:
         assert [course["id"] for course in response.json()] == ["CS100"]
         assert response.headers["X-Total-Count"] == "1"
         assert response.headers["X-Data-Commit-Hash"] == "course-test-version"
-
-    async def test_get_without_filters_remains_empty(self, client):
-        response = await client.get("/courses/search")
-        assert response.status_code == 200
-        assert response.json() == []
-
-
-def test_course_endpoint_deprecations_and_operation_ids():
-    paths = app.openapi()["paths"]
-    operations = [
-        ("/courses", "get", "getCourses", False),
-        ("/courses/query", "post", "queryCourses", False),
-        ("/courses/", "get", "getAllCourses", True),
-        ("/courses/search", "get", "searchCoursesByFieldAndValue", True),
-        ("/courses/search", "post", "searchCoursesByCondition", True),
-        ("/courses/lists/{list_name}", "get", "listCoursesByType", True),
-    ]
-    for path, method, operation_id, deprecated in operations:
-        operation = paths[path][method]
-        assert operation["operationId"] == operation_id
-        assert operation.get("deprecated", False) is deprecated
-        if deprecated:
-            assert "已棄用" in operation["description"]
-    assert len({operation_id for _, _, operation_id, _ in operations}) == len(operations)
-    assert (
-        paths["/courses/query"]["post"]["requestBody"]
-        == paths["/courses/search"]["post"]["requestBody"]
-    )
 
 
 class TestCourseCollection:
@@ -370,21 +332,6 @@ class TestCourseCollection:
         response = await client.get("/courses", params={"type": course_type})
         assert response.status_code == 422
 
-    @pytest.mark.parametrize("course_type", ["microcredits", "xclass"])
-    async def test_legacy_list_matches_type_filter(self, client, course_type):
-        old = await client.get(f"/courses/lists/{course_type}")
-        new = await client.get("/courses", params={"type": course_type})
-        assert old.status_code == new.status_code == 200
-        assert old.json() == new.json()
-        assert old.headers["X-Total-Count"] == new.headers["X-Total-Count"]
-        assert old.headers["X-Data-Commit-Hash"] == new.headers["X-Data-Commit-Hash"]
-
-    async def test_legacy_all_courses_ignores_filters(self, client):
-        response = await client.get("/courses/", params={"teacher": "absent"})
-        assert response.status_code == 200
-        assert [course["id"] for course in response.json()] == ["A", "B", "C", "D"]
-        assert response.headers["X-Total-Count"] == "4"
-
     @pytest.mark.parametrize(
         "body,expected_ids",
         [
@@ -400,11 +347,9 @@ class TestCourseCollection:
             ({"row_field": "teacher", "matcher": "林"}, []),
         ],
     )
-    async def test_query_matches_legacy_search(self, client, body, expected_ids):
-        old = await client.post("/courses/search", json=body)
+    async def test_query_conditions(self, client, body, expected_ids):
         new = await client.post("/courses/query", json=body)
-        assert old.status_code == new.status_code == 200
+        assert new.status_code == 200
         assert [course["id"] for course in new.json()] == expected_ids
-        assert old.json() == new.json()
         assert new.headers["X-Total-Count"] == str(len(expected_ids))
         assert new.headers["X-Data-Commit-Hash"] == "course-test-version"

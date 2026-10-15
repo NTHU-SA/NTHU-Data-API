@@ -1,0 +1,85 @@
+# Configure the GCP trigger for stable vX.Y.Z tags and this repository file.
+timeout: 1800s
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _TRIGGER_ID: 3bcfdd9c-47e5-4d67-948e-1aca334f5ef2
+  _AR_HOSTNAME: asia-east1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _AR_PROJECT_ID: nthusa-data-api
+  _PLATFORM: managed
+  _SERVICE_NAME: nthu-data-api
+  REPO_NAME: nthu-data-api
+  _DEPLOY_REGION: asia-east1
+
+steps:
+  - id: validate-and-test
+    name: ghcr.io/astral-sh/uv:0.12.19-python3.14-trixie-slim@sha256:a2657d5b8da6a702204e49b2ed2467597da15fb45eb9fee00304c127dad4b1e9
+    entrypoint: sh
+    env:
+      - UV_PROJECT_ENVIRONMENT=/workspace/.venv
+      - RELEASE_TAG=$TAG_NAME
+      - RELEASE_COMMIT=$COMMIT_SHA
+    args:
+      - -eu
+      - -c
+      - |
+        : "$${RELEASE_TAG:?A stable release tag is required}"
+        : "$${RELEASE_COMMIT:?A source commit is required}"
+        uv sync --locked --all-groups
+        uv run --no-sync python -m data_api.checks.release --tag "$$RELEASE_TAG"
+        uv run --no-sync black --check src tests main.py
+        uv run --no-sync isort --check-only src tests main.py
+        uv run --no-sync pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85
+        uv run --no-sync python -m data_api.checks.openapi
+        uv run --no-sync python -m data_api.checks.mcp
+
+  - id: Build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --no-cache
+      - -t
+      - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+      - -t
+      - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$TAG_NAME
+      - .
+      - -f
+      - Dockerfile
+
+  - id: Push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+
+  - id: PushRelease
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$TAG_NAME
+
+  - id: Deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - --platform=$_PLATFORM
+      - --image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+      - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - --region=$_DEPLOY_REGION
+      - --quiet
+
+images:
+  - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+  - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$TAG_NAME
+
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - nthu-data-api

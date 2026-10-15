@@ -3,8 +3,9 @@
 import httpx
 import pytest
 
-from data_api.api.schemas.newsletters import NewsletterName
 from data_api.data.manager import nthudata
+
+NEWSLETTER_NAMES = ["NTHU-Newsletter", "教務處綜合教務組電子報"]
 
 
 @pytest.fixture(autouse=True)
@@ -77,8 +78,8 @@ async def dataset_runtime():
         "/dining.json": [],
         "/directory.json": [],
         "/newsletters.json": [
-            {"name": name.value, "link": "https://example.com", "details": {}, "articles": []}
-            for name in NewsletterName
+            {"name": name, "link": "https://example.com", "details": {}, "articles": []}
+            for name in NEWSLETTER_NAMES
         ],
         "/maps.json": {
             "main": {

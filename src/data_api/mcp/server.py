@@ -14,6 +14,7 @@ from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 
+from data_api import __version__
 from data_api.core.exceptions import DataNotAvailableException
 
 
@@ -33,6 +34,7 @@ class DatasetErrors(Middleware):
 # Create curated MCP server
 mcp = FastMCP(
     name="NTHU Campus Assistant",
+    version=__version__,
     mask_error_details=True,
     instructions="""You are an assistant for National Tsing Hua University (NTHU) in Taiwan.
 You can help with:

@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from data_api import __version__
 from data_api.api.schemas.meta import MetaResponse
 from data_api.core import config
 from data_api.core.exceptions import (
@@ -100,7 +101,7 @@ def create_app() -> FastAPI:
         lifespan=combined_lifespan,
         routes=list(mcp_app.routes),
         title="NTHU Data API",
-        version="2.0.0",
+        version=__version__,
         description="由國立清華大學校內各單位資料所組成的公共資料 API。",
     )
 
@@ -180,7 +181,6 @@ def create_app() -> FastAPI:
         buses,
         calendars,
         courses,
-        departments,
         dining,
         directory,
         energy,
@@ -195,7 +195,6 @@ def create_app() -> FastAPI:
     app.include_router(buses.router, prefix="/buses", tags=["Buses"])
     app.include_router(calendars.router, prefix="/calendars", tags=["Calendars"])
     app.include_router(courses.router, prefix="/courses", tags=["Courses"])
-    app.include_router(departments.router, prefix="/departments", tags=["Departments"])
     app.include_router(directory.router, prefix="/directory", tags=["Directory"])
     app.include_router(dining.router, prefix="/dining", tags=["Dining"])
     app.include_router(energy.router, prefix="/energy", tags=["Energy"])

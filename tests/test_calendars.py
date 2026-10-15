@@ -55,7 +55,7 @@ CALENDARS = [
     },
 ]
 PATHS = [
-    "/calendars/",
+    "/calendars",
     "/calendars/academic",
     "/calendars/academic/events",
     "/calendars/academic/events/a",
@@ -92,7 +92,7 @@ async def runtime(monkeypatch, library_publisher):
 
 async def test_calendar_metadata_and_dynamic_ids(runtime):
     client, publisher, _ = runtime
-    response = await client.get("/calendars/")
+    response = await client.get("/calendars")
     assert response.status_code == 200
     assert response.json() == [
         Calendar.model_validate(calendar).model_dump(mode="json") for calendar in CALENDARS
@@ -213,7 +213,7 @@ async def test_empty_calendar_and_empty_dataset(runtime):
     assert response.headers["X-Total-Count"] == "0"
     publisher.payload, publisher.version = [], "empty"
     clock.advance()
-    response = await client.get("/calendars/")
+    response = await client.get("/calendars")
     assert response.status_code == 200
     assert response.json() == []
     assert (
@@ -331,7 +331,7 @@ async def test_unified_list_and_all_library_branches(runtime, library_publisher)
         for branch in ["main", "hss", "nanda"]
     ]
     original = deepcopy(library_publisher.payload)
-    response = await client.get("/calendars/")
+    response = await client.get("/calendars")
     assert response.status_code == 200
     assert [calendar["id"] for calendar in response.json()] == [
         "academic",
@@ -384,7 +384,7 @@ async def test_individual_calendars_do_not_depend_on_other_dataset(
         path = "/calendars/academic"
     for suffix in ["", "/events", "/events/b"]:
         assert (await client.get(f"{path}{suffix}")).status_code == 200
-    assert (await client.get("/calendars/")).status_code == 503
+    assert (await client.get("/calendars")).status_code == 503
 
 
 async def test_library_refresh_versions_and_stale_snapshot(runtime, library_publisher):
@@ -392,11 +392,11 @@ async def test_library_refresh_versions_and_stale_snapshot(runtime, library_publ
     library_publisher.payload = [
         {"id": "main", "url": "https://example.com/calendar", "events": deepcopy(EVENTS)}
     ]
-    first = await client.get("/calendars/")
+    first = await client.get("/calendars")
     library_publisher.version = "b"
     library_publisher.payload[0]["events"][2]["title"] = "Updated library event"
     clock.advance()
-    second = await client.get("/calendars/")
+    second = await client.get("/calendars")
     assert first.headers["X-Data-Commit-Hash"] != second.headers["X-Data-Commit-Hash"]
     event = await client.get("/calendars/library-main/events/b")
     assert event.json()["title"] == "Updated library event"
@@ -404,7 +404,7 @@ async def test_library_refresh_versions_and_stale_snapshot(runtime, library_publ
     assert publisher.version == "a"
     publisher.version = "campus-b"
     clock.advance()
-    third = await client.get("/calendars/")
+    third = await client.get("/calendars")
     assert second.headers["X-Data-Commit-Hash"] != third.headers["X-Data-Commit-Hash"]
     library_publisher.version = "c"
     library_publisher.data_error = 503
@@ -461,6 +461,6 @@ async def test_invalid_library_payload_preserves_snapshot(
 async def test_unknown_library_version_omits_aggregate_header(runtime, library_publisher):
     client, _, _ = runtime
     library_publisher.version = None
-    response = await client.get("/calendars/")
+    response = await client.get("/calendars")
     assert response.status_code == 200
     assert "X-Data-Commit-Hash" not in response.headers

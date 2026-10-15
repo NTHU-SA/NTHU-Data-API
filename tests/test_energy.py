@@ -18,7 +18,7 @@ class TestEnergyEndpoints:
         ) as client:
             yield client
 
-    @pytest.mark.parametrize("path", ["/energy/electricity", "/energy/electricity_usage"])
+    @pytest.mark.parametrize("path", ["/energy/electricity"])
     async def test_get_electricity_usage(self, client: AsyncClient, mock_upstream, path):
         values = {1: 1234, 2: 0, 3: -1}
 
@@ -39,7 +39,7 @@ class TestEnergyEndpoints:
             }
             assert item["last_updated"]
 
-    @pytest.mark.parametrize("path", ["/energy/electricity", "/energy/electricity_usage"])
+    @pytest.mark.parametrize("path", ["/energy/electricity"])
     async def test_upstream_unavailable(self, client: AsyncClient, path):
         response = await client.get(path)
         assert response.status_code == 502

@@ -21,14 +21,6 @@ LIVE_CALLS = [
         id="energy-current",
     ),
     pytest.param(
-        "/energy/electricity_usage",
-        "get_energy_usage",
-        {},
-        energy_service,
-        "get_realtime_electricity_usage",
-        id="energy",
-    ),
-    pytest.param(
         "/libraries/spaces",
         "get_library_info",
         {"info_type": "space"},
@@ -37,28 +29,12 @@ LIVE_CALLS = [
         id="spaces-current",
     ),
     pytest.param(
-        "/libraries/space",
-        "get_library_info",
-        {"info_type": "space"},
-        libraries_service,
-        "get_space_availability",
-        id="space",
-    ),
-    pytest.param(
         "/libraries/lost-and-found",
         "get_library_info",
         {"info_type": "lost_and_found"},
         libraries_service,
         "get_lost_and_found_items",
         id="lost-items-current",
-    ),
-    pytest.param(
-        "/libraries/lost_and_found",
-        "get_library_info",
-        {"info_type": "lost_and_found"},
-        libraries_service,
-        "get_lost_and_found_items",
-        id="lost-items",
     ),
 ]
 CALL_PARAMETERS = "path,tool,arguments,service,method"
@@ -147,51 +123,51 @@ async def test_unexpected_live_failures_are_safe(
 @pytest.mark.parametrize(
     "path,tool,arguments,body",
     [
-        ("/energy/electricity_usage", "get_energy_usage", {}, ""),
-        ("/energy/electricity_usage", "get_energy_usage", {}, '<img alt="kW: --">'),
-        ("/libraries/space", "get_library_info", {"info_type": "space"}, "Private invalid JSON"),
-        ("/libraries/space", "get_library_info", {"info_type": "space"}, b'"\xff"'),
-        ("/libraries/space", "get_library_info", {"info_type": "space"}, "[]"),
-        ("/libraries/space", "get_library_info", {"info_type": "space"}, "null"),
-        ("/libraries/space", "get_library_info", {"info_type": "space"}, "{}"),
+        ("/energy/electricity", "get_energy_usage", {}, ""),
+        ("/energy/electricity", "get_energy_usage", {}, '<img alt="kW: --">'),
+        ("/libraries/spaces", "get_library_info", {"info_type": "space"}, "Private invalid JSON"),
+        ("/libraries/spaces", "get_library_info", {"info_type": "space"}, b'"\xff"'),
+        ("/libraries/spaces", "get_library_info", {"info_type": "space"}, "[]"),
+        ("/libraries/spaces", "get_library_info", {"info_type": "space"}, "null"),
+        ("/libraries/spaces", "get_library_info", {"info_type": "space"}, "{}"),
         (
-            "/libraries/space",
+            "/libraries/spaces",
             "get_library_info",
             {"info_type": "space"},
             json.dumps({"resmsg": "\u6210\u529f"}),
         ),
         (
-            "/libraries/space",
+            "/libraries/spaces",
             "get_library_info",
             {"info_type": "space"},
             json.dumps({"resmsg": "\u6210\u529f", "rows": None}),
         ),
         (
-            "/libraries/space",
+            "/libraries/spaces",
             "get_library_info",
             {"info_type": "space"},
             json.dumps({"resmsg": "\u6210\u529f", "rows": [{}]}),
         ),
         (
-            "/libraries/lost_and_found",
+            "/libraries/lost-and-found",
             "get_library_info",
             {"info_type": "lost_and_found"},
             "<html>Private upstream login page</html>",
         ),
         (
-            "/libraries/lost_and_found",
+            "/libraries/lost-and-found",
             "get_library_info",
             {"info_type": "lost_and_found"},
             "<table></table>",
         ),
         (
-            "/libraries/lost_and_found",
+            "/libraries/lost-and-found",
             "get_library_info",
             {"info_type": "lost_and_found"},
             "<table><tr><td>Unexpected column</td></tr></table>",
         ),
         (
-            "/libraries/lost_and_found",
+            "/libraries/lost-and-found",
             "get_library_info",
             {"info_type": "lost_and_found"},
             "<p>\u76ee\u524d\u7121\u8cc7\u6599 !!</p>",
@@ -217,7 +193,7 @@ async def test_malformed_lost_rows_are_not_skipped(
         f"<td>{invalid_row_position}</td>", "<td>incomplete</td><td>extra cell</td>"
     )
     mock_upstream(lambda request: httpx.Response(200, text=html))
-    response = await rest.get("/libraries/lost_and_found")
+    response = await rest.get("/libraries/lost-and-found")
     assert response.status_code == 502
     assert response.json() == {"detail": "Invalid response from upstream service"}
     async with Client(mcp) as client:
@@ -242,7 +218,7 @@ async def test_lost_items_reject_invalid_headers(rest, mock_upstream, headers):
     html = f"<table><tr>{header}</tr><tr>{cells}</tr></table>"
     mock_upstream(lambda request: httpx.Response(200, text=html))
 
-    response = await rest.get("/libraries/lost_and_found")
+    response = await rest.get("/libraries/lost-and-found")
     assert response.status_code == 502
     assert response.json() == {"detail": "Invalid response from upstream service"}
     async with Client(mcp) as client:
@@ -271,7 +247,7 @@ async def test_lost_items_accept_reordered_headers(rest, mock_upstream, count):
     html += "</table>"
     mock_upstream(lambda request: httpx.Response(200, text=html))
 
-    response = await rest.get("/libraries/lost_and_found")
+    response = await rest.get("/libraries/lost-and-found")
     assert response.status_code == 200
     assert response.json() == items
     async with Client(mcp) as client:
@@ -303,7 +279,7 @@ async def test_lost_items_accept_reordered_headers(rest, mock_upstream, count):
 async def test_lost_items_reject_invalid_empty_pages(rest, mock_upstream, html):
     mock_upstream(lambda request: httpx.Response(200, text=html))
 
-    response = await rest.get("/libraries/lost_and_found")
+    response = await rest.get("/libraries/lost-and-found")
     assert response.status_code == 502
     assert response.json() == {"detail": "Invalid response from upstream service"}
     async with Client(mcp) as client:
@@ -320,7 +296,7 @@ async def test_library_space_application_failure(rest, mock_upstream):
             200, json={"resmsg": "Private upstream rejection", "rows": []}
         )
     )
-    response = await rest.get("/libraries/space")
+    response = await rest.get("/libraries/spaces")
     assert response.status_code == 502
     assert response.json() == {"detail": "Upstream service unavailable"}
     async with Client(mcp) as client:

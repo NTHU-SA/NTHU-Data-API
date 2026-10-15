@@ -60,7 +60,7 @@ def test_documentation_changes_are_ignored_but_title_fields_are_not():
 
 def test_every_snapshot_operation_documents_availability_and_headers():
     schema = app.openapi()
-    live_prefixes = ("/energy/", "/libraries/space", "/libraries/lost")
+    live_prefixes = ("/energy/", "/libraries/spaces", "/libraries/lost")
     for path, methods in schema["paths"].items():
         for operation in methods.values():
             responses = operation["responses"]
@@ -93,9 +93,7 @@ def test_manual_errors_and_course_validation_have_body_schemas():
     ]
     for path, method in [
         ("/courses", "get"),
-        ("/courses/search", "get"),
         ("/courses/query", "post"),
-        ("/courses/search", "post"),
     ]:
         assert schema["paths"][path][method]["responses"]["422"]["content"]["application/json"][
             "schema"

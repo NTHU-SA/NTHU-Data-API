@@ -27,18 +27,13 @@ def test_missing_route_metadata_is_not_registered():
     [
         ("/buses/routes", "get_route_info"),
         ("/buses/stops", "gen_bus_stops_info"),
-        ("/buses/info/stops", "gen_bus_stops_info"),
         (
-            "/buses/schedules?bus_type=main&day=weekday&direction=up",
+            "/buses/schedule?route=main&day=weekday&direction=up",
             "get_schedule",
         ),
         (
             "/buses/schedule?route=main&day=weekday&direction=up&stop=台積館",
             "get_schedule",
-        ),
-        (
-            "/buses/stops/台積館?bus_type=main&day=weekday&direction=up",
-            "get_stop_schedule",
         ),
     ],
 )
@@ -113,13 +108,6 @@ class TestBusesStopMetadata:
         assert response.json() == expected
         assert response.headers["X-Data-Commit-Hash"] == buses_service.last_commit_hash
 
-    async def test_legacy_info_stops_matches_collection(self, client: AsyncClient):
-        response = await client.get("/buses/info/stops")
-        canonical = await client.get("/buses/stops")
-        assert response.status_code == canonical.status_code == 200
-        assert response.json() == canonical.json()
-        assert response.headers["X-Data-Commit-Hash"] == canonical.headers["X-Data-Commit-Hash"]
-
 
 class TestBusesSchedules:
     """Tests for bus schedules endpoints."""
@@ -132,7 +120,7 @@ class TestBusesSchedules:
         ) as client:
             yield client
 
-    @pytest.mark.parametrize("path", ["/buses/schedule", "/buses/schedules"])
+    @pytest.mark.parametrize("path", ["/buses/schedule"])
     @pytest.mark.parametrize(
         "bus_type",
         [_.value for _ in schemas.buses.BusRouteType],
@@ -149,10 +137,7 @@ class TestBusesSchedules:
         self, client: AsyncClient, bus_type: str, day: str, direction: str, path: str
     ):
         """Test getting bus schedules by type, day and direction."""
-        route_parameter = "route" if path == "/buses/schedule" else "bus_type"
-        response = await client.get(
-            f"{path}?{route_parameter}={bus_type}&day={day}&direction={direction}"
-        )
+        response = await client.get(f"{path}?route={bus_type}&day={day}&direction={direction}")
         assert response.status_code == 200
 
 
@@ -195,6 +180,13 @@ class TestBusesStops:
     ):
         """Test getting bus arrivals at a specific stop."""
         response = await client.get(
-            f"/buses/stops/{stop_name}/?bus_type={bus_type}&day={day}&direction={direction}&details={details}"
+            "/buses/schedule",
+            params={
+                "stop": stop_name,
+                "route": bus_type,
+                "day": day,
+                "direction": direction,
+                "details": details,
+            },
         )
         assert response.status_code == 200

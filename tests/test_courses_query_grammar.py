@@ -146,7 +146,7 @@ def test_schema_accepts_prevalidated_conditions_and_nested_models():
     ]
 
 
-@pytest.mark.parametrize("path", ["/courses/query", "/courses/search"])
+@pytest.mark.parametrize("path", ["/courses/query"])
 @pytest.mark.parametrize("empty_data", [False, True])
 class TestCourseQueryGrammarEndpoints:
     @pytest.fixture
@@ -190,7 +190,7 @@ class TestCourseQueryGrammarEndpoints:
             assert any("cannot exceed" in error["msg"] for error in response.json()["detail"])
 
 
-@pytest.mark.parametrize("path", ["/courses/query", "/courses/search"])
+@pytest.mark.parametrize("path", ["/courses/query"])
 def test_openapi_documents_grammar_validation(path):
     operation = app.openapi()["paths"][path]["post"]
     assert "grammar" in operation["responses"]["422"]["description"]

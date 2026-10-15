@@ -2,6 +2,7 @@
 
 import httpx
 
+from data_api import __version__
 from data_api.api.api import app
 from data_api.data.manager import nthudata
 
@@ -21,7 +22,7 @@ async def test_metadata_available_without_datasets_or_upstream(monkeypatch):
     assert response.status_code == 200
     assert response.json() == {
         "name": "NTHU Data API",
-        "version": "2.0.0",
+        "version": __version__,
         "docs": "/docs",
         "openapi": "/openapi.json",
         "mcp": "/mcp",
@@ -63,7 +64,7 @@ async def test_metadata_hidden_from_openapi_and_swagger():
         schema = await client.get("/openapi.json")
         assert schema.status_code == 200
         assert "/" not in schema.json()["paths"]
-        assert "/courses/" in schema.json()["paths"]
+        assert "/courses" in schema.json()["paths"]
         assert "MetaResponse" not in schema.json()["components"]["schemas"]
         docs = await client.get("/docs")
         assert docs.status_code == 200

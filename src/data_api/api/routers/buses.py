@@ -6,7 +6,7 @@ Delegates business logic to domain services.
 """
 
 from datetime import datetime
-from typing import Literal, Union
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query, Response
 
@@ -15,9 +15,6 @@ from data_api.api.schemas import buses as schemas
 from data_api.api.schemas.errors import ErrorResponse
 from data_api.api.schemas.responses import SNAPSHOT_RESPONSES
 from data_api.domain.buses import services
-
-# Constants
-DEFAULT_LIMIT_DAY_CURRENT = 5
 
 router = APIRouter(responses=SNAPSHOT_RESPONSES)
 
@@ -46,8 +43,6 @@ def _query_bus_schedule(
     details: bool,
     stop: schemas.BusStopsName | None,
     query: schemas.BusQuery,
-    *,
-    use_stop_arrival_time: bool = True,
 ):
     find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
     with service_errors():
@@ -59,7 +54,6 @@ def _query_bus_schedule(
             stop=stop,
             after_time=after_time or "",
             limit=query.limit,
-            use_stop_arrival_time=use_stop_arrival_time,
         )
 
 
@@ -90,48 +84,10 @@ async def get_bus_route_metadata(
     operation_id="getBusStops",
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus stops"}},
 )
-@router.get(
-    "/info/stops",
-    response_model=list[schemas.BusStopsInfo],
-    dependencies=[Depends(add_custom_header)],
-    operation_id="getBusStopsInformation",
-    deprecated=True,
-    description="已棄用，將於下一個 major 版本移除。請改用 GET /buses/stops，回應格式不變。",
-    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus stops"}},
-)
 async def get_bus_stops_information():
     """取得所有公車站牌的經緯度與資訊。"""
     with service_errors():
         return services.buses_service.gen_bus_stops_info()
-
-
-@router.get(
-    "/schedules",
-    response_model=list[Union[schemas.BusDetailedSchedule, schemas.BusSchedule, None]],
-    dependencies=[Depends(add_custom_header)],
-    operation_id="getBusSchedules",
-    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
-    response_description="取得公車時刻表信息。",
-    deprecated=True,
-    description=(
-        "已棄用，將於下一個 major 版本移除。請改用 GET /buses/schedule，並將 bus_type 改為 route。"
-        "新版預設 route=all、day=current、direction=all，亦支援 stop 篩選。"
-    ),
-)
-async def get_bus_schedules(
-    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
-    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
-    direction: schemas.BusDirection = Query(..., description="上山或下山"),
-    details: bool = Query(False, description="是否包含詳細站點時間資訊"),
-    stop: schemas.BusStopsName | None = Query(
-        None, description="僅回傳停靠此站的班次；不影響回應格式，時間仍以發車時間篩選"
-    ),
-    query: schemas.BusQuery = Depends(),
-):
-    """取得指定條件的公車時刻表，保留舊版必填參數與回應格式。"""
-    return _query_bus_schedule(
-        bus_type, day, direction, details, stop, query, use_stop_arrival_time=False
-    )
 
 
 @router.get(
@@ -162,33 +118,3 @@ async def get_bus_schedule(
     - **stop**: 以指定站牌的預估到站時間篩選，包含已發車但尚未到站的班次；未指定時以發車時間篩選。
     """
     return _query_bus_schedule(route, day, direction, details, stop, query)
-
-
-@router.get(
-    "/stops/{stop_name}",
-    response_model=list[schemas.BusStopsQueryResult | None],
-    dependencies=[Depends(add_custom_header)],
-    operation_id="getStopBusInformationByStop",
-    deprecated=True,
-    description=(
-        "已棄用，將於下一個 major 版本移除。請改用 GET /buses/schedule?stop={stop_name}&details=true。"
-        "新 API 回傳時刻表格式，並以指定站牌的預估到站時間篩選；此舊 API 保留到站資訊與到站時間篩選。"
-    ),
-    responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
-)
-async def get_stop_bus_information_by_stop(
-    stop_name: schemas.BusStopsName,
-    bus_type: schemas.BusRouteType = Query(..., description="車種選擇"),
-    day: schemas.BusDayWithCurrent = Query(..., description="平日、假日或目前時刻"),
-    direction: schemas.BusDirection = Query(..., description="上山或下山"),
-    query: schemas.BusQuery = Depends(),
-):
-    """取得指定公車站牌的資訊和即將停靠公車。"""
-    find_day, after_time = (day, query.time) if day != "current" else get_current_time_state()
-
-    with service_errors():
-        raw_data = services.buses_service.get_stop_schedule(
-            stop_name, bus_type, find_day, direction
-        )
-        res = services.after_specific_time(raw_data, after_time or "", ["arrive_time"])
-        return res[: query.limit]

@@ -25,14 +25,14 @@ async def test_rest_and_mcp_observe_runtime_course_refresh(monkeypatch):
             ) as rest,
             Client(mcp) as tools,
         ):
-            first = await rest.get("/courses/")
+            first = await rest.get("/courses")
             assert first.json()[0]["id"] == "A"
             assert first.headers["X-Data-Commit-Hash"] == "a"
             publisher.version, publisher.payload = "b", [
                 {"id": "B", "english_title": "Version B", "language": "中"}
             ]
             clock.advance()
-            second = await rest.get("/courses/search?english_title=Version")
+            second = await rest.get("/courses?english_title=Version")
             assert second.json()[0]["id"] == "B"
             assert second.headers["X-Data-Commit-Hash"] == "b"
             result = await tools.call_tool("search_courses", {})
@@ -45,10 +45,10 @@ async def test_rest_and_mcp_observe_runtime_course_refresh(monkeypatch):
             clock.advance()
             result = await tools.call_tool("search_courses", {})
             assert result.data["courses"][0]["id"] == "C"
-            assert (await rest.get("/courses/")).json()[0]["id"] == "C"
+            assert (await rest.get("/courses")).json()[0]["id"] == "C"
             publisher.version, publisher.data_error = "d", 503
             clock.advance()
-            fallback = await rest.get("/courses/")
+            fallback = await rest.get("/courses")
             assert fallback.status_code == 200
             assert fallback.json()[0]["id"] == "C"
             assert fallback.headers["X-Data-Commit-Hash"] == "c"
@@ -67,7 +67,7 @@ async def test_cold_start_empty_is_not_unavailable(empty):
             ) as rest,
             Client(mcp) as tools,
         ):
-            response = await rest.get("/courses/")
+            response = await rest.get("/courses")
             result = await tools.call_tool("search_courses", {}, raise_on_error=False)
             if empty:
                 assert response.status_code == 200
@@ -86,36 +86,35 @@ async def test_cold_start_empty_is_not_unavailable(empty):
 @pytest.mark.parametrize(
     "endpoint,path,payload,tool,args",
     [
-        ("dining.json", "/dining/", [], "find_dining", {}),
+        ("dining.json", "/dining", [], "find_dining", {}),
         (
             "dining.json",
-            "/dining/?schedule=today",
+            "/dining?schedule=today",
             [],
             "find_dining",
             {"check_open": "today"},
         ),
         (
             "dining.json",
-            "/dining/?schedule=today&fuzzy=false",
+            "/dining?schedule=today&fuzzy=false",
             [],
             "find_dining",
             {"check_open": "today"},
         ),
-        ("announcements.json", "/announcements/", [], "get_announcements", {}),
-        ("newsletters.json", "/newsletters/", [], "get_newsletters", {}),
+        ("announcements.json", "/announcements", [], "get_announcements", {}),
+        ("newsletters.json", "/newsletters", [], "get_newsletters", {}),
         ("buses.json", "/buses/routes", {}, "get_bus_schedule", {}),
         ("buses.json", "/buses/stops", {}, "get_bus_schedule", {}),
-        ("buses.json", "/buses/info/stops", {}, "get_bus_schedule", {}),
         (
             "buses.json",
-            "/buses/schedules?bus_type=main&day=weekday&direction=up",
+            "/buses/schedule?route=main&day=weekday&direction=up",
             {},
             "get_bus_schedule",
             {},
         ),
         (
             "buses.json",
-            "/buses/stops/北校門口?bus_type=main&day=weekday&direction=up",
+            "/buses/schedule?stop=北校門口&route=main&day=weekday&direction=up&details=true",
             {},
             "get_bus_schedule",
             {},
@@ -180,7 +179,7 @@ async def test_real_data_lifespan_client_cleanup(monkeypatch, upstream_available
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=api_module.app), base_url="http://test"
         ) as rest:
-            assert (await rest.get("/courses/")).status_code == (200 if upstream_available else 503)
+            assert (await rest.get("/courses")).status_code == (200 if upstream_available else 503)
     assert client.is_closed
     assert nthudata.fetcher.client is None
     assert not courses_service.state.usable

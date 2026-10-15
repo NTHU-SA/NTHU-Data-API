@@ -92,7 +92,7 @@ class TestDiningEndpoints:
     async def test_get_open_restaurants(self, client: AsyncClient, schedule: str):
         """Test getting open restaurants by schedule."""
         params = {"schedule": schedule}
-        response = await client.get("/dining/", params=params)
+        response = await client.get("/dining", params=params)
         assert response.status_code == 200
 
     @pytest.mark.parametrize("schedule", [None, "today", "weekday", "saturday", "sunday"])
@@ -109,7 +109,7 @@ class TestDiningEndpoints:
             params["building_name"] = "水木生活中心"
         if name_filter:
             params["restaurant_name"] = "Sushi"
-        response = await client.get("/dining/", params=params)
+        response = await client.get("/dining", params=params)
         assert response.status_code == 200
         day = "saturday" if schedule == "today" else schedule
         # Preserve the existing heuristic: Sunday's single-character "日" also matches "平日".
@@ -145,7 +145,7 @@ class TestDiningEndpoints:
     )
     async def test_no_schedule_matches(self, client, dining_candidates, fuzzy, filters):
         response = await client.get(
-            "/dining/", params={**filters, "schedule": "saturday", "fuzzy": fuzzy}
+            "/dining", params={**filters, "schedule": "saturday", "fuzzy": fuzzy}
         )
         assert response.status_code == 200
         assert response.json() == []
@@ -163,7 +163,7 @@ class TestDiningEndpoints:
             return "testhash", data
 
         monkeypatch.setattr(nthudata, "get", fake_get)
-        response = await client.get("/dining/", params={"schedule": "saturday", "fuzzy": fuzzy})
+        response = await client.get("/dining", params={"schedule": "saturday", "fuzzy": fuzzy})
         assert response.status_code == 200
         assert response.json() == []
         assert data == original
@@ -171,7 +171,7 @@ class TestDiningEndpoints:
     @pytest.mark.parametrize("fuzzy", [True, False])
     async def test_schedule_respects_search_mode(self, client, dining_candidates, fuzzy):
         response = await client.get(
-            "/dining/",
+            "/dining",
             params={"schedule": "saturday", "restaurant_name": "Susi", "fuzzy": fuzzy},
         )
         assert response.status_code == 200
@@ -180,7 +180,7 @@ class TestDiningEndpoints:
 
     @pytest.mark.parametrize("schedule", ["", "monday", "now"])
     async def test_invalid_schedule(self, client, dining_candidates, schedule):
-        response = await client.get("/dining/", params={"schedule": schedule})
+        response = await client.get("/dining", params={"schedule": schedule})
         assert response.status_code == 422
         assert dining_candidates[1] == []
 
@@ -193,7 +193,7 @@ class TestDiningEndpoints:
             return None, data
 
         monkeypatch.setattr(nthudata, "get", fake_get)
-        response = await client.get("/dining/", params={"schedule": "saturday", "fuzzy": fuzzy})
+        response = await client.get("/dining", params={"schedule": "saturday", "fuzzy": fuzzy})
         assert response.status_code == 200
         assert response.json()
         assert "X-Data-Commit-Hash" not in response.headers

@@ -177,7 +177,7 @@ class TestLibraryCalendars:
     """Tests for the calendar endpoints."""
 
     async def test_list_calendars_without_events(self, client: AsyncClient, fake_data):
-        response = await client.get("/calendars/")
+        response = await client.get("/calendars")
         assert response.status_code == 200
         data = response.json()
         assert [c["id"] for c in data] == ["library-main", "library-hss"]
@@ -251,7 +251,7 @@ class TestLibraryCalendars:
     @pytest.mark.parametrize(
         "url",
         [
-            "/calendars/",
+            "/calendars",
             "/calendars/library-main",
             "/calendars/library-main/events",
             "/calendars/library-main/events/a1",
@@ -283,9 +283,7 @@ class TestLibrariesLiveEndpoints:
         "url",
         [
             "/libraries/spaces",
-            "/libraries/space",
             "/libraries/lost-and-found",
-            "/libraries/lost_and_found",
         ],
     )
     async def test_libraries_endpoints(self, client: AsyncClient, url: str):
@@ -294,7 +292,7 @@ class TestLibrariesLiveEndpoints:
         assert response.json() == {"detail": "Upstream service unavailable"}
 
     @pytest.mark.parametrize("empty", [False, True])
-    @pytest.mark.parametrize("path", ["/libraries/spaces", "/libraries/space"])
+    @pytest.mark.parametrize("path", ["/libraries/spaces"])
     async def test_library_space(
         self, client: AsyncClient, mock_upstream, library_space_payload, empty, path
     ):
@@ -317,7 +315,7 @@ class TestLibrariesLiveEndpoints:
             ]
         )
 
-    @pytest.mark.parametrize("path", ["/libraries/lost-and-found", "/libraries/lost_and_found"])
+    @pytest.mark.parametrize("path", ["/libraries/lost-and-found"])
     async def test_lost_items(self, client: AsyncClient, mock_upstream, lost_items_html, path):
         def handler(request):
             assert request.method == "POST"
@@ -337,7 +335,7 @@ class TestLibrariesLiveEndpoints:
         ]
 
     @pytest.mark.parametrize("empty_page", ["table", "message"])
-    @pytest.mark.parametrize("path", ["/libraries/lost-and-found", "/libraries/lost_and_found"])
+    @pytest.mark.parametrize("path", ["/libraries/lost-and-found"])
     async def test_lost_items_empty(
         self,
         client: AsyncClient,

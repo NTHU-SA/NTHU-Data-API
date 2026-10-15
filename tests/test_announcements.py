@@ -81,7 +81,7 @@ class TestAnnouncementsEndpoints:
 
     async def test_get_all_announcements(self, client: AsyncClient):
         """Test getting all announcements."""
-        response = await client.get("/announcements/")
+        response = await client.get("/announcements")
         assert response.status_code == 200
 
     @pytest.mark.parametrize(
@@ -94,7 +94,7 @@ class TestAnnouncementsEndpoints:
         response = await client.get("/announcements", params=params)
         assert response.status_code == 200
 
-    @pytest.mark.parametrize("path", ["/announcements", "/announcements/"])
+    @pytest.mark.parametrize("path", ["/announcements"])
     @pytest.mark.parametrize("fuzzy", [False, True])
     @pytest.mark.parametrize(
         "url, indices",
@@ -186,35 +186,6 @@ class TestAnnouncementsEndpoints:
         assert response.json() == expected
         assert response.headers["X-Data-Commit-Hash"] == "test-commit"
 
-    @pytest.mark.parametrize(
-        "sources, expected",
-        [
-            ([], []),
-            (
-                [
-                    {"department": "Beta"},
-                    {"department": "Alpha"},
-                    {"department": "Beta"},
-                ],
-                ["Alpha", "Beta"],
-            ),
-        ],
-    )
-    async def test_deprecated_departments_endpoint(
-        self, client: AsyncClient, monkeypatch, sources, expected
-    ):
-        """The deprecated endpoint preserves its sorted, unique response."""
-
-        async def get_sources(endpoint):
-            assert endpoint == "announcements_list.json"
-            return "test-commit", sources
-
-        monkeypatch.setattr(nthudata, "get", get_sources)
-        response = await client.get("/announcements/lists/departments")
-        assert response.status_code == 200
-        assert response.json() == expected
-        assert response.headers["X-Data-Commit-Hash"] == "test-commit"
-
 
 def test_announcements_openapi_contract():
     schema = app.openapi()
@@ -222,29 +193,18 @@ def test_announcements_openapi_contract():
     announcement_paths = {path for path in paths if path.startswith("/announcements")}
     assert announcement_paths == {
         "/announcements",
-        "/announcements/",
         "/announcements/sources",
-        "/announcements/lists/departments",
     }
     assert paths["/announcements"]["get"]["operationId"] == "getAnnouncements"
     assert paths["/announcements/sources"]["get"]["operationId"] == "getAnnouncementsList"
     assert not paths["/announcements"]["get"].get("deprecated", False)
-    assert paths["/announcements/"]["get"]["deprecated"] is True
     assert not paths["/announcements/sources"]["get"].get("deprecated", False)
-    legacy = paths["/announcements/lists/departments"]["get"]
-    assert legacy["operationId"] == "listAnnouncementDepartments"
-    assert legacy["deprecated"] is True
-    assert "/announcements/sources" in legacy["description"]
     parameters = {
         parameter["name"]: parameter for parameter in paths["/announcements"]["get"]["parameters"]
     }
     assert {"department", "title", "language", "fuzzy", "url"} <= parameters.keys()
     assert parameters["url"]["required"] is False
     assert parameters["url"]["schema"]["type"] == "string"
-    legacy_parameters = {
-        parameter["name"] for parameter in paths["/announcements/"]["get"]["parameters"]
-    }
-    assert "url" in legacy_parameters
     description = parameters["department"]["description"]
     assert "/announcements/sources" in description
     assert "/announcements/lists/departments" not in description

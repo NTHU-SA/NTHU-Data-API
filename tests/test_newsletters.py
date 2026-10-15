@@ -4,6 +4,7 @@ from copy import deepcopy
 from itertools import product
 
 import pytest
+from conftest import NEWSLETTER_NAMES
 from httpx import ASGITransport, AsyncClient
 
 from data_api.api import schemas
@@ -27,40 +28,17 @@ class TestNewslettersEndpoints:
 
     async def test_get_all_newsletters(self, client: AsyncClient):
         """Test getting all newsletters."""
-        response = await client.get("/newsletters/")
+        response = await client.get("/newsletters")
         assert response.status_code == 200
-        assert len(response.json()) == len(schemas.newsletters.NewsletterName)
+        assert [source["name"] for source in response.json()] == NEWSLETTER_NAMES
         assert response.headers["X-Data-Commit-Hash"] == "fixture"
 
     async def test_get_sources(self, client: AsyncClient):
         response = await client.get("/newsletters/sources")
         assert response.status_code == 200
-        assert len(response.json()) == len(schemas.newsletters.NewsletterName)
+        assert [source["name"] for source in response.json()] == NEWSLETTER_NAMES
         assert all(set(source) == {"name", "link", "details"} for source in response.json())
         assert response.headers["X-Data-Commit-Hash"] == "fixture"
-
-    @pytest.mark.parametrize(
-        "newsletter_name",
-        [_.value for _ in schemas.newsletters.NewsletterName],
-    )
-    async def test_get_newsletter_by_name(self, client: AsyncClient, newsletter_name: str):
-        """Test getting newsletter by name."""
-        response = await client.get(f"/newsletters/{newsletter_name}")
-        assert response.status_code == 200
-        replacement = await client.get(
-            "/newsletters/", params={"name": newsletter_name, "fuzzy": False}
-        )
-        assert replacement.json() == [response.json()]
-
-    async def test_legacy_missing_name(self, client: AsyncClient, monkeypatch):
-        async def empty_dataset(endpoint):
-            return "empty", []
-
-        monkeypatch.setattr(nthudata, "get", empty_dataset)
-        name = schemas.newsletters.NewsletterName.NTHU_Newsletter.value
-        response = await client.get(f"/newsletters/{name}")
-        assert response.status_code == 404
-        assert response.json() == {"detail": "電子報名稱不存在"}
 
 
 @pytest.fixture
@@ -112,7 +90,7 @@ async def test_combined_filters_preserve_cached_data(
             params["name"] = name
         if title:
             params["title"] = title
-        response = await client.get("/newsletters/", params=params)
+        response = await client.get("/newsletters", params=params)
     assert response.status_code == 200
     expected = deepcopy(original)
     if name_filter:
@@ -145,12 +123,12 @@ async def test_combined_filters_preserve_cached_data(
 @pytest.mark.parametrize(
     "path,params,expected_names",
     [
-        ("/newsletters/", {"name": "Alpha Newsletter", "fuzzy": False}, ["Alpha Newsletter"]),
-        ("/newsletters/", {"name": "Alpha", "fuzzy": False}, []),
-        ("/newsletters/", {"title": "notice", "fuzzy": False}, []),
-        ("/newsletters/", {"name": "Missing"}, []),
-        ("/newsletters/", {"title": "Missing"}, []),
-        ("/newsletters/", {"name": "", "title": ""}, ["Alpha Newsletter", "ZZZZZZ", "Alpha Empty"]),
+        ("/newsletters", {"name": "Alpha Newsletter", "fuzzy": False}, ["Alpha Newsletter"]),
+        ("/newsletters", {"name": "Alpha", "fuzzy": False}, []),
+        ("/newsletters", {"title": "notice", "fuzzy": False}, []),
+        ("/newsletters", {"name": "Missing"}, []),
+        ("/newsletters", {"title": "Missing"}, []),
+        ("/newsletters", {"name": "", "title": ""}, ["Alpha Newsletter", "ZZZZZZ", "Alpha Empty"]),
         ("/newsletters/sources", {"name": "Alpha Newsletter"}, ["Alpha Newsletter"]),
         ("/newsletters/sources", {"name": "Alpha"}, []),
     ],
@@ -172,7 +150,7 @@ async def test_fuzzy_threshold(newsletter_data, monkeypatch, score, matched, fie
     assert bool(result) is matched
 
 
-@pytest.mark.parametrize("path", ["/newsletters/", "/newsletters/sources"])
+@pytest.mark.parametrize("path", ["/newsletters", "/newsletters/sources"])
 @pytest.mark.parametrize("dataset", [None, ("empty", []), (None, [])])
 async def test_empty_and_unavailable_dataset(monkeypatch, path, dataset):
     async def get_dataset(endpoint):
@@ -189,9 +167,6 @@ async def test_empty_and_unavailable_dataset(monkeypatch, path, dataset):
 
 def test_openapi_newsletter_contract():
     paths = app.openapi()["paths"]
-    legacy = paths["/newsletters/{newsletter_name}"]["get"]
-    assert legacy["deprecated"] is True
-    assert legacy["operationId"] == "getNewsletterByName"
     query = paths["/newsletters"]["get"]
     assert query["operationId"] == "getAllNewsletters"
     parameters = {parameter["name"]: parameter for parameter in query["parameters"]}
