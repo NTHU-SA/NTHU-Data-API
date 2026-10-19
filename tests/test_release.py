@@ -20,7 +20,7 @@ def test_installed_version_has_one_source():
     assert mcp.version == __version__
 
 
-@pytest.mark.parametrize("value", ["3", "3.0", "v3.0.0", "03.0.0", "3.0.0rc1", "3.0.0\n"])
+@pytest.mark.parametrize("value", ["3", "3.0", "v3.0.0", "03.0.0", "3.0.0rc1", "3.0.0\n", "3.０.0"])
 def test_nonstable_versions_rejected(value):
     with pytest.raises(ValueError, match="stable"):
         release.version_tuple(value)

@@ -8,7 +8,7 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-VERSION_PATTERN = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)")
+VERSION_PATTERN = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)", re.ASCII)
 OPENAPI_CONTRACT = "openapi_contract.json"
 MCP_CONTRACT = "mcp_contract.json"
 CONTRACTS = (OPENAPI_CONTRACT, MCP_CONTRACT)
