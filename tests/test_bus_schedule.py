@@ -91,29 +91,34 @@ def test_stop_filters_actual_route_membership(
         route_type=route, day=day, direction=direction, detailed=True
     )
     expected = [
-        bus for bus in full if any(arrival["stop"] == stop.value for arrival in bus["stops_time"])
+        {
+            **(bus if detailed else bus["dep_info"]),
+            "arrive_time": next(
+                arrival["arrive_time"]
+                for arrival in bus["stops_time"]
+                if arrival["stop"] == stop.value
+            ),
+        }
+        for bus in full
+        if any(arrival["stop"] == stop.value for arrival in bus["stops_time"])
     ]
     result = populated_buses.get_schedule(
         route_type=route, day=day, direction=direction, detailed=detailed, stop=stop
     )
-    assert result == (expected if detailed else [bus["dep_info"] for bus in expected])
-    upcoming = [
-        bus
-        for bus in expected
-        if any(
-            arrival["stop"] == stop.value and arrival["arrive_time"] >= "08:05"
-            for arrival in bus["stops_time"]
+    assert result == expected
+    upcoming = [bus for bus in expected if bus["arrive_time"] >= "08:05"]
+    assert (
+        populated_buses.query_schedule(
+            route_type=route,
+            day=day,
+            direction=direction,
+            detailed=detailed,
+            stop=stop,
+            after_time="08:05",
+            limit=1,
         )
-    ]
-    assert populated_buses.query_schedule(
-        route_type=route,
-        day=day,
-        direction=direction,
-        detailed=detailed,
-        stop=stop,
-        after_time="08:05",
-        limit=1,
-    ) == (upcoming[:1] if detailed else [bus["dep_info"] for bus in upcoming[:1]])
+        == upcoming[:1]
+    )
     assert (
         populated_buses.get_schedule(route_type=route, day=day, direction=direction, detailed=True)
         == full
@@ -128,7 +133,9 @@ async def get_schedule(client, path="/buses/schedule", **params):
 
 def canonical_schedules(schedules, details):
     model = BusCanonicalDetailedSchedule if details else BusCanonicalSchedule
-    return [model.model_validate(bus).model_dump(mode="json") for bus in schedules]
+    return [
+        model.model_validate(bus).model_dump(mode="json", exclude_none=True) for bus in schedules
+    ]
 
 
 @pytest.mark.parametrize("route", [None, "main", "nanda"])
@@ -200,12 +207,15 @@ async def test_rest_filters_before_limit_and_preserves_shape(populated_buses, de
     entry = filtered.json()[0]
     departure = entry["dep_info"] if details else entry
     assert departure["time"] == "08:10"
-    assert set(entry) == set(unfiltered.json()[0])
-    assert "arrive_time" not in entry
+    assert "arrive_time" not in unfiltered.json()[0]
+    assert set(entry) == {*unfiltered.json()[0], "arrive_time"}
+    assert entry["arrive_time"] == "08:12"
+    if details:
+        assert "arrive_time" not in entry["dep_info"]
     assert filtered.headers["X-Data-Commit-Hash"] == "bus-fixture"
     if details:
         assert entry == BusCanonicalDetailedSchedule.model_validate(expected[0]).model_dump(
-            mode="json"
+            mode="json", exclude_none=True
         )
 
 
@@ -327,6 +337,9 @@ async def test_mcp_stop_time_limit_and_metadata(populated_buses, details):
         )
     data = result.data
     assert len(data["buses"]) == 1
+    assert data["buses"][0]["arrive_time"] == "08:12"
+    if details:
+        assert "arrive_time" not in data["buses"][0]["dep_info"]
     departure = data["buses"][0]["dep_info"] if details else data["buses"][0]
     assert departure["time"] == "08:10"
     assert departure["line"] == "main_green"
@@ -532,7 +545,7 @@ async def test_published_nanda_line_rest_and_mcp(populated_buses, monkeypatch, d
         "line": "nanda_route_2",
         "bus_type": "large-sized_bus",
     }
-    assert education.json() == response.json()
+    assert education.json() == [{**response.json()[0], "arrive_time": "11:37"}]
     assert tsmc.json() == []
     down_departure = down.json()[0]["dep_info"] if details else down.json()[0]
     assert down_departure["line"] == "nanda_route_1"

@@ -427,12 +427,14 @@ class PreparedBusData:
     ) -> list[dict]:
         if stop is not None:
             schedules = self.detailed_schedule_data.get((route_type, day, direction), [])
-            matching = [
-                entry
-                for entry in schedules
-                if any(arrival["stop"] == stop.value for arrival in entry["stops_time"])
-            ]
-            return matching if detailed else [entry["dep_info"] for entry in matching]
+            matching = []
+            for entry in schedules:
+                for arrival in entry["stops_time"]:
+                    if arrival["stop"] == stop.value:
+                        item = entry if detailed else entry["dep_info"]
+                        matching.append({**item, "arrive_time": arrival["arrive_time"]})
+                        break
+            return matching
         store = self.detailed_schedule_data if detailed else self.raw_schedule_data
         return store.get((route_type, day, direction), [])
 
@@ -448,23 +450,11 @@ class PreparedBusData:
         limit: int | None = 5,
     ) -> list[dict]:
         """Filter by the selected stop's arrival time, or departure time without a stop."""
-        if stop is not None:
-            schedules = self.get_schedule(
-                route_type=route_type, day=day, direction=direction, detailed=True, stop=stop
-            )
-            arrivals = [
-                {"schedule": entry, "arrive_time": arrival["arrive_time"]}
-                for entry in schedules
-                for arrival in entry["stops_time"]
-                if arrival["stop"] == stop.value
-            ]
-            matching = after_specific_time(arrivals, after_time, ["arrive_time"])[:limit]
-            return [
-                item["schedule"] if detailed else item["schedule"]["dep_info"] for item in matching
-            ]
         schedules = self.get_schedule(
             route_type=route_type, day=day, direction=direction, detailed=detailed, stop=stop
         )
+        if stop is not None:
+            return after_specific_time(schedules, after_time, ["arrive_time"])[:limit]
         time_path = ["dep_info", "time"] if detailed else ["time"]
         return after_specific_time(schedules, after_time, time_path)[:limit]
 

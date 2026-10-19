@@ -97,6 +97,7 @@ async def get_bus_stops_information():
 @router.get(
     "/schedule",
     response_model=list[schemas.BusCanonicalDetailedSchedule | schemas.BusCanonicalSchedule],
+    response_model_exclude_none=True,
     dependencies=[Depends(add_custom_header)],
     operation_id="getBusSchedule",
     responses={500: {"model": ErrorResponse, "description": "Unable to retrieve bus schedules"}},
@@ -110,7 +111,11 @@ async def get_bus_schedule(
     direction: schemas.BusDirection = Query(schemas.BusDirection.all, description="上山或下山"),
     details: bool = Query(False, description="是否包含詳細站點時間資訊"),
     stop: schemas.BusStopsName | None = Query(
-        None, description="僅回傳停靠此站的班次；以此站預估到站時間篩選，包含已發車但尚未到站的班次"
+        None,
+        description=(
+            "僅回傳停靠此站的班次並於最外層附帶此站的 arrive_time（未指定時省略）；"
+            "以此站預估到站時間篩選，包含已發車但尚未到站的班次"
+        ),
     ),
     query: schemas.BusQuery = Depends(),
 ):
@@ -119,6 +124,6 @@ async def get_bus_schedule(
     - 不指定條件時，回傳現在開始的全部路線與方向班次，預設最多 5 筆。
     - **details=False**: 回傳簡易時刻表（僅發車時間）。
     - **details=True**: 回傳詳細時刻表（包含每站預估到達時間）。
-    - **stop**: 以指定站牌的預估到站時間篩選，包含已發車但尚未到站的班次；未指定時以發車時間篩選。
+    - **stop**: 以指定站牌的預估到站時間篩選（包含已發車但尚未到站的班次），並在每筆班次最外層回傳該站預估到達時間 `arrive_time`；未指定 `stop` 時省略 `arrive_time` 並以發車時間篩選。
     """
     return _query_bus_schedule(route, day, direction, details, stop, query)
