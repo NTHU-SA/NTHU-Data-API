@@ -33,6 +33,11 @@ class LibraryPayload(BaseModel):
     name: str
 
 
+LIBRARIES_RSS_ENDPOINT = "/libraries/rss.json"
+LIBRARIES_CALENDARS_ENDPOINT = "/libraries/calendars.json"
+CALENDARS_ENDPOINT = "/calendars.json"
+
+
 @lru_cache
 def _adapters() -> dict[str, TypeAdapter]:
     return {
@@ -43,9 +48,9 @@ def _adapters() -> dict[str, TypeAdapter]:
         "/newsletters.json": TypeAdapter(list[NewsletterInfo]),
         "/maps.json": TypeAdapter(dict[str, dict[str, Coordinates]]),
         "/libraries.json": TypeAdapter(list[LibraryPayload]),
-        "/libraries/rss.json": TypeAdapter(dict[str, list[LibraryRssItem]]),
-        "/libraries/calendars.json": TypeAdapter(list[LibraryCalendarPayload]),
-        "/calendars.json": TypeAdapter(list[CalendarPayload]),
+        LIBRARIES_RSS_ENDPOINT: TypeAdapter(dict[str, list[LibraryRssItem]]),
+        LIBRARIES_CALENDARS_ENDPOINT: TypeAdapter(list[LibraryCalendarPayload]),
+        CALENDARS_ENDPOINT: TypeAdapter(list[CalendarPayload]),
     }
 
 
@@ -62,35 +67,46 @@ def _validate_calendar_events(
                 raise FetchFailure("validation") from exc
 
 
+def _normalize_library_rss(
+    raw: dict[str, list[dict]], parsed: dict[str, list[LibraryRssItem]]
+) -> dict[str, list[dict]]:
+    normalized = {}
+    for feed, items in raw.items():
+        normalized[feed] = []
+        for item, model in zip(items, parsed[feed], strict=True):
+            result = dict(item)
+            if model.image is not None:
+                result["image"] = {
+                    **item["image"],
+                    "url": str(model.image.url) if model.image.url is not None else None,
+                    "link": str(model.image.link) if model.image.link is not None else None,
+                }
+            normalized[feed].append(result)
+    return normalized
+
+
+def _validate_calendars(endpoint: str, parsed: Sequence[CalendarPayload]) -> None:
+    ids = [calendar.id for calendar in parsed]
+    has_reserved_prefix = endpoint == CALENDARS_ENDPOINT and any(
+        calendar_id.startswith("library-") for calendar_id in ids
+    )
+    if len(ids) != len(set(ids)) or has_reserved_prefix:
+        raise FetchFailure("validation")
+    _validate_calendar_events(parsed)
+
+
 def validate_dataset(endpoint: str, raw: JsonData) -> JsonData:
     adapter = _adapters().get(endpoint)
-    if adapter is not None:
-        expected_type = dict if endpoint in {"/maps.json", "/libraries/rss.json"} else list
-        if not isinstance(raw, expected_type):
-            raise FetchFailure("payload_type")
-        # JSON strict mode accepts enum/URL strings without coercing booleans or numbers.
-        parsed = adapter.validate_json(json.dumps(raw), strict=True)
-        if endpoint == "/libraries/rss.json":
-            normalized = {}
-            for feed, items in raw.items():
-                normalized[feed] = []
-                for item, model in zip(items, parsed[feed], strict=True):
-                    result = dict(item)
-                    if model.image is not None:
-                        result["image"] = {
-                            **item["image"],
-                            "url": str(model.image.url) if model.image.url is not None else None,
-                            "link": str(model.image.link) if model.image.link is not None else None,
-                        }
-                    normalized[feed].append(result)
-            return normalized
-        if endpoint in {"/libraries/calendars.json", "/calendars.json"}:
-            ids = [calendar.id for calendar in parsed]
-            if len(ids) != len(set(ids)) or (
-                endpoint == "/calendars.json"
-                and any(calendar_id.startswith("library-") for calendar_id in ids)
-            ):
-                raise FetchFailure("validation")
-            _validate_calendar_events(parsed)
-    # Other datasets preserve their upstream fields and representation.
+    if adapter is None:
+        # Other datasets preserve their upstream fields and representation.
+        return raw
+    expected_type = dict if endpoint in {"/maps.json", LIBRARIES_RSS_ENDPOINT} else list
+    if not isinstance(raw, expected_type):
+        raise FetchFailure("payload_type")
+    # JSON strict mode accepts enum/URL strings without coercing booleans or numbers.
+    parsed = adapter.validate_json(json.dumps(raw), strict=True)
+    if endpoint == LIBRARIES_RSS_ENDPOINT:
+        return _normalize_library_rss(raw, parsed)
+    if endpoint in {LIBRARIES_CALENDARS_ENDPOINT, CALENDARS_ENDPOINT}:
+        _validate_calendars(endpoint, parsed)
     return raw

@@ -105,30 +105,33 @@ class Conditions:
         return Conditions(list_build_target=[self.condition_stat, "or", other.condition_stat])
 
     @staticmethod
+    def _prepare_sequence(item: list[Any]) -> Callable[[CourseData], bool]:
+        validate_condition_sequence(item)
+        if not item:
+            return lambda course: True
+        operands = [Conditions._prepare(value) for value in item[::2]]
+        operators = tuple(item[1::2])
+
+        def evaluate(course: CourseData) -> bool:
+            result = operands[0](course)
+            for operator, predicate in zip(operators, operands[1:], strict=True):
+                value = predicate(course)
+                result = result and value if operator == "and" else result or value
+            return result
+
+        return evaluate
+
+    @staticmethod
     def _prepare(item: ConditionType) -> Callable[[CourseData], bool]:
         if isinstance(item, dict):
             return Condition(**item).check
-        elif isinstance(item, list):
-            validate_condition_sequence(item)
-            if not item:
-                return lambda course: True
-            operands = [Conditions._prepare(value) for value in item[::2]]
-            operators = tuple(item[1::2])
-
-            def evaluate(course: CourseData) -> bool:
-                result = operands[0](course)
-                for operator, predicate in zip(operators, operands[1:], strict=True):
-                    value = predicate(course)
-                    result = result and value if operator == "and" else result or value
-                return result
-
-            return evaluate
-        elif isinstance(item, Condition):
+        if isinstance(item, list):
+            return Conditions._prepare_sequence(item)
+        if isinstance(item, Condition):
             return item.check
-        elif isinstance(item, bool):
+        if isinstance(item, bool):
             return lambda course: item
-        else:
-            raise TypeError(f"Cannot handle condition item: {item}")
+        raise TypeError(f"Cannot handle condition item: {item}")
 
     @cached_property
     def _predicate(self) -> Callable[[CourseData], bool]:

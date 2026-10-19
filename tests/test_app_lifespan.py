@@ -272,10 +272,9 @@ async def test_error_after_stream_starts_is_not_replaced():
     async def receive():
         return {"type": "http.request", "body": b"", "more_body": False}
 
+    middleware = api_module._SafeUnexpectedErrorsMiddleware(fail_after_start)
     with pytest.raises(RuntimeError, match="Late stream failure"):
-        await api_module._SafeUnexpectedErrorsMiddleware(fail_after_start)(
-            {"type": "http"}, receive, send
-        )
+        await middleware({"type": "http"}, receive, send)
 
     assert [message["type"] for message in sent] == ["http.response.start", "http.response.body"]
 
@@ -292,8 +291,9 @@ async def test_cancelled_request_is_not_formatted():
     async def receive():
         return {"type": "http.request", "body": b"", "more_body": False}
 
+    middleware = api_module._SafeUnexpectedErrorsMiddleware(cancel)
     with pytest.raises(asyncio.CancelledError):
-        await api_module._SafeUnexpectedErrorsMiddleware(cancel)({"type": "http"}, receive, send)
+        await middleware({"type": "http"}, receive, send)
 
     assert not sent
 

@@ -27,10 +27,12 @@ def published_rss():
 def test_fixed_cases_reproduce_original_single_uri_failures(published_rss):
     adapter = TypeAdapter(HttpUrl)
     for item in published_rss["news"][1:]:
+        link_json = json.dumps(item["link"])
         with pytest.raises(ValidationError):
-            adapter.validate_json(json.dumps(item["link"]), strict=True)
+            adapter.validate_json(link_json, strict=True)
+    image_url_json = json.dumps(published_rss["news"][0]["image"]["url"])
     with pytest.raises(ValidationError):
-        adapter.validate_json(json.dumps(published_rss["news"][0]["image"]["url"]), strict=True)
+        adapter.validate_json(image_url_json, strict=True)
 
 
 def test_full_rss_candidate_preserves_text_and_unknown_fields(published_rss):

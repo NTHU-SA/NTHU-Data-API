@@ -167,8 +167,8 @@ async def check_published(client: httpx.AsyncClient, data_url: str) -> list[Chec
     return await _check_local_responses(documents, entries, runtime)
 
 
-async def run(data_url: str, timeout: float) -> int:
-    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+async def run(data_url: str, request_timeout: float) -> int:
+    async with httpx.AsyncClient(timeout=request_timeout, follow_redirects=True) as client:
         return report(await check_published(client, data_url), "published-data")
 
 

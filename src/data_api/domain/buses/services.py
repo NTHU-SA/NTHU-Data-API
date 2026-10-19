@@ -416,6 +416,17 @@ class PreparedBusData:
                 results.append(info)
         return results
 
+    @staticmethod
+    def _find_stop_schedule(schedules: list[dict], stop_name: str, detailed: bool) -> list[dict]:
+        matching = []
+        for entry in schedules:
+            for arrival in entry["stops_time"]:
+                if arrival["stop"] == stop_name:
+                    item = entry if detailed else entry["dep_info"]
+                    matching.append({**item, "arrive_time": arrival["arrive_time"]})
+                    break
+        return matching
+
     def get_schedule(
         self,
         *,
@@ -427,14 +438,7 @@ class PreparedBusData:
     ) -> list[dict]:
         if stop is not None:
             schedules = self.detailed_schedule_data.get((route_type, day, direction), [])
-            matching = []
-            for entry in schedules:
-                for arrival in entry["stops_time"]:
-                    if arrival["stop"] == stop.value:
-                        item = entry if detailed else entry["dep_info"]
-                        matching.append({**item, "arrive_time": arrival["arrive_time"]})
-                        break
-            return matching
+            return self._find_stop_schedule(schedules, stop.value, detailed)
         store = self.detailed_schedule_data if detailed else self.raw_schedule_data
         return store.get((route_type, day, direction), [])
 

@@ -20,7 +20,7 @@ def test_installed_version_has_one_source():
     assert mcp.version == __version__
 
 
-@pytest.mark.parametrize("value", ["3", "3.0", "v3.0.0", "03.0.0", "3.0.0rc1", "3.0.0\n"])
+@pytest.mark.parametrize("value", ["3", "3.0", "v3.0.0", "03.0.0", "3.0.0rc1", "3.0.0\n", "3.０.0"])
 def test_nonstable_versions_rejected(value):
     with pytest.raises(ValueError, match="stable"):
         release.version_tuple(value)
@@ -28,8 +28,9 @@ def test_nonstable_versions_rejected(value):
 
 @pytest.mark.parametrize("tag", ["", "3.0.0", "v2.0.0", "v3.0.0-rc.1", "v03.0.0"])
 def test_invalid_or_mismatched_tags_fail(tag):
+    root = Path.cwd()
     with pytest.raises(ValueError, match="tag"):
-        release.validate_version(Path.cwd(), tag)
+        release.validate_version(root, tag)
 
 
 def test_lock_mismatch_fails(tmp_path):
@@ -304,11 +305,12 @@ def test_same_major_mcp_snapshot_changes(monkeypatch, change, breaking):
 
     monkeypatch.setattr(Path, "read_text", read_text)
     monkeypatch.setattr(release, "git_file", git_file)
+    root = Path.cwd()
     if breaking:
         with pytest.raises(ValueError, match="major"):
-            release.compare_base(Path.cwd(), "a" * 40, "3.0.1")
+            release.compare_base(root, "a" * 40, "3.0.1")
     else:
-        assert not release.compare_base(Path.cwd(), "a" * 40, "3.0.1")
+        assert not release.compare_base(root, "a" * 40, "3.0.1")
 
 
 async def test_mcp_structured_baseline():

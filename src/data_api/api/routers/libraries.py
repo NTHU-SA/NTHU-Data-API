@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, HTTPException, Path, Response
 
 from data_api.api.errors import service_errors
@@ -55,10 +57,12 @@ async def get_library_lost_and_found_items():
 )
 async def get_library_rss_data(
     response: Response,
-    rss_type: LibraryRssType = Path(
-        ...,
-        description="RSS 類型：最新消息(news)、電子資源(eresources)、展覽及活動(exhibit)、南大與人社分館(branches)",
-    ),
+    rss_type: Annotated[
+        LibraryRssType,
+        Path(
+            description="RSS 類型：最新消息(news)、電子資源(eresources)、展覽及活動(exhibit)、南大與人社分館(branches)",
+        ),
+    ],
 ):
     """
     取得指定圖書館的 RSS 資料。

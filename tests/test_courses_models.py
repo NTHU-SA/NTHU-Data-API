@@ -44,8 +44,9 @@ def test_complete_normalized_course_and_union_shapes():
     ],
 )
 def test_invalid_candidates_rejected(overrides):
+    candidates = [course_payload(**overrides)]
     with pytest.raises(ValidationError):
-        prepare_courses([course_payload(**overrides)])
+        prepare_courses(candidates)
 
 
 @pytest.mark.parametrize("field", list(course_payload()))
@@ -59,10 +60,12 @@ def test_missing_published_fields_are_not_silently_filled(field):
 def test_snapshot_identity_and_semester_validation():
     from data_api.data.nthudata import FetchFailure
 
+    duplicate_courses = [course_payload(), course_payload()]
     with pytest.raises(FetchFailure, match="validation"):
-        prepare_courses([course_payload(), course_payload()])
+        prepare_courses(duplicate_courses)
+    single_course = [course_payload()]
     with pytest.raises(FetchFailure, match="validation"):
-        prepare_courses([course_payload()], "11420")
+        prepare_courses(single_course, "11420")
     with pytest.raises(FetchFailure, match="payload_type"):
         prepare_courses({})
     assert prepare_courses([]) == []
@@ -128,8 +131,10 @@ def test_independent_any_conditions_and_cached_predicate():
 
 @pytest.mark.parametrize("body", [["and"], [True, "xor", True], [True, True], [42], [None]])
 def test_domain_invalid_conditions(body):
+    conditions = Conditions(list_build_target=body)
+    course = make_course()
     with pytest.raises((ValueError, TypeError)):
-        Conditions(list_build_target=body).accept(make_course())
+        conditions.accept(course)
 
 
 def test_conditions_require_a_field_or_sequence():

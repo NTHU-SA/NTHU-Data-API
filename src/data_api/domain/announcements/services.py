@@ -99,6 +99,23 @@ class AnnouncementsService:
 
         return commit_hash, announcements_list
 
+    @staticmethod
+    def _matches_fuzzy_source(
+        source: dict,
+        department: Optional[str],
+        language: Optional[str],
+        url: Optional[str],
+    ) -> bool:
+        if url and not _matches_source_url(source["link"], url):
+            return False
+        if language and source.get("language") != language:
+            return False
+        if department:
+            dept_name = source.get("department", "")
+            if fuzz.partial_ratio(department, dept_name) < FUZZY_SEARCH_THRESHOLD:
+                return False
+        return True
+
     async def fuzzy_search_announcements(
         self,
         department: Optional[str] = None,
@@ -117,19 +134,8 @@ class AnnouncementsService:
 
         # 2. 遍歷每一個處室/來源
         for source in raw_data:
-            if url and not _matches_source_url(source["link"], url):
+            if not self._matches_fuzzy_source(source, department, language, url):
                 continue
-
-            # 如果使用者指定了語言，不符合的整包直接跳過
-            if language and source.get("language") != language:
-                continue
-
-            # 如果使用者指定了部門，模糊比對不符合的整包直接跳過
-            if department:
-                dept_name = source.get("department", "")
-                score = fuzz.partial_ratio(department, dept_name)
-                if score < FUZZY_SEARCH_THRESHOLD:
-                    continue
 
             # 取出該處室的所有文章
             original_articles = source.get("articles", [])

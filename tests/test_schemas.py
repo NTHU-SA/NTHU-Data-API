@@ -81,12 +81,12 @@ def test_announcement_source_requires_metadata(field):
         "language": "en",
         "department": "Office",
     }
+    missing_field_payload = {key: value for key, value in payload.items() if key != field}
     with pytest.raises(ValidationError):
-        AnnouncementSource.model_validate(
-            {key: value for key, value in payload.items() if key != field}
-        )
+        AnnouncementSource.model_validate(missing_field_payload)
+    null_field_payload = {**payload, field: None}
     with pytest.raises(ValidationError):
-        AnnouncementSource.model_validate({**payload, field: None})
+        AnnouncementSource.model_validate(null_field_payload)
 
 
 @pytest.mark.parametrize("link", ["https://", "not a url", "/news", 42, True, [], {}])

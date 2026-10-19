@@ -45,7 +45,7 @@ def _filter_by_schedule(dining_data: list[dict], schedule: Optional[str]) -> lis
     day = schedule
     if schedule == "today":
         weekday = datetime.now(ZoneInfo("Asia/Taipei")).weekday()
-        day = "saturday" if weekday == 5 else "sunday" if weekday == 6 else "weekday"
+        day = {5: "saturday", 6: "sunday"}.get(weekday, "weekday")
 
     filtered = []
     for building in dining_data:

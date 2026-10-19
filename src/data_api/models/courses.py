@@ -3,7 +3,7 @@
 import math
 import re
 from enum import StrEnum
-from typing import Annotated, Any, Self, Union
+from typing import Annotated, Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel, field_validator, model_validator
 
@@ -153,64 +153,72 @@ class CourseFieldName(StrEnum):
 
 
 INTEGER_FIELDS = {
-    "capacity",
-    "enrolled_count",
-    "enrollment_after_selection",
-    "enrollment_after_withdrawal",
-    "reserved_for_freshmen",
+    CourseFieldName.capacity.value,
+    CourseFieldName.enrolled_count.value,
+    CourseFieldName.enrollment_after_selection.value,
+    CourseFieldName.enrollment_after_withdrawal.value,
+    CourseFieldName.reserved_for_freshmen.value,
 }
-BOOLEAN_FIELDS = {"capacity_unlimited", "is_cancelled"}
-NULLABLE_FIELDS = (
-    INTEGER_FIELDS
-    | BOOLEAN_FIELDS
-    | {
-        "credits",
-        "department_code",
-        "course_number",
-        "department_name",
-        "college_name",
-        "course_level_code",
-        "course_level",
-        "remote_teaching",
-        "language_code",
-        "lecturers.label",
-        "lecturers.name_zh",
-        "lecturers.name_en",
-        "meetings.classroom",
-        "meetings.time",
-        "meetings.time_codes",
-        "expertises.name",
-        "expertises.type",
-        "curriculum_requirements.target",
-        "curriculum_requirements.requirement",
-    }
-)
+BOOLEAN_FIELDS = {
+    CourseFieldName.capacity_unlimited.value,
+    CourseFieldName.is_cancelled.value,
+}
+NUMERIC_OR_BOOLEAN_FIELDS = INTEGER_FIELDS | BOOLEAN_FIELDS | {CourseFieldName.credits.value}
+NULLABLE_FIELDS = NUMERIC_OR_BOOLEAN_FIELDS | {
+    CourseFieldName.department_code.value,
+    CourseFieldName.course_number.value,
+    CourseFieldName.department_name.value,
+    CourseFieldName.college_name.value,
+    CourseFieldName.course_level_code.value,
+    CourseFieldName.course_level.value,
+    CourseFieldName.remote_teaching.value,
+    CourseFieldName.language_code.value,
+    CourseFieldName.lecturer_label.value,
+    CourseFieldName.lecturer_name_zh.value,
+    CourseFieldName.lecturer_name_en.value,
+    CourseFieldName.meeting_classroom.value,
+    CourseFieldName.meeting_time.value,
+    CourseFieldName.meeting_time_codes.value,
+    CourseFieldName.expertise_name.value,
+    CourseFieldName.expertise_type.value,
+    CourseFieldName.requirement_target.value,
+    CourseFieldName.requirement.value,
+}
+
+
+def _is_valid_credits_matcher(matcher: CourseMatcher) -> bool:
+    if type(matcher) is int:
+        return matcher >= 0
+    if type(matcher) is float:
+        return math.isfinite(matcher) and matcher >= 0
+    return False
+
+
+def _is_valid_matcher_value(field: str, matcher: CourseMatcher) -> bool:
+    if matcher is None:
+        return field in NULLABLE_FIELDS
+    if field in BOOLEAN_FIELDS:
+        return type(matcher) is bool
+    if field in INTEGER_FIELDS:
+        return type(matcher) is int and matcher >= 0
+    if field == CourseFieldName.credits.value:
+        return _is_valid_credits_matcher(matcher)
+    return isinstance(matcher, str)
 
 
 def validate_matcher(field: str, matcher: CourseMatcher, regex_match: bool) -> None:
     """Validate types before querying, including empty datasets."""
     CourseFieldName(field)
-    if matcher is None:
-        valid = field in NULLABLE_FIELDS
-    elif field in BOOLEAN_FIELDS:
-        valid = type(matcher) is bool
-    elif field in INTEGER_FIELDS:
-        valid = type(matcher) is int and matcher >= 0
-    elif field == "credits":
-        valid = (
-            type(matcher) is int or (type(matcher) is float and math.isfinite(matcher))
-        ) and matcher >= 0
-    else:
-        valid = isinstance(matcher, str)
-    if not valid:
+    if not _is_valid_matcher_value(field, matcher):
         raise ValueError(f"Invalid matcher type for course field '{field}'")
-    if regex_match:
-        if not isinstance(matcher, str) or field in INTEGER_FIELDS | BOOLEAN_FIELDS | {"credits"}:
-            raise ValueError("Regular expressions require a text field and string matcher")
-        try:
-            re.compile(matcher)
-        except (re.error, OverflowError, RecursionError) as exc:
-            raise ValueError("Invalid regular expression") from exc
+    if not regex_match:
+        return
+    if not isinstance(matcher, str) or field in NUMERIC_OR_BOOLEAN_FIELDS:
+        raise ValueError("Regular expressions require a text field and string matcher")
+    try:
+        re.compile(matcher)
+    except (re.error, OverflowError, RecursionError) as exc:
+        raise ValueError("Invalid regular expression") from exc
 
 
 class CourseSearchParams(BaseModel):
@@ -244,17 +252,17 @@ class CourseSearchParams(BaseModel):
     reserved_for_freshmen: Annotated[int, Field(ge=0)] | None = None
     is_cancelled: bool | None = None
     language_code: str | None = None
-    lecturer_label: str | None = Field(None, alias="lecturers.label")
-    lecturer_name_zh: str | None = Field(None, alias="lecturers.name_zh")
-    lecturer_name_en: str | None = Field(None, alias="lecturers.name_en")
-    meeting_classroom: str | None = Field(None, alias="meetings.classroom")
-    meeting_time: str | None = Field(None, alias="meetings.time")
-    meeting_time_codes: str | None = Field(None, alias="meetings.time_codes")
-    expertise_name: str | None = Field(None, alias="expertises.name")
-    expertise_type: str | None = Field(None, alias="expertises.type")
+    lecturer_label: str | None = Field(None, alias=CourseFieldName.lecturer_label.value)
+    lecturer_name_zh: str | None = Field(None, alias=CourseFieldName.lecturer_name_zh.value)
+    lecturer_name_en: str | None = Field(None, alias=CourseFieldName.lecturer_name_en.value)
+    meeting_classroom: str | None = Field(None, alias=CourseFieldName.meeting_classroom.value)
+    meeting_time: str | None = Field(None, alias=CourseFieldName.meeting_time.value)
+    meeting_time_codes: str | None = Field(None, alias=CourseFieldName.meeting_time_codes.value)
+    expertise_name: str | None = Field(None, alias=CourseFieldName.expertise_name.value)
+    expertise_type: str | None = Field(None, alias=CourseFieldName.expertise_type.value)
     programs: str | None = None
-    requirement_target: str | None = Field(None, alias="curriculum_requirements.target")
-    requirement: str | None = Field(None, alias="curriculum_requirements.requirement")
+    requirement_target: str | None = Field(None, alias=CourseFieldName.requirement_target.value)
+    requirement: str | None = Field(None, alias=CourseFieldName.requirement.value)
     prerequisite_text: str | None = None
     parsing_issues: str | None = None
 
@@ -287,7 +295,7 @@ class CourseQueryCondition(RootModel):
     Maximum 32 array levels and 1024 nodes (arrays, condition objects and operators).
     """
 
-    root: list[Union["CourseQueryCondition", CourseCondition, CourseQueryOperation]]
+    root: list["CourseQueryCondition | CourseCondition | CourseQueryOperation"]
 
     @field_validator("root", mode="before")
     @classmethod
