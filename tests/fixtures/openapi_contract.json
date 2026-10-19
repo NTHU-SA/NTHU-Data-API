@@ -2705,6 +2705,16 @@
     },
     "BusCanonicalDetailedSchedule": {
       "properties": {
+        "arrive_time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "dep_info": {
           "$ref": "#/components/schemas/BusCanonicalSchedule"
         },
@@ -2723,6 +2733,16 @@
     },
     "BusCanonicalSchedule": {
       "properties": {
+        "arrive_time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "bus_type": {
           "$ref": "#/components/schemas/BusType"
         },

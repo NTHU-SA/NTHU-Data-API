@@ -46,6 +46,7 @@ class BusDepartureResult(TypedDict):
     dep_stop: str
     line: str
     bus_type: str
+    arrive_time: NotRequired[str]
 
 
 class BusArrivalResult(TypedDict):
@@ -56,6 +57,7 @@ class BusArrivalResult(TypedDict):
 class BusDetailedResult(TypedDict):
     dep_info: BusDepartureResult
     stops_time: list[BusArrivalResult]
+    arrive_time: NotRequired[str]
 
 
 class BusStopResult(TypedDict):

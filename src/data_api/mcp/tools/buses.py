@@ -41,7 +41,10 @@ async def _get_bus_schedule(
     result = {
         "current_time": bus_time.current_time,
         "day_type": bus_time.day,
-        "buses": [schedule_model.model_validate(bus).model_dump(mode="json") for bus in buses],
+        "buses": [
+            schedule_model.model_validate(bus).model_dump(mode="json", exclude_none=True)
+            for bus in buses
+        ],
         "route_info": service.get_route_info(
             route if route != "all" else None,
             direction if direction != "all" else None,
@@ -60,8 +63,10 @@ async def _get_bus_schedule(
     title="查詢公車時刻表",
     description="Get campus bus schedules, optionally filtered to buses serving a specific stop. "
     "Replaces get_next_buses and get_bus_stops. "
-    "With stop, time filtering uses estimated arrival time at that stop, including buses "
-    "that have departed but have not arrived yet. Without stop, it uses departure time. "
+    "With stop, time filtering uses estimated arrival time at that stop (including buses "
+    "that have departed but have not arrived yet) and each bus entry includes top-level "
+    "arrive_time for that stop; without stop, arrive_time is omitted and filtering uses "
+    "departure time. "
     "Use details=true for departure information and arrival times at all stops; "
     "details=false returns simple departure schedules. "
     "Line identifiers are main_red, main_green, nanda_route_1, and nanda_route_2. "

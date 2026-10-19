@@ -493,7 +493,9 @@ Stop and time filters are applied before the limit; no matches return `[]`.
 `route` selects a campus route; response `bus_type` identifies the vehicle type
 (for example, `large-sized_bus`), not the campus route. `details=false` returns
 departure schedules; `details=true` includes `dep_info` and all `stops_time` entries.
-Filtering by `stop` does not change the response format.
+When `stop` is supplied, each bus object also includes top-level `arrive_time` (the
+estimated arrival time at that stop) in both `details=false` and `details=true` modes;
+when `stop` is omitted, `arrive_time` is omitted from the response.
 
 The REST endpoint and MCP use campus-qualified `line` identifiers:
 `main_red`, `main_green`, `nanda_route_1`, and `nanda_route_2`. With `details=true`,

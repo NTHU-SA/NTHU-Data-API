@@ -42,8 +42,8 @@ all-courses behavior.
 | `GET /newsletters/{newsletter_name}` | `GET /newsletters?name={newsletter_name}&fuzzy=false`; returns an array, or `[]` instead of 404. Names are no longer restricted to a fixed legacy enum. |
 | `GET /locations/search?query=...` | `GET /locations?name=...`; no matches returns `[]` instead of 404. |
 | `GET /buses/info/stops` | `GET /buses/stops`; same collection format. |
-| `GET /buses/schedules` | `GET /buses/schedule`; rename `bus_type` to `route`. Defaults are now `route=all`, `day=current`, `direction=all`. Line IDs are campus-qualified; when `stop` is supplied, time filtering uses arrival at that stop, not departure. |
-| `GET /buses/stops/{stop_name}` | `GET /buses/schedule?stop={stop_name}&details=true`; read `dep_info` and `stops_time`, not flat arrival records. Arrival filtering still includes in-transit buses. |
+| `GET /buses/schedules` | `GET /buses/schedule`; rename `bus_type` to `route`. Defaults are now `route=all`, `day=current`, `direction=all`. Line IDs are campus-qualified; when `stop` is supplied, time filtering uses arrival at that stop (not departure) and each entry includes top-level `arrive_time` (omitted when `stop` is not supplied). |
+| `GET /buses/stops/{stop_name}` | `GET /buses/schedule?stop={stop_name}` (or with `&details=true` for `dep_info` and `stops_time`); read top-level `arrive_time` for the selected stop. Arrival filtering still includes in-transit buses. |
 | `GET /libraries/space` | `GET /libraries/spaces`. |
 | `GET /libraries/lost_and_found` | `GET /libraries/lost-and-found`. |
 | `GET /energy/electricity_usage` | `GET /energy/electricity`. |

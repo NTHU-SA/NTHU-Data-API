@@ -79,6 +79,9 @@ class BusCanonicalSchedule(BusSchedule):
     """Schedule with campus-qualified line identifiers for the current API."""
 
     line: str = Field("", description="路線 (main_red/main_green/nanda_route_1/nanda_route_2)")
+    arrive_time: str | None = Field(
+        None, description="指定站牌的預計到達時間（僅在提供 stop 參數時回傳，未指定時省略）"
+    )
 
     @field_validator("line")
     @classmethod
@@ -95,3 +98,6 @@ class BusCanonicalDetailedSchedule(BusDetailedSchedule):
     """Detailed schedule with campus-qualified departure line identifiers."""
 
     dep_info: BusCanonicalSchedule = Field(..., description="發車資訊")
+    arrive_time: str | None = Field(
+        None, description="指定站牌的預計到達時間（僅在提供 stop 參數時回傳，未指定時省略）"
+    )
