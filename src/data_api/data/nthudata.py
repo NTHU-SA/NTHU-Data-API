@@ -286,6 +286,45 @@ class NTHUDataManager:
             )
         return state.snapshot
 
+    def _record_load_failure(
+        self, endpoint: str, state: DatasetState[T], exc: FetchFailure
+    ) -> None:
+        state.last_error = RefreshError(exc.category, datetime.now(timezone.utc), exc.status_code)
+        state.freshness = Freshness.STALE if state.snapshot is not None else Freshness.UNAVAILABLE
+        logger.warning(
+            "dataset load failed dataset=%s category=%s status=%s usable=%s",
+            endpoint,
+            exc.category,
+            exc.status_code,
+            state.usable,
+        )
+        # Bound retry storms even when the first load has no fallback.
+        state.next_check = max(state.next_check, self.clock() + self.ttl)
+
+    @staticmethod
+    def _install_snapshot(
+        endpoint: str,
+        state: DatasetState[T],
+        raw: JsonData,
+        candidate: T,
+        version: str | None,
+        entry: ManifestEntry | None,
+        error: RefreshError | None,
+    ) -> None:
+        now = datetime.now(timezone.utc)
+        state.snapshot = Snapshot(
+            raw, candidate, version, now, entry.last_updated if entry else None
+        )
+        state.last_refresh_success_at = now
+        state.last_error = error
+        state.freshness = Freshness.UNVERIFIED if error else Freshness.CURRENT
+        logger.info(
+            "dataset load succeeded dataset=%s version=%s freshness=%s",
+            endpoint,
+            version,
+            state.freshness,
+        )
+
     async def _refresh(self, endpoint: str, state: DatasetState[T]) -> None:
         previous = state.snapshot
         logger.debug("dataset check due dataset=%s", endpoint)
@@ -324,33 +363,9 @@ class NTHUDataManager:
         try:
             raw, candidate = await self._load_candidate(endpoint, state, entry)
         except FetchFailure as exc:
-            state.last_error = RefreshError(
-                exc.category, datetime.now(timezone.utc), exc.status_code
-            )
-            state.freshness = Freshness.STALE if previous is not None else Freshness.UNAVAILABLE
-            logger.warning(
-                "dataset load failed dataset=%s category=%s status=%s usable=%s",
-                endpoint,
-                exc.category,
-                exc.status_code,
-                state.usable,
-            )
-            # Bound retry storms even when the first load has no fallback.
-            state.next_check = max(state.next_check, self.clock() + self.ttl)
+            self._record_load_failure(endpoint, state, exc)
         else:
-            now = datetime.now(timezone.utc)
-            state.snapshot = Snapshot(
-                raw, candidate, version, now, entry.last_updated if entry else None
-            )
-            state.last_refresh_success_at = now
-            state.last_error = error
-            state.freshness = Freshness.UNVERIFIED if error else Freshness.CURRENT
-            logger.info(
-                "dataset load succeeded dataset=%s version=%s freshness=%s",
-                endpoint,
-                version,
-                state.freshness,
-            )
+            self._install_snapshot(endpoint, state, raw, candidate, version, entry, error)
 
     async def _load_candidate(
         self, endpoint: str, state: DatasetState[T], entry: ManifestEntry | None

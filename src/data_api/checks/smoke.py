@@ -23,6 +23,9 @@ from data_api.checks.common import CheckFailure, fetch_json, report, validation_
 from data_api.core.config import PREFETCH_ENDPOINTS
 from data_api.models.courses import SemesterCode
 
+BUSES_DATASET = "/buses.json"
+PING_PATH = "/ping"
+
 
 @dataclass(frozen=True)
 class EndpointCheck:
@@ -48,12 +51,12 @@ ENDPOINTS = [
     EndpointCheck("/newsletters/sources", TypeAdapter(list[NewsletterSource]), "/newsletters.json"),
     EndpointCheck("/dining", TypeAdapter(list[DiningBuilding]), "/dining.json"),
     EndpointCheck("/locations", TypeAdapter(list[LocationDetail]), "/maps.json"),
-    EndpointCheck("/buses/routes", TypeAdapter(list[BusInfo]), "/buses.json"),
-    EndpointCheck("/buses/stops", TypeAdapter(list[BusStopsInfo]), "/buses.json"),
+    EndpointCheck("/buses/routes", TypeAdapter(list[BusInfo]), BUSES_DATASET),
+    EndpointCheck("/buses/stops", TypeAdapter(list[BusStopsInfo]), BUSES_DATASET),
     EndpointCheck(
         "/buses/schedule?day=weekday&details=true&limit=5",
         TypeAdapter(list[BusCanonicalDetailedSchedule]),
-        "/buses.json",
+        BUSES_DATASET,
     ),
     EndpointCheck("/calendars", TypeAdapter(list[Calendar]), "/calendars.json"),
     *[
@@ -63,6 +66,29 @@ ENDPOINTS = [
         for feed in LibraryRssType
     ],
 ]
+
+
+def _validate_endpoint_headers(
+    check: EndpointCheck,
+    payload: Any,
+    response: httpx.Response,
+    expected_versions: dict[str, str | None] | None,
+) -> None:
+    try:
+        duration = float(response.headers["X-Process-Time"])
+        if not math.isfinite(duration) or duration < 0:
+            raise ValueError
+        if check.counted and int(response.headers["X-Total-Count"]) != len(payload):
+            raise ValueError
+        version = response.headers.get("X-Data-Commit-Hash")
+        if version == "" or (
+            expected_versions is not None and version != expected_versions[check.path]
+        ):
+            raise ValueError
+    except (KeyError, ValueError) as exc:
+        raise CheckFailure(
+            check.path, "headers", "missing or invalid timing/count/version"
+        ) from exc
 
 
 async def check_endpoints(
@@ -80,21 +106,7 @@ async def check_endpoints(
                 check.adapter.validate_json(response.content, strict=True)
             except ValidationError as exc:
                 raise CheckFailure(check.path, "response-schema", validation_reason(exc)) from exc
-            try:
-                duration = float(response.headers["X-Process-Time"])
-                if not math.isfinite(duration) or duration < 0:
-                    raise ValueError
-                if check.counted and int(response.headers["X-Total-Count"]) != len(payload):
-                    raise ValueError
-                version = response.headers.get("X-Data-Commit-Hash")
-                if version == "" or (
-                    expected_versions is not None and version != expected_versions[check.path]
-                ):
-                    raise ValueError
-            except (KeyError, ValueError) as exc:
-                raise CheckFailure(
-                    check.path, "headers", "missing or invalid timing/count/version"
-                ) from exc
+            _validate_endpoint_headers(check, payload, response, expected_versions)
         except CheckFailure as exc:
             failures.append(exc)
     return failures
@@ -104,33 +116,33 @@ async def check_smoke(client: httpx.AsyncClient, api_url: str) -> list[CheckFail
     api_url = api_url.rstrip("/")
     failures = []
     try:
-        _, response = await fetch_json(client, f"{api_url}/ping", "/ping")
+        _, response = await fetch_json(client, f"{api_url}{PING_PATH}", PING_PATH)
         try:
             health = PingResponse.model_validate_json(response.content, strict=True)
         except ValidationError as exc:
-            raise CheckFailure("/ping", "response-schema", validation_reason(exc)) from exc
+            raise CheckFailure(PING_PATH, "response-schema", validation_reason(exc)) from exc
         if "no-store" not in response.headers.get("Cache-Control", "").lower():
-            raise CheckFailure("/ping", "headers", "expected Cache-Control: no-store")
+            raise CheckFailure(PING_PATH, "headers", "expected Cache-Control: no-store")
         required = {f"/{endpoint}" for endpoint in PREFETCH_ENDPOINTS}
         missing = required - health.datasets.keys()
         if missing:
             raise CheckFailure(
-                "/ping", "readiness", f"missing datasets: {', '.join(sorted(missing))}"
+                PING_PATH, "readiness", f"missing datasets: {', '.join(sorted(missing))}"
             )
         if (
             not health.ready
             or health.status == "unavailable"
             or any(not dataset.usable for dataset in health.datasets.values())
         ):
-            raise CheckFailure("/ping", "readiness", "one or more snapshots are unavailable")
+            raise CheckFailure(PING_PATH, "readiness", "one or more snapshots are unavailable")
     except CheckFailure as exc:
         failures.append(exc)
     failures.extend(await check_endpoints(client, api_url))
     return failures
 
 
-async def run(api_url: str, timeout: float) -> int:
-    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+async def run(api_url: str, request_timeout: float) -> int:
+    async with httpx.AsyncClient(timeout=request_timeout, follow_redirects=True) as client:
         return report(await check_smoke(client, api_url), "deployment-smoke")
 
 

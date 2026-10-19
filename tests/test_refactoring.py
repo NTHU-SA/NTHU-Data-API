@@ -49,8 +49,9 @@ async def test_request_duration_uses_monotonic_clock(monkeypatch):
 def test_bus_time_resolution(day, time, instant, expected):
     now = datetime.fromisoformat(instant)
     state = resolve_bus_time(day, time, now)
+    expected_time = now.strftime("%H:%M")
     assert (state.day, state.after_time) == expected
-    assert state.current_time == now.strftime("%H:%M")
+    assert state.current_time == expected_time
 
 
 def test_course_conditions_prepare_once_and_do_not_retain_course():
@@ -168,10 +169,9 @@ async def test_two_apps_isolate_snapshots_clients_and_mcp_http(mock_upstream):
                         rest, "tools/call", {"name": "search_courses", "arguments": {}}
                     )
                     assert not result.get("isError", False)
-                    assert (
-                        json.loads(result["content"][0]["text"])["courses"][0]["id"]
-                        == f"11510{marker}"
-                    )
+                    courses_payload = json.loads(result["content"][0]["text"])
+                    expected_id = f"11510{marker}"
+                    assert courses_payload["courses"][0]["id"] == expected_id
                     ping = await rest.get("/ping")
                     assert ping.status_code == 200
                     assert ping.json()["datasets"]["/courses/latest.json"]["version"] == marker
@@ -200,13 +200,14 @@ async def test_runtime_closes_all_clients_on_startup_failure(monkeypatch):
         raise RuntimeError("startup failed")
 
     monkeypatch.setattr(runtime.datasets, "prefetch", fail)
+    app_lifespan = api.lifespan(application)
     with pytest.raises(RuntimeError, match="startup failed"):
-        async with api.lifespan(application):
-            pytest.fail("Startup must fail")
+        await app_lifespan.__aenter__()
     assert len(clients) == 3
     assert all(client.is_closed for client in clients)
     assert runtime.datasets.fetcher.client is None
-    assert runtime.energy.client is runtime.libraries.client is None
+    assert runtime.energy.client is None
+    assert runtime.libraries.client is None
 
 
 async def test_runtime_cannot_be_reentered_without_losing_live_clients():
@@ -214,9 +215,9 @@ async def test_runtime_cannot_be_reentered_without_losing_live_clients():
     async with runtime.lifespan():
         energy = runtime.energy.client
         library = runtime.libraries.client
+        nested_lifespan = runtime.lifespan()
         with pytest.raises(RuntimeError, match="already running"):
-            async with runtime.lifespan():
-                pytest.fail("Runtime must not be reentered")
+            await nested_lifespan.__aenter__()
         assert runtime.energy.client is energy
         assert runtime.libraries.client is library
         assert not energy.is_closed
@@ -314,7 +315,8 @@ async def test_library_live_calls_borrow_the_injected_client(
     service = LibrariesService()
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         service.client = client
-        assert await service.get_space_availability() == library_space_payload["rows"]
+        spaces = await service.get_space_availability()
+        assert spaces == library_space_payload["rows"]
         assert len(await service.get_lost_and_found_items()) == 1
         assert not client.is_closed
     assert methods == ["GET", "POST"]

@@ -8,8 +8,10 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-VERSION_PATTERN = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
-CONTRACTS = ("openapi_contract.json", "mcp_contract.json")
+VERSION_PATTERN = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)")
+OPENAPI_CONTRACT = "openapi_contract.json"
+MCP_CONTRACT = "mcp_contract.json"
+CONTRACTS = (OPENAPI_CONTRACT, MCP_CONTRACT)
 CONSTRAINTS = {
     "type",
     "$ref",
@@ -99,79 +101,92 @@ def validate_version(root: Path, tag: str | None = None) -> str:
     return version
 
 
+def _resolve_context(path: str, context: str | None) -> str:
+    if context is not None:
+        return context
+    if path.endswith(".parameters"):
+        return "map:parameter"
+    if path == MCP_CONTRACT:
+        return "map:tool"
+    if path == OPENAPI_CONTRACT:
+        return "document"
+    return "schema"
+
+
+def _is_new_constraint_or_required_input(
+    context: str, named_map: bool, key: str, value: Any
+) -> bool:
+    if context == "schema" and key in CONSTRAINTS:
+        return True
+    if not named_map and key == "required" and value:
+        return True
+    is_param_or_request_body = context == "map:parameter" or (
+        context == "operation" and key == "requestBody"
+    )
+    return is_param_or_request_body and isinstance(value, dict) and bool(value.get("required"))
+
+
+def _child_context(context: str, named_map: bool, key: str) -> str:
+    if named_map:
+        return context.removeprefix("map:")
+    if key in NAMED_MAPS:
+        return f"map:{NAMED_MAPS[key]}"
+    if context == "schema" and key == "anyOf":
+        return "anyOf"
+    if context == "schema" and key in {"default", "const", "enum"}:
+        return "value"
+    if key in SCHEMA_CHILDREN:
+        return "schema"
+    return "structure"
+
+
+def _should_skip_shared_key(context: str, key: str, old_val: Any, new_val: Any) -> bool:
+    if key == "deprecated" and context in {"schema", "operation"}:
+        return True
+    return context == "schema" and key == "enum" and all(item in new_val for item in old_val)
+
+
+def _dict_breaking_changes(
+    old: dict[str, Any], new: dict[str, Any], path: str, context: str
+) -> list[str]:
+    named_map = context.startswith("map:")
+    changes = [
+        f"{path}.{key}: removed"
+        for key in sorted(old.keys() - new.keys())
+        if named_map or key != "deprecated" or context not in {"schema", "operation"}
+    ]
+    for key in sorted(new.keys() - old.keys()):
+        if _is_new_constraint_or_required_input(context, named_map, key, new[key]):
+            changes.append(f"{path}.{key}: new constraint or required input")
+    for key in sorted(old.keys() & new.keys()):
+        if _should_skip_shared_key(context, key, old[key], new[key]):
+            continue
+        child_ctx = _child_context(context, named_map, key)
+        changes.extend(breaking_changes(old[key], new[key], f"{path}.{key}", _context=child_ctx))
+    return changes
+
+
 def breaking_changes(
     old: Any, new: Any, path: str = "contract", *, _context: str | None = None
 ) -> list[str]:
     """Conservative structural guard, not a proof of behavioral compatibility."""
-    if _context is None:
-        _context = (
-            "map:tool"
-            if path == "mcp_contract.json"
-            else "document" if path == "openapi_contract.json" else "schema"
-        )
-        if path.endswith(".parameters"):
-            _context = "map:parameter"
-    if _context == "value":
+    context = _resolve_context(path, _context)
+    if context == "value":
         return [] if old == new else [f"{path}: changed"]
     if isinstance(old, dict) and isinstance(new, dict):
-        named_map = _context.startswith("map:")
-        changes = [
-            f"{path}.{key}: removed"
-            for key in sorted(old.keys() - new.keys())
-            if named_map or key != "deprecated" or _context not in {"schema", "operation"}
+        return _dict_breaking_changes(old, new, path, context)
+    if (
+        context == "anyOf"
+        and isinstance(old, list)
+        and isinstance(new, list)
+        and len(old) == len(new)
+    ):
+        return [
+            change
+            for index, (previous, current) in enumerate(zip(old, new))
+            for change in breaking_changes(previous, current, f"{path}[{index}]", _context="schema")
         ]
-        for key in sorted(new.keys() - old.keys()):
-            value = new[key]
-            if (
-                (_context == "schema" and key in CONSTRAINTS)
-                or (not named_map and key == "required" and value)
-                or (
-                    (
-                        _context == "map:parameter"
-                        or (_context == "operation" and key == "requestBody")
-                    )
-                    and isinstance(value, dict)
-                    and value.get("required")
-                )
-            ):
-                changes.append(f"{path}.{key}: new constraint or required input")
-        for key in sorted(old.keys() & new.keys()):
-            if key == "deprecated" and _context in {"schema", "operation"}:
-                continue
-            if (
-                _context == "schema"
-                and key == "enum"
-                and all(item in new[key] for item in old[key])
-            ):
-                continue
-            if named_map:
-                child_context = _context.removeprefix("map:")
-            elif key in NAMED_MAPS:
-                child_context = f"map:{NAMED_MAPS[key]}"
-            elif _context == "schema" and key == "anyOf":
-                child_context = "anyOf"
-            elif _context == "schema" and key in {"default", "const", "enum"}:
-                child_context = "value"
-            elif key in SCHEMA_CHILDREN:
-                child_context = "schema"
-            else:
-                child_context = "structure"
-            changes.extend(
-                breaking_changes(old[key], new[key], f"{path}.{key}", _context=child_context)
-            )
-        return changes
-    if _context == "anyOf" and isinstance(old, list) and isinstance(new, list):
-        if len(old) == len(new):
-            return [
-                change
-                for index, (previous, current) in enumerate(zip(old, new))
-                for change in breaking_changes(
-                    previous, current, f"{path}[{index}]", _context="schema"
-                )
-            ]
-    if old != new:
-        return [f"{path}: changed"]
-    return []
+    return [f"{path}: changed"] if old != new else []
 
 
 def git_file(base_sha: str, path: str) -> str:
@@ -228,20 +243,23 @@ def compare_base(
     for name in CONTRACTS:
         path = f"tests/fixtures/{name}"
         # The MCP snapshot is introduced with 3.0.0; older releases have no baseline.
-        if name == "mcp_contract.json" and previous_version < (3, 0, 0):
+        if name == MCP_CONTRACT and previous_version < (3, 0, 0):
             continue
         old = json.loads(git_file(base_sha, path))
         new = json.loads((root / "tests" / "fixtures" / name).read_text(encoding="utf-8"))
         changes.extend(breaking_changes(old, new, name))
     for change in changes:
         print(change)
-    if changes and current_version[0] <= previous_version[0]:
-        if not (
+    if (
+        changes
+        and current_version[0] <= previous_version[0]
+        and not (
             check_publication
             and version == previous == "3.0.0"
             and initial_version_is_unpublished(version)
-        ):
-            raise ValueError("Public contract changes require a major version increase")
+        )
+    ):
+        raise ValueError("Public contract changes require a major version increase")
     return changes
 
 

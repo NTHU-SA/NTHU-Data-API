@@ -26,6 +26,24 @@ class NewslettersService:
         """Get all newsletters."""
         return await self.manager.get(JSON_PATH)
 
+    @staticmethod
+    def _matches_newsletter_name(newsletter_name: str, query: Optional[str], fuzzy: bool) -> bool:
+        if not query:
+            return True
+        if fuzzy:
+            return fuzz.partial_ratio(query, newsletter_name) >= FUZZY_SEARCH_THRESHOLD
+        return newsletter_name == query
+
+    @staticmethod
+    def _filter_newsletter_articles(
+        articles: list[dict], title: Optional[str], fuzzy: bool
+    ) -> list[dict]:
+        if not title:
+            return list(articles)
+        if fuzzy:
+            return fuzzy_matches(articles, title, "title", FUZZY_SEARCH_THRESHOLD)
+        return [article for article in articles if title in (article.get("title") or "")]
+
     async def get_newsletters(
         self,
         name: Optional[str] = None,
@@ -36,23 +54,12 @@ class NewslettersService:
         commit_hash, newsletters = await self.get_all_newsletters()
         filtered = []
         for newsletter in newsletters:
-            if name:
-                if fuzzy:
-                    if fuzz.partial_ratio(name, newsletter["name"]) < FUZZY_SEARCH_THRESHOLD:
-                        continue
-                elif newsletter["name"] != name:
-                    continue
+            if not self._matches_newsletter_name(newsletter["name"], name, fuzzy):
+                continue
 
-            articles = list(newsletter["articles"])
-            if title:
-                if fuzzy:
-                    articles = fuzzy_matches(articles, title, "title", FUZZY_SEARCH_THRESHOLD)
-                else:
-                    articles = [
-                        article for article in articles if title in (article.get("title") or "")
-                    ]
-                if not articles:
-                    continue
+            articles = self._filter_newsletter_articles(newsletter["articles"], title, fuzzy)
+            if title and not articles:
+                continue
 
             filtered.append({**newsletter, "articles": articles})
         return commit_hash, filtered

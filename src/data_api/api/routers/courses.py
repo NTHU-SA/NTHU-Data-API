@@ -85,7 +85,12 @@ def query_courses(
     return counted_response(response, snapshot, result)
 
 
-@router.get("", response_model=list[schemas.CourseData], operation_id="getCourses")
+@router.get(
+    "",
+    response_model=list[schemas.CourseData],
+    operation_id="getCourses",
+    responses=VALIDATION_ERROR_RESPONSES,
+)
 async def get_courses(response: Response, filters: CourseFilters, snapshot: LatestSnapshot):
     """查詢最新課程。文字欄位使用 regex，數值與布林精確比對；所有條件以 AND 組合。"""
     return filter_courses(response, snapshot, filters)
@@ -119,7 +124,7 @@ async def search_courses_by_condition(
     "/{semester}",
     response_model=list[schemas.CourseData],
     operation_id="getSemesterCourses",
-    responses=SEMESTER_ERRORS,
+    responses={**SEMESTER_ERRORS, **VALIDATION_ERROR_RESPONSES},
 )
 async def get_semester_courses(
     response: Response, filters: CourseFilters, snapshot: SemesterSnapshot

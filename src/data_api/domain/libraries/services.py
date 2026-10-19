@@ -25,6 +25,7 @@ from data_api.data.nthudata import NTHUDataManager
 from data_api.models.libraries import LibraryLostAndFound, LibrarySpace
 
 RSS_JSON_PATH = "libraries/rss.json"
+MISSING_LOST_AND_FOUND_TABLE = "Lost-and-found results table is missing"
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 }
@@ -39,15 +40,15 @@ def parse_lost_items(html: str) -> list[dict[str, str]]:
     if table is None:
         content = soup.find(id="content")
         if content is None:
-            raise UpstreamResponseException("Lost-and-found results table is missing")
+            raise UpstreamResponseException(MISSING_LOST_AND_FOUND_TABLE)
         heading = content.find("h1")
         if heading is None:
-            raise UpstreamResponseException("Lost-and-found results table is missing")
+            raise UpstreamResponseException(MISSING_LOST_AND_FOUND_TABLE)
         if "Lost and Found System" in heading.get_text() and re.search(
             r"\u76ee\u524d\u7121\u8cc7\u6599\s*!!", content.get_text()
         ):
             return []
-        raise UpstreamResponseException("Lost-and-found results table is missing")
+        raise UpstreamResponseException(MISSING_LOST_AND_FOUND_TABLE)
 
     rows = table.find_all("tr")
     if not rows:

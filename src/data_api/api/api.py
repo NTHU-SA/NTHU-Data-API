@@ -57,9 +57,8 @@ mcp_app = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=
 async def combined_lifespan(app: FastAPI):
     """Run both MCP and data lifespans on the exported application."""
     transport = mcp_app if app.state.runtime is default_runtime else app.state.mcp_app
-    async with transport.lifespan(app):
-        async with lifespan(app):
-            yield
+    async with transport.lifespan(app), lifespan(app):
+        yield
 
 
 class _SafeUnexpectedErrorsMiddleware:
@@ -168,7 +167,7 @@ def create_app(runtime: Runtime | None = None) -> FastAPI:
         response.headers["X-Process-Time"] = str(process_time)
         return response
 
-    @app.get("/", response_model=MetaResponse, include_in_schema=False)
+    @app.get("/", include_in_schema=False)
     async def metadata() -> MetaResponse:
         """Discover the API name, version, documentation, and MCP endpoint."""
         return MetaResponse(
