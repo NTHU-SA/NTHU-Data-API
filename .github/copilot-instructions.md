@@ -277,6 +277,14 @@ Readiness does not certify live energy/library integrations or MCP transport.
 
 ## CI Dependency Safety
 
+Dependabot groups all Actions updates and Python minor/patch updates separately;
+Python major updates remain independent. Grouping is not automatic merge approval.
+Follow the dependency update and PR rules in `docs/development.md`. Keep the Black
+hook revision aligned with its locked development dependency when updating it.
+Preserve the existing PR template sections and comments, use N/A for empty sections,
+and report exact validation commands with results. Template changes must also update
+the Prepare Release renderer and its regression test; never silently omit sections.
+
 The coverage uploader installs `.github/smokeshow-requirements.txt` with SHA-256
 verification and wheels only, including transitive dependencies. To update it,
 review `.github/smokeshow.in` and regenerate the lock:
