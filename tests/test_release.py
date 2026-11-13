@@ -43,6 +43,19 @@ def test_prepare_release_renders_current_pr_template(monkeypatch, tmp_path, miss
 
     exec(compile(script, "prepare-release-template", "exec"), {})
     rendered = output.read_text(encoding="utf-8")
+    for guidance in (
+        "Add or modify features.\n      Including Commit Tags: feat, style, perf, test, revert.",
+        "Bug fixes.\n      Including Commit Tags: fix.",
+        "Code changes that neither fixes a bug nor adds a feature.\n"
+        "      Including Commit Tags: refactor, update.",
+        "Changes to the build process or auxiliary tools and libraries.\n"
+        "      Including Commit Tags: chore.",
+        "Documentation changes.\n      Including Commit Tags: docs.",
+        "Any other notes.",
+    ):
+        comment = f"<!--- {guidance}" + (" -->" if "\n" not in guidance else "\n      -->")
+        assert comment in template
+        assert comment in rendered
     assert "### Internal\nPrepare 3.0.2; update pyproject.toml and uv.lock." in rendered
     assert "### Notes\nSee docs/releasing.md" in rendered
     assert (
