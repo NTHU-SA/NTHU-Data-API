@@ -29,10 +29,10 @@ jobs:
         with:
           ref: main
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
@@ -71,26 +71,34 @@ jobs:
           import os
           from pathlib import Path
           template = Path(".github/PULL_REQUEST_TEMPLATE/pull_request_template.md").read_text()
-          notes = [
-              "N/A",
-              "N/A",
-              "N/A",
-              f"Prepare {os.environ['RELEASE_VERSION']}; update pyproject.toml and uv.lock.",
-              "See docs/releasing.md for tag-only Cloud Build deployment.",
-              "Passed: uv run --no-sync --no-build pre-commit run --all-files; "
-              "uv run --no-sync --no-build pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85; "
-              "uv run --no-sync --no-build python -m data_api.checks.openapi; "
-              "uv run --no-sync --no-build python -m data_api.checks.mcp; "
-              "uv run --no-sync --no-build python -m data_api.checks.release. "
-              "This PR does not create a tag or deploy. Checks run here because GITHUB_TOKEN-created PRs do not trigger PR workflows.",
-          ]
-          for note in notes:
-              template = template.replace("- <something>", f"- {note}", 1)
+          sections = {
+              "### Internal": f"Prepare {os.environ['RELEASE_VERSION']}; update pyproject.toml and uv.lock.",
+              "### Notes": (
+                  "See docs/releasing.md for tag-only Cloud Build deployment. "
+                  "This PR does not create a tag or deploy. Checks run here because "
+                  "GITHUB_TOKEN-created PRs do not trigger PR workflows."
+              ),
+              "#### Validation": "\n".join(
+                  f"- `{command}` (passed)"
+                  for command in [
+                      "uv run --no-sync --no-build pre-commit run --all-files",
+                      "uv run --no-sync --no-build pytest -n auto tests --cov=src --cov=tests --cov-fail-under=85",
+                      "uv run --no-sync --no-build python -m data_api.checks.openapi",
+                      "uv run --no-sync --no-build python -m data_api.checks.mcp",
+                      "uv run --no-sync --no-build python -m data_api.checks.release",
+                  ]
+              ),
+          }
+          for heading, content in sections.items():
+              placeholder = f"{heading}\nN/A"
+              if template.count(placeholder) != 1:
+                  raise ValueError(f"Expected one PR template section: {heading}")
+              template = template.replace(placeholder, f"{heading}\n{content}", 1)
           Path(os.environ["RUNNER_TEMP"], "release-pr.md").write_text(template)
           PY
       - name: Open version preparation PR
         id: release-pr
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           branch: release/v${{ inputs.version }}
           base: main

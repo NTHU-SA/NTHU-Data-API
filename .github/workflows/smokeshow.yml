@@ -20,12 +20,12 @@ jobs:
         with:
           # workflow_run defaults to the trusted default-branch commit, not the triggering head.
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
       - run: |
           python -m pip install --require-hashes --only-binary=:all: -r .github/smokeshow-requirements.txt
-      - uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
+      - uses: dawidd6/action-download-artifact@a92c7ae74cf1df8810783758581e485ac3aaa309 # v28
         with:
           workflow: tests.yml
           run_id: ${{ github.event.workflow_run.id }}

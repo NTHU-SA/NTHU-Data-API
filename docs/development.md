@@ -13,6 +13,7 @@ release guide.
 - [Configuration](#configuration)
 - [Formatting and offline tests](#formatting-and-offline-tests)
 - [REST and MCP contract baselines](#rest-and-mcp-contract-baselines)
+- [Dependency updates and pull requests](#dependency-updates-and-pull-requests)
 - [Published data and deployment checks](#published-data-and-deployment-checks)
 
 ## Configuration
@@ -85,6 +86,42 @@ Do not regenerate to hide unexpected removed routes/tools/parameters or changed
 operation IDs, defaults, schemas or headers. Documentation-only wording is ignored.
 Review REST and MCP together, update the [API guide](api-guide.md), and follow the
 [release compatibility policy](releasing.md#version-source-and-compatibility).
+
+## Dependency updates and pull requests
+
+Dependabot checks weekly. GitHub Actions updates share the `actions` group,
+including major versions; Python minor/patch updates share `python-minor-patch`.
+Python major updates remain separate for explicit compatibility review. Grouping
+reduces PR noise; it does not authorize automatic merging or make major Actions
+updates safe without review.
+
+Review upstream release notes and the complete combined diff, including transitive
+dependencies. Use targeted `uv lock --upgrade-package <name>==<version>` updates
+instead of upgrading unrelated packages. Keep `pyproject.toml` and `uv.lock`
+consistent, and align the Black pre-commit revision with the locked development
+version when updating Black. Actions must remain pinned to full commit SHAs with
+matching version comments; check runner requirements and existing inputs on major
+updates. Preserve workflow permissions and the coverage uploader's trusted checkout,
+exact-run artifact selection and separately hash-locked dependencies.
+
+Validate the lock with `uv lock --check`, install with
+`uv sync --locked --all-groups`, and run pre-commit, the offline suite with the
+85% coverage threshold, and the REST/MCP baseline checks documented above.
+Do not regenerate baselines to conceal unexpected dependency-induced contract
+changes. Add focused regression tests only when behavior needs a compatibility fix.
+When consolidating existing update PRs, link them from the replacement PR and
+close them only after the combined changes are verified and its CI passes.
+
+Use the existing [PR template](../.github/PULL_REQUEST_TEMPLATE/pull_request_template.md)
+with a Conventional Commit title. Preserve section order and comments; leave
+unaffected sections as `N/A`. Under Validation, list each exact command actually
+run and its result, and explain relevant checks not run. Do not claim a previous
+PR's successful CI verifies a new combination of updates.
+
+The Prepare Release workflow fills this same template. Any change to its headings
+or default section text must also update the renderer and its regression test in
+`tests/test_release.py`; missing sections must fail rather than produce a
+success-shaped but incomplete PR description.
 
 ## Published data and deployment checks
 

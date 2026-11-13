@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 from importlib.metadata import version
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
 
@@ -12,6 +13,62 @@ from data_api.api.api import app
 from data_api.checks import release
 from data_api.checks.mcp import BASELINE, structural, tool_contract
 from data_api.mcp.server import mcp
+
+
+@pytest.mark.parametrize("missing_section", [False, True])
+def test_prepare_release_renders_current_pr_template(monkeypatch, tmp_path, missing_section):
+    root = Path.cwd()
+    workflow = (root / ".github" / "workflows" / "prepare-release.yml").read_text(encoding="utf-8")
+    script = dedent(
+        workflow.split("- name: Fill repository PR template", 1)[1]
+        .split("python - <<'PY'\n", 1)[1]
+        .split("\n          PY", 1)[0]
+    )
+    relative_template = Path(".github") / "PULL_REQUEST_TEMPLATE" / "pull_request_template.md"
+    template = (root / relative_template).read_text(encoding="utf-8")
+    if missing_section:
+        template = template.replace("#### Validation\nN/A", "#### Validation\n")
+    destination = tmp_path / relative_template
+    destination.parent.mkdir(parents=True)
+    destination.write_text(template, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("RUNNER_TEMP", str(tmp_path))
+    monkeypatch.setenv("RELEASE_VERSION", "3.0.2")
+    output = tmp_path / "release-pr.md"
+    if missing_section:
+        with pytest.raises(ValueError, match="Expected one PR template section: #### Validation"):
+            exec(compile(script, "prepare-release-template", "exec"), {})
+        assert not output.exists()
+        return
+
+    exec(compile(script, "prepare-release-template", "exec"), {})
+    rendered = output.read_text(encoding="utf-8")
+    for guidance in (
+        "Add or modify features.\n      Including Commit Tags: feat, style, perf, test, revert.",
+        "Bug fixes.\n      Including Commit Tags: fix.",
+        "Code changes that neither fixes a bug nor adds a feature.\n"
+        "      Including Commit Tags: refactor, update.",
+        "Changes to the build process or auxiliary tools and libraries.\n"
+        "      Including Commit Tags: chore.",
+        "Documentation changes.\n      Including Commit Tags: docs.",
+        "Any other notes.",
+    ):
+        comment = f"<!--- {guidance}" + (" -->" if "\n" not in guidance else "\n      -->")
+        assert comment in template
+        assert comment in rendered
+    assert "### Internal\nPrepare 3.0.2; update pyproject.toml and uv.lock." in rendered
+    assert "### Notes\nSee docs/releasing.md" in rendered
+    assert (
+        "#### Validation\n- `uv run --no-sync --no-build pre-commit run --all-files` (passed)"
+        in rendered
+    )
+    assert rendered.count("(passed)") == 5
+    assert "- <something>" not in rendered
+    assert [line for line in rendered.splitlines() if line.startswith("#")] == [
+        line for line in template.splitlines() if line.startswith("#")
+    ]
+    for heading in ("Features", "Fixes", "Refactors", "Documentations"):
+        assert f"### {heading}\nN/A" in rendered
 
 
 def test_installed_version_has_one_source():
